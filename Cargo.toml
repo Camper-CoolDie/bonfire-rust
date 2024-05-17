@@ -1,0 +1,25 @@
+[package]
+name = "bonfire"
+version = "0.1.0"
+authors = ["Camper CoolDie <campercooldie@gmail.com>"]
+edition = "2021"
+description = "Client library for the Bonfire API"
+documentation = "https://docs.rs/bonfire"
+readme = "README.md"
+repository = "https://github.com/Camper-CoolDie/bonfire-rust"
+license = "MIT"
+keywords = ["bonfire", "api", "bot"]
+
+[dependencies]
+hyper = { version = "1", features = ["client", "http1"] }
+hyper-util = { version = "0.1", features = ["tokio"] }
+http-body-util = "0.1"
+tokio = { version = "1", features = ["rt", "net"] }
+tokio-native-tls = "0.3"
+native-tls = "0.2"
+json = "0.12.4"
+
+[dev-dependencies]
+hyper = { version = "1", features = ["server"] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+tokio-test = "0.4"
