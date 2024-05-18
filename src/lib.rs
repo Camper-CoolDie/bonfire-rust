@@ -28,15 +28,12 @@
 //! ```
 
 mod builder;
-mod connector;
+mod connectors;
 mod error;
 mod request_kind;
 mod result;
+mod session;
 
 /// Tools for communicating with the server using sessions.
-pub mod insecure_connector;
-pub mod secure_connector;
-pub mod session;
-pub use insecure_connector::InsecureConnector;
-pub use secure_connector::SecureConnector;
+pub use connectors::{InsecureConnector, SecureConnector};
 pub use session::Session;

@@ -1,4 +1,4 @@
-use crate::connector::Connector;
+use crate::connectors::connector::Connector;
 use crate::error::Error;
 use crate::result::Result;
 use http_body_util::Full;

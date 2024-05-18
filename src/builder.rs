@@ -1,4 +1,4 @@
-use crate::connector::Connector;
+use crate::connectors::Connector;
 use crate::request_kind::RequestKind;
 use crate::result::Result;
 use crate::Session;

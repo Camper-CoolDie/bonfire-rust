@@ -1,5 +1,5 @@
 use crate::builder::Builder;
-use crate::connector::Connector;
+use crate::connectors::Connector;
 use crate::error::Error;
 use crate::request_kind::RequestKind;
 use crate::result::Result;
