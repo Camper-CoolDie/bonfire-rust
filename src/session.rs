@@ -27,20 +27,17 @@ impl Session {
     /// Connect to the server.
     ///
     /// ```no_run
-    /// # use std::net::{SocketAddr, IpAddr, Ipv4Addr};
-    /// # use bonfire::{Session, SecureConnector, Error};
     /// # use bonfire::session::Builder;
+    /// # use bonfire::{Error, SecureConnector, Session};
     /// #
     /// # let host = "localhost";
-    /// # let addr = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 8080);
+    /// # let addr = (host, 8080);
     /// # tokio_test::block_on(async {
+    /// let mut session = Session::connect(&Builder::new(), SecureConnector::new(host, addr)).await?;
     /// #
-    /// let mut session = Session::connect(
-    ///     &Builder::new(),
-    ///     SecureConnector::new(host, addr)
-    /// ).await?;
-    /// #
-    /// # Ok::<(), Error>(()) }).unwrap();
+    /// #     Ok::<(), Error>(())
+    /// # })
+    /// # .unwrap();
     /// ```
     pub async fn connect<C>(builder: &Builder, connector: C) -> Result<Self>
     where
@@ -59,20 +56,21 @@ impl Session {
     /// Send a request.
     ///
     /// ```no_run
-    /// # use std::net::{SocketAddr, IpAddr, Ipv4Addr};
-    /// # use bonfire::{Session, SecureConnector, Error};
+    /// # use bonfire::{Error, SecureConnector, Session};
     /// #
     /// # let host = "localhost";
-    /// # let addr = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 8080);
+    /// # let addr = (host, 8080);
     /// # let endpoint = "/";
-    /// # let object = json::object!{};
+    /// # let object = json::object! {};
     /// # tokio_test::block_on(async {
-    /// #
-    /// # let mut session = Session::builder()
-    /// #     .connect(SecureConnector::new(host, addr)).await?;
+    /// #     let mut session = Session::builder()
+    /// #         .connect(SecureConnector::new(host, addr))
+    /// #         .await?;
     /// let response = session.request(endpoint, object).await?;
     /// #
-    /// # Ok::<(), Error>(()) }).unwrap();
+    /// #     Ok::<(), Error>(())
+    /// # })
+    /// # .unwrap();
     /// ```
     ///
     /// # Errors
@@ -134,18 +132,19 @@ impl Session {
     /// Create a new `Builder` to build a new `Session`.
     ///
     /// ```no_run
-    /// # use std::net::{SocketAddr, IpAddr, Ipv4Addr};
-    /// # use bonfire::{Session, SecureConnector, Error};
+    /// # use bonfire::{Error, SecureConnector, Session};
     /// #
     /// # let host = "localhost";
-    /// # let addr = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 8080);
+    /// # let addr = (host, 8080);
     /// # tokio_test::block_on(async {
-    /// #
     /// let mut session = Session::builder()
     ///     /* ... */
-    ///     .connect(SecureConnector::new(host, addr)).await?;
+    ///     .connect(SecureConnector::new(host, addr))
+    ///     .await?;
     /// #
-    /// # Ok::<(), Error>(()) }).unwrap();
+    /// #     Ok::<(), Error>(())
+    /// # })
+    /// # .unwrap();
     /// ```
     #[inline]
     pub fn builder() -> Builder {
@@ -176,19 +175,20 @@ impl Builder {
     /// Connect to the server.
     ///
     /// ```no_run
-    /// # use std::net::{SocketAddr, IpAddr, Ipv4Addr};
-    /// # use bonfire::{SecureConnector, Error};
     /// # use bonfire::session::Builder;
+    /// # use bonfire::{Error, SecureConnector};
     /// #
     /// # let host = "localhost";
-    /// # let addr = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 8080);
+    /// # let addr = (host, 8080);
     /// # tokio_test::block_on(async {
-    /// #
     /// let mut session = Builder::new()
     ///     /* ... */
-    ///     .connect(SecureConnector::new(host, addr)).await?;
+    ///     .connect(SecureConnector::new(host, addr))
+    ///     .await?;
     /// #
-    /// # Ok::<(), Error>(()) }).unwrap();
+    /// #     Ok::<(), Error>(())
+    /// # })
+    /// # .unwrap();
     /// ```
     pub async fn connect<C>(&self, connector: C) -> Result<Session>
     where
@@ -216,7 +216,7 @@ impl Builder {
     /// Set the type of this `Session`.
     ///
     /// ```
-    /// # use bonfire::session::{RequestKind, Builder};
+    /// # use bonfire::session::{Builder, RequestKind};
     /// #
     /// # let mut builder: &mut Builder = &mut Builder::new();
     /// builder = builder.kind(RequestKind::default());

@@ -3,8 +3,7 @@ use http_body_util::Full;
 use hyper::body::Bytes;
 use hyper::client::conn::http1::{handshake, SendRequest};
 use hyper_util::rt::TokioIo;
-use std::net::SocketAddr;
-use tokio::net::TcpStream;
+use tokio::net::{TcpStream, ToSocketAddrs};
 use tokio::task;
 use tokio_native_tls::TlsConnector;
 
@@ -24,35 +23,34 @@ pub trait Connector {
 ///
 /// * `Error::Connect`
 /// * `Error::Handshake`
-pub struct InsecureConnector {
+pub struct InsecureConnector<A> {
     host: String,
-    addr: SocketAddr,
+    addrs: A,
 }
-impl InsecureConnector {
+impl<A: ToSocketAddrs + Clone + Send + Sync> InsecureConnector<A> {
     /// Create a new `InsecureConnector`.
     ///
     /// ```
-    /// # use std::net::{SocketAddr, IpAddr, Ipv4Addr};
     /// # use bonfire::InsecureConnector;
     /// #
     /// # let host = "localhost";
-    /// # let addr = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 8080);
+    /// # let addr = (host, 8080);
     /// let connector = InsecureConnector::new(host, addr);
     /// ```
-    pub fn new<T>(host: T, addr: SocketAddr) -> Self
+    pub fn new<T>(host: T, addrs: A) -> Self
     where
         String: From<T>,
     {
         Self {
             host: host.into(),
-            addr,
+            addrs,
         }
     }
 }
 
-impl Connector for InsecureConnector {
+impl<A: ToSocketAddrs + Clone + Send + Sync> Connector for InsecureConnector<A> {
     async fn connect(&self) -> Result<SendRequest<Full<Bytes>>> {
-        let stream = TcpStream::connect(self.addr)
+        let stream = TcpStream::connect(self.addrs.clone())
             .await
             .map_err(Error::Connect)?;
         let io = TokioIo::new(stream);
@@ -75,35 +73,34 @@ impl Connector for InsecureConnector {
 /// * `Error::Handshake`
 /// * `Error::TlsConnector`
 /// * `Error::TlsHandshake`
-pub struct SecureConnector {
+pub struct SecureConnector<A> {
     host: String,
-    addr: SocketAddr,
+    addrs: A,
 }
-impl SecureConnector {
+impl<A: ToSocketAddrs + Clone + Send + Sync> SecureConnector<A> {
     /// Create a new `SecureConnector`.
     ///
     /// ```
-    /// # use std::net::{SocketAddr, IpAddr, Ipv4Addr};
     /// # use bonfire::SecureConnector;
     /// #
     /// # let host = "localhost";
-    /// # let addr = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 8080);
+    /// # let addr = (host, 8080);
     /// let connector = SecureConnector::new(host, addr);
     /// ```
-    pub fn new<T>(host: T, addr: SocketAddr) -> Self
+    pub fn new<T>(host: T, addrs: A) -> Self
     where
         String: From<T>,
     {
         Self {
             host: host.into(),
-            addr,
+            addrs,
         }
     }
 }
 
-impl Connector for SecureConnector {
+impl<A: ToSocketAddrs + Clone + Send + Sync> Connector for SecureConnector<A> {
     async fn connect(&self) -> Result<SendRequest<Full<Bytes>>> {
-        let stream = TcpStream::connect(self.addr)
+        let stream = TcpStream::connect(self.addrs.clone())
             .await
             .map_err(Error::Connect)?;
         let connector = native_tls::TlsConnector::new().map_err(Error::TlsConnector)?;

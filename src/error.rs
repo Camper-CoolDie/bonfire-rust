@@ -1,12 +1,14 @@
 use hyper::StatusCode;
 
+/// Result type returned from methods that can have `Error`s.
+pub type Result<T> = std::result::Result<T, Error>;
+
 /// Represents errors that can occur while operating on a session.
 ///
 /// # Source
 ///
 /// An `Error` can be the result of connecting or requesting.
 /// It may be caused by implementors of `Connector` or while processing `Session.request`.
-/* TODO: implement std::error::Error */
 #[derive(Debug)]
 pub enum Error {
     /// Couldn't connect to the server.
@@ -37,5 +39,21 @@ pub enum Error {
     TlsHandshake(native_tls::Error),
 }
 
-/// Result type returned from methods that can have `Error`s.
-pub type Result<T> = std::result::Result<T, Error>;
+impl std::fmt::Display for Error {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Error::Connect(err) => write!(f, "{}", err),
+            Error::Handshake(err) => write!(f, "{}", err),
+            Error::Http(status) => write!(f, "erroneous HTTP status-code received: {}", status),
+            Error::RequestBuilder(err) => write!(f, "{}", err),
+            Error::RequestSend(err) => write!(f, "{}", err),
+            Error::ResponseParseJson(err) => write!(f, "{}", err),
+            Error::ResponseReceive(err) => write!(f, "{}", err),
+            Error::ResponseUtf8(err) => write!(f, "{}", err),
+            Error::TlsConnector(err) => write!(f, "{}", err),
+            Error::TlsHandshake(err) => write!(f, "{}", err),
+        }
+    }
+}
+
+impl std::error::Error for Error {}
