@@ -56,4 +56,19 @@ impl std::fmt::Display for Error {
     }
 }
 
-impl std::error::Error for Error {}
+impl std::error::Error for Error {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            Error::Connect(err) => Some(err),
+            Error::Handshake(err) => Some(err),
+            Error::RequestBuilder(err) => Some(err),
+            Error::RequestSend(err) => Some(err),
+            Error::ResponseParseJson(err) => Some(err),
+            Error::ResponseReceive(err) => Some(err),
+            Error::ResponseUtf8(err) => Some(err),
+            Error::TlsConnector(err) => Some(err),
+            Error::TlsHandshake(err) => Some(err),
+            _ => None,
+        }
+    }
+}
