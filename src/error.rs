@@ -1,3 +1,10 @@
+use hyper::http::Error as HttpError;
+use hyper::Error as HyperError;
+use json::JsonError;
+use native_tls::Error as TlsError;
+use std::io::Error as IoError;
+use std::str::Utf8Error;
+
 use hyper::StatusCode;
 
 /// Result type returned from methods that can have `Error`s.
@@ -12,9 +19,9 @@ pub type Result<T> = std::result::Result<T, Error>;
 #[derive(Debug)]
 pub enum Error {
     /// Couldn't connect to the server.
-    Connect(std::io::Error),
+    Connect(IoError),
     /// Couldn't handshake with the server.
-    Handshake(hyper::Error),
+    Handshake(HyperError),
     /// The server returned an erroneous HTTP status code.
     ///
     /// * `413`: A `RequestKind::Standart` request was sent to the Bonfire server.
@@ -23,20 +30,20 @@ pub enum Error {
     Http(StatusCode),
     /// Couldn't build a request.
     /// This error can be caused because of an invalid parameter, such as `endpoint`.
-    RequestBuilder(hyper::http::Error),
+    RequestBuilder(HttpError),
     /// Couldn't send the request.
-    RequestSend(hyper::Error),
+    RequestSend(HyperError),
     /// Couldn't parse the JSON string from the response.
-    ResponseParseJson(json::JsonError),
+    ResponseParseJson(JsonError),
     /// Couldn't receive the response.
-    ResponseReceive(hyper::Error),
+    ResponseReceive(HyperError),
     /// Couldn't convert the response to a valid UTF-8 string.
-    ResponseUtf8(std::str::Utf8Error),
+    ResponseUtf8(Utf8Error),
     /// Couldn't determine the default settings for the TLS protocol.
-    TlsConnector(native_tls::Error),
+    TlsConnector(TlsError),
     /// Couldn't handshake with the server.
     /// This error can be caused because the server has an invalid certificate.
-    TlsHandshake(native_tls::Error),
+    TlsHandshake(TlsError),
 }
 
 impl std::fmt::Display for Error {
@@ -70,5 +77,29 @@ impl std::error::Error for Error {
             Error::TlsHandshake(err) => Some(err),
             _ => None,
         }
+    }
+}
+
+impl From<IoError> for Error {
+    fn from(err: IoError) -> Self {
+        Error::Connect(err)
+    }
+}
+
+impl From<HttpError> for Error {
+    fn from(err: HttpError) -> Self {
+        Error::RequestBuilder(err)
+    }
+}
+
+impl From<JsonError> for Error {
+    fn from(err: JsonError) -> Self {
+        Error::ResponseParseJson(err)
+    }
+}
+
+impl From<Utf8Error> for Error {
+    fn from(err: Utf8Error) -> Self {
+        Error::ResponseUtf8(err)
     }
 }

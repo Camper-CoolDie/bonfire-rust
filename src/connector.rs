@@ -50,9 +50,7 @@ impl<A: ToSocketAddrs + Clone + Send + Sync> InsecureConnector<A> {
 
 impl<A: ToSocketAddrs + Clone + Send + Sync> Connector for InsecureConnector<A> {
     async fn connect(&self) -> Result<SendRequest<Full<Bytes>>> {
-        let stream = TcpStream::connect(self.addrs.clone())
-            .await
-            .map_err(Error::Connect)?;
+        let stream = TcpStream::connect(self.addrs.clone()).await?;
         let io = TokioIo::new(stream);
         let (sender, conn) = handshake(io).await.map_err(Error::Handshake)?;
         task::spawn(conn);
@@ -100,9 +98,7 @@ impl<A: ToSocketAddrs + Clone + Send + Sync> SecureConnector<A> {
 
 impl<A: ToSocketAddrs + Clone + Send + Sync> Connector for SecureConnector<A> {
     async fn connect(&self) -> Result<SendRequest<Full<Bytes>>> {
-        let stream = TcpStream::connect(self.addrs.clone())
-            .await
-            .map_err(Error::Connect)?;
+        let stream = TcpStream::connect(self.addrs.clone()).await?;
         let connector = native_tls::TlsConnector::new().map_err(Error::TlsConnector)?;
         let connector = TlsConnector::from(connector);
         let stream = connector

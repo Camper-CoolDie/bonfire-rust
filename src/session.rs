@@ -103,8 +103,7 @@ impl Session {
             .header(header::CONNECTION, "keep-alive")
             .header(header::USER_AGENT, user_agent)
             .header(header::AUTHORIZATION, self.authorization.clone())
-            .body(Full::new(Bytes::from(body)))
-            .map_err(Error::RequestBuilder)?;
+            .body(Full::new(Bytes::from(body)))?;
 
         let mut response = self
             .sender
@@ -118,11 +117,11 @@ impl Session {
             while let Some(next) = response.frame().await {
                 let frame = next.map_err(Error::ResponseReceive)?;
                 if let Some(chunk) = frame.data_ref() {
-                    string.push_str(std::str::from_utf8(chunk).map_err(Error::ResponseUtf8)?);
+                    string.push_str(std::str::from_utf8(chunk)?);
                 }
             }
 
-            let body = json::parse(&string).map_err(Error::ResponseParseJson)?;
+            let body = json::parse(&string)?;
             Ok(body)
         } else {
             Err(Error::Http(status))
