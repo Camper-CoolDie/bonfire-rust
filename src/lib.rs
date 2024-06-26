@@ -6,27 +6,35 @@
 //! Creating a session to send a simple request to the real server and print the response.
 //!
 //! ```
+//! use bonfire::session::RequestKind;
+//! use bonfire::{Session, SecureConnector, Result};
 //! use std::net::{SocketAddr, IpAddr, Ipv4Addr};
-//! use bonfire::Session;
-//! use bonfire::session::{Result, RequestKind, SecureConnector};
 //!
 //! #[tokio::main]
 //! async fn main() -> Result<()> {
-//! 	let addr = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(116, 202, 162, 215)), 443);
-//! 	let host = "cf2.bonfire.moe";
-//! 	let connector = SecureConnector::new(host, addr);
-//! 	let object = json::object!{ J_REQUEST_NAME: "RProjectVersionGet" };
+//!     let addr = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(116, 202, 162, 215)), 443);
+//!     let host = "cf2.bonfire.moe";
+//!     let connector = SecureConnector::new(host, addr);
+//!     let object = json::object!{ J_REQUEST_NAME: "RProjectVersionGet" };
 //!
-//! 	let mut session = Session::builder()
-//! 		.kind(RequestKind::Bonfire)
-//! 		.connect(connector).await?;
-//! 	let response = session.request("/", object).await?;
-//! 	println!("{}", response);
+//!     let mut session = Session::builder()
+//!         .kind(RequestKind::Bonfire)
+//!         .connect(connector).await?;
+//!     let response = session.request("/", object).await?;
+//!     println!("{}", response);
 //!
-//! 	Ok(())
+//!     Ok(())
 //! }
 //! ```
 
 /// Tools for communicating with the server using sessions.
 pub mod session;
 pub use session::Session;
+
+/// Implementations for connecting to the server.
+pub mod connector;
+pub use connector::{Connector, InsecureConnector, SecureConnector};
+
+/// Errors.
+pub mod error;
+pub use error::{Error, Result};
