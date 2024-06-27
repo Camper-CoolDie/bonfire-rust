@@ -117,7 +117,14 @@ impl Session {
 
         let status = response.status();
         if status.is_success() {
-            let mut body: Vec<u8> = Vec::new();
+            let length = response
+                .headers()
+                .get(header::CONTENT_LENGTH)
+                .ok_or(Error::ResponseNoLength)?;
+            let length = length.to_str().map_err(Error::ResponseLengthToStr)?;
+            let length: usize = length.parse().map_err(Error::ResponseParseLength)?;
+
+            let mut body: Vec<u8> = Vec::with_capacity(length);
             while let Some(next) = response.frame().await {
                 let frame = next.map_err(Error::ResponseReceive)?;
                 if let Some(chunk) = frame.data_ref() {

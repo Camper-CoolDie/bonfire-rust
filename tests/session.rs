@@ -1,6 +1,7 @@
 use bonfire::{InsecureConnector, Session};
 use http_body_util::{BodyExt, Full};
 use hyper::body::{Bytes, Incoming};
+use hyper::header;
 use hyper::server::conn::http1::Builder;
 use hyper::service::service_fn;
 use hyper::{Request, Response, Result};
@@ -32,7 +33,11 @@ async fn fake_server() {
 }
 
 async fn fake_server_service(mut request: Request<Incoming>) -> Result<Response<Full<Bytes>>> {
-    let mut body: Vec<u8> = Vec::new();
+    let length = request.headers().get(header::CONTENT_LENGTH).unwrap();
+    let length = length.to_str().unwrap();
+    let length: usize = length.parse().unwrap();
+
+    let mut body: Vec<u8> = Vec::with_capacity(length);
     while let Some(next) = request.frame().await {
         let frame = next.unwrap();
         if let Some(chunk) = frame.data_ref() {

@@ -30,6 +30,12 @@ pub enum Error {
     RequestSerialize(serde_json::Error),
     /// Couldn't deserialize the JSON string from the response.
     ResponseDeserialize(serde_json::Error),
+    /// Couldn't convert the `Content-Length` header in the response to a string.
+    ResponseLengthToStr(hyper::header::ToStrError),
+    /// Couldn't find the `Content-Length` header in the response.
+    ResponseNoLength,
+    /// Couldn't parse the `Content-Length` header in the response.
+    ResponseParseLength(std::num::ParseIntError),
     /// Couldn't receive the response.
     ResponseReceive(hyper::Error),
     /// Couldn't write the response into buffer.
@@ -51,6 +57,9 @@ impl std::fmt::Display for Error {
             Error::RequestSend(err) => write!(f, "{}", err),
             Error::RequestSerialize(err) => write!(f, "{}", err),
             Error::ResponseDeserialize(err) => write!(f, "{}", err),
+            Error::ResponseLengthToStr(err) => write!(f, "{}", err),
+            Error::ResponseNoLength => write!(f, "response has no content-length"),
+            Error::ResponseParseLength(err) => write!(f, "{}", err),
             Error::ResponseReceive(err) => write!(f, "{}", err),
             Error::ResponseWrite(err) => write!(f, "{}", err),
             Error::TlsConnector(err) => write!(f, "{}", err),
@@ -68,6 +77,8 @@ impl std::error::Error for Error {
             Error::RequestSend(err) => Some(err),
             Error::RequestSerialize(err) => Some(err),
             Error::ResponseDeserialize(err) => Some(err),
+            Error::ResponseLengthToStr(err) => Some(err),
+            Error::ResponseParseLength(err) => Some(err),
             Error::ResponseReceive(err) => Some(err),
             Error::ResponseWrite(err) => Some(err),
             Error::TlsConnector(err) => Some(err),
