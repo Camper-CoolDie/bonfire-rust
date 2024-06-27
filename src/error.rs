@@ -26,12 +26,14 @@ pub enum Error {
     RequestBuilder(hyper::http::Error),
     /// Couldn't send the request.
     RequestSend(hyper::Error),
-    /// Couldn't parse the JSON string from the response.
-    ResponseParseJson(json::JsonError),
+    /// Couldn't serialize the JSON structure into a string.
+    RequestSerialize(serde_json::Error),
+    /// Couldn't deserialize the JSON string from the response.
+    ResponseDeserialize(serde_json::Error),
     /// Couldn't receive the response.
     ResponseReceive(hyper::Error),
-    /// Couldn't convert the response to a valid UTF-8 string.
-    ResponseUtf8(std::str::Utf8Error),
+    /// Couldn't write the response into buffer.
+    ResponseWrite(std::io::Error),
     /// Couldn't determine the default settings for the TLS protocol.
     TlsConnector(native_tls::Error),
     /// Couldn't handshake with the server.
@@ -47,9 +49,10 @@ impl std::fmt::Display for Error {
             Error::Http(status) => write!(f, "erroneous HTTP status-code received: {}", status),
             Error::RequestBuilder(err) => write!(f, "{}", err),
             Error::RequestSend(err) => write!(f, "{}", err),
-            Error::ResponseParseJson(err) => write!(f, "{}", err),
+            Error::RequestSerialize(err) => write!(f, "{}", err),
+            Error::ResponseDeserialize(err) => write!(f, "{}", err),
             Error::ResponseReceive(err) => write!(f, "{}", err),
-            Error::ResponseUtf8(err) => write!(f, "{}", err),
+            Error::ResponseWrite(err) => write!(f, "{}", err),
             Error::TlsConnector(err) => write!(f, "{}", err),
             Error::TlsHandshake(err) => write!(f, "{}", err),
         }
@@ -63,9 +66,10 @@ impl std::error::Error for Error {
             Error::Handshake(err) => Some(err),
             Error::RequestBuilder(err) => Some(err),
             Error::RequestSend(err) => Some(err),
-            Error::ResponseParseJson(err) => Some(err),
+            Error::RequestSerialize(err) => Some(err),
+            Error::ResponseDeserialize(err) => Some(err),
             Error::ResponseReceive(err) => Some(err),
-            Error::ResponseUtf8(err) => Some(err),
+            Error::ResponseWrite(err) => Some(err),
             Error::TlsConnector(err) => Some(err),
             Error::TlsHandshake(err) => Some(err),
             _ => None,

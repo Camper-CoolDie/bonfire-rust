@@ -5,6 +5,8 @@ use hyper::server::conn::http1::Builder;
 use hyper::service::service_fn;
 use hyper::{Request, Response, Result};
 use hyper_util::rt::TokioIo;
+use serde_json::{json, Value};
+use std::io::Write;
 use tokio::net::TcpListener;
 
 #[tokio::test]
@@ -16,11 +18,8 @@ async fn fake_server() {
     let handle = tokio::task::spawn(async move {
         let connector = InsecureConnector::new(host, addr);
         let mut session = Session::builder().connect(connector).await.unwrap();
-        let response = session
-            .request("/", json::object! { test: 1 })
-            .await
-            .unwrap();
-        assert_eq!(json::object! { test: 2 }, response);
+        let response = session.request("/", json!({ "test": 1 })).await.unwrap();
+        assert_eq!(json!({ "test": 2 }), response);
     });
 
     let (stream, _) = listener.accept().await.unwrap();
@@ -33,18 +32,20 @@ async fn fake_server() {
 }
 
 async fn fake_server_service(mut request: Request<Incoming>) -> Result<Response<Full<Bytes>>> {
-    let mut string = String::new();
+    let mut body: Vec<u8> = Vec::new();
     while let Some(next) = request.frame().await {
         let frame = next.unwrap();
         if let Some(chunk) = frame.data_ref() {
-            string.push_str(std::str::from_utf8(chunk).unwrap());
+            body.write(chunk).unwrap();
         }
     }
+    body.flush().unwrap();
 
-    let body = json::parse(&string).unwrap();
-    assert_eq!(json::object! { test: 1 }, body);
+    let body: Value = serde_json::from_slice(&body).unwrap();
+    assert_eq!(json!({ "test": 1 }), body);
 
-    let body = json::stringify(json::object! { test: 2 });
+    let mut body: Vec<u8> = Vec::new();
+    let _ = serde_json::to_writer(&mut body, &json!({ "test": 2 })).unwrap();
     Ok(Response::builder()
         .status(200)
         .body(Full::new(Bytes::from(body)))

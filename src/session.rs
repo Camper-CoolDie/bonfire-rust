@@ -3,7 +3,8 @@ use http_body_util::{BodyExt, Full};
 use hyper::body::Bytes;
 use hyper::client::conn::http1::SendRequest;
 use hyper::{header, Method, Request};
-use json::JsonValue;
+use serde_json::Value;
+use std::io::Write;
 
 /// Represents the type of a request.
 #[derive(Clone, Default)]
@@ -57,16 +58,17 @@ impl Session {
     ///
     /// ```no_run
     /// # use bonfire::{Error, SecureConnector, Session};
+    /// # use serde_json::json;
     /// #
     /// # let host = "localhost";
     /// # let addr = (host, 8080);
     /// # let endpoint = "/";
-    /// # let object = json::object! {};
+    /// # let json = json!({});
     /// # tokio_test::block_on(async {
     /// #     let mut session = Session::builder()
     /// #         .connect(SecureConnector::new(host, addr))
     /// #         .await?;
-    /// let response = session.request(endpoint, object).await?;
+    /// let response = session.request(endpoint, json).await?;
     /// #
     /// #     Ok::<(), Error>(())
     /// # })
@@ -77,11 +79,12 @@ impl Session {
     ///
     /// * `Error::RequestBuilder`
     /// * `Error::RequestSend`
+    /// * `Error::RequestSerialize`
+    /// * `Error::ResponseDeserialize`
     /// * `Error::ResponseReceive`
-    /// * `Error::ResponseUtf8`
-    /// * `Error::ResponseParseJson`
+    /// * `Error::ResponseWrite`
     /// * `Error::Http`
-    pub async fn request<T>(&mut self, endpoint: T, json: JsonValue) -> Result<JsonValue>
+    pub async fn request<T>(&mut self, endpoint: T, json: Value) -> Result<Value>
     where
         String: From<T>,
     {
@@ -89,8 +92,8 @@ impl Session {
         let user_agent: String =
             format!("{}/{}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"));
 
-        let body = json::stringify(json);
-        let body = body.into_bytes();
+        let mut body: Vec<u8> = Vec::new();
+        let _ = serde_json::to_writer(&mut body, &json).map_err(Error::RequestSerialize);
         let body = match self.kind {
             RequestKind::Standart => body,
             RequestKind::Bonfire => [&(body.len() as u32).to_be_bytes(), &body as &[u8]].concat(),
@@ -114,15 +117,16 @@ impl Session {
 
         let status = response.status();
         if status.is_success() {
-            let mut string = String::new();
+            let mut body: Vec<u8> = Vec::new();
             while let Some(next) = response.frame().await {
                 let frame = next.map_err(Error::ResponseReceive)?;
                 if let Some(chunk) = frame.data_ref() {
-                    string.push_str(std::str::from_utf8(chunk).map_err(Error::ResponseUtf8)?);
+                    body.write(chunk).map_err(Error::ResponseWrite)?;
                 }
             }
+            body.flush().map_err(Error::ResponseWrite)?;
 
-            let body = json::parse(&string).map_err(Error::ResponseParseJson)?;
+            let body = serde_json::from_slice(&body).map_err(Error::ResponseDeserialize)?;
             Ok(body)
         } else {
             Err(Error::Http(status))
@@ -167,7 +171,7 @@ impl Builder {
     /// ```
     pub fn new() -> Self {
         Self {
-            authorization: String::new(),
+            authorization: String::default(),
             kind: RequestKind::default(),
         }
     }
@@ -228,6 +232,7 @@ impl Builder {
 }
 
 impl Default for Builder {
+    #[inline]
     fn default() -> Self {
         Self::new()
     }
