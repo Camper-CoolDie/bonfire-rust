@@ -50,20 +50,20 @@ pub enum Error {
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Error::Connect(err) => write!(f, "{}", err),
-            Error::Handshake(err) => write!(f, "{}", err),
-            Error::Http(status) => write!(f, "erroneous HTTP status-code received: {}", status),
-            Error::RequestBuilder(err) => write!(f, "{}", err),
-            Error::RequestSend(err) => write!(f, "{}", err),
-            Error::RequestSerialize(err) => write!(f, "{}", err),
-            Error::ResponseDeserialize(err) => write!(f, "{}", err),
-            Error::ResponseLengthToStr(err) => write!(f, "{}", err),
-            Error::ResponseNoLength => write!(f, "response has no content-length"),
-            Error::ResponseParseLength(err) => write!(f, "{}", err),
-            Error::ResponseReceive(err) => write!(f, "{}", err),
-            Error::ResponseWrite(err) => write!(f, "{}", err),
-            Error::TlsConnector(err) => write!(f, "{}", err),
-            Error::TlsHandshake(err) => write!(f, "{}", err),
+            Error::Connect(_) => write!(f, "connect failed"),
+            Error::Handshake(_) => write!(f, "handshake failed"),
+            Error::Http(_) => write!(f, "erroneous HTTP status-code received"),
+            Error::RequestBuilder(_) => write!(f, "request failed to build"),
+            Error::RequestSend(_) => write!(f, "error sending request"),
+            Error::RequestSerialize(_) => write!(f, "error serializing request JSON"),
+            Error::ResponseDeserialize(_) => write!(f, "error deserializing response JSON"),
+            Error::ResponseLengthToStr(_) => write!(f, "invalid bytes in response content-length"),
+            Error::ResponseNoLength => write!(f, "no response content-length"),
+            Error::ResponseParseLength(_) => write!(f, "invalid response content-length"),
+            Error::ResponseReceive(_) => write!(f, "error receiving response"),
+            Error::ResponseWrite(_) => write!(f, "error writing response into buffer"),
+            Error::TlsConnector(_) => write!(f, "TLS connector failed"),
+            Error::TlsHandshake(_) => write!(f, "TLS handshake failed"),
         }
     }
 }
