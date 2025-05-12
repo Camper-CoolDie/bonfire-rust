@@ -1,0 +1,18 @@
+query AccountSecurityQuery {
+    me {
+        email
+        securitySettings {
+            googleLinked
+            firebaseLinked
+        }
+        birthday
+    }
+    activeSessions(offset: 0) {
+        id
+        active
+        lastActive
+        userAgent
+        ip
+        current
+    }
+}
