@@ -1,11 +1,13 @@
-use super::Gender;
-use crate::models::{EmptyResponse, ImageRef, Post};
-use crate::{Client, Result};
+use std::ops::Range;
+use std::result::Result as StdResult;
+
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde_json::json;
-use std::ops::Range;
-use std::result::Result as StdResult;
+
+use super::Gender;
+use crate::models::{EmptyResponse, ImageRef, Post};
+use crate::{Client, Result};
 
 /// The number of links an account can contain.
 pub const LINKS_COUNT: usize = 7;

@@ -1,5 +1,6 @@
 use chrono::{DateTime, Utc};
-use serde::{de::Error, Deserialize, Deserializer, Serialize};
+use serde::de::Error;
+use serde::{Deserialize, Deserializer, Serialize};
 use thiserror::Error;
 
 /// Represents an error from the root server. Some most common ones are split into predefined

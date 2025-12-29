@@ -14,11 +14,12 @@ bonfire is an asynchronous Rust client library for the [Bonfire](https://github.
 ## Example
 
 ```rust,no_run
-use bonfire::models::Auth;
-use bonfire::{Client, Result};
 use std::fs;
 use std::fs::File;
 use std::io::Write;
+
+use bonfire::models::Auth;
+use bonfire::{Client, Result};
 
 const EMAIL: &str = "user@example.com";
 const PASSWORD: &str = "password";

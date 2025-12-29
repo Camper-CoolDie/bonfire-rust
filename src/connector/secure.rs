@@ -1,14 +1,16 @@
-use super::{Connector, Error, Result};
+use std::sync::Arc;
+
 use http::Uri;
 use http_body_util::Full;
 use hyper::body::Bytes;
 use hyper::client::conn::http1::{handshake, SendRequest};
 use hyper_util::rt::TokioIo;
 use rustls_pki_types::ServerName;
-use std::sync::Arc;
 use tokio::net::TcpStream;
 use tokio::task;
 use tokio_rustls::TlsConnector;
+
+use super::{Connector, Error, Result};
 
 pub(crate) struct SecureConnector {
     host: String,

@@ -1,10 +1,11 @@
 mod post;
 
-use crate::models::{Account, Category, Fandom};
 use chrono::{DateTime, Utc};
 pub use post::*;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde_repr::{Deserialize_repr, Serialize_repr};
+
+use crate::models::{Account, Category, Fandom};
 
 /// Represents a publication.
 #[derive(Default, Clone, Debug, Deserialize, Serialize)]

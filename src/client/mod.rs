@@ -3,8 +3,8 @@ mod query;
 mod request;
 mod session;
 
-use crate::connector;
-use crate::models::{auth, Auth};
+use std::fmt;
+
 use http::{header, HeaderMap, StatusCode, Uri};
 use jsonwebtoken::errors::ErrorKind;
 pub use query::MeliorError;
@@ -14,8 +14,10 @@ pub use request::{RootError, UnavailableError};
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use session::Session;
-use std::fmt;
 use thiserror::Error;
+
+use crate::connector;
+use crate::models::{auth, Auth};
 
 // It's great when we can test our requests against a test server, hence the ability to specify
 // custom URIs.

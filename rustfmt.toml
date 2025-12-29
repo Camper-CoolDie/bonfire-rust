@@ -4,3 +4,6 @@ wrap_comments = true
 format_code_in_doc_comments = true
 max_width = 100
 comment_width = 100
+
+imports_granularity = "Module"
+group_imports = "StdExternalCrate"

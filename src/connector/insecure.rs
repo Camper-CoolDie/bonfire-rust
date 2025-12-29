@@ -1,4 +1,3 @@
-use super::{Connector, Error, Result};
 use http::Uri;
 use http_body_util::Full;
 use hyper::body::Bytes;
@@ -6,6 +5,8 @@ use hyper::client::conn::http1::{handshake, SendRequest};
 use hyper_util::rt::TokioIo;
 use tokio::net::TcpStream;
 use tokio::task;
+
+use super::{Connector, Error, Result};
 
 pub(crate) struct InsecureConnector {
     host: String,

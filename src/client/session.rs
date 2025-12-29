@@ -1,6 +1,3 @@
-use super::query::{MeliorResponse, Query};
-use super::request::{Request, RootResponse};
-use crate::{connector, Connector, ConnectorWrapper, Error, Result};
 use bytes::{BufMut, Bytes, BytesMut};
 use http::uri::PathAndQuery;
 use http::{header, HeaderMap, HeaderValue, Method, Uri};
@@ -9,6 +6,10 @@ use hyper::client::conn::http1::SendRequest;
 use once_cell::sync::Lazy;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
+
+use super::query::{MeliorResponse, Query};
+use super::request::{Request, RootResponse};
+use crate::{connector, Connector, ConnectorWrapper, Error, Result};
 
 static USER_AGENT: Lazy<String> = Lazy::new(|| {
     format!(

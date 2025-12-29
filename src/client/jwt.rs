@@ -1,9 +1,10 @@
+use std::result::Result as StdResult;
+
 use chrono::{DateTime, Utc};
 use jsonwebtoken::errors::Result as JwtResult;
 use jsonwebtoken::{Algorithm, DecodingKey, Validation};
 use serde::de::Error;
 use serde::{Deserialize, Deserializer};
-use std::result::Result as StdResult;
 
 const JWT_ISSUER: &str = "https://bonfire.moe";
 const JWT_ACCESS_AUDIENCE: &str = "access";

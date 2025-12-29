@@ -1,7 +1,8 @@
-use crate::models::ImageRef;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde_repr::{Deserialize_repr, Serialize_repr};
+
+use crate::models::ImageRef;
 
 /// Represents a fandom.
 #[derive(Default, Clone, Debug, Deserialize, Serialize)]

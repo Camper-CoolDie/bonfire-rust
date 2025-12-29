@@ -1,7 +1,8 @@
+use std::result::Result as StdResult;
+
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde_repr::{Deserialize_repr, Serialize_repr};
-use std::result::Result as StdResult;
 
 /// Represents an account effect.
 #[derive(Default, Clone, Debug, Deserialize, Serialize)]

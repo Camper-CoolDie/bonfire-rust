@@ -1,9 +1,11 @@
-use crate::{Client, Result};
+use std::fmt;
+
 use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use std::fmt;
 use thiserror::Error;
+
+use crate::{Client, Result};
 
 /// Represents an authentication session.
 #[derive(Default, Clone, Debug, Deserialize, Serialize)]

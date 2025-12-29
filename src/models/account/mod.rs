@@ -1,14 +1,15 @@
 mod effect;
 mod info;
 
-use crate::models::ImageRef;
-use crate::{Client, Result};
 use chrono::{DateTime, Duration, Utc};
 pub use effect::*;
 pub use info::*;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use serde_repr::{Deserialize_repr, Serialize_repr};
+
+use crate::models::ImageRef;
+use crate::{Client, Result};
 
 /// The duration of an account's online status since when it was last online.
 pub const ONLINE_DURATION: Duration = Duration::minutes(15);

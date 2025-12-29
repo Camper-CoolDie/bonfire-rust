@@ -1,6 +1,7 @@
-use serde::{Deserialize, Serialize};
 use std::error::Error;
 use std::fmt;
+
+use serde::{Deserialize, Serialize};
 
 /// Represents an error from the melior server.
 #[derive(Clone, Debug, Deserialize)]

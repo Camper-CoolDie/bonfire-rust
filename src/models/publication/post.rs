@@ -1,5 +1,6 @@
-use super::Publication;
 use serde::{Deserialize, Serialize};
+
+use super::Publication;
 
 /// Represents a post.
 #[derive(Default, Clone, Debug, Deserialize, Serialize)]
