@@ -6,6 +6,8 @@ pub mod auth;
 pub mod common;
 /// Fandom implementations and helper structs.
 pub mod fandom;
+/// Profile implementation and helper structs.
+pub mod profile;
 /// Publication implementations and helper structs.
 pub mod publication;
 
@@ -335,16 +337,17 @@ pub mod publication;
  */
 
 pub use account::{Account, Badge, Effect, Gender, Info as AccountInfo, Link};
-pub use auth::{Auth, Me};
+pub use auth::Auth;
 use chrono::{DateTime, Utc};
 pub use common::{Category, ImageRef, Language};
 pub use fandom::Fandom;
+pub use profile::Me;
 pub use publication::{Post, Publication, Reaction};
 use serde::de::Error;
 use serde::{Deserialize, Deserializer, Serializer};
 
 #[derive(Deserialize)]
-pub(crate) struct EmptyResponse {}
+struct EmptyResponse {}
 
 pub(crate) fn serialize_level<S: Serializer>(
     value: &f32,

@@ -1,9 +1,0 @@
-mutation LoginOAuthMutation($input: OauthLoginInput!) {
-    loginOauth(input: $input) {
-        emailAlreadyBound
-        tokens {
-            accessToken
-            refreshToken
-        }
-    }
-}

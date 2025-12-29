@@ -1,3 +1,5 @@
+mod queries;
+
 use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 
@@ -36,7 +38,7 @@ impl Me {
     /// # Examples
     ///
     /// ```no_run
-    /// use bonfire::models::auth::Me;
+    /// use bonfire::models::Me;
     /// use bonfire::Client;
     ///
     /// #[tokio::main]
@@ -47,8 +49,32 @@ impl Me {
     ///     println!("logged in as {}", info.name);
     /// }
     /// ```
-    #[inline]
     pub async fn get(client: &mut Client) -> Result<Self> {
         Auth::me(client).await
+    }
+
+    /// Set your birthday.
+    ///
+    /// # Errors
+    ///
+    /// Returns [Error][crate::Error] if an error occurred while sending the request.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use bonfire::models::Me;
+    /// use bonfire::Client;
+    /// use chrono::NaiveDate;
+    ///
+    /// #[tokio::main]
+    /// async fn main() {
+    ///     let mut client = Client::connect().await.unwrap();
+    ///     // ...
+    ///     let birthday = NaiveDate::from_ymd_opt(2000, 1, 1).unwrap();
+    ///     Me::set_birthday(&mut client, birthday).await.unwrap();
+    /// }
+    /// ```
+    pub async fn set_birthday(client: &mut Client, birthday: NaiveDate) -> Result<Me> {
+        Me::_set_birthday(client, birthday).await
     }
 }

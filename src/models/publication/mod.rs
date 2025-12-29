@@ -9,6 +9,23 @@ use serde_repr::{Deserialize_repr, Serialize_repr};
 
 use crate::models::{Account, Category, Fandom};
 
+pub(crate) fn serialize_importance<S: Serializer>(
+    value: &bool,
+    serializer: S,
+) -> Result<S::Ok, S::Error> {
+    serializer.serialize_i64(match value {
+        true => -1,
+        false => 0,
+    })
+}
+
+pub(crate) fn deserialize_importance<'de, D: Deserializer<'de>>(
+    deserializer: D,
+) -> Result<bool, D::Error> {
+    let value = i64::deserialize(deserializer)?;
+    Ok(matches!(value, -1))
+}
+
 /// Represents a publication status.
 #[derive(Default, Clone, Debug, Deserialize_repr, Serialize_repr)]
 #[repr(i64)]
@@ -90,8 +107,8 @@ pub struct Publication {
     /// Is this publication marked as important?
     #[serde(
         rename = "important",
-        serialize_with = "Publication::serialize_importance",
-        deserialize_with = "Publication::deserialize_importance"
+        serialize_with = "serialize_importance",
+        deserialize_with = "deserialize_importance"
     )]
     pub is_important: bool,
     /// Does this publication come from a blacklisted fandom or account?
@@ -103,22 +120,4 @@ pub struct Publication {
     /// The publication's hotness
     pub hotness: f32,
     // TODO: tag_1, tag_2, tag_s_1, jsonDB.reactions, etc.
-}
-impl Publication {
-    pub(crate) fn serialize_importance<S: Serializer>(
-        value: &bool,
-        serializer: S,
-    ) -> Result<S::Ok, S::Error> {
-        serializer.serialize_i64(match value {
-            true => -1,
-            false => 0,
-        })
-    }
-
-    pub(crate) fn deserialize_importance<'de, D: Deserializer<'de>>(
-        deserializer: D,
-    ) -> Result<bool, D::Error> {
-        let value = i64::deserialize(deserializer)?;
-        Ok(matches!(value, -1))
-    }
 }

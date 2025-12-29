@@ -21,11 +21,11 @@ use crate::connector;
 use crate::models::{auth, Auth};
 
 // It's great when we can test our requests against a test server, hence the ability to specify
-// custom URIs.
+// custom URIs
 const ROOT_SERVER_URI: &str = "https://cf2.bonfire.moe";
 const MELIOR_SERVER_URI: &str = "https://api.bonfire.moe";
 
-// Some requests require this value and return various responses depending on it.
+// Some requests require this value and return various responses depending on it
 const API_VERSION: &str = "3.1.0";
 
 /// Represents an HTTP wrapper for the Bonfire API. It manages the authentication session [Auth]
@@ -100,7 +100,6 @@ impl Client {
     }
 
     /// Create a new `ClientBuilder` with default values.
-    #[inline]
     pub fn builder() -> ClientBuilder {
         ClientBuilder::new()
     }

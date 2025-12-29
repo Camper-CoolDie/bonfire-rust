@@ -3,6 +3,7 @@ mod effect;
 mod gender;
 mod info;
 mod link;
+mod requests;
 
 pub use badge::Badge;
 use chrono::{DateTime, Duration, Utc};
@@ -11,7 +12,6 @@ pub use gender::Gender;
 pub use info::*;
 pub use link::Link;
 use serde::{Deserialize, Serialize};
-use serde_json::json;
 
 use crate::models::ImageRef;
 use crate::{Client, Result};
@@ -84,7 +84,6 @@ pub struct Account {
 }
 impl Account {
     /// Check if this account is currently online.
-    #[inline]
     pub fn is_online(&self) -> bool {
         Utc::now() - self.last_online_at < ONLINE_DURATION
     }
@@ -97,15 +96,7 @@ impl Account {
     /// if there's no account with the provided identifier or [Error][crate::Error] if any other
     /// error occurred while sending the request.
     pub async fn get_by_id(client: &mut Client, id: i64) -> Result<Self> {
-        #[derive(Deserialize)]
-        struct Response {
-            account: Account,
-        }
-
-        Ok(client
-            .send_request::<_, Response>("RAccountsGet", json!({ "accountId": id }), Vec::default())
-            .await?
-            .account)
+        Account::_get_account(client, Some(id), None).await
     }
 
     /// Get an account by its name. Doesn't require authentication.
@@ -116,19 +107,7 @@ impl Account {
     /// if there's no account with the provided name or [Error][crate::Error] if any other error
     /// occurred while sending the request.
     pub async fn get_by_name(client: &mut Client, name: &str) -> Result<Self> {
-        #[derive(Deserialize)]
-        struct Response {
-            account: Account,
-        }
-
-        Ok(client
-            .send_request::<_, Response>(
-                "RAccountsGet",
-                json!({ "accountName": name }),
-                Vec::default(),
-            )
-            .await?
-            .account)
+        Account::_get_account(client, None, Some(name)).await
     }
 
     /// Search for accounts by their name.
@@ -142,23 +121,7 @@ impl Account {
         offset: i64,
         follows_only: bool,
     ) -> Result<Vec<Self>> {
-        #[derive(Deserialize)]
-        struct Response {
-            accounts: Vec<Account>,
-        }
-
-        Ok(client
-            .send_request::<_, Response>(
-                "RAccountsGetAll",
-                json!({
-                    "username": name,
-                    "offset": offset,
-                    "isSubscriptionsOnly": follows_only,
-                }),
-                Vec::default(),
-            )
-            .await?
-            .accounts)
+        Account::_search_accounts(client, name, offset, follows_only).await
     }
 
     /// Get [Info] about this account.
@@ -168,7 +131,6 @@ impl Account {
     /// Returns [client::RootServerError::Unavailable][crate::client::RootServerError::Unavailable]
     /// if there's no account with the contained identifier or [Error][crate::Error] if any other
     /// error occurred while sending the request.
-    #[inline]
     pub async fn info(&self, client: &mut Client) -> Result<Info> {
         Info::get_by_id(client, self.id).await
     }
@@ -180,18 +142,6 @@ impl Account {
     ///
     /// Returns [Error][crate::Error] if an error occurred while sending the request.
     pub async fn get_online(client: &mut Client, offset_date: DateTime<Utc>) -> Result<Vec<Self>> {
-        #[derive(Deserialize)]
-        struct Response {
-            accounts: Vec<Account>,
-        }
-
-        Ok(client
-            .send_request::<_, Response>(
-                "RAccountsGetAllOnline",
-                json!({ "offsetDate": offset_date.timestamp_millis() }),
-                Vec::default(),
-            )
-            .await?
-            .accounts)
+        Account::_get_online(client, offset_date).await
     }
 }

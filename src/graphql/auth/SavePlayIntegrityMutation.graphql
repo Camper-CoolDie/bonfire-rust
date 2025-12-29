@@ -1,3 +1,0 @@
-mutation SavePlayIntegrityMutation($intentionToken: String!, $packageName: String!, $token: String!) {
-    savePlayIntegrity(intentionToken: $intentionToken, packageName: $packageName, token: $token)
-}

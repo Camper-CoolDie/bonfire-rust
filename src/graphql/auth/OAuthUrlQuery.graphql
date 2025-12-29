@@ -1,7 +1,0 @@
-query OAuthUrlQuery($provider: OauthProvider!) {
-    oauthUrl(provider: $provider) {
-        scope
-        state
-        nonce
-    }
-}

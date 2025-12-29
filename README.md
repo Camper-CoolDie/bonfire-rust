@@ -7,8 +7,7 @@
 bonfire is an asynchronous Rust client library for the [Bonfire](https://github.com/timas130/bonfire) API.
 
 - **Efficiency**. Fast asynchronous requests using [hyper](https://crates.io/crates/hyper)
-- **Simplicity**. Well-documented request-sending methods like
-  [Account::search()][models::Account::search()]
+- **Simplicity**. Well-documented request-sending methods like `Account::search()`
 - **Debuggability**. Connection attempts, requests and errors are logged using [tracing](https://crates.io/crates/tracing)
 
 ## Example

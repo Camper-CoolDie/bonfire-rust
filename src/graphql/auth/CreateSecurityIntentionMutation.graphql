@@ -1,3 +1,0 @@
-mutation CreateSecurityIntentionMutation($intentionType: IntentionType!) {
-    createSecurityIntention(intentionType: $intentionType)
-}

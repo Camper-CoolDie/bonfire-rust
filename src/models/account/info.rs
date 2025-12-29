@@ -3,22 +3,42 @@ use std::result::Result as StdResult;
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use serde_json::json;
 
-use crate::models::{EmptyResponse, Gender, ImageRef, Link, Post};
+use crate::models::{Account, Gender, ImageRef, Link, Post};
 use crate::{Client, Result};
 
 /// The number of links an account can contain.
 pub const LINKS_COUNT: usize = 7;
-
 /// The allowed range for an age.
-pub const AGE_RANGE: Range<i64> = 0..101;
-
+pub const AGE_RANGE: Range<i64> = 0..201;
 /// The maximum allowed status length.
 pub const STATUS_MAX_LENGTH: usize = 100;
-
 /// The maximum allowed description length.
 pub const DESCRIPTION_MAX_LENGTH: usize = 1000;
+
+fn serialize_links<S: Serializer>(value: &[Link], serializer: S) -> StdResult<S::Ok, S::Error> {
+    let mut links = value.to_vec();
+    links.resize(LINKS_COUNT, Link::default());
+
+    Links { links }.serialize(serializer)
+}
+
+fn deserialize_links<'de, D: Deserializer<'de>>(deserializer: D) -> StdResult<Vec<Link>, D::Error> {
+    Ok(Links::deserialize(deserializer)?
+        .links
+        .into_iter()
+        .filter(|link| !link.title.is_empty() && !link.uri.is_empty())
+        .collect())
+}
+
+fn deserialize_ban_timestamp<'de, D: Deserializer<'de>>(
+    deserializer: D,
+) -> StdResult<Option<DateTime<Utc>>, D::Error> {
+    Ok(
+        crate::models::deserialize_timestamp_millis_or_none(deserializer)?
+            .filter(|date| *date > Utc::now()),
+    )
+}
 
 #[derive(Deserialize, Serialize)]
 struct Links {
@@ -40,7 +60,7 @@ pub struct Info {
     #[serde(
         rename = "banDate",
         serialize_with = "crate::models::serialize_timestamp_millis_or_none",
-        deserialize_with = "Info::deserialize_ban_timestamp"
+        deserialize_with = "deserialize_ban_timestamp"
     )]
     pub banned_until: Option<DateTime<Utc>>,
     /// The account's background
@@ -87,8 +107,8 @@ pub struct Info {
     pub description: Option<String>,
     /// The account's links
     #[serde(
-        serialize_with = "Info::serialize_links",
-        deserialize_with = "Info::deserialize_links"
+        serialize_with = "serialize_links",
+        deserialize_with = "deserialize_links"
     )]
     pub links: Vec<Link>,
     /// Your note to this account
@@ -145,13 +165,7 @@ impl Info {
     /// if there's no account with the provided identifier or [Error][crate::Error] if any other
     /// error occurred while sending the request.
     pub async fn get_by_id(client: &mut Client, id: i64) -> Result<Self> {
-        client
-            .send_request::<_, Info>(
-                "RAccountsGetProfile",
-                json!({ "accountId": id }),
-                Vec::default(),
-            )
-            .await
+        Account::_get_info(client, Some(id), None).await
     }
 
     /// Get account information by its name.
@@ -162,13 +176,7 @@ impl Info {
     /// if there's no account with the provided name or [Error][crate::Error] if any other error
     /// occurred while sending the request.
     pub async fn get_by_name(client: &mut Client, name: &str) -> Result<Self> {
-        client
-            .send_request::<_, Info>(
-                "RAccountsGetProfile",
-                json!({ "accountName": name }),
-                Vec::default(),
-            )
-            .await
+        Account::_get_info(client, None, Some(name)).await
     }
 
     /// Set your age. Must be within [AGE_RANGE]. Zero or `None` means no age.
@@ -179,14 +187,7 @@ impl Info {
     /// code `E_BAD_AGE` if the provided age is not within the range or [Error][crate::Error] if
     /// any other error occurred while sending the request.
     pub async fn set_age(client: &mut Client, age: Option<i64>) -> Result<()> {
-        client
-            .send_request::<_, EmptyResponse>(
-                "RAccountsBioSetAge",
-                json!({ "age": age.unwrap_or(0) }),
-                Vec::default(),
-            )
-            .await?;
-        Ok(())
+        Account::_set_age(client, age.unwrap_or(0)).await
     }
 
     /// Set your status. Must be no longer than [STATUS_MAX_LENGTH]. Empty or `None` means no
@@ -200,14 +201,7 @@ impl Info {
     ///   `E_BAD_SIZE` if the provided status is longer than the maximum allowed length
     /// * [Error][crate::Error] if any other error occurred while sending the request.
     pub async fn set_status(client: &mut Client, status: Option<&str>) -> Result<()> {
-        client
-            .send_request::<_, EmptyResponse>(
-                "RAccountsStatusSet",
-                json!({ "status": status.unwrap_or("") }),
-                Vec::default(),
-            )
-            .await?;
-        Ok(())
+        Account::_set_status(client, status.unwrap_or("")).await
     }
 
     /// Set your description. Must be no longer than [DESCRIPTION_MAX_LENGTH]. Empty or `None`
@@ -219,14 +213,7 @@ impl Info {
     /// code `E_BAD_SIZE` if the provided description is longer than the maximum allowed length or
     /// [Error][crate::Error] if any other error occurred while sending the request.
     pub async fn set_description(client: &mut Client, description: Option<&str>) -> Result<()> {
-        client
-            .send_request::<_, EmptyResponse>(
-                "RAccountsBioSetDescription",
-                json!({ "description": description.unwrap_or("") }),
-                Vec::default(),
-            )
-            .await?;
-        Ok(())
+        Account::_set_description(client, description.unwrap_or("")).await
     }
 
     /// Set your gender.
@@ -235,39 +222,6 @@ impl Info {
     ///
     /// Returns [Error][crate::Error] if an error occurred while sending the request.
     pub async fn set_gender(client: &mut Client, gender: Gender) -> Result<()> {
-        client
-            .send_request::<_, EmptyResponse>(
-                "RAccountsBioSetSex",
-                json!({ "sex": gender }),
-                Vec::default(),
-            )
-            .await?;
-        Ok(())
-    }
-
-    fn serialize_links<S: Serializer>(value: &[Link], serializer: S) -> StdResult<S::Ok, S::Error> {
-        let mut links = value.to_vec();
-        links.resize(LINKS_COUNT, Link::default());
-
-        Links { links }.serialize(serializer)
-    }
-
-    fn deserialize_links<'de, D: Deserializer<'de>>(
-        deserializer: D,
-    ) -> StdResult<Vec<Link>, D::Error> {
-        Ok(Links::deserialize(deserializer)?
-            .links
-            .into_iter()
-            .filter(|link| !link.title.is_empty() && !link.uri.is_empty())
-            .collect())
-    }
-
-    fn deserialize_ban_timestamp<'de, D: Deserializer<'de>>(
-        deserializer: D,
-    ) -> StdResult<Option<DateTime<Utc>>, D::Error> {
-        Ok(
-            crate::models::deserialize_timestamp_millis_or_none(deserializer)?
-                .filter(|date| *date > Utc::now()),
-        )
+        Account::_set_gender(client, gender).await
     }
 }

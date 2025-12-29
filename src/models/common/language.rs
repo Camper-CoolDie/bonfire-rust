@@ -1,3 +1,4 @@
+use serde::de::Error;
 use serde::{Deserialize, Deserializer, Serializer};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
@@ -40,6 +41,7 @@ impl Language {
         let value = i64::deserialize(deserializer)?;
         Ok(match value {
             0 => None,
+            1 => Some(Language::English),
             2 => Some(Language::Russian),
             3 => Some(Language::Portuguese),
             4 => Some(Language::Ukrainian),
@@ -47,7 +49,14 @@ impl Language {
             6 => Some(Language::Italian),
             7 => Some(Language::Polish),
             8 => Some(Language::French),
-            _ => Some(Language::English),
+            value => Err(D::Error::custom(format!(
+                "invalid value: {}, expected one of: {}",
+                value,
+                (0..9)
+                    .map(|i| i.to_string())
+                    .collect::<Vec<String>>()
+                    .join(", ")
+            )))?,
         })
     }
 }

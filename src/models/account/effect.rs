@@ -4,6 +4,14 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
+fn serialize_tag<S: Serializer>(value: &bool, serializer: S) -> StdResult<S::Ok, S::Error> {
+    serializer.serialize_i64(*value as i64)
+}
+
+fn deserialize_tag<'de, D: Deserializer<'de>>(deserializer: D) -> StdResult<bool, D::Error> {
+    Ok(i64::deserialize(deserializer)? == 1)
+}
+
 /// Represents an effect type.
 #[derive(Default, Clone, Debug, Deserialize_repr, Serialize_repr)]
 #[repr(i64)]
@@ -80,8 +88,8 @@ pub struct Effect {
     /// Was this effect applied by the system?
     #[serde(
         rename = "tag",
-        serialize_with = "Effect::serialize_tag",
-        deserialize_with = "Effect::deserialize_tag"
+        serialize_with = "serialize_tag",
+        deserialize_with = "deserialize_tag"
     )]
     pub is_system: bool,
     /// A preselected reason for applying this effect. Useful only if `is_system` is true,
@@ -90,13 +98,4 @@ pub struct Effect {
     pub reason_kind: EffectReasonKind,
     /// An account name who applied this effect. Empty if `is_system` is true
     pub from_account_name: String,
-}
-impl Effect {
-    fn serialize_tag<S: Serializer>(value: &bool, serializer: S) -> StdResult<S::Ok, S::Error> {
-        serializer.serialize_i64(*value as i64)
-    }
-
-    fn deserialize_tag<'de, D: Deserializer<'de>>(deserializer: D) -> StdResult<bool, D::Error> {
-        Ok(i64::deserialize(deserializer)? == 1)
-    }
 }

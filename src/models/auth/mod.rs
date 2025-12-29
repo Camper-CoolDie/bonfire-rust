@@ -1,12 +1,10 @@
 mod error;
-mod me;
+mod queries;
 
-use chrono::NaiveDate;
 pub use error::{Error, TfaKind, TfaRequired};
-pub use me::Me;
 use serde::{Deserialize, Serialize};
-use serde_json::json;
 
+use crate::models::Me;
 use crate::{Client, Result};
 
 /// Represents an authentication session.
@@ -29,7 +27,7 @@ impl Auth {
     /// # Examples
     ///
     /// ```no_run
-    /// use bonfire::models::auth::Me;
+    /// use bonfire::models::Auth;
     /// use bonfire::Client;
     ///
     /// #[tokio::main]
@@ -39,41 +37,7 @@ impl Auth {
     /// }
     /// ```
     pub async fn login(client: &mut Client, email: &str, password: &str) -> Result<()> {
-        #[derive(Deserialize)]
-        struct Response {
-            #[serde(rename = "loginEmail")]
-            result: LoginResult,
-        }
-
-        #[derive(Deserialize)]
-        #[serde(tag = "__typename")]
-        enum LoginResult {
-            #[serde(rename = "LoginResultSuccess")]
-            Success(Auth),
-            #[serde(rename = "LoginResultTfaRequired")]
-            TfaRequired(TfaRequired),
-        }
-
-        match client
-            .send_query::<_, Response>(
-                "LoginEmailMutation",
-                include_str!("../../graphql/auth/LoginEmailMutation.graphql"),
-                json!({
-                    "input": {
-                        "email": email,
-                        "password": password,
-                    }
-                }),
-            )
-            .await?
-            .result
-        {
-            LoginResult::Success(success) => {
-                client.auth = Some(success);
-                Ok(())
-            }
-            LoginResult::TfaRequired(error) => Err(Error::TfaRequired(error).into()),
-        }
+        Auth::_login_email(client, email, password).await
     }
 
     /// Log out. The client becomes unauthenticated.
@@ -85,7 +49,7 @@ impl Auth {
     /// # Examples
     ///
     /// ```no_run
-    /// use bonfire::models::auth::Me;
+    /// use bonfire::models::Auth;
     /// use bonfire::Client;
     ///
     /// #[tokio::main]
@@ -96,18 +60,7 @@ impl Auth {
     /// }
     /// ```
     pub async fn logout(client: &mut Client) -> Result<()> {
-        #[derive(Deserialize)]
-        struct Response {}
-
-        client
-            .send_query::<_, Response>(
-                "LogoutMutation",
-                include_str!("../../graphql/auth/LogoutMutation.graphql"),
-                json!({}),
-            )
-            .await?;
-        client.auth = None;
-        Ok(())
+        Auth::_logout(client).await
     }
 
     /// Get information about the currently authenticated user.
@@ -119,7 +72,7 @@ impl Auth {
     /// # Examples
     ///
     /// ```no_run
-    /// use bonfire::models::auth::Me;
+    /// use bonfire::models::Auth;
     /// use bonfire::Client;
     ///
     /// #[tokio::main]
@@ -131,77 +84,10 @@ impl Auth {
     /// }
     /// ```
     pub async fn me(client: &mut Client) -> Result<Me> {
-        #[derive(Deserialize)]
-        struct Response {
-            me: Me,
-        }
-
-        Ok(client
-            .send_query::<_, Response>(
-                "MeQuery",
-                include_str!("../../graphql/auth/MeQuery.graphql"),
-                json!({}),
-            )
-            .await?
-            .me)
-    }
-
-    /// Set your birthday.
-    ///
-    /// # Errors
-    ///
-    /// Returns [Error][crate::Error] if an error occurred while sending the request.
-    ///
-    /// # Examples
-    ///
-    /// ```no_run
-    /// use bonfire::models::auth::Me;
-    /// use bonfire::Client;
-    /// use chrono::NaiveDate;
-    ///
-    /// #[tokio::main]
-    /// async fn main() {
-    ///     let mut client = Client::connect().await.unwrap();
-    ///     // ...
-    ///     let birthday = NaiveDate::from_ymd_opt(2000, 1, 1).unwrap();
-    ///     Auth::set_birthday(&mut client, birthday).await.unwrap();
-    /// }
-    /// ```
-    pub async fn set_birthday(client: &mut Client, birthday: NaiveDate) -> Result<Me> {
-        #[derive(Deserialize)]
-        struct Response {
-            #[serde(rename = "setBirthday")]
-            me: Me,
-        }
-
-        Ok(client
-            .send_query::<_, Response>(
-                "SetBirthdayMutation",
-                include_str!("../../graphql/auth/SetBirthdayMutation.graphql"),
-                json!({ "birthday": birthday }),
-            )
-            .await?
-            .me)
+        Auth::_me(client).await
     }
 
     pub(crate) async fn refresh(client: &mut Client) -> Result<()> {
-        #[derive(Deserialize)]
-        struct Response {
-            #[serde(rename = "loginRefresh")]
-            auth: Auth,
-        }
-
-        let auth = client.auth.clone().ok_or(Error::Unauthenticated)?;
-        client.auth = Some(
-            client
-                .send_query_without_auth::<_, Response>(
-                    "LoginRefreshMutation",
-                    include_str!("../../graphql/auth/LoginRefreshMutation.graphql"),
-                    json!({ "refreshToken": auth.refresh_token }),
-                )
-                .await?
-                .auth,
-        );
-        Ok(())
+        Auth::_login_refresh(client).await
     }
 }
