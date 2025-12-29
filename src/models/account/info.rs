@@ -5,8 +5,7 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde_json::json;
 
-use super::Gender;
-use crate::models::{EmptyResponse, ImageRef, Post};
+use crate::models::{EmptyResponse, Gender, ImageRef, Link, Post};
 use crate::{Client, Result};
 
 /// The number of links an account can contain.
@@ -20,6 +19,11 @@ pub const STATUS_MAX_LENGTH: usize = 100;
 
 /// The maximum allowed description length.
 pub const DESCRIPTION_MAX_LENGTH: usize = 1000;
+
+#[derive(Deserialize, Serialize)]
+struct Links {
+    links: Vec<Link>,
+}
 
 /// Represents information about an account.
 #[derive(Default, Clone, Debug, Deserialize, Serialize)]
@@ -266,19 +270,4 @@ impl Info {
                 .filter(|date| *date > Utc::now()),
         )
     }
-}
-
-#[derive(Deserialize, Serialize)]
-struct Links {
-    links: Vec<Link>,
-}
-
-/// Represents a link in an account's profile.
-#[derive(Default, Clone, Debug, Deserialize, Serialize)]
-pub struct Link {
-    /// The link's title
-    pub title: String,
-    /// The link's URI
-    #[serde(rename = "url")]
-    pub uri: String,
 }

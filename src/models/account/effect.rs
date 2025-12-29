@@ -4,6 +4,50 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
+/// Represents an effect type.
+#[derive(Default, Clone, Debug, Deserialize_repr, Serialize_repr)]
+#[repr(i64)]
+pub enum EffectKind {
+    /// The user can't place negative rates
+    #[default]
+    Hater = 1,
+    /// The user's avatar is replaced with a pig
+    Pig = 2,
+    /// The user can't block publications
+    Watchman = 3,
+    /// A goose is running across the user's screen which you can't get rid of
+    Goose = 4,
+    /// It is constantly snowing for the user
+    EternalWinter = 5,
+    /// The user can't perform admin actions
+    Punished = 6,
+    /// The user has the privilege to translate the application regardless of their level and karma
+    Translator = 7,
+    /// The user can't mention others by using "@"
+    MentionLock = 8,
+}
+
+/// Represents a preselected reason kind of an effect.
+#[derive(Default, Clone, Debug, Deserialize_repr, Serialize_repr)]
+#[repr(i64)]
+pub enum EffectReasonKind {
+    /// The reason is not preselected
+    #[default]
+    None = 0,
+    /// Punished for inappropriate behavior towards the gods
+    Gods = 1,
+    /// Punished for unreasonable blocks
+    RejectedBlocks = 2,
+    /// Punished for blocking too many publications
+    TooManyBlocks = 3,
+    /// Punished for swearing in the service
+    Swearing = 4,
+    /// Punished for placing negative rates to every publication they saw
+    Hater = 5,
+    /// Punished for being uncultured
+    Uncultured = 6,
+}
+
 /// Represents an account effect.
 #[derive(Default, Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -55,48 +99,4 @@ impl Effect {
     fn deserialize_tag<'de, D: Deserializer<'de>>(deserializer: D) -> StdResult<bool, D::Error> {
         Ok(i64::deserialize(deserializer)? == 1)
     }
-}
-
-/// Represents an effect type.
-#[derive(Default, Clone, Debug, Deserialize_repr, Serialize_repr)]
-#[repr(i64)]
-pub enum EffectKind {
-    /// The user can't place negative rates
-    #[default]
-    Hater = 1,
-    /// The user's avatar is replaced with a pig
-    Pig = 2,
-    /// The user can't block publications
-    Watchman = 3,
-    /// A goose is running across the user's screen which you can't get rid of
-    Goose = 4,
-    /// It is constantly snowing for the user
-    EternalWinter = 5,
-    /// The user can't perform admin actions
-    Punished = 6,
-    /// The user has the privilege to translate the application regardless of their level and karma
-    Translator = 7,
-    /// The user can't mention others by using "@"
-    MentionLock = 8,
-}
-
-/// Represents a preselected reason kind of an effect.
-#[derive(Default, Clone, Debug, Deserialize_repr, Serialize_repr)]
-#[repr(i64)]
-pub enum EffectReasonKind {
-    /// The reason is not preselected
-    #[default]
-    None = 0,
-    /// Punished for inappropriate behavior towards the gods
-    Gods = 1,
-    /// Punished for unreasonable blocks
-    RejectedBlocks = 2,
-    /// Punished for blocking too many publications
-    TooManyBlocks = 3,
-    /// Punished for swearing in the service
-    Swearing = 4,
-    /// Punished for placing negative rates to every publication they saw
-    Hater = 5,
-    /// Punished for being uncultured
-    Uncultured = 6,
 }

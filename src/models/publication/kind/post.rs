@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use super::Publication;
+use crate::models::Publication;
 
 /// Represents a post.
 #[derive(Default, Clone, Debug, Deserialize, Serialize)]

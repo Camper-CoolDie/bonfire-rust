@@ -1,18 +1,34 @@
+mod badge;
 mod effect;
+mod gender;
 mod info;
+mod link;
 
+pub use badge::Badge;
 use chrono::{DateTime, Duration, Utc};
-pub use effect::*;
+pub use effect::{Effect, EffectKind, EffectReasonKind};
+pub use gender::Gender;
 pub use info::*;
+pub use link::Link;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use serde_repr::{Deserialize_repr, Serialize_repr};
 
 use crate::models::ImageRef;
 use crate::{Client, Result};
 
 /// The duration of an account's online status since when it was last online.
 pub const ONLINE_DURATION: Duration = Duration::minutes(15);
+
+/// Represents an account customization.
+#[derive(Default, Clone, Debug, Deserialize, Serialize)]
+pub struct AccountCustomization {
+    /// The account's name color
+    #[serde(rename = "nc")]
+    pub name_color: Option<i32>,
+    /// The account's active badge
+    #[serde(rename = "ab")]
+    pub active_badge: Option<Badge>,
+}
 
 /// Represents an account.
 #[derive(Default, Clone, Debug, Deserialize, Serialize)]
@@ -64,7 +80,7 @@ pub struct Account {
     pub effects: Vec<Effect>,
     /// The account's customization
     #[serde(rename = "czt")]
-    pub customization: Customization,
+    pub customization: AccountCustomization,
 }
 impl Account {
     /// Check if this account is currently online.
@@ -178,39 +194,4 @@ impl Account {
             .await?
             .accounts)
     }
-}
-
-/// Represents an account customization.
-#[derive(Default, Clone, Debug, Deserialize, Serialize)]
-pub struct Customization {
-    /// The account's name color
-    #[serde(rename = "nc")]
-    pub name_color: Option<i32>,
-    /// The account's active badge
-    #[serde(rename = "ab")]
-    pub active_badge: Option<Badge>,
-}
-
-/// Represents a badge in an account's profile.
-#[derive(Default, Clone, Debug, Deserialize, Serialize)]
-pub struct Badge {
-    /// The badge's index
-    #[serde(rename = "id")]
-    pub index: i64,
-    /// The badge's image
-    #[serde(rename = "mi")]
-    pub image: ImageRef,
-}
-
-/// Represents an account gender.
-#[derive(Default, Clone, Debug, Deserialize_repr, Serialize_repr)]
-#[repr(i64)]
-pub enum Gender {
-    /// Male gender
-    #[default]
-    Male = 0,
-    /// Female gender
-    Female = 1,
-    /// Non-binary gender
-    Other = 2,
 }

@@ -33,7 +33,7 @@
 //!     }
 //!
 //!     // Get information about the currently authenicated user
-//!     println!("{:#?}", Auth::info(&mut client).await?);
+//!     println!("{:#?}", Auth::me(&mut client).await?);
 //!
 //!     // Save auth tokens to "credential.json"
 //!     if let Some(ref auth) = client.auth.as_ref() {

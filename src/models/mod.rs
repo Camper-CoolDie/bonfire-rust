@@ -2,9 +2,10 @@
 pub mod account;
 /// Authentication implementation, errors and helper structs.
 pub mod auth;
+/// Common, shared models used across the API.
+pub mod common;
 /// Fandom implementations and helper structs.
 pub mod fandom;
-mod other;
 /// Publication implementations and helper structs.
 pub mod publication;
 
@@ -333,12 +334,12 @@ pub mod publication;
  * [ ] RWikiReorder
  */
 
-pub use account::{Account, Info as AccountInfo};
+pub use account::{Account, Badge, Effect, Gender, Info as AccountInfo, Link};
 pub use auth::{Auth, Me};
 use chrono::{DateTime, Utc};
-pub use fandom::{Category, Fandom, Language};
-pub use other::*;
-pub use publication::{Post, Publication};
+pub use common::{Category, ImageRef, Language};
+pub use fandom::Fandom;
+pub use publication::{Post, Publication, Reaction};
 use serde::de::Error;
 use serde::{Deserialize, Deserializer, Serializer};
 
