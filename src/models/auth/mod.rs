@@ -9,7 +9,6 @@ use crate::{Client, Result};
 
 /// Represents an authentication session.
 #[derive(Default, Clone, Debug, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase")]
 pub struct Auth {
     /// The session's access token
     pub access_token: String,

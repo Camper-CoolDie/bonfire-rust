@@ -1,36 +1,27 @@
-use serde::{Deserialize, Serialize};
-
-use crate::models::Publication;
+use crate::models::publication::{PublicationInheritor, PublicationKind};
 
 /// Represents a post.
-#[derive(Default, Clone, Debug, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Default, Clone, Debug)]
 pub struct Post {
-    /// The post's inner struct
-    #[serde(flatten)]
-    pub inner: Publication,
-    // #[serde(rename = "J_PAGES")]
+    /// An identifier of the corresponding publication. Should always be set to a valid value if
+    /// constructing with `{ ... }` and match [Publication::id]
+    pub id: i64,
+    // /// The post's content
     // pub pages: Vec<Page>,
-    // pub best_comment: Option<Comment>,
+    // /// A comment which earned the highest amount of karma
+    // pub best_comment: Option<Publication<Comment>>,
     /// The post's rubric identifier
-    #[serde(
-        serialize_with = "crate::models::serialize_i64_or_none",
-        deserialize_with = "crate::models::deserialize_i64_or_none"
-    )]
     pub rubric_id: Option<i64>,
     /// The post's rubric name
-    #[serde(
-        serialize_with = "crate::models::serialize_string_or_none",
-        deserialize_with = "crate::models::deserialize_string_or_none"
-    )]
     pub rubric_name: Option<String>,
     /// The post's rubric karma coefficient
-    #[serde(
-        rename = "rubricKarmaCof",
-        serialize_with = "crate::models::serialize_level_or_none",
-        deserialize_with = "crate::models::deserialize_level_or_none"
-    )]
     pub rubric_karma_coef: Option<f32>,
-    // #[serde(rename = "userActivity")]
+    // /// The post's relay race
     // pub relay_race: Option<RelayRace>,
+}
+
+impl PublicationInheritor for Post {
+    fn kind(&self) -> PublicationKind {
+        PublicationKind::Post
+    }
 }

@@ -2,13 +2,14 @@ use chrono::NaiveDate;
 use serde::Deserialize;
 use serde_json::json;
 
+use crate::models::raw::RawMe;
 use crate::models::Me;
 use crate::{Client, Result};
 
 #[derive(Deserialize)]
 struct Response {
     #[serde(rename = "setBirthday")]
-    me: Me,
+    me: RawMe,
 }
 
 impl Me {
@@ -20,6 +21,7 @@ impl Me {
                 json!({ "birthday": birthday }),
             )
             .await?
-            .me)
+            .me
+            .into())
     }
 }

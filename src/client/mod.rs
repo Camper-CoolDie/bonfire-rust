@@ -1,7 +1,5 @@
 mod error;
 mod jwt;
-mod query;
-mod request;
 mod session;
 
 use std::fmt;
@@ -9,16 +7,12 @@ use std::fmt;
 pub use error::{Error, Result};
 use http::{header, HeaderMap, Uri};
 use jsonwebtoken::errors::ErrorKind;
-pub use query::MeliorError;
-use query::Query;
-use request::Request;
-pub use request::{RootError, UnavailableError};
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use session::Session;
 
 use crate::connector;
-use crate::models::{auth, Auth};
+use crate::models::{auth, Auth, Query, Request};
 
 // It's great when we can test our requests against a test server, hence the ability to specify
 // custom URIs
@@ -108,7 +102,7 @@ impl Client {
         &mut self,
         request_name: &'static str,
         content: R,
-        attachments: Vec<Option<&[u8]>>,
+        attachments: Vec<&[u8]>,
     ) -> Result<S> {
         tracing::info!(request_name, "sending request");
 
@@ -119,7 +113,7 @@ impl Client {
         // Contains the length of each attachment
         let data_output = attachments
             .iter()
-            .map(|option| option.map(|slice| slice.len() as u32))
+            .map(|slice| (!slice.is_empty()).then_some(slice.len() as u32))
             .collect::<Vec<Option<u32>>>();
 
         let headers = HeaderMap::new();

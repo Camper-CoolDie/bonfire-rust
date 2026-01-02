@@ -3,9 +3,8 @@ use std::result::Result as StdResult;
 use http::StatusCode;
 use thiserror::Error;
 
-use crate::client::{MeliorError, RootError};
 use crate::connector;
-use crate::models::auth;
+use crate::models::{auth, MeliorError, RootError};
 
 /// A type alias for [Result<T, Error>][std::result::Result<T, Error>].
 pub type Result<T> = StdResult<T, Error>;

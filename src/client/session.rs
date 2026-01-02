@@ -7,8 +7,7 @@ use once_cell::sync::Lazy;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 
-use super::query::{MeliorResponse, Query};
-use super::request::{Request, RootResponse};
+use crate::models::{MeliorError, MeliorResponse, Query, Request, RootError, RootResponse};
 use crate::{connector, Connector, ConnectorWrapper, Error, Result};
 
 static USER_AGENT: Lazy<String> = Lazy::new(|| {
@@ -57,22 +56,18 @@ impl Session {
     pub(super) async fn send_request<'a, R: Serialize, S: DeserializeOwned>(
         &mut self,
         request: Request<'a, R>,
-        attachments: Vec<Option<&[u8]>>,
+        attachments: Vec<&[u8]>,
         headers: HeaderMap<HeaderValue>,
     ) -> Result<S> {
         let json_body = serde_json::to_vec(&request)?;
 
-        let data_length = attachments
-            .iter()
-            .flatten()
-            .map(|slice| slice.len())
-            .sum::<usize>();
+        let data_length = attachments.iter().map(|slice| slice.len()).sum::<usize>();
 
         // 4 bytes for u32 length
         let mut payload = BytesMut::with_capacity(4 + json_body.len() + data_length);
         payload.put_u32(json_body.len() as u32);
         payload.put_slice(&json_body);
-        for attachment in attachments.into_iter().flatten() {
+        for attachment in attachments.into_iter() {
             payload.put_slice(attachment);
         }
 
@@ -80,7 +75,13 @@ impl Session {
 
         match serde_json::from_slice::<RootResponse<S>>(&response)? {
             RootResponse::Ok(content) => Ok(content),
-            RootResponse::Error(error) => Err(error.into()),
+            RootResponse::Error(error) => Err(match RootError::try_from(error) {
+                Ok(root_error) => root_error.into(),
+                Err(error) => {
+                    tracing::error!(?error, "failed to parse a root error");
+                    error
+                }
+            }),
         }
     }
 
@@ -102,7 +103,7 @@ impl Session {
             .is_some_and(|errors| !errors.is_empty())
         {
             // For simplicity we return only the first error
-            Err(response.errors.unwrap()[0].clone().into())
+            Err(MeliorError::from(response.errors.unwrap().pop().unwrap()).into())
         } else {
             Ok(response
                 .data

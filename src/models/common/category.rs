@@ -1,25 +1,21 @@
-use serde_repr::{Deserialize_repr, Serialize_repr};
-
 /// Represents a category.
-#[derive(Default, Clone, Debug, Deserialize_repr, Serialize_repr)]
-#[repr(i64)]
+#[derive(Default, Clone, Debug)]
 pub enum Category {
     /// The fandom has an unknown or unspecified category
     #[default]
-    #[serde(other)]
-    Unknown = 101,
+    Unknown,
     /// The fandom represents a game
-    Games = 1,
+    Games,
     /// The fandom represents an anime
-    Anime = 2,
+    Anime,
     /// The fandom represents a movie
-    Movies = 5,
+    Movies,
     /// The fandom represents a book
-    Books = 8,
+    Books,
     /// The fandom represents a specific type of art
-    Art = 15,
+    Art,
     /// The fandom represents a roleplay game
-    Roleplay = 16,
+    Roleplay,
     /// The fandom has a non-standart category
-    Other = 100,
+    Other,
 }

@@ -1,14 +1,11 @@
-use serde_repr::{Deserialize_repr, Serialize_repr};
-
 /// Represents an account gender.
-#[derive(Default, Clone, Debug, Deserialize_repr, Serialize_repr)]
-#[repr(i64)]
+#[derive(Default, Clone, Debug)]
 pub enum Gender {
     /// Male gender
     #[default]
-    Male = 0,
+    Male,
     /// Female gender
-    Female = 1,
+    Female,
     /// Non-binary gender
-    Other = 2,
+    Other,
 }

@@ -1,12 +1,13 @@
 use serde::Deserialize;
 use serde_json::json;
 
+use crate::models::raw::RawAccount;
 use crate::models::Account;
 use crate::{Client, Result};
 
 #[derive(Deserialize)]
 struct Response {
-    accounts: Vec<Account>,
+    accounts: Vec<RawAccount>,
 }
 
 impl Account {
@@ -16,7 +17,7 @@ impl Account {
         offset: i64,
         follows_only: bool,
     ) -> Result<Vec<Self>> {
-        Ok(client
+        client
             .send_request::<_, Response>(
                 "RAccountsGetAll",
                 json!({
@@ -27,6 +28,9 @@ impl Account {
                 Vec::default(),
             )
             .await?
-            .accounts)
+            .accounts
+            .into_iter()
+            .map(TryInto::try_into)
+            .collect()
     }
 }

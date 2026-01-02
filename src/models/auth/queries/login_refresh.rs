@@ -2,13 +2,14 @@ use serde::Deserialize;
 use serde_json::json;
 
 use crate::models::auth::Error;
+use crate::models::raw::RawAuth;
 use crate::models::Auth;
 use crate::{Client, Result};
 
 #[derive(Deserialize)]
 struct Response {
     #[serde(rename = "loginRefresh")]
-    auth: Auth,
+    auth: RawAuth,
 }
 
 impl Auth {
@@ -23,7 +24,8 @@ impl Auth {
                     json!({ "refreshToken": auth.refresh_token }),
                 )
                 .await?
-                .auth,
+                .auth
+                .into(),
         );
         Ok(())
     }

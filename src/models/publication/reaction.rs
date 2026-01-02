@@ -1,12 +1,8 @@
-use serde::{Deserialize, Serialize};
-
 /// Represents a reaction on a publication.
-#[derive(Default, Clone, Debug, Deserialize, Serialize)]
+#[derive(Default, Clone, Debug)]
 pub struct Reaction {
     /// The reaction's account ID
-    #[serde(rename = "accountId")]
-    pub from_account_id: String,
+    pub from_account_id: i64,
     /// The reaction's index
-    #[serde(rename = "reactionIndex")]
     pub index: i64,
 }

@@ -1,5 +1,6 @@
 use serde_json::json;
 
+use crate::models::raw::RawGender;
 use crate::models::{Account, EmptyResponse, Gender};
 use crate::{Client, Result};
 
@@ -8,7 +9,7 @@ impl Account {
         client
             .send_request::<_, EmptyResponse>(
                 "RAccountsBioSetSex",
-                json!({ "sex": gender }),
+                json!({ "sex": RawGender::from(gender) }),
                 Vec::default(),
             )
             .await?;

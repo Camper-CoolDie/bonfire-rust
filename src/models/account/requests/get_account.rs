@@ -1,12 +1,13 @@
 use serde::Deserialize;
 use serde_json::json;
 
+use crate::models::raw::RawAccount;
 use crate::models::Account;
 use crate::{Client, Result};
 
 #[derive(Deserialize)]
 struct Response {
-    account: Account,
+    account: RawAccount,
 }
 
 impl Account {
@@ -15,7 +16,7 @@ impl Account {
         id: Option<i64>,
         name: Option<&str>,
     ) -> Result<Self> {
-        Ok(client
+        client
             .send_request::<_, Response>(
                 "RAccountsGet",
                 json!({
@@ -25,6 +26,7 @@ impl Account {
                 Vec::default(),
             )
             .await?
-            .account)
+            .account
+            .try_into()
     }
 }

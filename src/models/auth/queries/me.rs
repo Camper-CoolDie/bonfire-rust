@@ -1,12 +1,13 @@
 use serde::Deserialize;
 use serde_json::json;
 
+use crate::models::raw::RawMe;
 use crate::models::{Auth, Me};
 use crate::{Client, Result};
 
 #[derive(Deserialize)]
 struct Response {
-    me: Me,
+    me: RawMe,
 }
 
 impl Auth {
@@ -18,6 +19,7 @@ impl Auth {
                 json!({}),
             )
             .await?
-            .me)
+            .me
+            .into())
     }
 }

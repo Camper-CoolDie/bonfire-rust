@@ -1,6 +1,7 @@
 use serde_json::json;
 
 use crate::models::account::Info;
+use crate::models::raw::account::RawInfo;
 use crate::models::Account;
 use crate::{Client, Result};
 
@@ -11,7 +12,7 @@ impl Account {
         name: Option<&str>,
     ) -> Result<Info> {
         client
-            .send_request::<_, Info>(
+            .send_request::<_, RawInfo>(
                 "RAccountsGetProfile",
                 json!({
                     "accountId": id,
@@ -19,6 +20,7 @@ impl Account {
                 }),
                 Vec::default(),
             )
-            .await
+            .await?
+            .try_into()
     }
 }

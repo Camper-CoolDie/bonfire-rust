@@ -1,10 +1,8 @@
 use std::error::Error;
 use std::fmt;
 
-use serde::{Deserialize, Serialize};
-
 /// Represents an error from the melior server.
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Debug)]
 pub struct MeliorError {
     /// Message of the error
     pub message: String,
@@ -41,7 +39,7 @@ impl fmt::Display for MeliorError {
 impl Error for MeliorError {}
 
 /// Represents a location inside a query.
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Debug)]
 pub struct QueryLocation {
     /// Line number in the query
     pub line: i32,
@@ -50,23 +48,10 @@ pub struct QueryLocation {
 }
 
 /// Represents a part of a query path.
-#[derive(Clone, Debug, Deserialize)]
-#[serde(untagged)]
+#[derive(Debug)]
 pub enum QueryPath {
     /// A key inside an object
     Key(String),
     /// An index inside an array
     Index(i32),
-}
-
-#[derive(Serialize)]
-pub(crate) struct Query<R> {
-    pub variables: R,
-    pub query: &'static str,
-}
-
-#[derive(Deserialize)]
-pub(super) struct MeliorResponse<S> {
-    pub data: Option<S>,
-    pub errors: Option<Vec<MeliorError>>,
 }

@@ -1,11 +1,9 @@
 use std::fmt;
 
-use serde::Deserialize;
 use thiserror::Error;
 
 /// Represents a type of the TFA.
-#[derive(Clone, Debug, Deserialize)]
-#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+#[derive(Debug)]
 pub enum TfaKind {
     /// Log in again using a TOTP (Time-based One Time Password)
     Totp,
@@ -23,13 +21,11 @@ impl fmt::Display for TfaKind {
 }
 
 /// Represents data to continue logging in using TFA (Two-Factor Authentication).
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Debug)]
 pub struct TfaRequired {
     /// A type of the TFA
-    #[serde(rename = "tfaType")]
     pub kind: TfaKind,
     /// A wait token of the TFA
-    #[serde(rename = "tfaWaitToken")]
     pub wait_token: String,
 }
 

@@ -1,7 +1,9 @@
 use serde::Deserialize;
 use serde_json::json;
 
-use crate::models::auth::{Error, TfaRequired};
+use crate::models::auth::Error;
+use crate::models::raw::auth::RawTfaRequired;
+use crate::models::raw::RawAuth;
 use crate::models::Auth;
 use crate::{Client, Result};
 
@@ -9,9 +11,9 @@ use crate::{Client, Result};
 #[serde(tag = "__typename")]
 enum LoginResult {
     #[serde(rename = "LoginResultSuccess")]
-    Success(Auth),
+    Success(RawAuth),
     #[serde(rename = "LoginResultTfaRequired")]
-    TfaRequired(TfaRequired),
+    TfaRequired(RawTfaRequired),
 }
 
 #[derive(Deserialize)]
@@ -41,10 +43,10 @@ impl Auth {
             .result
         {
             LoginResult::Success(success) => {
-                client.auth = Some(success);
+                client.auth = Some(success.into());
                 Ok(())
             }
-            LoginResult::TfaRequired(error) => Err(Error::TfaRequired(error).into()),
+            LoginResult::TfaRequired(error) => Err(Error::TfaRequired(error.into()).into()),
         }
     }
 }

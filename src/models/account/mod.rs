@@ -11,7 +11,6 @@ pub use effect::{Effect, EffectKind, EffectReasonKind};
 pub use gender::Gender;
 pub use info::*;
 pub use link::Link;
-use serde::{Deserialize, Serialize};
 
 use crate::models::ImageRef;
 use crate::{Client, Result};
@@ -20,66 +19,39 @@ use crate::{Client, Result};
 pub const ONLINE_DURATION: Duration = Duration::minutes(15);
 
 /// Represents an account customization.
-#[derive(Default, Clone, Debug, Deserialize, Serialize)]
+#[derive(Default, Clone, Debug)]
 pub struct AccountCustomization {
     /// The account's name color
-    #[serde(rename = "nc")]
     pub name_color: Option<i32>,
     /// The account's active badge
-    #[serde(rename = "ab")]
     pub active_badge: Option<Badge>,
 }
 
 /// Represents an account.
-#[derive(Default, Clone, Debug, Deserialize, Serialize)]
+#[derive(Default, Clone, Debug)]
 pub struct Account {
     /// A unique identifier of this account. Should always be set to a valid value if constructing
     /// with `{ ... }`
-    #[serde(rename = "J_ID")]
     pub id: i64,
     /// The account's level
-    #[serde(
-        rename = "J_LVL",
-        serialize_with = "crate::models::serialize_level",
-        deserialize_with = "crate::models::deserialize_level"
-    )]
     pub level: f32,
     /// The time when the account was last online
-    #[serde(
-        rename = "J_LAST_ONLINE_DATE",
-        serialize_with = "crate::models::serialize_timestamp_millis",
-        deserialize_with = "crate::models::deserialize_timestamp_millis"
-    )]
     pub last_online_at: DateTime<Utc>,
     /// The account's name
-    #[serde(rename = "J_NAME")]
     pub name: String,
     /// The account's avatar
-    #[serde(
-        serialize_with = "ImageRef::serialize_or_none",
-        deserialize_with = "ImageRef::deserialize_or_none"
-    )]
     pub avatar: Option<ImageRef>,
     /// The account's gender
-    #[serde(rename = "sex")]
     pub gender: Gender,
     /// The account's karma in the last 30 days
-    #[serde(
-        serialize_with = "crate::models::serialize_level",
-        deserialize_with = "crate::models::deserialize_level"
-    )]
     pub karma30: f32,
     /// The amount that the account has donated
-    #[serde(rename = "sponsor")]
     pub sponsor_amount: i64,
     /// The number of times this account has donated sequentially
-    #[serde(rename = "sponsorTimes")]
     pub sponsor_count: i64,
     /// The account's effects
-    #[serde(rename = "accountEffects")]
     pub effects: Vec<Effect>,
     /// The account's customization
-    #[serde(rename = "czt")]
     pub customization: AccountCustomization,
 }
 impl Account {
