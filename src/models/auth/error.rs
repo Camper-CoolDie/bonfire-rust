@@ -42,6 +42,9 @@ impl fmt::Display for TfaRequired {
 /// An `auth::Error` can be the result of a non-standart response or an unauthenticated client.
 #[derive(Error, Debug)]
 pub enum Error {
+    /// Client is already authenticated
+    #[error("authenticated client")]
+    AlreadyAuthenticated,
     /// TFA is required to continue logging in
     #[error("TFA is required to continue logging in ({0})")]
     TfaRequired(TfaRequired),

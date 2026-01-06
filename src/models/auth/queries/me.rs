@@ -11,7 +11,7 @@ struct Response {
 }
 
 impl Auth {
-    pub(crate) async fn _me(client: &mut Client) -> Result<Me> {
+    pub(crate) async fn _me(client: &Client) -> Result<Me> {
         Ok(client
             .send_query::<_, Response>(
                 "MeQuery",

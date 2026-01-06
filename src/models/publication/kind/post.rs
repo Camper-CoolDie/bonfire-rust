@@ -4,7 +4,7 @@ use crate::models::publication::{PublicationInheritor, PublicationKind};
 #[derive(Default, Clone, Debug)]
 pub struct Post {
     /// An identifier of the corresponding publication. Should always be set to a valid value if
-    /// constructing with `{ ... }` and match [Publication::id]
+    /// constructing with `{ ... }` and match [Publication::id][crate::models::Publication::id]
     pub id: i64,
     // /// The post's content
     // pub pages: Vec<Page>,

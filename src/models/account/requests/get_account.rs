@@ -12,7 +12,7 @@ struct Response {
 
 impl Account {
     pub(crate) async fn _get_account(
-        client: &mut Client,
+        client: &Client,
         id: Option<i64>,
         name: Option<&str>,
     ) -> Result<Self> {

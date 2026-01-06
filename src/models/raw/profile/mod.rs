@@ -10,7 +10,7 @@ pub(crate) struct RawMe {
     #[serde(rename = "username")]
     name: String,
     email: String,
-    cached_level: f32,
+    cached_level: i64,
     birthday: Option<NaiveDate>,
     is_nsfw_allowed: Option<bool>,
 }

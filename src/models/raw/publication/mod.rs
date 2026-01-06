@@ -80,7 +80,7 @@ pub(crate) struct RawPublication<T: RawPublicationInheritor = AnyRawPublication>
     #[serde(flatten)]
     additional_data: Value,
     #[serde(skip)]
-    _kind: PhantomData<T>,
+    marker: PhantomData<T>,
     // TODO: tag_1, tag_2, tag_s_1, etc.
 }
 

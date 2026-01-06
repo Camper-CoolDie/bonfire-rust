@@ -13,7 +13,7 @@ struct Response {
 
 impl Account {
     pub(crate) async fn _get_online(
-        client: &mut Client,
+        client: &Client,
         offset_date: DateTime<Utc>,
     ) -> Result<Vec<Self>> {
         client

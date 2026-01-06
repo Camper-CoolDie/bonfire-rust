@@ -7,7 +7,7 @@ use crate::{Client, Result};
 
 impl Account {
     pub(crate) async fn _get_info(
-        client: &mut Client,
+        client: &Client,
         id: Option<i64>,
         name: Option<&str>,
     ) -> Result<Info> {

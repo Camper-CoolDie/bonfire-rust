@@ -12,7 +12,7 @@ struct Response {
 
 impl Account {
     pub(crate) async fn _search_accounts(
-        client: &mut Client,
+        client: &Client,
         name: Option<&str>,
         offset: i64,
         follows_only: bool,

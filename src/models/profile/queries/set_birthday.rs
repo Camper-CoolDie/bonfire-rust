@@ -13,7 +13,7 @@ struct Response {
 }
 
 impl Me {
-    pub(crate) async fn _set_birthday(client: &mut Client, birthday: NaiveDate) -> Result<Me> {
+    pub(crate) async fn _set_birthday(client: &Client, birthday: NaiveDate) -> Result<Me> {
         Ok(client
             .send_query::<_, Response>(
                 "SetBirthdayMutation",

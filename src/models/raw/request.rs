@@ -130,8 +130,6 @@ pub(crate) struct Request<'a, R> {
     pub data_output: Vec<Option<u32>>,
     #[serde(rename = "J_API_ACCESS_TOKEN", skip_serializing_if = "Option::is_none")]
     pub api_access_token: Option<&'a str>,
-    #[serde(rename = "J_API_BOT_TOKEN", skip_serializing_if = "Option::is_none")]
-    pub api_bot_token: Option<&'a str>,
     #[serde(rename = "requestApiVersion")]
     pub api_version: &'static str,
 }

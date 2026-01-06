@@ -64,10 +64,10 @@ impl Account {
     ///
     /// # Errors
     ///
-    /// Returns [client::RootServerError::Unavailable][crate::client::RootServerError::Unavailable]
-    /// if there's no account with the provided identifier or [Error][crate::Error] if any other
-    /// error occurred while sending the request.
-    pub async fn get_by_id(client: &mut Client, id: i64) -> Result<Self> {
+    /// Returns [RootError::Unavailable][crate::models::RootError::Unavailable] if there's no
+    /// account with the provided identifier or [Error][crate::Error] if any other error occurred
+    /// while sending the request.
+    pub async fn get_by_id(client: &Client, id: i64) -> Result<Self> {
         Account::_get_account(client, Some(id), None).await
     }
 
@@ -75,10 +75,10 @@ impl Account {
     ///
     /// # Errors
     ///
-    /// Returns [client::RootServerError::Unavailable][crate::client::RootServerError::Unavailable]
-    /// if there's no account with the provided name or [Error][crate::Error] if any other error
-    /// occurred while sending the request.
-    pub async fn get_by_name(client: &mut Client, name: &str) -> Result<Self> {
+    /// Returns [RootError::Unavailable][crate::models::RootError::Unavailable] if there's no
+    /// account with the provided name or [Error][crate::Error] if any other error occurred while
+    /// sending the request.
+    pub async fn get_by_name(client: &Client, name: &str) -> Result<Self> {
         Account::_get_account(client, None, Some(name)).await
     }
 
@@ -88,7 +88,7 @@ impl Account {
     ///
     /// Returns [Error][crate::Error] if an error occurred while sending the request.
     pub async fn search(
-        client: &mut Client,
+        client: &Client,
         name: Option<&str>,
         offset: i64,
         follows_only: bool,
@@ -100,10 +100,10 @@ impl Account {
     ///
     /// # Errors
     ///
-    /// Returns [client::RootServerError::Unavailable][crate::client::RootServerError::Unavailable]
-    /// if there's no account with the contained identifier or [Error][crate::Error] if any other
-    /// error occurred while sending the request.
-    pub async fn info(&self, client: &mut Client) -> Result<Info> {
+    /// Returns [RootError::Unavailable][crate::models::RootError::Unavailable] if there's no
+    /// account with the contained identifier or [Error][crate::Error] if any other error occurred
+    /// while sending the request.
+    pub async fn info(&self, client: &Client) -> Result<Info> {
         Info::get_by_id(client, self.id).await
     }
 
@@ -113,7 +113,7 @@ impl Account {
     /// # Errors
     ///
     /// Returns [Error][crate::Error] if an error occurred while sending the request.
-    pub async fn get_online(client: &mut Client, offset_date: DateTime<Utc>) -> Result<Vec<Self>> {
+    pub async fn get_online(client: &Client, offset_date: DateTime<Utc>) -> Result<Vec<Self>> {
         Account::_get_online(client, offset_date).await
     }
 }

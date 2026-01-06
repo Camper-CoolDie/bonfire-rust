@@ -2,7 +2,7 @@ use chrono::{DateTime, Utc};
 use thiserror::Error;
 
 /// Represents an error from the root server. Some most common ones are split into predefined
-/// variants. [RootServerError::Other] is used for errors that aren't predefined.
+/// variants. [RootError::Other] is used for errors that aren't predefined.
 #[derive(Error, Debug)]
 pub enum RootError {
     /// You don't have enough permission. In very rare cases the server may also say why the access
@@ -45,8 +45,7 @@ pub enum RootError {
     },
 }
 
-/// Represents a specific type of
-/// [client::RootServerError::Unavailable][RootServerError::Unavailable].
+/// Represents a specific type of [RootError::Unavailable].
 #[derive(Error, Debug)]
 pub enum UnavailableError {
     /// The publication was blocked by a moderator

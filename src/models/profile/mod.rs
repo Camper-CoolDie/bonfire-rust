@@ -42,7 +42,7 @@ impl Me {
     ///     println!("logged in as {}", info.name);
     /// }
     /// ```
-    pub async fn get(client: &mut Client) -> Result<Self> {
+    pub async fn get(client: &Client) -> Result<Self> {
         Auth::me(client).await
     }
 
@@ -67,7 +67,7 @@ impl Me {
     ///     Me::set_birthday(&mut client, birthday).await.unwrap();
     /// }
     /// ```
-    pub async fn set_birthday(client: &mut Client, birthday: NaiveDate) -> Result<Me> {
+    pub async fn set_birthday(client: &Client, birthday: NaiveDate) -> Result<Me> {
         Me::_set_birthday(client, birthday).await
     }
 }

@@ -1,10 +1,12 @@
 use std::result::Result as StdResult;
 
 use chrono::{DateTime, Utc};
-use jsonwebtoken::errors::Result as JwtResult;
+use jsonwebtoken::errors::{ErrorKind, Result as JwtResult};
 use jsonwebtoken::{Algorithm, DecodingKey, Validation};
 use serde::de::Error;
 use serde::{Deserialize, Deserializer};
+
+use crate::models::Auth;
 
 const JWT_ISSUER: &str = "https://bonfire.moe";
 const JWT_ACCESS_AUDIENCE: &str = "access";
@@ -18,7 +20,7 @@ fn deserialize_timestamp<'de, D: Deserializer<'de>>(
 }
 
 #[derive(Deserialize)]
-pub(super) struct TokenClaims {
+struct TokenClaims {
     #[serde(rename = "sub")]
     pub subject: String,
     #[serde(rename = "exp", deserialize_with = "deserialize_timestamp")]
@@ -28,10 +30,46 @@ pub(super) struct TokenClaims {
     // There are other fields, but we don't need them yet
 }
 
-pub(super) fn decode(token: &str) -> JwtResult<TokenClaims> {
+fn decode(token: &str) -> JwtResult<TokenClaims> {
     let mut validation = Validation::new(Algorithm::HS256);
     validation.set_audience(&[JWT_ACCESS_AUDIENCE]);
     validation.set_issuer(&[JWT_ISSUER]);
     validation.insecure_disable_signature_validation();
     Ok(jsonwebtoken::decode(token, &DecodingKey::from_secret(&[]), &validation)?.claims)
+}
+
+pub(super) fn validate_token(auth: &Auth, just_refreshed: bool) -> JwtResult<Option<String>> {
+    // Ok(Some(...)) => token is valid
+    // Ok(None) => needs refreshing (only if just_refreshed is false)
+    // Err(...) => error while validating
+    decode(&auth.access_token)
+        .map(Some)
+        .or_else(|error| match error.kind() {
+            ErrorKind::ExpiredSignature => {
+                (!just_refreshed).then_some(Ok(None)).ok_or(error).flatten()
+            }
+            _ => Err(error),
+        })
+        .map(|option| {
+            option.map(|claims| {
+                tracing::debug!(
+                    subject = claims.subject,
+                    expires_at = ?claims.expires_at,
+                    issued_at = ?claims.issued_at,
+                    "validated login"
+                );
+                auth.access_token.clone()
+            })
+        })
+        .inspect_err(|error| {
+            tracing::error!(
+                ?error,
+                "failed to validate login{}",
+                if just_refreshed {
+                    " after refreshing"
+                } else {
+                    ""
+                }
+            );
+        })
 }

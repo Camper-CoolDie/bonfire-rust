@@ -75,10 +75,10 @@ impl Info {
     ///
     /// # Errors
     ///
-    /// Returns [client::RootServerError::Unavailable][crate::client::RootServerError::Unavailable]
-    /// if there's no account with the provided identifier or [Error][crate::Error] if any other
-    /// error occurred while sending the request.
-    pub async fn get_by_id(client: &mut Client, id: i64) -> Result<Self> {
+    /// Returns [RootError::Unavailable][crate::models::RootError::Unavailable] if there's no
+    /// account with the provided identifier or [Error][crate::Error] if any other error occurred
+    /// while sending the request.
+    pub async fn get_by_id(client: &Client, id: i64) -> Result<Self> {
         Account::_get_info(client, Some(id), None).await
     }
 
@@ -86,10 +86,10 @@ impl Info {
     ///
     /// # Errors
     ///
-    /// Returns [client::RootServerError::Unavailable][crate::client::RootServerError::Unavailable]
-    /// if there's no account with the provided name or [Error][crate::Error] if any other error
-    /// occurred while sending the request.
-    pub async fn get_by_name(client: &mut Client, name: &str) -> Result<Self> {
+    /// Returns [RootError::Unavailable][crate::models::RootError::Unavailable] if there's no
+    /// account with the provided name or [Error][crate::Error] if any other error occurred while
+    /// sending the request.
+    pub async fn get_by_name(client: &Client, name: &str) -> Result<Self> {
         Account::_get_info(client, None, Some(name)).await
     }
 
@@ -97,10 +97,10 @@ impl Info {
     ///
     /// # Errors
     ///
-    /// Returns [client::RootServerError::Other][crate::client::RootServerError::Other] with the
-    /// code `E_BAD_AGE` if the provided age is not within the range or [Error][crate::Error] if
-    /// any other error occurred while sending the request.
-    pub async fn set_age(client: &mut Client, age: Option<i64>) -> Result<()> {
+    /// Returns [RootError::Other][crate::models::RootError::Other] with the code `E_BAD_AGE` if
+    /// the provided age is not within the range or [Error][crate::Error] if any other error
+    /// occurred while sending the request.
+    pub async fn set_age(client: &Client, age: Option<i64>) -> Result<()> {
         Account::_set_age(client, age.unwrap_or(0)).await
     }
 
@@ -109,12 +109,12 @@ impl Info {
     ///
     /// # Errors
     ///
-    /// * [client::RootServerError::AccessDenied][crate::client::RootServerError::AccessDenied] if
-    ///   you aren't yet allowed to change your status
-    /// * [client::RootServerError::Other][crate::client::RootServerError::Other] with the code
-    ///   `E_BAD_SIZE` if the provided status is longer than the maximum allowed length
+    /// * [RootError::AccessDenied][crate::models::RootError::AccessDenied] if you aren't yet
+    ///   allowed to change your status
+    /// * [RootRrror::Other][crate::models::RootError::Other] with the code `E_BAD_SIZE` if the
+    ///   provided status is longer than the maximum allowed length
     /// * [Error][crate::Error] if any other error occurred while sending the request.
-    pub async fn set_status(client: &mut Client, status: Option<&str>) -> Result<()> {
+    pub async fn set_status(client: &Client, status: Option<&str>) -> Result<()> {
         Account::_set_status(client, status.unwrap_or("")).await
     }
 
@@ -123,10 +123,10 @@ impl Info {
     ///
     /// # Errors
     ///
-    /// Returns [client::RootServerError::Other][crate::client::RootServerError::Other] with the
-    /// code `E_BAD_SIZE` if the provided description is longer than the maximum allowed length or
-    /// [Error][crate::Error] if any other error occurred while sending the request.
-    pub async fn set_description(client: &mut Client, description: Option<&str>) -> Result<()> {
+    /// Returns [RootError::Other][crate::models::RootError::Other] with the code `E_BAD_SIZE` if
+    /// the provided description is longer than the maximum allowed length or [Error][crate::Error]
+    /// if any other error occurred while sending the request.
+    pub async fn set_description(client: &Client, description: Option<&str>) -> Result<()> {
         Account::_set_description(client, description.unwrap_or("")).await
     }
 
@@ -135,7 +135,7 @@ impl Info {
     /// # Errors
     ///
     /// Returns [Error][crate::Error] if an error occurred while sending the request.
-    pub async fn set_gender(client: &mut Client, gender: Gender) -> Result<()> {
+    pub async fn set_gender(client: &Client, gender: Gender) -> Result<()> {
         Account::_set_gender(client, gender).await
     }
 }

@@ -23,11 +23,7 @@ struct Response {
 }
 
 impl Auth {
-    pub(crate) async fn _login_email(
-        client: &mut Client,
-        email: &str,
-        password: &str,
-    ) -> Result<()> {
+    pub(crate) async fn _login_email(client: &Client, email: &str, password: &str) -> Result<Self> {
         match client
             .send_query::<_, Response>(
                 "LoginEmailMutation",
@@ -42,10 +38,7 @@ impl Auth {
             .await?
             .result
         {
-            LoginResult::Success(success) => {
-                client.auth = Some(success.into());
-                Ok(())
-            }
+            LoginResult::Success(success) => Ok(success.into()),
             LoginResult::TfaRequired(error) => Err(Error::TfaRequired(error.into()).into()),
         }
     }

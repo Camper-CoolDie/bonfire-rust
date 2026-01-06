@@ -4,7 +4,7 @@ use crate::models::{Auth, EmptyResponse};
 use crate::{Client, Result};
 
 impl Auth {
-    pub(crate) async fn _logout(client: &mut Client) -> Result<()> {
+    pub(crate) async fn _logout(client: &Client) -> Result<()> {
         client
             .send_query::<_, EmptyResponse>(
                 "LogoutMutation",
@@ -12,8 +12,6 @@ impl Auth {
                 json!({}),
             )
             .await?;
-
-        client.auth = None;
         Ok(())
     }
 }
