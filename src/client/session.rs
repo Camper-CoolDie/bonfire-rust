@@ -62,7 +62,7 @@ impl Session {
         match serde_json::from_slice::<RootResponse<S>>(&response)? {
             RootResponse::Ok(content) => Ok(content),
             RootResponse::Error(error) => Err(RootError::try_from(error)
-                .inspect_err(|error| tracing::error!(?error, "failed to parse a root error"))
+                .inspect_err(|error| tracing::error!(?error, "Failed to parse root error"))
                 .map_or_else(|error| error, Error::from)),
         }
     }

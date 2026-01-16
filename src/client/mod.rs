@@ -1,18 +1,19 @@
 mod error;
 mod jwt;
 mod session;
+mod token_provider;
 
 use std::fmt;
 use std::sync::Arc;
 
 pub use error::{Error, Result};
 use http::{header, HeaderMap, Uri};
+use jwt::is_token_expired;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use session::Session;
-use tokio::sync::RwLock;
+use token_provider::TokenProvider;
 
-use crate::client::jwt::validate_token;
 use crate::models::{auth, Auth, Query, Request};
 
 // It's great when we can test our requests against a test server, hence the ability to specify
@@ -26,7 +27,7 @@ const API_VERSION: &str = "3.1.0";
 struct Inner {
     root_session: Session,
     melior_session: Session,
-    auth: RwLock<Option<Auth>>,
+    token_provider: TokenProvider,
 }
 
 /// Represents an HTTP wrapper for the Bonfire API. It manages the authentication session [Auth]
@@ -58,7 +59,7 @@ impl Client {
             inner: Arc::new(Inner {
                 root_session: Session::new(root_uri),
                 melior_session: Session::new(melior_uri),
-                auth: RwLock::new(auth),
+                token_provider: TokenProvider::new(auth),
             }),
         }
     }
@@ -86,14 +87,12 @@ impl Client {
     /// # }
     /// ```
     pub async fn login(&self, email: &str, password: &str) -> Result<()> {
-        self.inner.auth.read().await
-            .as_ref()
-            .map_or(Ok(()), |_| Err(auth::Error::AlreadyAuthenticated))?;
+        if self.inner.token_provider.is_auth().await {
+            Err(auth::Error::AlreadyAuthenticated)?;
+        }
 
         let auth = Auth::login(self, email, password).await?;
-
-        let mut guard = self.inner.auth.write().await;
-        *guard = Some(auth);
+        self.inner.token_provider.set_auth(Some(auth)).await;
         Ok(())
     }
 
@@ -121,14 +120,12 @@ impl Client {
     /// # }
     /// ```
     pub async fn logout(&self) -> Result<()> {
-        self.inner.auth.read().await
-            .as_ref()
-            .map_or(Err(auth::Error::Unauthenticated), |_| Ok(()))?;
+        if !self.inner.token_provider.is_auth().await {
+            Err(auth::Error::Unauthenticated)?;
+        }
 
         Auth::logout(self).await?;
-
-        let mut guard = self.inner.auth.write().await;
-        *guard = None;
+        self.inner.token_provider.set_auth(None).await;
         Ok(())
     }
 
@@ -171,72 +168,7 @@ impl Client {
     /// # }
     /// ```
     pub async fn auth(&self) -> Result<Option<Auth>> {
-        // Basically a modified version of `Client::validate_token()`. Why not just call it? We
-        // remove the extra `self.inner.auth.read()` which is good for optimization, since the
-        // original method returns only the access token and we need the whole credentials.
-        let guard = self.inner.auth.read().await;
-        match &*guard {
-            Some(auth) => {
-                if validate_token(auth, false)?.is_some() {
-                    return Ok(Some(auth.clone()));
-                }
-            }
-            None => return Ok(None),
-        };
-        drop(guard);
-
-        let mut guard = self.inner.auth.write().await;
-        let auth = match &*guard {
-            Some(auth) => {
-                if validate_token(auth, false)?.is_some() {
-                    return Ok(Some(auth.clone()));
-                } else {
-                    auth
-                }
-            }
-            None => return Ok(None),
-        };
-
-        tracing::info!("login has expired, refreshing");
-        let auth = auth.refresh(self).await?;
-        validate_token(&auth, true)?;
-        *guard = Some(auth.clone());
-        Ok(Some(auth))
-    }
-
-    async fn validate_token(&self) -> Result<Option<String>> {
-        let guard = self.inner.auth.read().await;
-        match &*guard {
-            Some(auth) => {
-                if let Some(token) = validate_token(auth, false)? {
-                    return Ok(Some(token.to_owned()));
-                }
-            }
-            None => return Ok(None),
-        };
-        drop(guard);
-
-        // At this point we need to refresh the access token (if it hasn't already been refreshed
-        // by another thread which acquired the write lock first)
-        let mut guard = self.inner.auth.write().await;
-        let auth = match &*guard {
-            Some(auth) => {
-                if let Some(token) = validate_token(auth, false)? {
-                    return Ok(Some(token));
-                } else {
-                    auth
-                }
-            }
-            None => return Ok(None),
-        };
-
-        // The token is still expired, now it's our job to refresh it
-        tracing::info!("login has expired, refreshing");
-        let auth = auth.refresh(self).await?;
-        let token = validate_token(&auth, true)?;
-        // Change `auth` only after validating it
-        *guard = Some(auth);
-        Ok(token)
+        self.inner.token_provider.get_auth(self).await
     }
 
     pub(crate) async fn send_request<R: Serialize, S: DeserializeOwned>(
@@ -245,8 +177,8 @@ impl Client {
         content: R,
         attachments: Vec<&[u8]>,
     ) -> Result<S> {
-        tracing::info!(request_name, "sending request");
-        let token = self.validate_token().await?;
+        tracing::info!(request_name, "Sending request");
+        let token = self.inner.token_provider.get_token(self).await?;
 
         // Contains the length of each attachment
         let data_output = attachments
@@ -266,7 +198,7 @@ impl Client {
             .root_session
             .send_request(request, attachments, HeaderMap::new())
             .await
-            .inspect_err(|error| tracing::error!(?error, "failed to send request"))
+            .inspect_err(|error| tracing::error!(?error, "Failed to send request"))
     }
 
     pub(crate) async fn send_query<R: Serialize, S: DeserializeOwned>(
@@ -275,8 +207,8 @@ impl Client {
         query: &'static str,
         variables: R,
     ) -> Result<S> {
-        tracing::info!(operation_name, "sending query");
-        let token = self.validate_token().await?;
+        tracing::info!(operation_name, "Sending query");
+        let token = self.inner.token_provider.get_token(self).await?;
 
         let mut headers = HeaderMap::new();
         if let Some(token) = token {
@@ -290,7 +222,7 @@ impl Client {
             .melior_session
             .send_query(Query { variables, query }, headers)
             .await
-            .inspect_err(|error| tracing::error!(?error, "failed to send query"))
+            .inspect_err(|error| tracing::error!(?error, "Failed to send query"))
     }
 
     // `send_query` that doesn't validate credentials
@@ -300,13 +232,13 @@ impl Client {
         query: &'static str,
         variables: R,
     ) -> Result<S> {
-        tracing::info!(operation_name, "sending refresh query");
+        tracing::info!(operation_name, "Sending refresh query");
 
         self.inner
             .melior_session
             .send_query(Query { variables, query }, HeaderMap::new())
             .await
-            .inspect_err(|error| tracing::error!(?error, "failed to send refresh query"))
+            .inspect_err(|error| tracing::error!(?error, "Failed to send refresh query"))
     }
 
     /// Create a new `ClientBuilder` with default values.

@@ -31,16 +31,19 @@ impl Me {
     /// # Examples
     ///
     /// ```no_run
-    /// use bonfire::models::Me;
+    /// # use bonfire::models::Me;
+    /// # use bonfire::Result;
     /// use bonfire::Client;
     ///
-    /// #[tokio::main]
-    /// async fn main() {
-    ///     let mut client = Client::connect().await.unwrap();
-    ///     // ...
-    ///     let info = Me::get(&mut client).await.unwrap();
-    ///     println!("logged in as {}", info.name);
-    /// }
+    /// # #[tokio::main]
+    /// # async fn main() -> Result<()> {
+    /// let client = Client::default();
+    /// client.login("email", "password").await?;
+    ///
+    /// let me = Me::get(&client).await.unwrap();
+    /// println!("Logged in as {}", me.name);
+    /// #    Ok(())
+    /// # }
     /// ```
     pub async fn get(client: &Client) -> Result<Self> {
         Auth::me(client).await
@@ -55,17 +58,17 @@ impl Me {
     /// # Examples
     ///
     /// ```no_run
-    /// use bonfire::models::Me;
-    /// use bonfire::Client;
+    /// # use bonfire::models::Me;
+    /// # use bonfire::{Client, Result};
     /// use chrono::NaiveDate;
     ///
-    /// #[tokio::main]
-    /// async fn main() {
-    ///     let mut client = Client::connect().await.unwrap();
-    ///     // ...
-    ///     let birthday = NaiveDate::from_ymd_opt(2000, 1, 1).unwrap();
-    ///     Me::set_birthday(&mut client, birthday).await.unwrap();
-    /// }
+    /// # #[tokio::main]
+    /// # async fn main() -> Result<()> {
+    /// # let client = Client::default();
+    /// let birthday = NaiveDate::from_ymd_opt(2000, 1, 1).unwrap();
+    /// Me::set_birthday(&client, birthday).await.unwrap();
+    /// #    Ok(())
+    /// # }
     /// ```
     pub async fn set_birthday(client: &Client, birthday: NaiveDate) -> Result<Me> {
         Me::_set_birthday(client, birthday).await
