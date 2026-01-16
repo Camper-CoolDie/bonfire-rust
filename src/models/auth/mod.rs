@@ -25,16 +25,19 @@ impl Auth {
     /// # Examples
     ///
     /// ```no_run
-    /// use bonfire::models::Auth;
+    /// # use bonfire::models::Auth;
+    /// # use bonfire::Result;
     /// use bonfire::Client;
     ///
-    /// #[tokio::main]
-    /// async fn main() {
-    ///     let mut client = Client::connect().await.unwrap();
-    ///     // ...
-    ///     let me = Auth::me(&mut client).await.unwrap();
-    ///     println!("logged in as {}", me.name);
-    /// }
+    /// # #[tokio::main]
+    /// # async fn main() -> Result<()> {
+    /// let client = Client::default();
+    /// client.login("email", "password").await?;
+    ///
+    /// let me = Auth::me(&client).await.unwrap();
+    /// println!("Logged in as {}", me.name);
+    /// #    Ok(())
+    /// # }
     /// ```
     pub async fn me(client: &Client) -> Result<Me> {
         Auth::_me(client).await
