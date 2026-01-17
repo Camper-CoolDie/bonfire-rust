@@ -5,28 +5,19 @@ use hyper_rustls::{HttpsConnector, HttpsConnectorBuilder};
 use hyper_util::client::legacy::connect::HttpConnector;
 use hyper_util::client::legacy::Client as HyperClient;
 use hyper_util::rt::TokioExecutor;
-use once_cell::sync::Lazy;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 
-use crate::models::{MeliorError, MeliorResponse, Query, Request, RootError, RootResponse};
+use crate::client::service::USER_AGENT;
+use crate::models::{Request, RootError, RootResponse};
 use crate::{Error, Result};
 
-static USER_AGENT: Lazy<String> = Lazy::new(|| {
-    format!(
-        "{}/{} ({})",
-        env!("CARGO_PKG_NAME"),
-        env!("CARGO_PKG_VERSION"),
-        os_info::get()
-    )
-});
-
-pub(super) struct Session {
+pub(crate) struct RootService {
     hyper_client: HyperClient<HttpsConnector<HttpConnector>, Full<Bytes>>,
     uri: Uri,
 }
-impl Session {
-    pub(super) fn new(uri: &Uri) -> Self {
+impl RootService {
+    pub(crate) fn new(uri: &Uri) -> Self {
         let connector = HttpsConnectorBuilder::new()
             .with_webpki_roots()
             .https_or_http()
@@ -39,7 +30,7 @@ impl Session {
         }
     }
 
-    pub(super) async fn send_request<'a, R: Serialize, S: DeserializeOwned>(
+    pub(crate) async fn send_request<'a, R: Serialize, S: DeserializeOwned>(
         &self,
         request: Request<'a, R>,
         attachments: Vec<&[u8]>,
@@ -47,17 +38,17 @@ impl Session {
     ) -> Result<S> {
         let json_body = serde_json::to_vec(&request)?;
 
-        let data_length = attachments.iter().map(|slice| slice.len()).sum::<usize>();
+        let attachments_length = attachments.iter().map(|slice| slice.len()).sum::<usize>();
+        let payload_length = 4 + json_body.len() + attachments_length;
 
-        // 4 bytes for u32 length
-        let mut payload = BytesMut::with_capacity(4 + json_body.len() + data_length);
+        let mut payload = BytesMut::with_capacity(payload_length);
         payload.put_u32(json_body.len() as u32);
         payload.put_slice(&json_body);
         for attachment in attachments.into_iter() {
             payload.put_slice(attachment);
         }
 
-        let response = self.send_raw(payload.freeze(), &headers, None).await?;
+        let response = self.send_raw(payload.freeze(), &headers).await?;
 
         match serde_json::from_slice::<RootResponse<S>>(&response)? {
             RootResponse::Ok(content) => Ok(content),
@@ -67,49 +58,16 @@ impl Session {
         }
     }
 
-    pub(super) async fn send_query<R: Serialize, S: DeserializeOwned>(
-        &self,
-        query: Query<R>,
-        headers: HeaderMap<HeaderValue>,
-    ) -> Result<S> {
-        let body = serde_json::to_vec(&query)?;
-
-        let response = self
-            .send_raw(Bytes::from(body), &headers, Some("application/json"))
-            .await?;
-
-        let response = serde_json::from_slice::<MeliorResponse<S>>(&response)?;
-        response.data.ok_or(
-            response
-                .errors
-                .and_then(|errors| {
-                    errors
-                        .into_iter()
-                        .next()
-                        .map(MeliorError::from)
-                        .map(Error::from)
-                })
-                .unwrap_or(Error::InvalidMeliorResponse),
-        )
-    }
-
-    async fn send_raw(
-        &self,
-        body: Bytes,
-        headers: &HeaderMap<HeaderValue>,
-        body_kind: Option<&'static str>,
-    ) -> Result<Bytes> {
-        let mut builder = http::Request::builder()
+    async fn send_raw(&self, body: Bytes, headers: &HeaderMap<HeaderValue>) -> Result<Bytes> {
+        let builder = http::Request::builder()
             .uri(&self.uri)
             .method(Method::POST)
+            .header(header::CONTENT_TYPE, "application/json")
             .header(header::USER_AGENT, &**USER_AGENT);
 
-        if let Some(kind) = body_kind {
-            builder = builder.header(header::CONTENT_TYPE, kind);
-        }
-        for (key, value) in headers {
-            builder = builder.header(key, value);
-        }
+        let builder = headers
+            .iter()
+            .fold(builder, |builder, (key, value)| builder.header(key, value));
 
         let request = builder.body(Full::new(body))?;
         let response = self.hyper_client.request(request).await?;

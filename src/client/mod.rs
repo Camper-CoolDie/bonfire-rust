@@ -1,6 +1,6 @@
 mod error;
 mod jwt;
-mod session;
+mod service;
 mod token_provider;
 
 use std::fmt;
@@ -11,7 +11,7 @@ use http::{header, HeaderMap, Uri};
 use jwt::is_token_expired;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
-use session::Session;
+use service::{MeliorService, RootService};
 use token_provider::TokenProvider;
 
 use crate::models::{auth, Auth, Query, Request};
@@ -25,8 +25,8 @@ const MELIOR_SERVER_URI: &str = "https://api.bonfire.moe";
 const API_VERSION: &str = "3.1.0";
 
 struct Inner {
-    root_session: Session,
-    melior_session: Session,
+    root_service: RootService,
+    melior_service: MeliorService,
     token_provider: TokenProvider,
 }
 
@@ -57,8 +57,8 @@ impl Client {
     fn new(root_uri: &Uri, melior_uri: &Uri, auth: Option<Auth>) -> Self {
         Self {
             inner: Arc::new(Inner {
-                root_session: Session::new(root_uri),
-                melior_session: Session::new(melior_uri),
+                root_service: RootService::new(root_uri),
+                melior_service: MeliorService::new(melior_uri),
                 token_provider: TokenProvider::new(auth),
             }),
         }
@@ -195,7 +195,7 @@ impl Client {
         };
 
         self.inner
-            .root_session
+            .root_service
             .send_request(request, attachments, HeaderMap::new())
             .await
             .inspect_err(|error| tracing::error!(?error, "Failed to send request"))
@@ -219,7 +219,7 @@ impl Client {
         }
 
         self.inner
-            .melior_session
+            .melior_service
             .send_query(Query { variables, query }, headers)
             .await
             .inspect_err(|error| tracing::error!(?error, "Failed to send query"))
@@ -235,7 +235,7 @@ impl Client {
         tracing::info!(operation_name, "Sending refresh query");
 
         self.inner
-            .melior_session
+            .melior_service
             .send_query(Query { variables, query }, HeaderMap::new())
             .await
             .inspect_err(|error| tracing::error!(?error, "Failed to send refresh query"))
