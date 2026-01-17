@@ -47,7 +47,8 @@ impl TokenProvider {
     async fn refresh_now(&self, client: &Client) -> Result<()> {
         let mut guard = self.auth.write().await;
         *guard = match guard.as_ref() {
-            Some(auth) => Some(auth.refresh(client).await?),
+            // Another thread may already have refreshed auth, so we check if it's still expired
+            Some(auth) if is_token_expired(auth)? => Some(auth.refresh(client).await?),
             _ => None,
         };
         Ok(())
