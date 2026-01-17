@@ -8,12 +8,14 @@ use std::sync::Arc;
 
 pub use error::{Error, Result};
 use http::{header, HeaderMap, Uri};
-use jwt::is_token_expired;
+pub use jwt::JwtError;
+use jwt::JwtResult;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use service::{MeliorService, RootService};
 use token_provider::TokenProvider;
 
+use crate::client::jwt::decode_token;
 use crate::models::{auth, Auth, Query, Request};
 
 // It's great when we can test our requests against a test server, hence the ability to specify
@@ -59,7 +61,7 @@ impl Client {
             inner: Arc::new(Inner {
                 root_service: RootService::new(root_uri),
                 melior_service: MeliorService::new(melior_uri),
-                token_provider: TokenProvider::new(auth),
+                token_provider: TokenProvider::new(auth).expect("failed to create TokenProvider"),
             }),
         }
     }
@@ -92,7 +94,7 @@ impl Client {
         }
 
         let auth = Auth::login(self, email, password).await?;
-        self.inner.token_provider.set_auth(Some(auth)).await;
+        self.inner.token_provider.set_auth(Some(auth)).await?;
         Ok(())
     }
 
@@ -125,7 +127,7 @@ impl Client {
         }
 
         Auth::logout(self).await?;
-        self.inner.token_provider.set_auth(None).await;
+        self.inner.token_provider.set_auth(None).await?;
         Ok(())
     }
 
@@ -333,13 +335,16 @@ impl ClientBuilder {
     /// use bonfire::models::Auth;
     ///
     /// let auth_data = fs::read("credentials.json").expect("failed to read from 'credentials.json'");
-    /// let auth = serde_json::from_slice::<Auth>(&auth_data)
-    ///     .expect("failed to parse authentication credentials");
-    /// let client = ClientBuilder::new().auth(auth).build();
+    /// let auth = serde_json::from_slice::<Auth>(&auth_data).expect("failed to parse auth");
+    /// let client = ClientBuilder::new()
+    ///     .auth(auth)
+    ///     .expect("invalid auth")
+    ///     .build();
     /// ```
-    pub fn auth(mut self, auth: Auth) -> Self {
+    pub fn auth(mut self, auth: Auth) -> JwtResult<Self> {
+        decode_token(&auth.access_token)?;
         self.auth = Some(auth);
-        self
+        Ok(self)
     }
 }
 

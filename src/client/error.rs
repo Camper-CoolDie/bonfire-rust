@@ -3,9 +3,10 @@ use std::result::Result as StdResult;
 use http::StatusCode;
 use thiserror::Error;
 
+use crate::client::JwtError;
 use crate::models::{auth, MeliorError, RootError};
 
-/// A type alias for [Result<T, Error>][std::result::Result<T, Error>].
+/// A type alias for [Result<T, Error>][StdResult<T, Error>].
 pub type Result<T> = StdResult<T, Error>;
 
 /// Represents errors that can occur while operating with a client.
@@ -18,12 +19,12 @@ pub enum Error {
     /// Can't authenticate
     #[error("authentication error")]
     AuthError(#[from] auth::Error),
+    /// Can't parse authentication credentials
+    #[error("JWT error")]
+    JwtError(#[from] JwtError),
     /// Can't (de)serialize a JSON object
     #[error("JSON error")]
     JsonError(#[from] serde_json::Error),
-    /// Can't decode a JSON Web Token
-    #[error("JWT error")]
-    JwtError(#[from] jsonwebtoken::errors::Error),
     /// Can't build a request
     #[error("HTTP error")]
     HttpError(#[from] http::Error),

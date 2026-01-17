@@ -7,7 +7,8 @@ use thiserror::Error;
 pub enum TfaKind {
     /// Log in again using a TOTP (Time-based One Time Password)
     Totp,
-    /// Log in after an owner of the account verified the login through a link sent to their email
+    /// Log in after an owner of the account verified this log-in attempt through a link sent to
+    /// their email
     EmailLink,
 }
 

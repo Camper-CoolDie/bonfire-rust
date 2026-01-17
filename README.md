@@ -38,13 +38,13 @@ async fn main() -> Result<()> {
     // Set up tracing
     tracing_subscriber::fmt::init();
 
-    // Build client & authenticate (either by using `credentials.json` or sending a login request)
+    // Build client & authenticate (either by using `credentials.json` or sending a log-in request)
     let auth = fs::read("credentials.json")
         .ok()
         .map(|data| serde_json::from_slice::<Auth>(&data))
         .transpose()?;
     let client = match auth {
-        Some(auth) => Client::builder().auth(auth).build(),
+        Some(auth) => Client::builder().auth(auth).expect("invalid auth").build(),
         None => {
             let client = Client::default();
             client.login(EMAIL, PASSWORD).await?;

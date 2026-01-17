@@ -1,34 +1,39 @@
 use std::result::Result as StdResult;
 
+use base64::prelude::BASE64_URL_SAFE_NO_PAD;
+use base64::Engine;
 use chrono::{DateTime, Utc};
-use jsonwebtoken::errors::{ErrorKind, Result as JwtResult};
-use jsonwebtoken::{Algorithm, DecodingKey, Validation};
-use once_cell::sync::Lazy;
 use serde::de::Error;
 use serde::{Deserialize, Deserializer};
-
-use crate::models::Auth;
-
-const JWT_ISSUER: &str = "https://bonfire.moe";
-const JWT_ACCESS_AUDIENCE: &str = "access";
-static VALIDATION: Lazy<Validation> = Lazy::new(|| {
-    let mut validation = Validation::new(Algorithm::HS256);
-    validation.set_audience(&[JWT_ACCESS_AUDIENCE]);
-    validation.set_issuer(&[JWT_ISSUER]);
-    validation.insecure_disable_signature_validation();
-    validation
-});
+use thiserror::Error;
 
 fn deserialize_timestamp<'de, D: Deserializer<'de>>(
     deserializer: D,
 ) -> StdResult<DateTime<Utc>, D::Error> {
-    let millis = i64::deserialize(deserializer)?;
-    DateTime::from_timestamp(millis, 0)
-        .ok_or_else(|| D::Error::custom(format!("timestamp {} is out of range", millis)))
+    let seconds = i64::deserialize(deserializer)?;
+    DateTime::from_timestamp(seconds, 0)
+        .ok_or_else(|| D::Error::custom(format!("timestamp {} is out of range", seconds)))
+}
+
+pub(super) type JwtResult<T> = StdResult<T, JwtError>;
+
+/// Represents an error parsing the authentication credentials (more specifically, parsing its
+/// access token).
+#[derive(Error, Debug)]
+pub enum JwtError {
+    /// The contained access token doesn't have a payload
+    #[error("no payload")]
+    NoPayload,
+    /// Can't decode payload of the contained access token
+    #[error("base64 error")]
+    Base64Error(#[from] base64::DecodeError),
+    /// Can't deserialize the contained access token
+    #[error("JSON error")]
+    JsonError(#[from] serde_json::Error),
 }
 
 #[derive(Deserialize)]
-struct TokenClaims {
+pub(super) struct JwtClaims {
     #[serde(rename = "sub")]
     pub subject: String,
     #[serde(rename = "exp", deserialize_with = "deserialize_timestamp")]
@@ -38,28 +43,20 @@ struct TokenClaims {
     // There are other fields, but we don't need them yet
 }
 
-pub(super) fn is_token_expired(auth: &Auth) -> JwtResult<bool> {
-    match validate_token(auth) {
-        Ok(_) => Ok(false),
-        Err(error) if error.kind() == &ErrorKind::ExpiredSignature => Ok(true),
-        Err(error) => Err(error),
-    }
-}
-
-fn validate_token(auth: &Auth) -> JwtResult<TokenClaims> {
-    Ok(jsonwebtoken::decode::<TokenClaims>(
-        &auth.access_token,
-        &DecodingKey::from_secret(&[]),
-        &VALIDATION,
-    )?
-    .claims)
-    .inspect(|claims| {
-        tracing::debug!(
-            subject = claims.subject,
-            expires_at = ?claims.expires_at,
-            issued_at = ?claims.issued_at,
-            "Validated login"
-        );
-    })
-    .inspect_err(|error| tracing::error!(?error, "Failed to validate login"))
+pub(super) fn decode_token(token: &str) -> JwtResult<JwtClaims> {
+    token
+        .split('.')
+        .nth(1)
+        .ok_or(JwtError::NoPayload)
+        .and_then(|data| BASE64_URL_SAFE_NO_PAD.decode(data).map_err(JwtError::from))
+        .and_then(|decoded| serde_json::from_slice::<JwtClaims>(&decoded).map_err(JwtError::from))
+        .inspect(|claims| {
+            tracing::debug!(
+                subject = claims.subject,
+                expires_at = ?claims.expires_at,
+                issued_at = ?claims.issued_at,
+                "Decoded JWT"
+            );
+        })
+        .inspect_err(|error| tracing::error!(?error, "Failed to decode JWT"))
 }
