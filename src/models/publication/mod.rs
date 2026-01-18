@@ -37,7 +37,7 @@ pub enum PublicationStatus {
 pub struct Publication<T: PublicationInheritor = AnyPublication> {
     /// A unique identifier of this publication. Should always be set to a valid value if
     /// constructing with `{ ... }`
-    pub id: i64,
+    pub id: u64,
     /// Additional data which depends on a type of this publication
     pub kind: T,
     /// The publication's fandom
@@ -49,7 +49,7 @@ pub struct Publication<T: PublicationInheritor = AnyPublication> {
     /// The date when this publication was created (published)
     pub created_at: DateTime<Utc>,
     /// The parent publication's ID (if any)
-    pub parent_id: Option<i64>,
+    pub parent_id: Option<u64>,
     /// The parent publication's type (if any)
     pub parent_kind: Option<PublicationKind>,
     /// The publication's karma amount
@@ -61,7 +61,7 @@ pub struct Publication<T: PublicationInheritor = AnyPublication> {
     /// Will this publication appear in feed? (not to be confused with [Fandom::is_closed])
     pub is_closed: bool,
     /// The number of comments on this publication
-    pub comments_count: i64,
+    pub comments_count: u64,
     /// Is this publication marked as important?
     pub is_important: bool,
     /// Does this publication come from a blacklisted fandom or account?

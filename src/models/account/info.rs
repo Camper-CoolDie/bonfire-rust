@@ -34,9 +34,9 @@ pub struct Info {
     /// Is this account following you?
     pub follows_me: bool,
     /// The number of users this account is followed to
-    pub follows_count: i64,
+    pub follows_count: u64,
     /// The number of users who are following this account
-    pub followers_count: i64,
+    pub followers_count: u64,
     /// The account's status
     pub status: Option<String>,
     /// The account's age
@@ -50,29 +50,29 @@ pub struct Info {
     /// A post which this account has pinned inside their profile
     pub pinned_post: Option<Publication<Post>>,
     /// The account's bans count
-    pub bans_count: i64,
+    pub bans_count: u64,
     /// The account's warns count
-    pub warns_count: i64,
+    pub warns_count: u64,
     /// The account's total karma
     pub karma_total: f32,
     /// The number of rates placed by this account
-    pub rates_count: i64,
+    pub rates_count: u64,
     /// The sum of this account's positive rates (each rate's amount is rounded to 1)
     pub positive_rates_sum: i64,
     /// The sum of this account's negative rates (each rate's amount is rounded to 1)
     pub negative_rates_sum: i64,
     /// The number of fandoms this account can moderate
-    pub moderating_fandoms_count: i64,
+    pub moderating_fandoms_count: u64,
     /// The number of fandoms this account subscribed to
-    pub subscriptions_count: i64,
+    pub subscriptions_count: u64,
     /// The number of fandoms this account is viceroy in
-    pub viceroys_count: i64,
+    pub viceroys_count: u64,
     /// The number of stickers this account has added to their collection
-    pub stickers_count: i64,
+    pub stickers_count: u64,
     /// The number of users this account has blacklisted
-    pub blacklisted_accounts_count: i64,
+    pub blacklisted_accounts_count: u64,
     /// The number of fandoms this account has blacklisted
-    pub blacklisted_fandoms_count: i64,
+    pub blacklisted_fandoms_count: u64,
 }
 impl Info {
     /// Get account information by its identifier.
@@ -82,7 +82,7 @@ impl Info {
     /// Returns [RootError::Unavailable][crate::models::RootError::Unavailable] if there's no
     /// account with the provided identifier or [Error][crate::Error] if any other error occurred
     /// while sending the request.
-    pub async fn get_by_id(client: &Client, id: i64) -> Result<Self> {
+    pub async fn get_by_id(client: &Client, id: u64) -> Result<Self> {
         GetInfoRequest::new_by_id(id).send_request(client).await
     }
 

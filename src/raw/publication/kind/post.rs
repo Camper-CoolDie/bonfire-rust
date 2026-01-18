@@ -15,8 +15,8 @@ struct InnerData {
 #[serde(rename_all = "camelCase")]
 pub(crate) struct RawPost {
     #[serde(skip)]
-    id: i64,
-    rubric_id: i64,
+    id: u64,
+    rubric_id: u64,
     rubric_name: String,
     #[serde(rename = "rubricKarmaCof")]
     rubric_karma_coef: i64,
@@ -29,7 +29,7 @@ pub(crate) struct RawPost {
 impl RawPublicationInheritor for RawPost {
     type Target = Post;
 
-    fn new(data: serde_json::Value, id: i64, _kind: RawPublicationKind) -> Result<Self> {
+    fn new(data: serde_json::Value, id: u64, _kind: RawPublicationKind) -> Result<Self> {
         let mut post = serde_json::from_value::<RawPost>(data)?;
         post.id = id;
         Ok(post)

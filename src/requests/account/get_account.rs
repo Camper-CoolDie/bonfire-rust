@@ -11,11 +11,11 @@ struct Response {
 }
 
 pub(crate) struct GetAccountRequest<'a> {
-    id: Option<i64>,
+    id: Option<u64>,
     name: Option<&'a str>,
 }
 impl<'a> GetAccountRequest<'a> {
-    pub(crate) fn new_by_id(id: i64) -> Self {
+    pub(crate) fn new_by_id(id: u64) -> Self {
         Self {
             id: Some(id),
             name: None,

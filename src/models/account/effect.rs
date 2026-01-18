@@ -47,9 +47,9 @@ pub enum EffectReasonKind {
 pub struct Effect {
     /// A unique identifier of this effect. Should always be set to a valid value if constructing
     /// with `{ ... }`
-    pub id: i64,
+    pub id: u64,
     /// An account identifier to whom this effect is applied
-    pub account_id: i64,
+    pub account_id: u64,
     /// The date when this effect was applied
     pub applied_at: DateTime<Utc>,
     /// The effect's end date

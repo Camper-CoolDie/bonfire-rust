@@ -19,7 +19,7 @@ use crate::Result;
 pub(crate) trait RawPublicationInheritor: Sized {
     type Target: PublicationInheritor;
 
-    fn new(data: Value, id: i64, kind: RawPublicationKind) -> Result<Self>;
+    fn new(data: Value, id: u64, kind: RawPublicationKind) -> Result<Self>;
 }
 
 #[derive(Deserialize_repr)]
@@ -49,7 +49,7 @@ impl From<RawPublicationStatus> for PublicationStatus {
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct RawPublication<T: RawPublicationInheritor = AnyRawPublication> {
-    pub id: i64,
+    pub id: u64,
     fandom: RawFandom,
     #[serde(rename = "creator")]
     author: RawAccount,
@@ -59,7 +59,7 @@ pub(crate) struct RawPublication<T: RawPublicationInheritor = AnyRawPublication>
     #[serde(rename = "unitType")]
     kind: RawPublicationKind,
     #[serde(rename = "parentUnitId")]
-    parent_id: i64,
+    parent_id: u64,
     #[serde(rename = "parentUnitType")]
     parent_kind: i64,
     #[serde(rename = "karmaCount")]
@@ -69,7 +69,7 @@ pub(crate) struct RawPublication<T: RawPublicationInheritor = AnyRawPublication>
     #[serde(rename = "closed")]
     is_closed: bool,
     #[serde(rename = "subUnitsCount")]
-    comments_count: i64,
+    comments_count: u64,
     #[serde(rename = "important")]
     importance: i64,
     #[serde(rename = "blacklisted")]

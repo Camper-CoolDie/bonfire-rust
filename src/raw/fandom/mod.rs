@@ -28,7 +28,7 @@ impl From<RawFandomStatus> for FandomStatus {
 
 #[derive(Deserialize)]
 pub(crate) struct RawFandom {
-    pub id: i64,
+    pub id: u64,
     #[serde(rename = "languageId")]
     language: i64,
     #[serde(rename = "image")]
@@ -42,11 +42,11 @@ pub(crate) struct RawFandom {
     #[serde(rename = "karmaCof")]
     karma_coef: i64,
     #[serde(rename = "creatorId")]
-    suggester_id: i64,
+    suggester_id: u64,
     #[serde(rename = "dateCreate")]
     suggested_at: i64,
     #[serde(rename = "subscribesCount")]
-    subscribers_count: i64,
+    subscribers_count: u64,
     status: RawFandomStatus,
     category: RawCategory,
 }

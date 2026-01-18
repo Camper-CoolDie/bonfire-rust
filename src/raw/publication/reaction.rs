@@ -5,7 +5,7 @@ use crate::models::Reaction;
 #[derive(Deserialize)]
 pub(crate) struct RawReaction {
     #[serde(rename = "accountId")]
-    from_account_id: i64,
+    from_account_id: u64,
     #[serde(rename = "reactionIndex")]
     index: i64,
 }

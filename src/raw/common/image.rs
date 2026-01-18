@@ -5,13 +5,13 @@ use crate::models::ImageRef;
 #[derive(Deserialize)]
 pub(crate) struct RawImageRef {
     #[serde(rename = "i")]
-    pub id: i64,
+    pub id: u64,
     #[serde(rename = "u")]
     uri: String,
     #[serde(rename = "w")]
-    width: i32,
+    width: u32,
     #[serde(rename = "h")]
-    height: i32,
+    height: u32,
 }
 
 impl From<RawImageRef> for ImageRef {

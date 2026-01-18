@@ -27,34 +27,34 @@ pub(crate) struct RawInfo {
     is_following: bool,
     #[serde(rename = "followsYou")]
     follows_me: bool,
-    follows_count: i64,
-    followers_count: i64,
+    follows_count: u64,
+    followers_count: u64,
     status: String,
     age: i64,
     description: String,
     links: Links,
     note: String,
     pinned_post: Option<RawPublication<RawPost>>,
-    bans_count: i64,
-    warns_count: i64,
+    bans_count: u64,
+    warns_count: u64,
     karma_total: i64,
     #[serde(rename = "rates")]
-    rates_count: i64,
+    rates_count: u64,
     #[serde(rename = "ratesPositive")]
     positive_rates_sum: i64,
     #[serde(rename = "ratesNegative")]
     negative_rates_sum: i64,
     #[serde(rename = "moderationFandomsCount")]
-    moderating_fandoms_count: i64,
+    moderating_fandoms_count: u64,
     #[serde(rename = "subscribedFandomsCount")]
-    subscriptions_count: i64,
+    subscriptions_count: u64,
     #[serde(rename = "viceroyFandomsCount")]
-    viceroys_count: i64,
-    stickers_count: i64,
+    viceroys_count: u64,
+    stickers_count: u64,
     #[serde(rename = "blackAccountsCount")]
-    blacklisted_accounts_count: i64,
+    blacklisted_accounts_count: u64,
     #[serde(rename = "blackFandomsCount")]
-    blacklisted_fandoms_count: i64,
+    blacklisted_fandoms_count: u64,
 }
 
 impl TryFrom<RawInfo> for Info {

@@ -12,11 +12,11 @@ struct Response {
 
 pub(crate) struct SearchAccountsRequest<'a> {
     name: Option<&'a str>,
-    offset: i64,
+    offset: u64,
     follows_only: bool,
 }
 impl<'a> SearchAccountsRequest<'a> {
-    pub(crate) fn new(name: Option<&'a str>, offset: i64, follows_only: bool) -> Self {
+    pub(crate) fn new(name: Option<&'a str>, offset: u64, follows_only: bool) -> Self {
         Self {
             name,
             offset,

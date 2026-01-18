@@ -38,7 +38,7 @@ impl From<RawAccountCustomization> for AccountCustomization {
 #[derive(Deserialize)]
 pub(crate) struct RawAccount {
     #[serde(rename = "J_ID")]
-    pub id: i64,
+    pub id: u64,
     #[serde(rename = "J_LVL")]
     level: i64,
     #[serde(rename = "J_LAST_ONLINE_DATE")]
@@ -50,9 +50,9 @@ pub(crate) struct RawAccount {
     gender: RawGender,
     karma30: i64,
     #[serde(rename = "sponsor")]
-    sponsor_amount: i64,
+    sponsor_amount: u64,
     #[serde(rename = "sponsorTimes")]
-    sponsor_count: i64,
+    sponsor_count: u64,
     #[serde(rename = "accountEffects")]
     effects: Vec<RawEffect>,
     #[serde(rename = "czt")]

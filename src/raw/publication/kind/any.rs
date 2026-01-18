@@ -24,7 +24,7 @@ pub(crate) enum AnyRawPublication {
 impl RawPublicationInheritor for AnyRawPublication {
     type Target = AnyPublication;
 
-    fn new(data: Value, id: i64, kind: RawPublicationKind) -> Result<Self> {
+    fn new(data: Value, id: u64, kind: RawPublicationKind) -> Result<Self> {
         Ok(match kind {
             RawPublicationKind::Unknown => AnyRawPublication::Unknown,
             RawPublicationKind::Comment => AnyRawPublication::Comment,

@@ -34,7 +34,7 @@ pub struct AccountCustomization {
 pub struct Account {
     /// A unique identifier of this account. Should always be set to a valid value if constructing
     /// with `{ ... }`
-    pub id: i64,
+    pub id: u64,
     /// The account's level
     pub level: f32,
     /// The time when the account was last online
@@ -48,9 +48,9 @@ pub struct Account {
     /// The account's karma in the last 30 days
     pub karma30: f32,
     /// The amount that the account has donated
-    pub sponsor_amount: i64,
+    pub sponsor_amount: u64,
     /// The number of times this account has donated sequentially
-    pub sponsor_count: i64,
+    pub sponsor_count: u64,
     /// The account's effects
     pub effects: Vec<Effect>,
     /// The account's customization
@@ -69,7 +69,7 @@ impl Account {
     /// Returns [RootError::Unavailable][crate::models::RootError::Unavailable] if there's no
     /// account with the provided identifier or [Error][crate::Error] if any other error occurred
     /// while sending the request.
-    pub async fn get_by_id(client: &Client, id: i64) -> Result<Self> {
+    pub async fn get_by_id(client: &Client, id: u64) -> Result<Self> {
         GetAccountRequest::new_by_id(id).send_request(client).await
     }
 
@@ -94,7 +94,7 @@ impl Account {
     pub async fn search(
         client: &Client,
         name: Option<&str>,
-        offset: i64,
+        offset: u64,
         follows_only: bool,
     ) -> Result<Vec<Self>> {
         SearchAccountsRequest::new(name, offset, follows_only)

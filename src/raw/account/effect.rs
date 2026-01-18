@@ -64,8 +64,8 @@ impl From<RawEffectReasonKind> for EffectReasonKind {
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct RawEffect {
-    pub id: i64,
-    account_id: i64,
+    pub id: u64,
+    account_id: u64,
     #[serde(rename = "dateCreate")]
     applied_at: i64,
     #[serde(rename = "dateEnd")]
