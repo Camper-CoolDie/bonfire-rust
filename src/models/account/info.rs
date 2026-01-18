@@ -105,9 +105,7 @@ impl Info {
     /// the provided age is not within the range or [Error][crate::Error] if any other error
     /// occurred while sending the request.
     pub async fn set_age(client: &Client, age: Option<i64>) -> Result<()> {
-        SetAgeRequest::new(age.unwrap_or(0))
-            .send_request(client)
-            .await
+        SetAgeRequest::new(age).send_request(client).await
     }
 
     /// Set your status. Must be no longer than [STATUS_MAX_LENGTH]. Empty or `None` means no
@@ -121,9 +119,7 @@ impl Info {
     ///   provided status is longer than the maximum allowed length
     /// * [Error][crate::Error] if any other error occurred while sending the request.
     pub async fn set_status(client: &Client, status: Option<&str>) -> Result<()> {
-        SetStatusRequest::new(status.unwrap_or(""))
-            .send_request(client)
-            .await
+        SetStatusRequest::new(status).send_request(client).await
     }
 
     /// Set your description. Must be no longer than [DESCRIPTION_MAX_LENGTH]. Empty or `None`
@@ -135,7 +131,7 @@ impl Info {
     /// the provided description is longer than the maximum allowed length or [Error][crate::Error]
     /// if any other error occurred while sending the request.
     pub async fn set_description(client: &Client, description: Option<&str>) -> Result<()> {
-        SetDescriptionRequest::new(description.unwrap_or(""))
+        SetDescriptionRequest::new(description)
             .send_request(client)
             .await
     }

@@ -1,6 +1,5 @@
 use chrono::NaiveDate;
-use serde::Deserialize;
-use serde_json::json;
+use serde::{Deserialize, Serialize};
 
 use crate::models::Me;
 use crate::raw::RawMe;
@@ -12,6 +11,7 @@ struct Response {
     me: RawMe,
 }
 
+#[derive(Serialize)]
 pub(crate) struct SetBirthdayQuery {
     birthday: NaiveDate,
 }
@@ -29,7 +29,7 @@ impl Query for SetBirthdayQuery {
             .send_query::<_, Response>(
                 "SetBirthdayMutation",
                 include_str!("graphql/SetBirthdayMutation.graphql"),
-                json!({ "birthday": self.birthday }),
+                self,
             )
             .await?
             .me

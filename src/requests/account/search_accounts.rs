@@ -1,5 +1,4 @@
-use serde::Deserialize;
-use serde_json::json;
+use serde::{Deserialize, Serialize};
 
 use crate::models::Account;
 use crate::raw::RawAccount;
@@ -10,15 +9,18 @@ struct Response {
     accounts: Vec<RawAccount>,
 }
 
+#[derive(Serialize)]
 pub(crate) struct SearchAccountsRequest<'a> {
-    name: Option<&'a str>,
+    #[serde(rename = "username", skip_serializing_if = "str::is_empty")]
+    name: &'a str,
     offset: u64,
+    #[serde(rename = "isSubscriptionsOnly")]
     follows_only: bool,
 }
 impl<'a> SearchAccountsRequest<'a> {
     pub(crate) fn new(name: Option<&'a str>, offset: u64, follows_only: bool) -> Self {
         Self {
-            name,
+            name: name.unwrap_or(""),
             offset,
             follows_only,
         }
@@ -30,15 +32,7 @@ impl Request for SearchAccountsRequest<'_> {
 
     async fn send_request(&self, client: &Client) -> Result<Vec<Account>> {
         client
-            .send_request::<_, Response>(
-                "RAccountsGetAll",
-                json!({
-                    "username": self.name,
-                    "offset": self.offset,
-                    "isSubscriptionsOnly": self.follows_only,
-                }),
-                Vec::default(),
-            )
+            .send_request::<_, Response>("RAccountsGetAll", self, Vec::default())
             .await?
             .accounts
             .into_iter()

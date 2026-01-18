@@ -1,14 +1,17 @@
-use serde_json::json;
+use serde::Serialize;
 
 use crate::requests::EmptyResponse;
 use crate::{Client, Request, Result};
 
+#[derive(Serialize)]
 pub(crate) struct SetDescriptionRequest<'a> {
     description: &'a str,
 }
 impl<'a> SetDescriptionRequest<'a> {
-    pub(crate) fn new(description: &'a str) -> Self {
-        Self { description }
+    pub(crate) fn new(description: Option<&'a str>) -> Self {
+        Self {
+            description: description.unwrap_or(""),
+        }
     }
 }
 
@@ -17,11 +20,7 @@ impl Request for SetDescriptionRequest<'_> {
 
     async fn send_request(&self, client: &Client) -> Result<()> {
         client
-            .send_request::<_, EmptyResponse>(
-                "RAccountsBioSetDescription",
-                json!({ "description": self.description }),
-                Vec::default(),
-            )
+            .send_request::<_, EmptyResponse>("RAccountsBioSetDescription", self, Vec::default())
             .await?;
         Ok(())
     }

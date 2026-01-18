@@ -1,6 +1,5 @@
 use chrono::{DateTime, Utc};
-use serde::Deserialize;
-use serde_json::json;
+use serde::{Deserialize, Serialize};
 
 use crate::models::Account;
 use crate::raw::RawAccount;
@@ -11,12 +10,18 @@ struct Response {
     accounts: Vec<RawAccount>,
 }
 
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
 pub(crate) struct GetOnlineRequest {
-    offset_date: DateTime<Utc>,
+    offset_date: i64,
 }
 impl GetOnlineRequest {
-    pub(crate) fn new(offset_date: DateTime<Utc>) -> Self {
-        Self { offset_date }
+    pub(crate) fn new(offset_date: Option<DateTime<Utc>>) -> Self {
+        Self {
+            offset_date: offset_date
+                .map(|datetime| datetime.timestamp_millis())
+                .unwrap_or(0),
+        }
     }
 }
 
@@ -25,11 +30,7 @@ impl Request for GetOnlineRequest {
 
     async fn send_request(&self, client: &Client) -> Result<Vec<Account>> {
         client
-            .send_request::<_, Response>(
-                "RAccountsGetAllOnline",
-                json!({ "offsetDate": self.offset_date.timestamp_millis() }),
-                Vec::default(),
-            )
+            .send_request::<_, Response>("RAccountsGetAllOnline", self, Vec::default())
             .await?
             .accounts
             .into_iter()

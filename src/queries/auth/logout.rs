@@ -1,8 +1,9 @@
-use serde_json::json;
+use serde::Serialize;
 
 use crate::queries::EmptyResponse;
 use crate::{Client, Query, Result};
 
+#[derive(Serialize)]
 pub(crate) struct LogoutQuery {}
 impl LogoutQuery {
     pub(crate) fn new() -> Self {
@@ -18,7 +19,7 @@ impl Query for LogoutQuery {
             .send_query::<_, EmptyResponse>(
                 "LogoutMutation",
                 include_str!("graphql/LogoutMutation.graphql"),
-                json!({}),
+                self,
             )
             .await?;
         Ok(())

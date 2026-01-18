@@ -1,11 +1,13 @@
-use serde_json::json;
+use serde::Serialize;
 
 use crate::models::Gender;
 use crate::raw::RawGender;
 use crate::requests::EmptyResponse;
 use crate::{Client, Request, Result};
 
+#[derive(Serialize)]
 pub(crate) struct SetGenderRequest {
+    #[serde(rename = "sex")]
     gender: RawGender,
 }
 impl SetGenderRequest {
@@ -21,11 +23,7 @@ impl Request for SetGenderRequest {
 
     async fn send_request(&self, client: &Client) -> Result<()> {
         client
-            .send_request::<_, EmptyResponse>(
-                "RAccountsBioSetSex",
-                json!({ "sex": self.gender }),
-                Vec::default(),
-            )
+            .send_request::<_, EmptyResponse>("RAccountsBioSetSex", self, Vec::default())
             .await?;
         Ok(())
     }

@@ -1,5 +1,4 @@
-use serde::Deserialize;
-use serde_json::json;
+use serde::{Deserialize, Serialize};
 
 use crate::models::auth::Error;
 use crate::models::Auth;
@@ -22,13 +21,21 @@ struct Response {
     result: LoginResult,
 }
 
-pub(crate) struct LoginEmailQuery<'a> {
+#[derive(Serialize)]
+struct LoginInput<'a> {
     email: &'a str,
     password: &'a str,
 }
+
+#[derive(Serialize)]
+pub(crate) struct LoginEmailQuery<'a> {
+    input: LoginInput<'a>,
+}
 impl<'a> LoginEmailQuery<'a> {
     pub(crate) fn new(email: &'a str, password: &'a str) -> Self {
-        Self { email, password }
+        Self {
+            input: LoginInput { email, password },
+        }
     }
 }
 
@@ -40,12 +47,7 @@ impl Query for LoginEmailQuery<'_> {
             .send_query::<_, Response>(
                 "LoginEmailMutation",
                 include_str!("graphql/LoginEmailMutation.graphql"),
-                json!({
-                    "input": {
-                        "email": self.email,
-                        "password": self.password,
-                    }
-                }),
+                self,
             )
             .await?
             .result

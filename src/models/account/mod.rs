@@ -5,7 +5,7 @@ mod info;
 mod link;
 
 pub use badge::Badge;
-use chrono::{DateTime, Duration, TimeZone, Utc};
+use chrono::{DateTime, Duration, Utc};
 pub use effect::{Effect, EffectKind, EffectReasonKind};
 pub use gender::Gender;
 pub use info::*;
@@ -125,7 +125,7 @@ impl Account {
         client: &Client,
         offset_date: Option<DateTime<Utc>>,
     ) -> Result<Vec<Self>> {
-        GetOnlineRequest::new(offset_date.unwrap_or(Utc.timestamp_opt(0, 0).unwrap()))
+        GetOnlineRequest::new(offset_date)
             .send_request(client)
             .await
     }

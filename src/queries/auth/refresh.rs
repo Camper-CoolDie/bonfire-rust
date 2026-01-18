@@ -1,5 +1,4 @@
-use serde::Deserialize;
-use serde_json::json;
+use serde::{Deserialize, Serialize};
 
 use crate::models::Auth;
 use crate::raw::RawAuth;
@@ -11,6 +10,8 @@ struct Response {
     auth: RawAuth,
 }
 
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
 pub(crate) struct RefreshQuery<'a> {
     refresh_token: &'a str,
 }
@@ -28,7 +29,7 @@ impl Query for RefreshQuery<'_> {
             .send_refresh_query::<_, Response>(
                 "LoginRefreshMutation",
                 include_str!("graphql/LoginRefreshMutation.graphql"),
-                json!({ "refreshToken": self.refresh_token }),
+                self,
             )
             .await?
             .auth

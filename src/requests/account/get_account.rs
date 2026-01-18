@@ -1,5 +1,4 @@
-use serde::Deserialize;
-use serde_json::json;
+use serde::{Deserialize, Serialize};
 
 use crate::models::Account;
 use crate::raw::RawAccount;
@@ -10,23 +9,20 @@ struct Response {
     account: RawAccount,
 }
 
-pub(crate) struct GetAccountRequest<'a> {
-    id: Option<u64>,
-    name: Option<&'a str>,
+#[derive(Serialize)]
+pub(crate) enum GetAccountRequest<'a> {
+    #[serde(rename = "accountId")]
+    Id(u64),
+    #[serde(rename = "accountName")]
+    Name(&'a str),
 }
 impl<'a> GetAccountRequest<'a> {
     pub(crate) fn new_by_id(id: u64) -> Self {
-        Self {
-            id: Some(id),
-            name: None,
-        }
+        Self::Id(id)
     }
 
     pub(crate) fn new_by_name(name: &'a str) -> Self {
-        Self {
-            id: None,
-            name: Some(name),
-        }
+        Self::Name(name)
     }
 }
 
@@ -35,14 +31,7 @@ impl Request for GetAccountRequest<'_> {
 
     async fn send_request(&self, client: &Client) -> Result<Account> {
         client
-            .send_request::<_, Response>(
-                "RAccountsGet",
-                json!({
-                    "accountId": self.id,
-                    "accountName": self.name,
-                }),
-                Vec::default(),
-            )
+            .send_request::<_, Response>("RAccountsGet", self, Vec::default())
             .await?
             .account
             .try_into()

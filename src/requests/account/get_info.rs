@@ -1,26 +1,23 @@
-use serde_json::json;
+use serde::Serialize;
 
 use crate::models::account::Info;
 use crate::raw::account::RawInfo;
 use crate::{Client, Request, Result};
 
-pub(crate) struct GetInfoRequest<'a> {
-    id: Option<u64>,
-    name: Option<&'a str>,
+#[derive(Serialize)]
+pub(crate) enum GetInfoRequest<'a> {
+    #[serde(rename = "accountId")]
+    Id(u64),
+    #[serde(rename = "accountName")]
+    Name(&'a str),
 }
 impl<'a> GetInfoRequest<'a> {
     pub(crate) fn new_by_id(id: u64) -> Self {
-        Self {
-            id: Some(id),
-            name: None,
-        }
+        Self::Id(id)
     }
 
     pub(crate) fn new_by_name(name: &'a str) -> Self {
-        Self {
-            id: None,
-            name: Some(name),
-        }
+        Self::Name(name)
     }
 }
 
@@ -29,14 +26,7 @@ impl Request for GetInfoRequest<'_> {
 
     async fn send_request(&self, client: &Client) -> Result<Info> {
         client
-            .send_request::<_, RawInfo>(
-                "RAccountsGetProfile",
-                json!({
-                    "accountId": self.id,
-                    "accountName": self.name,
-                }),
-                Vec::default(),
-            )
+            .send_request::<_, RawInfo>("RAccountsGetProfile", self, Vec::default())
             .await?
             .try_into()
     }
