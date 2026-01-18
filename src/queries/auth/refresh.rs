@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::models::Auth;
-use crate::raw::RawAuth;
+use crate::queries::raw::RawAuth;
 use crate::{Client, Query, Result};
 
 #[derive(Deserialize)]

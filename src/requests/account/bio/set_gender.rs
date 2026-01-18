@@ -1,7 +1,7 @@
 use serde::Serialize;
 
 use crate::models::Gender;
-use crate::raw::RawGender;
+use crate::requests::raw::RawGender;
 use crate::requests::EmptyResponse;
 use crate::{Client, Request, Result};
 

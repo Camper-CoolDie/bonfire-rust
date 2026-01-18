@@ -1,7 +1,7 @@
 use serde::Serialize;
 
 use crate::models::account::Info;
-use crate::raw::account::RawInfo;
+use crate::requests::raw::account::RawInfo;
 use crate::{Client, Request, Result};
 
 #[derive(Serialize)]

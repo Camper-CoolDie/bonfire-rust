@@ -5,7 +5,7 @@ use serde_repr::Deserialize_repr;
 
 use crate::models::fandom::FandomStatus;
 use crate::models::{Fandom, Language};
-use crate::raw::{RawCategory, RawImageRef};
+use crate::requests::raw::{RawCategory, RawImageRef};
 use crate::Result;
 
 #[derive(Deserialize_repr)]

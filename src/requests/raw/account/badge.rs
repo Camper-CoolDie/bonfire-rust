@@ -1,7 +1,7 @@
 use serde::Deserialize;
 
 use crate::models::Badge;
-use crate::raw::RawImageRef;
+use crate::requests::raw::RawImageRef;
 
 #[derive(Deserialize)]
 pub(crate) struct RawBadge {

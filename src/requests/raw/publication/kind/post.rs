@@ -1,7 +1,7 @@
 use serde::Deserialize;
 
 use crate::models::Post;
-use crate::raw::publication::{RawPublicationInheritor, RawPublicationKind};
+use crate::requests::raw::publication::{RawPublicationInheritor, RawPublicationKind};
 use crate::Result;
 
 #[derive(Deserialize)]

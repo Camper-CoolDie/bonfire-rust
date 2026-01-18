@@ -13,7 +13,7 @@ use serde_repr::Deserialize_repr;
 
 use crate::models::publication::{PublicationInheritor, PublicationKind, PublicationStatus};
 use crate::models::{Account, Fandom, Publication};
-use crate::raw::{RawAccount, RawCategory, RawFandom};
+use crate::requests::raw::{RawAccount, RawCategory, RawFandom};
 use crate::Result;
 
 pub(crate) trait RawPublicationInheritor: Sized {

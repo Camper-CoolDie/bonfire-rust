@@ -3,7 +3,7 @@ use serde::de::Error;
 use serde::Deserialize;
 
 use crate::models::account::Info;
-use crate::raw::{RawImageRef, RawLink, RawPost, RawPublication};
+use crate::requests::raw::{RawImageRef, RawLink, RawPost, RawPublication};
 use crate::Result;
 
 #[derive(Deserialize)]

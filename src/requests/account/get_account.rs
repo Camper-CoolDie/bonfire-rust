@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::models::Account;
-use crate::raw::RawAccount;
+use crate::requests::raw::RawAccount;
 use crate::{Client, Request, Result};
 
 #[derive(Deserialize)]

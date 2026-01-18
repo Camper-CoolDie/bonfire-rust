@@ -2,8 +2,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::models::auth::Error;
 use crate::models::Auth;
-use crate::raw::auth::RawTfaRequired;
-use crate::raw::RawAuth;
+use crate::queries::raw::auth::RawTfaRequired;
+use crate::queries::raw::RawAuth;
 use crate::{Client, Query, Result};
 
 #[derive(Deserialize)]

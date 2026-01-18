@@ -1,10 +1,11 @@
 pub(crate) mod account;
 mod error;
+mod raw;
 
 pub use error::{RootError, UnavailableError};
 use serde::{Deserialize, Serialize};
 
-use crate::raw::RawRootError;
+use crate::requests::raw::RawRootError;
 use crate::{Client, Result};
 
 #[derive(Deserialize)]

@@ -1,11 +1,12 @@
 pub(crate) mod auth;
 mod error;
 pub(crate) mod profile;
+mod raw;
 
 pub use error::{MeliorError, QueryLocation, QueryPath};
 use serde::{Deserialize, Serialize};
 
-use crate::raw::RawMeliorError;
+use crate::queries::raw::RawMeliorError;
 use crate::{Client, Result};
 
 #[derive(Deserialize)]

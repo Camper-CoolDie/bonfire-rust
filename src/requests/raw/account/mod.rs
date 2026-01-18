@@ -15,7 +15,7 @@ use serde::Deserialize;
 
 use crate::models::account::AccountCustomization;
 use crate::models::{Account, Effect};
-use crate::raw::RawImageRef;
+use crate::requests::raw::RawImageRef;
 use crate::Result;
 
 #[derive(Deserialize)]

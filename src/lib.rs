@@ -74,7 +74,6 @@ pub mod client;
 /// Structs, errors and enums for constructing requests and parsing responses.
 pub mod models;
 mod queries;
-pub(crate) mod raw;
 mod requests;
 
 pub use client::{Client, ClientBuilder, Error, Result};
