@@ -7,16 +7,6 @@ pub use error::{MeliorError, QueryLocation, QueryPath};
 use serde::{Deserialize, Serialize};
 
 use crate::queries::raw::RawMeliorError;
-use crate::{Client, Result};
-
-#[derive(Deserialize)]
-struct EmptyResponse {}
-
-pub(crate) trait Query {
-    type Target;
-
-    async fn send_query(&self, client: &Client) -> Result<Self::Target>;
-}
 
 #[derive(Serialize)]
 pub(crate) struct MeliorQuery<R> {

@@ -1,10 +1,11 @@
 use serde::{Deserialize, Serialize};
 
+use crate::client::Request;
 use crate::models::auth::Error;
 use crate::models::Auth;
 use crate::queries::raw::auth::RawTfaRequired;
 use crate::queries::raw::RawAuth;
-use crate::{Client, Query, Result};
+use crate::{Client, Result};
 
 #[derive(Deserialize)]
 #[serde(tag = "__typename")]
@@ -39,10 +40,10 @@ impl<'a> LoginEmailQuery<'a> {
     }
 }
 
-impl Query for LoginEmailQuery<'_> {
+impl Request for LoginEmailQuery<'_> {
     type Target = Auth;
 
-    async fn send_query(&self, client: &Client) -> Result<Auth> {
+    async fn send_request(&self, client: &Client) -> Result<Auth> {
         match client
             .send_query::<_, Response>(
                 "LoginEmailMutation",

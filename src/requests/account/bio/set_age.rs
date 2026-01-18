@@ -1,7 +1,7 @@
 use serde::Serialize;
 
-use crate::requests::EmptyResponse;
-use crate::{Client, Request, Result};
+use crate::client::{EmptyResponse, Request};
+use crate::{Client, Result};
 
 #[derive(Serialize)]
 pub(crate) struct SetAgeRequest {

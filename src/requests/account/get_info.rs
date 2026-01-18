@@ -1,8 +1,9 @@
 use serde::Serialize;
 
+use crate::client::Request;
 use crate::models::account::Info;
 use crate::requests::raw::account::RawInfo;
-use crate::{Client, Request, Result};
+use crate::{Client, Result};
 
 #[derive(Serialize)]
 pub(crate) enum GetInfoRequest<'a> {

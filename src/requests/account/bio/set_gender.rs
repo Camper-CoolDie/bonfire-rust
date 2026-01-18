@@ -1,9 +1,9 @@
 use serde::Serialize;
 
+use crate::client::{EmptyResponse, Request};
 use crate::models::Gender;
 use crate::requests::raw::RawGender;
-use crate::requests::EmptyResponse;
-use crate::{Client, Request, Result};
+use crate::{Client, Result};
 
 #[derive(Serialize)]
 pub(crate) struct SetGenderRequest {

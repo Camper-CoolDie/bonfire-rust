@@ -2,12 +2,13 @@ use std::ops::Range;
 
 use chrono::{DateTime, Utc};
 
+use crate::client::Request;
 use crate::models::{Gender, ImageRef, Link, Post, Publication};
 use crate::requests::account::bio::{
     SetAgeRequest, SetDescriptionRequest, SetGenderRequest, SetStatusRequest,
 };
 use crate::requests::account::GetInfoRequest;
-use crate::{Client, Request, Result};
+use crate::{Client, Result};
 
 /// The number of links an account can contain.
 pub const LINKS_COUNT: usize = 7;

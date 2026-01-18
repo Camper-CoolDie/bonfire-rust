@@ -1,7 +1,7 @@
 use serde::Serialize;
 
-use crate::queries::EmptyResponse;
-use crate::{Client, Query, Result};
+use crate::client::{EmptyResponse, Request};
+use crate::{Client, Result};
 
 #[derive(Serialize)]
 pub(crate) struct LogoutQuery {}
@@ -11,10 +11,10 @@ impl LogoutQuery {
     }
 }
 
-impl Query for LogoutQuery {
+impl Request for LogoutQuery {
     type Target = ();
 
-    async fn send_query(&self, client: &Client) -> Result<()> {
+    async fn send_request(&self, client: &Client) -> Result<()> {
         client
             .send_query::<_, EmptyResponse>(
                 "LogoutMutation",

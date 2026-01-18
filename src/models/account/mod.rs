@@ -11,11 +11,12 @@ pub use gender::Gender;
 pub use info::*;
 pub use link::Link;
 
+use crate::client::Request;
 use crate::models::ImageRef;
 use crate::requests::account::{
     GetAccountRequest, GetInfoRequest, GetOnlineRequest, SearchAccountsRequest,
 };
-use crate::{Client, Request, Result};
+use crate::{Client, Result};
 
 /// The duration of an account's online status since when it was last online.
 pub const ONLINE_DURATION: Duration = Duration::minutes(15);

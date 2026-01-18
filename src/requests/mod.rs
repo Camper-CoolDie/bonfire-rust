@@ -6,16 +6,6 @@ pub use error::{RootError, UnavailableError};
 use serde::{Deserialize, Serialize};
 
 use crate::requests::raw::RawRootError;
-use crate::{Client, Result};
-
-#[derive(Deserialize)]
-struct EmptyResponse {}
-
-pub(crate) trait Request {
-    type Target;
-
-    async fn send_request(&self, client: &Client) -> Result<Self::Target>;
-}
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]

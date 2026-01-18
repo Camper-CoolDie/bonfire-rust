@@ -1,8 +1,9 @@
 use serde::{Deserialize, Serialize};
 
+use crate::client::Request;
 use crate::models::Auth;
 use crate::queries::raw::RawAuth;
-use crate::{Client, Query, Result};
+use crate::{Client, Result};
 
 #[derive(Deserialize)]
 struct Response {
@@ -21,10 +22,10 @@ impl<'a> RefreshQuery<'a> {
     }
 }
 
-impl Query for RefreshQuery<'_> {
+impl Request for RefreshQuery<'_> {
     type Target = Auth;
 
-    async fn send_query(&self, client: &Client) -> Result<Auth> {
+    async fn send_request(&self, client: &Client) -> Result<Auth> {
         Ok(client
             .send_refresh_query::<_, Response>(
                 "LoginRefreshMutation",

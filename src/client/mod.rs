@@ -1,5 +1,6 @@
 mod error;
 mod jwt;
+mod request;
 mod service;
 mod token_provider;
 
@@ -10,6 +11,7 @@ pub use error::{Error, Result};
 use http::{header, HeaderMap, Uri};
 pub use jwt::JwtError;
 use jwt::JwtResult;
+pub(crate) use request::{EmptyResponse, Request};
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use service::{MeliorService, RootService};

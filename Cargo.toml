@@ -9,7 +9,7 @@ readme = "README.md"
 repository = "https://github.com/Camper-CoolDie/bonfire-rust"
 license = "MIT"
 keywords = ["bonfire", "api", "bot"]
-include = ["/src/models/*/queries/graphql"]
+include = ["/src/queries/*/graphql"]
 
 [dependencies]
 base64 = "0.22"

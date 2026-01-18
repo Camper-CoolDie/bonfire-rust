@@ -3,9 +3,10 @@ mod error;
 pub use error::{Error, TfaKind, TfaRequired};
 use serde::{Deserialize, Serialize};
 
+use crate::client::Request;
 use crate::models::Me;
 use crate::queries::auth::{LoginEmailQuery, LogoutQuery, MeQuery, RefreshQuery};
-use crate::{Client, Query, Result};
+use crate::{Client, Result};
 
 /// Represents an authentication session.
 #[derive(Default, Clone, Debug, Deserialize, Serialize)]
@@ -40,22 +41,22 @@ impl Auth {
     /// # }
     /// ```
     pub async fn me(client: &Client) -> Result<Me> {
-        MeQuery::new().send_query(client).await
+        MeQuery::new().send_request(client).await
     }
 
     pub(crate) async fn login(client: &Client, email: &str, password: &str) -> Result<Self> {
         LoginEmailQuery::new(email, password)
-            .send_query(client)
+            .send_request(client)
             .await
     }
 
     pub(crate) async fn logout(client: &Client) -> Result<()> {
-        LogoutQuery::new().send_query(client).await
+        LogoutQuery::new().send_request(client).await
     }
 
     pub(crate) async fn refresh(&self, client: &Client) -> Result<Self> {
         RefreshQuery::new(&self.access_token)
-            .send_query(client)
+            .send_request(client)
             .await
     }
 }

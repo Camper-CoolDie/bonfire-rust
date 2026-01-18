@@ -78,6 +78,6 @@ mod requests;
 
 pub use client::{Client, ClientBuilder, Error, Result};
 pub use queries::{MeliorError, QueryLocation, QueryPath};
-pub(crate) use queries::{MeliorQuery, MeliorResponse, Query};
-pub(crate) use requests::{Request, RootRequest, RootResponse};
+pub(crate) use queries::{MeliorQuery, MeliorResponse};
 pub use requests::{RootError, UnavailableError};
+pub(crate) use requests::{RootRequest, RootResponse};

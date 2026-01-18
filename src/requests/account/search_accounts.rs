@@ -1,8 +1,9 @@
 use serde::{Deserialize, Serialize};
 
+use crate::client::Request;
 use crate::models::Account;
 use crate::requests::raw::RawAccount;
-use crate::{Client, Request, Result};
+use crate::{Client, Result};
 
 #[derive(Deserialize)]
 struct Response {
