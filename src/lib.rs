@@ -73,5 +73,12 @@
 pub mod client;
 /// Structs, errors and enums for constructing requests and parsing responses.
 pub mod models;
+mod queries;
+pub(crate) mod raw;
+mod requests;
 
 pub use client::{Client, ClientBuilder, Error, Result};
+pub use queries::{MeliorError, QueryLocation, QueryPath};
+pub(crate) use queries::{MeliorQuery, MeliorResponse, Query};
+pub(crate) use requests::{Request, RootRequest, RootResponse};
+pub use requests::{RootError, UnavailableError};

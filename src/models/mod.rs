@@ -10,9 +10,6 @@ pub mod fandom;
 pub mod profile;
 /// Publication implementations, kinds and helper structs.
 pub mod publication;
-pub(crate) mod query;
-pub(crate) mod raw;
-pub(crate) mod request;
 
 pub use account::{Account, Badge, Effect, Gender, Info as AccountInfo, Link};
 pub use auth::Auth;
@@ -20,10 +17,3 @@ pub use common::{Category, ImageRef, Language};
 pub use fandom::Fandom;
 pub use profile::Me;
 pub use publication::{AnyPublication, Post, Publication, Reaction};
-pub use query::{MeliorError, QueryLocation, QueryPath};
-pub(crate) use raw::{MeliorResponse, Query, Request, RootResponse};
-pub use request::{RootError, UnavailableError};
-use serde::Deserialize;
-
-#[derive(Deserialize)]
-struct EmptyResponse {}

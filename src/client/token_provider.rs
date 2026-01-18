@@ -67,7 +67,7 @@ impl TokenProvider {
         let mut guard = self.inner.write().await;
         let option = match &*guard {
             InnerState::Authenticated(auth, claims) if claims.expires_at < Utc::now() => {
-                tracing::debug!("Auth has expired, refreshing");
+                tracing::debug!("auth has expired, refreshing");
                 Some(auth.refresh(client).await?)
             }
             InnerState::Authenticated(auth, _) => return Ok(Some(auth.clone())),

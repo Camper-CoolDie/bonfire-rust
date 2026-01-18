@@ -3,17 +3,19 @@ mod effect;
 mod gender;
 mod info;
 mod link;
-mod requests;
 
 pub use badge::Badge;
-use chrono::{DateTime, Duration, Utc};
+use chrono::{DateTime, Duration, TimeZone, Utc};
 pub use effect::{Effect, EffectKind, EffectReasonKind};
 pub use gender::Gender;
 pub use info::*;
 pub use link::Link;
 
 use crate::models::ImageRef;
-use crate::{Client, Result};
+use crate::requests::account::{
+    GetAccountRequest, GetInfoRequest, GetOnlineRequest, SearchAccountsRequest,
+};
+use crate::{Client, Request, Result};
 
 /// The duration of an account's online status since when it was last online.
 pub const ONLINE_DURATION: Duration = Duration::minutes(15);
@@ -68,7 +70,7 @@ impl Account {
     /// account with the provided identifier or [Error][crate::Error] if any other error occurred
     /// while sending the request.
     pub async fn get_by_id(client: &Client, id: i64) -> Result<Self> {
-        Account::_get_account(client, Some(id), None).await
+        GetAccountRequest::new_by_id(id).send_request(client).await
     }
 
     /// Get an account by its name. Doesn't require authentication.
@@ -79,7 +81,9 @@ impl Account {
     /// account with the provided name or [Error][crate::Error] if any other error occurred while
     /// sending the request.
     pub async fn get_by_name(client: &Client, name: &str) -> Result<Self> {
-        Account::_get_account(client, None, Some(name)).await
+        GetAccountRequest::new_by_name(name)
+            .send_request(client)
+            .await
     }
 
     /// Search for accounts by their name.
@@ -93,7 +97,9 @@ impl Account {
         offset: i64,
         follows_only: bool,
     ) -> Result<Vec<Self>> {
-        Account::_search_accounts(client, name, offset, follows_only).await
+        SearchAccountsRequest::new(name, offset, follows_only)
+            .send_request(client)
+            .await
     }
 
     /// Get [Info] about this account.
@@ -104,7 +110,9 @@ impl Account {
     /// account with the contained identifier or [Error][crate::Error] if any other error occurred
     /// while sending the request.
     pub async fn info(&self, client: &Client) -> Result<Info> {
-        Info::get_by_id(client, self.id).await
+        GetInfoRequest::new_by_id(self.id)
+            .send_request(client)
+            .await
     }
 
     /// Get a list of accounts that are currently online (that were active less than
@@ -113,7 +121,12 @@ impl Account {
     /// # Errors
     ///
     /// Returns [Error][crate::Error] if an error occurred while sending the request.
-    pub async fn get_online(client: &Client, offset_date: DateTime<Utc>) -> Result<Vec<Self>> {
-        Account::_get_online(client, offset_date).await
+    pub async fn get_online(
+        client: &Client,
+        offset_date: Option<DateTime<Utc>>,
+    ) -> Result<Vec<Self>> {
+        GetOnlineRequest::new(offset_date.unwrap_or(Utc.timestamp_opt(0, 0).unwrap()))
+            .send_request(client)
+            .await
     }
 }

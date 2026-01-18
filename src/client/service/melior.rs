@@ -9,8 +9,7 @@ use serde::de::DeserializeOwned;
 use serde::Serialize;
 
 use crate::client::service::USER_AGENT;
-use crate::models::{MeliorError, MeliorResponse, Query};
-use crate::{Error, Result};
+use crate::{Error, MeliorError, MeliorQuery, MeliorResponse, Result};
 
 pub(crate) struct MeliorService {
     hyper_client: HyperClient<HttpsConnector<HttpConnector>, Full<Bytes>>,
@@ -32,7 +31,7 @@ impl MeliorService {
 
     pub(crate) async fn send_query<R: Serialize, S: DeserializeOwned>(
         &self,
-        query: Query<R>,
+        query: MeliorQuery<R>,
         headers: HeaderMap<HeaderValue>,
     ) -> Result<S> {
         let body = serde_json::to_vec(&query)?;

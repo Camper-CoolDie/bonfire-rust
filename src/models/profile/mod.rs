@@ -1,9 +1,8 @@
-mod queries;
-
 use chrono::NaiveDate;
 
-use crate::models::Auth;
-use crate::{Client, Result};
+use crate::queries::auth::MeQuery;
+use crate::queries::profile::SetBirthdayQuery;
+use crate::{Client, Query, Result};
 
 /// Represents information about an authenticated user.
 #[derive(Default, Clone, Debug)]
@@ -46,7 +45,7 @@ impl Me {
     /// # }
     /// ```
     pub async fn get(client: &Client) -> Result<Self> {
-        Auth::me(client).await
+        MeQuery::new().send_query(client).await
     }
 
     /// Set your birthday.
@@ -71,6 +70,6 @@ impl Me {
     /// # }
     /// ```
     pub async fn set_birthday(client: &Client, birthday: NaiveDate) -> Result<Me> {
-        Me::_set_birthday(client, birthday).await
+        SetBirthdayQuery::new(birthday).send_query(client).await
     }
 }

@@ -4,7 +4,8 @@ use http::StatusCode;
 use thiserror::Error;
 
 use crate::client::JwtError;
-use crate::models::{auth, MeliorError, RootError};
+use crate::models::auth;
+use crate::{MeliorError, RootError};
 
 /// A type alias for [Result<T, Error>][StdResult<T, Error>].
 pub type Result<T> = StdResult<T, Error>;

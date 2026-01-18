@@ -16,7 +16,8 @@ use service::{MeliorService, RootService};
 use token_provider::TokenProvider;
 
 use crate::client::jwt::decode_token;
-use crate::models::{auth, Auth, Query, Request};
+use crate::models::{auth, Auth};
+use crate::{MeliorQuery, RootRequest};
 
 // It's great when we can test our requests against a test server, hence the ability to specify
 // custom URIs
@@ -61,6 +62,7 @@ impl Client {
             inner: Arc::new(Inner {
                 root_service: RootService::new(root_uri),
                 melior_service: MeliorService::new(melior_uri),
+                // This error was previously caught in ClientBuilder::auth()
                 token_provider: TokenProvider::new(auth).expect("failed to create TokenProvider"),
             }),
         }
@@ -179,7 +181,7 @@ impl Client {
         content: R,
         attachments: Vec<&[u8]>,
     ) -> Result<S> {
-        tracing::info!(request_name, "Sending request");
+        tracing::info!(request_name, "sending request");
         let token = self.inner.token_provider.get_token(self).await?;
 
         // Contains the length of each attachment
@@ -188,7 +190,7 @@ impl Client {
             .map(|slice| (!slice.is_empty()).then_some(slice.len() as u32))
             .collect::<Vec<Option<u32>>>();
 
-        let request = Request {
+        let request = RootRequest {
             content,
             request_name,
             data_output,
@@ -200,7 +202,7 @@ impl Client {
             .root_service
             .send_request(request, attachments, HeaderMap::new())
             .await
-            .inspect_err(|error| tracing::error!(?error, "Failed to send request"))
+            .inspect_err(|error| tracing::error!(?error, "failed to send request"))
     }
 
     pub(crate) async fn send_query<R: Serialize, S: DeserializeOwned>(
@@ -209,7 +211,7 @@ impl Client {
         query: &'static str,
         variables: R,
     ) -> Result<S> {
-        tracing::info!(operation_name, "Sending query");
+        tracing::info!(operation_name, "sending query");
         let token = self.inner.token_provider.get_token(self).await?;
 
         let mut headers = HeaderMap::new();
@@ -222,9 +224,9 @@ impl Client {
 
         self.inner
             .melior_service
-            .send_query(Query { variables, query }, headers)
+            .send_query(MeliorQuery { variables, query }, headers)
             .await
-            .inspect_err(|error| tracing::error!(?error, "Failed to send query"))
+            .inspect_err(|error| tracing::error!(?error, "failed to send query"))
     }
 
     // `send_query` that doesn't validate credentials
@@ -234,13 +236,13 @@ impl Client {
         query: &'static str,
         variables: R,
     ) -> Result<S> {
-        tracing::info!(operation_name, "Sending refresh query");
+        tracing::info!(operation_name, "sending refresh query");
 
         self.inner
             .melior_service
-            .send_query(Query { variables, query }, HeaderMap::new())
+            .send_query(MeliorQuery { variables, query }, HeaderMap::new())
             .await
-            .inspect_err(|error| tracing::error!(?error, "Failed to send refresh query"))
+            .inspect_err(|error| tracing::error!(?error, "failed to send refresh query"))
     }
 
     /// Create a new `ClientBuilder` with default values.

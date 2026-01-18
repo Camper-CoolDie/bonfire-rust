@@ -55,8 +55,8 @@ pub(super) fn decode_token(token: &str) -> JwtResult<JwtClaims> {
                 subject = claims.subject,
                 expires_at = ?claims.expires_at,
                 issued_at = ?claims.issued_at,
-                "Decoded JWT"
+                "decoded token"
             );
         })
-        .inspect_err(|error| tracing::error!(?error, "Failed to decode JWT"))
+        .inspect_err(|error| tracing::error!(?error, "failed to decode token"))
 }

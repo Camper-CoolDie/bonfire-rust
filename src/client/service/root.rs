@@ -9,8 +9,7 @@ use serde::de::DeserializeOwned;
 use serde::Serialize;
 
 use crate::client::service::USER_AGENT;
-use crate::models::{Request, RootError, RootResponse};
-use crate::{Error, Result};
+use crate::{Error, Result, RootError, RootRequest, RootResponse};
 
 pub(crate) struct RootService {
     hyper_client: HyperClient<HttpsConnector<HttpConnector>, Full<Bytes>>,
@@ -32,7 +31,7 @@ impl RootService {
 
     pub(crate) async fn send_request<'a, R: Serialize, S: DeserializeOwned>(
         &self,
-        request: Request<'a, R>,
+        request: RootRequest<'a, R>,
         attachments: Vec<&[u8]>,
         headers: HeaderMap<HeaderValue>,
     ) -> Result<S> {
@@ -53,7 +52,7 @@ impl RootService {
         match serde_json::from_slice::<RootResponse<S>>(&response)? {
             RootResponse::Ok(content) => Ok(content),
             RootResponse::Error(error) => Err(RootError::try_from(error)
-                .inspect_err(|error| tracing::error!(?error, "Failed to parse root error"))
+                .inspect_err(|error| tracing::error!(?error, "failed to parse root error"))
                 .map_or_else(|error| error, Error::from)),
         }
     }

@@ -2,8 +2,12 @@ use std::ops::Range;
 
 use chrono::{DateTime, Utc};
 
-use crate::models::{Account, Gender, ImageRef, Link, Post, Publication};
-use crate::{Client, Result};
+use crate::models::{Gender, ImageRef, Link, Post, Publication};
+use crate::requests::account::bio::{
+    SetAgeRequest, SetDescriptionRequest, SetGenderRequest, SetStatusRequest,
+};
+use crate::requests::account::GetInfoRequest;
+use crate::{Client, Request, Result};
 
 /// The number of links an account can contain.
 pub const LINKS_COUNT: usize = 7;
@@ -79,7 +83,7 @@ impl Info {
     /// account with the provided identifier or [Error][crate::Error] if any other error occurred
     /// while sending the request.
     pub async fn get_by_id(client: &Client, id: i64) -> Result<Self> {
-        Account::_get_info(client, Some(id), None).await
+        GetInfoRequest::new_by_id(id).send_request(client).await
     }
 
     /// Get account information by its name.
@@ -90,7 +94,7 @@ impl Info {
     /// account with the provided name or [Error][crate::Error] if any other error occurred while
     /// sending the request.
     pub async fn get_by_name(client: &Client, name: &str) -> Result<Self> {
-        Account::_get_info(client, None, Some(name)).await
+        GetInfoRequest::new_by_name(name).send_request(client).await
     }
 
     /// Set your age. Must be within [AGE_RANGE]. Zero or `None` means no age.
@@ -101,7 +105,9 @@ impl Info {
     /// the provided age is not within the range or [Error][crate::Error] if any other error
     /// occurred while sending the request.
     pub async fn set_age(client: &Client, age: Option<i64>) -> Result<()> {
-        Account::_set_age(client, age.unwrap_or(0)).await
+        SetAgeRequest::new(age.unwrap_or(0))
+            .send_request(client)
+            .await
     }
 
     /// Set your status. Must be no longer than [STATUS_MAX_LENGTH]. Empty or `None` means no
@@ -115,7 +121,9 @@ impl Info {
     ///   provided status is longer than the maximum allowed length
     /// * [Error][crate::Error] if any other error occurred while sending the request.
     pub async fn set_status(client: &Client, status: Option<&str>) -> Result<()> {
-        Account::_set_status(client, status.unwrap_or("")).await
+        SetStatusRequest::new(status.unwrap_or(""))
+            .send_request(client)
+            .await
     }
 
     /// Set your description. Must be no longer than [DESCRIPTION_MAX_LENGTH]. Empty or `None`
@@ -127,7 +135,9 @@ impl Info {
     /// the provided description is longer than the maximum allowed length or [Error][crate::Error]
     /// if any other error occurred while sending the request.
     pub async fn set_description(client: &Client, description: Option<&str>) -> Result<()> {
-        Account::_set_description(client, description.unwrap_or("")).await
+        SetDescriptionRequest::new(description.unwrap_or(""))
+            .send_request(client)
+            .await
     }
 
     /// Set your gender.
@@ -136,6 +146,6 @@ impl Info {
     ///
     /// Returns [Error][crate::Error] if an error occurred while sending the request.
     pub async fn set_gender(client: &Client, gender: Gender) -> Result<()> {
-        Account::_set_gender(client, gender).await
+        SetGenderRequest::new(gender).send_request(client).await
     }
 }
