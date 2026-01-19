@@ -5,9 +5,8 @@ use hyper_rustls::{HttpsConnector, HttpsConnectorBuilder};
 use hyper_util::client::legacy::connect::HttpConnector;
 use hyper_util::client::legacy::Client as HyperClient;
 use hyper_util::rt::TokioExecutor;
-use serde::de::DeserializeOwned;
-use serde::Serialize;
 
+use crate::client::Request;
 use crate::client::service::USER_AGENT;
 use crate::{Error, Result, RootError, RootRequest, RootResponse};
 
@@ -29,12 +28,12 @@ impl RootService {
         }
     }
 
-    pub(crate) async fn send_request<'a, R: Serialize, S: DeserializeOwned>(
+    pub(crate) async fn send_request<'a, R: Request>(
         &self,
-        request: RootRequest<'a, R>,
+        request: RootRequest<'a, &R>,
         attachments: Vec<&[u8]>,
         headers: HeaderMap<HeaderValue>,
-    ) -> Result<S> {
+    ) -> Result<R::Response> {
         let json_body = serde_json::to_vec(&request)?;
 
         let attachments_length = attachments.iter().map(|slice| slice.len()).sum::<usize>();
@@ -49,7 +48,7 @@ impl RootService {
 
         let response = self.send_raw(payload.freeze(), &headers).await?;
 
-        match serde_json::from_slice::<RootResponse<S>>(&response)? {
+        match serde_json::from_slice::<RootResponse<R::Response>>(&response)? {
             RootResponse::Ok(content) => Ok(content),
             RootResponse::Error(error) => Err(RootError::try_from(error)
                 .inspect_err(|error| tracing::error!(?error, "failed to parse root error"))

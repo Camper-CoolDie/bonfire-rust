@@ -5,9 +5,8 @@ use hyper_rustls::{HttpsConnector, HttpsConnectorBuilder};
 use hyper_util::client::legacy::connect::HttpConnector;
 use hyper_util::client::legacy::Client as HyperClient;
 use hyper_util::rt::TokioExecutor;
-use serde::de::DeserializeOwned;
-use serde::Serialize;
 
+use crate::client::Request;
 use crate::client::service::USER_AGENT;
 use crate::{Error, MeliorError, MeliorQuery, MeliorResponse, Result};
 
@@ -29,15 +28,15 @@ impl MeliorService {
         }
     }
 
-    pub(crate) async fn send_query<R: Serialize, S: DeserializeOwned>(
+    pub(crate) async fn send_query<R: Request>(
         &self,
-        query: MeliorQuery<R>,
+        query: MeliorQuery<&R>,
         headers: HeaderMap<HeaderValue>,
-    ) -> Result<S> {
+    ) -> Result<R::Response> {
         let body = serde_json::to_vec(&query)?;
 
         let bytes = self.send_raw(Bytes::from(body), &headers).await?;
-        let response = serde_json::from_slice::<MeliorResponse<S>>(&bytes)?;
+        let response = serde_json::from_slice::<MeliorResponse<R::Response>>(&bytes)?;
 
         response.data.ok_or(
             response
