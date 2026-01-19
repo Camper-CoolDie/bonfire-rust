@@ -1,14 +1,13 @@
 use serde::{Deserialize, Serialize};
 
 use crate::client::Request;
-use crate::models::Auth;
 use crate::queries::raw::RawAuth;
 use crate::{Client, Result};
 
 #[derive(Deserialize)]
-struct Response {
+pub(crate) struct Response {
     #[serde(rename = "loginRefresh")]
-    auth: RawAuth,
+    pub(crate) auth: RawAuth,
 }
 
 #[derive(Serialize)]
@@ -23,17 +22,15 @@ impl<'a> RefreshQuery<'a> {
 }
 
 impl Request for RefreshQuery<'_> {
-    type Target = Auth;
+    type Target = Response;
 
-    async fn send_request(&self, client: &Client) -> Result<Auth> {
-        Ok(client
-            .send_refresh_query::<_, Response>(
+    async fn send_request(&self, client: &Client) -> Result<Response> {
+        client
+            .send_refresh_query(
                 "LoginRefreshMutation",
                 include_str!("graphql/LoginRefreshMutation.graphql"),
                 self,
             )
-            .await?
-            .auth
-            .into())
+            .await
     }
 }

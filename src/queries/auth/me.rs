@@ -1,13 +1,12 @@
 use serde::{Deserialize, Serialize};
 
 use crate::client::Request;
-use crate::models::Me;
 use crate::queries::raw::RawMe;
 use crate::{Client, Result};
 
 #[derive(Deserialize)]
-struct Response {
-    me: RawMe,
+pub(crate) struct Response {
+    pub(crate) me: RawMe,
 }
 
 #[derive(Serialize)]
@@ -19,13 +18,11 @@ impl MeQuery {
 }
 
 impl Request for MeQuery {
-    type Target = Me;
+    type Target = Response;
 
-    async fn send_request(&self, client: &Client) -> Result<Me> {
-        Ok(client
-            .send_query::<_, Response>("MeQuery", include_str!("graphql/MeQuery.graphql"), self)
-            .await?
-            .me
-            .into())
+    async fn send_request(&self, client: &Client) -> Result<Response> {
+        client
+            .send_query("MeQuery", include_str!("graphql/MeQuery.graphql"), self)
+            .await
     }
 }

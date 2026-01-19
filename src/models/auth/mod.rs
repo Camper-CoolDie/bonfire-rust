@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::client::Request;
 use crate::models::Me;
-use crate::queries::auth::{LoginEmailQuery, LogoutQuery, MeQuery, RefreshQuery};
+use crate::queries::auth::{LoginEmailQuery, LoginResult, LogoutQuery, MeQuery, RefreshQuery};
 use crate::{Client, Result};
 
 /// Represents an authentication session.
@@ -41,13 +41,21 @@ impl Auth {
     /// # }
     /// ```
     pub async fn me(client: &Client) -> Result<Me> {
-        MeQuery::new().send_request(client).await
+        MeQuery::new()
+            .send_request(client)
+            .await
+            .map(|r| r.me.into())
     }
 
     pub(crate) async fn login(client: &Client, email: &str, password: &str) -> Result<Self> {
-        LoginEmailQuery::new(email, password)
+        match LoginEmailQuery::new(email, password)
             .send_request(client)
-            .await
+            .await?
+            .result
+        {
+            LoginResult::Success(success) => Ok(success.into()),
+            LoginResult::TfaRequired(error) => Err(Error::TfaRequired(error.into()).into()),
+        }
     }
 
     pub(crate) async fn logout(client: &Client) -> Result<()> {
@@ -58,5 +66,6 @@ impl Auth {
         RefreshQuery::new(&self.access_token)
             .send_request(client)
             .await
+            .map(|r| r.auth.into())
     }
 }

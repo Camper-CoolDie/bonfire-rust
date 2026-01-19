@@ -1,13 +1,12 @@
 use serde::{Deserialize, Serialize};
 
 use crate::client::Request;
-use crate::models::Account;
 use crate::requests::raw::RawAccount;
 use crate::{Client, Result};
 
 #[derive(Deserialize)]
-struct Response {
-    account: RawAccount,
+pub(crate) struct Response {
+    pub(crate) account: RawAccount,
 }
 
 #[derive(Serialize)]
@@ -28,13 +27,11 @@ impl<'a> GetAccountRequest<'a> {
 }
 
 impl Request for GetAccountRequest<'_> {
-    type Target = Account;
+    type Target = Response;
 
-    async fn send_request(&self, client: &Client) -> Result<Account> {
+    async fn send_request(&self, client: &Client) -> Result<Response> {
         client
-            .send_request::<_, Response>("RAccountsGet", self, Vec::default())
-            .await?
-            .account
-            .try_into()
+            .send_request("RAccountsGet", self, Vec::default())
+            .await
     }
 }

@@ -2,13 +2,12 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 use crate::client::Request;
-use crate::models::Account;
 use crate::requests::raw::RawAccount;
 use crate::{Client, Result};
 
 #[derive(Deserialize)]
-struct Response {
-    accounts: Vec<RawAccount>,
+pub(crate) struct Response {
+    pub(crate) accounts: Vec<RawAccount>,
 }
 
 #[derive(Serialize)]
@@ -27,15 +26,11 @@ impl GetOnlineRequest {
 }
 
 impl Request for GetOnlineRequest {
-    type Target = Vec<Account>;
+    type Target = Response;
 
-    async fn send_request(&self, client: &Client) -> Result<Vec<Account>> {
+    async fn send_request(&self, client: &Client) -> Result<Response> {
         client
-            .send_request::<_, Response>("RAccountsGetAllOnline", self, Vec::default())
-            .await?
-            .accounts
-            .into_iter()
-            .map(TryInto::try_into)
-            .collect()
+            .send_request("RAccountsGetAllOnline", self, Vec::default())
+            .await
     }
 }

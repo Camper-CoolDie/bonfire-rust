@@ -2,14 +2,13 @@ use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 
 use crate::client::Request;
-use crate::models::Me;
 use crate::queries::raw::RawMe;
 use crate::{Client, Result};
 
 #[derive(Deserialize)]
-struct Response {
+pub(crate) struct Response {
     #[serde(rename = "setBirthday")]
-    me: RawMe,
+    pub(crate) me: RawMe,
 }
 
 #[derive(Serialize)]
@@ -23,17 +22,15 @@ impl SetBirthdayQuery {
 }
 
 impl Request for SetBirthdayQuery {
-    type Target = Me;
+    type Target = Response;
 
-    async fn send_request(&self, client: &Client) -> Result<Me> {
-        Ok(client
+    async fn send_request(&self, client: &Client) -> Result<Response> {
+        client
             .send_query::<_, Response>(
                 "SetBirthdayMutation",
                 include_str!("graphql/SetBirthdayMutation.graphql"),
                 self,
             )
-            .await?
-            .me
-            .into())
+            .await
     }
 }
