@@ -22,7 +22,7 @@ impl<'a> GetInfoRequest<'a> {
 }
 
 impl Request for GetInfoRequest<'_> {
-    type Target = RawInfo;
+    type Response = RawInfo;
 
     async fn send_request(&self, client: &Client) -> Result<RawInfo> {
         client

@@ -39,7 +39,7 @@ impl<'a> LoginEmailQuery<'a> {
 }
 
 impl Request for LoginEmailQuery<'_> {
-    type Target = Response;
+    type Response = Response;
 
     async fn send_request(&self, client: &Client) -> Result<Response> {
         client

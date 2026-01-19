@@ -18,7 +18,7 @@ impl MeQuery {
 }
 
 impl Request for MeQuery {
-    type Target = Response;
+    type Response = Response;
 
     async fn send_request(&self, client: &Client) -> Result<Response> {
         client

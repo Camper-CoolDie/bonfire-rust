@@ -3,7 +3,7 @@ use serde::Serialize;
 use crate::client::{EmptyResponse, Request};
 use crate::{Client, Result};
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone)]
 pub(crate) struct SetAgeRequest {
     age: i64,
 }
@@ -16,12 +16,11 @@ impl SetAgeRequest {
 }
 
 impl Request for SetAgeRequest {
-    type Target = ();
+    type Response = EmptyResponse;
 
-    async fn send_request(&self, client: &Client) -> Result<()> {
+    async fn send_request(&self, client: &Client) -> Result<EmptyResponse> {
         client
-            .send_request::<_, EmptyResponse>("RAccountsBioSetAge", self, Vec::default())
-            .await?;
-        Ok(())
+            .send_request("RAccountsBioSetAge", self, Vec::default())
+            .await
     }
 }

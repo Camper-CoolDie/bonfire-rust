@@ -28,7 +28,7 @@ impl<'a> SearchAccountsRequest<'a> {
 }
 
 impl Request for SearchAccountsRequest<'_> {
-    type Target = Response;
+    type Response = Response;
 
     async fn send_request(&self, client: &Client) -> Result<Response> {
         client

@@ -22,11 +22,11 @@ impl SetBirthdayQuery {
 }
 
 impl Request for SetBirthdayQuery {
-    type Target = Response;
+    type Response = Response;
 
     async fn send_request(&self, client: &Client) -> Result<Response> {
         client
-            .send_query::<_, Response>(
+            .send_query(
                 "SetBirthdayMutation",
                 include_str!("graphql/SetBirthdayMutation.graphql"),
                 self,

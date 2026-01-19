@@ -26,7 +26,7 @@ impl GetOnlineRequest {
 }
 
 impl Request for GetOnlineRequest {
-    type Target = Response;
+    type Response = Response;
 
     async fn send_request(&self, client: &Client) -> Result<Response> {
         client

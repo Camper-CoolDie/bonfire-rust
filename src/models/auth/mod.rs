@@ -59,7 +59,8 @@ impl Auth {
     }
 
     pub(crate) async fn logout(client: &Client) -> Result<()> {
-        LogoutQuery::new().send_request(client).await
+        LogoutQuery::new().send_request(client).await?;
+        Ok(())
     }
 
     pub(crate) async fn refresh(&self, client: &Client) -> Result<Self> {

@@ -22,7 +22,7 @@ impl<'a> RefreshQuery<'a> {
 }
 
 impl Request for RefreshQuery<'_> {
-    type Target = Response;
+    type Response = Response;
 
     async fn send_request(&self, client: &Client) -> Result<Response> {
         client

@@ -12,8 +12,6 @@ use http::{header, HeaderMap, Uri};
 pub use jwt::JwtError;
 use jwt::JwtResult;
 pub(crate) use request::{EmptyResponse, Request};
-use serde::de::DeserializeOwned;
-use serde::Serialize;
 use service::{MeliorService, RootService};
 use token_provider::TokenProvider;
 
@@ -177,12 +175,12 @@ impl Client {
         self.inner.token_provider.get_auth(self).await
     }
 
-    pub(crate) async fn send_request<R: Serialize, S: DeserializeOwned>(
+    pub(crate) async fn send_request<R: Request>(
         &self,
         request_name: &'static str,
-        content: R,
+        content: &R,
         attachments: Vec<&[u8]>,
-    ) -> Result<S> {
+    ) -> Result<R::Response> {
         tracing::info!(request_name, "sending request");
         let token = self.inner.token_provider.get_token(self).await?;
 
@@ -207,12 +205,12 @@ impl Client {
             .inspect_err(|error| tracing::error!(?error, "failed to send request"))
     }
 
-    pub(crate) async fn send_query<R: Serialize, S: DeserializeOwned>(
+    pub(crate) async fn send_query<R: Request>(
         &self,
         operation_name: &'static str,
         query: &'static str,
-        variables: R,
-    ) -> Result<S> {
+        variables: &R,
+    ) -> Result<R::Response> {
         tracing::info!(operation_name, "sending query");
         let token = self.inner.token_provider.get_token(self).await?;
 
@@ -232,12 +230,12 @@ impl Client {
     }
 
     // `send_query` that doesn't validate credentials
-    pub(crate) async fn send_refresh_query<R: Serialize, S: DeserializeOwned>(
+    pub(crate) async fn send_refresh_query<R: Request>(
         &self,
         operation_name: &'static str,
         query: &'static str,
-        variables: R,
-    ) -> Result<S> {
+        variables: &R,
+    ) -> Result<R::Response> {
         tracing::info!(operation_name, "sending refresh query");
 
         self.inner

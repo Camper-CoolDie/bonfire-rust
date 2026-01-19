@@ -16,12 +16,11 @@ impl<'a> SetStatusRequest<'a> {
 }
 
 impl Request for SetStatusRequest<'_> {
-    type Target = ();
+    type Response = EmptyResponse;
 
-    async fn send_request(&self, client: &Client) -> Result<()> {
+    async fn send_request(&self, client: &Client) -> Result<EmptyResponse> {
         client
-            .send_request::<_, EmptyResponse>("RAccountsStatusSet", self, Vec::default())
-            .await?;
-        Ok(())
+            .send_request("RAccountsStatusSet", self, Vec::default())
+            .await
     }
 }
