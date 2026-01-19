@@ -6,8 +6,8 @@ use hyper_util::client::legacy::connect::HttpConnector;
 use hyper_util::client::legacy::Client as HyperClient;
 use hyper_util::rt::TokioExecutor;
 
-use crate::client::Request;
 use crate::client::service::USER_AGENT;
+use crate::client::Request;
 use crate::{Error, Result, RootError, RootRequest, RootResponse};
 
 pub(crate) struct RootService {
