@@ -7,7 +7,7 @@ use crate::queries::raw::RawMe;
 use crate::{Client, Result};
 
 #[derive(Deserialize)]
-struct Response {
+pub(crate) struct Response {
     #[serde(rename = "setBirthday")]
     me: RawMe,
 }
@@ -23,11 +23,12 @@ impl SetBirthdayQuery {
 }
 
 impl Request for SetBirthdayQuery {
+    type Response = Response;
     type Target = Me;
 
     async fn send_request(&self, client: &Client) -> Result<Me> {
         Ok(client
-            .send_query::<_, Response>(
+            .send_query(
                 "SetBirthdayMutation",
                 include_str!("graphql/SetBirthdayMutation.graphql"),
                 self,

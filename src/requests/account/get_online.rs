@@ -7,7 +7,7 @@ use crate::requests::raw::RawAccount;
 use crate::{Client, Result};
 
 #[derive(Deserialize)]
-struct Response {
+pub(crate) struct Response {
     accounts: Vec<RawAccount>,
 }
 
@@ -25,11 +25,12 @@ impl GetOnlineRequest {
 }
 
 impl Request for GetOnlineRequest {
+    type Response = Response;
     type Target = Vec<Account>;
 
     async fn send_request(&self, client: &Client) -> Result<Vec<Account>> {
         client
-            .send_request::<_, Response>("RAccountsGetAllOnline", self, Vec::default())
+            .send_request("RAccountsGetAllOnline", self, Vec::default())
             .await?
             .accounts
             .into_iter()

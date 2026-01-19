@@ -23,11 +23,12 @@ impl<'a> GetInfoRequest<'a> {
 }
 
 impl Request for GetInfoRequest<'_> {
+    type Response = RawInfo;
     type Target = Info;
 
     async fn send_request(&self, client: &Client) -> Result<Info> {
         client
-            .send_request::<_, RawInfo>("RAccountsGetProfile", self, Vec::default())
+            .send_request("RAccountsGetProfile", self, Vec::default())
             .await?
             .try_into()
     }

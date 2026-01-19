@@ -6,7 +6,7 @@ use crate::requests::raw::RawAccount;
 use crate::{Client, Result};
 
 #[derive(Deserialize)]
-struct Response {
+pub(crate) struct Response {
     accounts: Vec<RawAccount>,
 }
 
@@ -29,11 +29,12 @@ impl<'a> SearchAccountsRequest<'a> {
 }
 
 impl Request for SearchAccountsRequest<'_> {
+    type Response = Response;
     type Target = Vec<Account>;
 
     async fn send_request(&self, client: &Client) -> Result<Vec<Account>> {
         client
-            .send_request::<_, Response>("RAccountsGetAll", self, Vec::default())
+            .send_request("RAccountsGetAll", self, Vec::default())
             .await?
             .accounts
             .into_iter()

@@ -17,7 +17,7 @@ enum LoginResult {
 }
 
 #[derive(Deserialize)]
-struct Response {
+pub(crate) struct Response {
     #[serde(rename = "loginEmail")]
     result: LoginResult,
 }
@@ -41,11 +41,12 @@ impl<'a> LoginEmailQuery<'a> {
 }
 
 impl Request for LoginEmailQuery<'_> {
+    type Response = Response;
     type Target = Auth;
 
     async fn send_request(&self, client: &Client) -> Result<Auth> {
         match client
-            .send_query::<_, Response>(
+            .send_query(
                 "LoginEmailMutation",
                 include_str!("graphql/LoginEmailMutation.graphql"),
                 self,

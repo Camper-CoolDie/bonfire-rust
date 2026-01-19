@@ -6,7 +6,7 @@ use crate::queries::raw::RawAuth;
 use crate::{Client, Result};
 
 #[derive(Deserialize)]
-struct Response {
+pub(crate) struct Response {
     #[serde(rename = "loginRefresh")]
     auth: RawAuth,
 }
@@ -23,11 +23,12 @@ impl<'a> RefreshQuery<'a> {
 }
 
 impl Request for RefreshQuery<'_> {
+    type Response = Response;
     type Target = Auth;
 
     async fn send_request(&self, client: &Client) -> Result<Auth> {
         Ok(client
-            .send_refresh_query::<_, Response>(
+            .send_refresh_query(
                 "LoginRefreshMutation",
                 include_str!("graphql/LoginRefreshMutation.graphql"),
                 self,

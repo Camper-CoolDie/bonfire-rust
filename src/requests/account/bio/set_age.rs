@@ -16,11 +16,12 @@ impl SetAgeRequest {
 }
 
 impl Request for SetAgeRequest {
+    type Response = EmptyResponse;
     type Target = ();
 
     async fn send_request(&self, client: &Client) -> Result<()> {
         client
-            .send_request::<_, EmptyResponse>("RAccountsBioSetAge", self, Vec::default())
+            .send_request("RAccountsBioSetAge", self, Vec::default())
             .await?;
         Ok(())
     }
