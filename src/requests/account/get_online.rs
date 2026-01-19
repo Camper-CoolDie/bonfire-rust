@@ -19,9 +19,7 @@ pub(crate) struct GetOnlineRequest {
 impl GetOnlineRequest {
     pub(crate) fn new(offset_date: Option<DateTime<Utc>>) -> Self {
         Self {
-            offset_date: offset_date
-                .map(|datetime| datetime.timestamp_millis())
-                .unwrap_or(0),
+            offset_date: offset_date.map(|date| date.timestamp_millis()).unwrap_or(0),
         }
     }
 }

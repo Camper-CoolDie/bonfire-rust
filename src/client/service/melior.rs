@@ -68,9 +68,9 @@ impl MeliorService {
         let response = self.hyper_client.request(request).await?;
 
         let status = response.status();
-        status
-            .is_success()
-            .then_some(response.collect().await?.to_bytes())
-            .ok_or(Error::UnsuccessfulResponse(status))
+        match status.is_success() {
+            true => Ok(response.collect().await?.to_bytes()),
+            false => Err(Error::UnsuccessfulResponse(status)),
+        }
     }
 }

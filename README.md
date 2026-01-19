@@ -12,7 +12,7 @@ bonfire is an asynchronous Rust client library for the [Bonfire](https://github.
 
 ## Example
 
-```rust,no_run
+```rust
 use std::fs;
 use std::fs::File;
 use std::io::Write;

@@ -29,7 +29,7 @@ pub(crate) struct RawAccountCustomization {
 impl From<RawAccountCustomization> for AccountCustomization {
     fn from(value: RawAccountCustomization) -> Self {
         Self {
-            name_color: value.name_color,
+            name_color: value.name_color.map(|color| color as u32),
             active_badge: value.active_badge.map(Into::into),
         }
     }

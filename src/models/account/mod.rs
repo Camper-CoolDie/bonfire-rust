@@ -25,7 +25,7 @@ pub const ONLINE_DURATION: Duration = Duration::minutes(15);
 #[derive(Default, Clone, Debug)]
 pub struct AccountCustomization {
     /// The account's name color
-    pub name_color: Option<i32>,
+    pub name_color: Option<u32>,
     /// The account's active badge
     pub active_badge: Option<Badge>,
 }
