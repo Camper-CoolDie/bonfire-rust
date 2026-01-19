@@ -17,12 +17,10 @@ impl<'a> SetDescriptionRequest<'a> {
 
 impl Request for SetDescriptionRequest<'_> {
     type Response = EmptyResponse;
-    type Target = ();
 
-    async fn send_request(&self, client: &Client) -> Result<()> {
+    async fn send_request(&self, client: &Client) -> Result<EmptyResponse> {
         client
             .send_request("RAccountsBioSetDescription", self, Vec::default())
-            .await?;
-        Ok(())
+            .await
     }
 }

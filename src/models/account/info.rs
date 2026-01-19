@@ -84,7 +84,10 @@ impl Info {
     /// account with the provided identifier or [Error][crate::Error] if any other error occurred
     /// while sending the request.
     pub async fn get_by_id(client: &Client, id: u64) -> Result<Self> {
-        GetInfoRequest::new_by_id(id).send_request(client).await
+        GetInfoRequest::new_by_id(id)
+            .send_request(client)
+            .await?
+            .try_into()
     }
 
     /// Get account information by its name.
@@ -95,7 +98,10 @@ impl Info {
     /// account with the provided name or [Error][crate::Error] if any other error occurred while
     /// sending the request.
     pub async fn get_by_name(client: &Client, name: &str) -> Result<Self> {
-        GetInfoRequest::new_by_name(name).send_request(client).await
+        GetInfoRequest::new_by_name(name)
+            .send_request(client)
+            .await?
+            .try_into()
     }
 
     /// Set your age. Must be within [AGE_RANGE]. Zero or `None` means no age.

@@ -46,7 +46,7 @@ impl Me {
     /// # }
     /// ```
     pub async fn get(client: &Client) -> Result<Self> {
-        MeQuery::new().send_request(client).await
+        Ok(MeQuery::new().send_request(client).await?.into())
     }
 
     /// Set your birthday.
@@ -71,6 +71,9 @@ impl Me {
     /// # }
     /// ```
     pub async fn set_birthday(client: &Client, birthday: NaiveDate) -> Result<Me> {
-        SetBirthdayQuery::new(birthday).send_request(client).await
+        Ok(SetBirthdayQuery::new(birthday)
+            .send_request(client)
+            .await?
+            .into())
     }
 }

@@ -1,11 +1,11 @@
 use chrono::DateTime;
-use serde::de::Error;
+use serde::de::Error as _;
 use serde::Deserialize;
 use serde_repr::Deserialize_repr;
 
 use crate::models::account::{EffectKind, EffectReasonKind};
 use crate::models::Effect;
-use crate::Result;
+use crate::{Error, Result};
 
 #[derive(Deserialize_repr)]
 #[repr(i64)]
@@ -82,7 +82,7 @@ pub(crate) struct RawEffect {
 }
 
 impl TryFrom<RawEffect> for Effect {
-    type Error = crate::Error;
+    type Error = Error;
 
     fn try_from(value: RawEffect) -> Result<Self> {
         Ok(Self {

@@ -1,8 +1,8 @@
 use chrono::DateTime;
-use serde::de::Error;
+use serde::de::Error as _;
 use serde::Deserialize;
 
-use crate::{Result, RootError, UnavailableError};
+use crate::{Error, Result, RootError, UnavailableError};
 
 #[derive(Deserialize)]
 #[serde(tag = "code")]
@@ -30,7 +30,7 @@ pub(crate) enum RawRootError {
 }
 
 impl TryFrom<RawRootError> for RootError {
-    type Error = crate::Error;
+    type Error = Error;
 
     fn try_from(value: RawRootError) -> Result<Self> {
         Ok(match value {
@@ -97,7 +97,7 @@ pub(crate) enum RawUnavailableError {
 }
 
 impl TryFrom<RawUnavailableError> for UnavailableError {
-    type Error = crate::Error;
+    type Error = Error;
 
     fn try_from(value: RawUnavailableError) -> Result<Self> {
         Ok(match value {

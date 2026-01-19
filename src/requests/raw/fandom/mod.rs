@@ -1,12 +1,12 @@
 use chrono::DateTime;
-use serde::de::Error;
+use serde::de::Error as _;
 use serde::Deserialize;
 use serde_repr::Deserialize_repr;
 
 use crate::models::fandom::FandomStatus;
 use crate::models::{Fandom, Language};
 use crate::requests::raw::{RawCategory, RawImageRef};
-use crate::Result;
+use crate::{Error, Result};
 
 #[derive(Deserialize_repr)]
 #[repr(i64)]
@@ -52,7 +52,7 @@ pub(crate) struct RawFandom {
 }
 
 impl TryFrom<RawFandom> for Fandom {
-    type Error = crate::Error;
+    type Error = Error;
 
     fn try_from(value: RawFandom) -> Result<Self> {
         let language = match value.language {

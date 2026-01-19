@@ -4,11 +4,19 @@ use serde::{Deserialize, Serialize};
 use crate::client::Request;
 use crate::models::Account;
 use crate::requests::raw::RawAccount;
-use crate::{Client, Result};
+use crate::{Client, Error, Result};
 
 #[derive(Deserialize)]
 pub(crate) struct Response {
     accounts: Vec<RawAccount>,
+}
+
+impl TryFrom<Response> for Vec<Account> {
+    type Error = Error;
+
+    fn try_from(value: Response) -> Result<Self> {
+        value.accounts.into_iter().map(TryInto::try_into).collect()
+    }
 }
 
 #[derive(Serialize)]
@@ -26,15 +34,10 @@ impl GetOnlineRequest {
 
 impl Request for GetOnlineRequest {
     type Response = Response;
-    type Target = Vec<Account>;
 
-    async fn send_request(&self, client: &Client) -> Result<Vec<Account>> {
+    async fn send_request(&self, client: &Client) -> Result<Response> {
         client
             .send_request("RAccountsGetAllOnline", self, Vec::default())
-            .await?
-            .accounts
-            .into_iter()
-            .map(TryInto::try_into)
-            .collect()
+            .await
     }
 }

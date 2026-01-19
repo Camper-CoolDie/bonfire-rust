@@ -11,6 +11,12 @@ pub(crate) struct Response {
     auth: RawAuth,
 }
 
+impl From<Response> for Auth {
+    fn from(value: Response) -> Self {
+        value.auth.into()
+    }
+}
+
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct RefreshQuery<'a> {
@@ -24,17 +30,14 @@ impl<'a> RefreshQuery<'a> {
 
 impl Request for RefreshQuery<'_> {
     type Response = Response;
-    type Target = Auth;
 
-    async fn send_request(&self, client: &Client) -> Result<Auth> {
-        Ok(client
+    async fn send_request(&self, client: &Client) -> Result<Response> {
+        client
             .send_refresh_query(
                 "LoginRefreshMutation",
                 include_str!("graphql/LoginRefreshMutation.graphql"),
                 self,
             )
-            .await?
-            .auth
-            .into())
+            .await
     }
 }

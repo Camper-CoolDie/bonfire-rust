@@ -41,13 +41,14 @@ impl Auth {
     /// # }
     /// ```
     pub async fn me(client: &Client) -> Result<Me> {
-        MeQuery::new().send_request(client).await
+        Ok(MeQuery::new().send_request(client).await?.into())
     }
 
     pub(crate) async fn login(client: &Client, email: &str, password: &str) -> Result<Self> {
         LoginEmailQuery::new(email, password)
             .send_request(client)
-            .await
+            .await?
+            .try_into()
     }
 
     pub(crate) async fn logout(client: &Client) -> Result<()> {
@@ -56,8 +57,9 @@ impl Auth {
     }
 
     pub(crate) async fn refresh(&self, client: &Client) -> Result<Self> {
-        RefreshQuery::new(&self.access_token)
+        Ok(RefreshQuery::new(&self.access_token)
             .send_request(client)
-            .await
+            .await?
+            .into())
     }
 }

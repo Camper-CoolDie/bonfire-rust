@@ -1,7 +1,6 @@
 use serde::Serialize;
 
 use crate::client::Request;
-use crate::models::account::Info;
 use crate::requests::raw::account::RawInfo;
 use crate::{Client, Result};
 
@@ -24,12 +23,10 @@ impl<'a> GetInfoRequest<'a> {
 
 impl Request for GetInfoRequest<'_> {
     type Response = RawInfo;
-    type Target = Info;
 
-    async fn send_request(&self, client: &Client) -> Result<Info> {
+    async fn send_request(&self, client: &Client) -> Result<RawInfo> {
         client
             .send_request("RAccountsGetProfile", self, Vec::default())
-            .await?
-            .try_into()
+            .await
     }
 }

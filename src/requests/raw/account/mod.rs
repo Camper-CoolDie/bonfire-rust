@@ -10,13 +10,13 @@ pub(crate) use effect::{RawEffect, RawEffectKind, RawEffectReasonKind};
 pub(crate) use gender::RawGender;
 pub(crate) use info::RawInfo;
 pub(crate) use link::RawLink;
-use serde::de::Error;
+use serde::de::Error as _;
 use serde::Deserialize;
 
 use crate::models::account::AccountCustomization;
 use crate::models::{Account, Effect};
 use crate::requests::raw::RawImageRef;
-use crate::Result;
+use crate::{Error, Result};
 
 #[derive(Deserialize)]
 pub(crate) struct RawAccountCustomization {
@@ -60,7 +60,7 @@ pub(crate) struct RawAccount {
 }
 
 impl TryFrom<RawAccount> for Account {
-    type Error = crate::Error;
+    type Error = Error;
 
     fn try_from(value: RawAccount) -> Result<Self> {
         Ok(Self {

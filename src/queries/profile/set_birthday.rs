@@ -12,6 +12,12 @@ pub(crate) struct Response {
     me: RawMe,
 }
 
+impl From<Response> for Me {
+    fn from(value: Response) -> Self {
+        value.me.into()
+    }
+}
+
 #[derive(Serialize)]
 pub(crate) struct SetBirthdayQuery {
     birthday: NaiveDate,
@@ -24,17 +30,14 @@ impl SetBirthdayQuery {
 
 impl Request for SetBirthdayQuery {
     type Response = Response;
-    type Target = Me;
 
-    async fn send_request(&self, client: &Client) -> Result<Me> {
-        Ok(client
+    async fn send_request(&self, client: &Client) -> Result<Response> {
+        client
             .send_query(
                 "SetBirthdayMutation",
                 include_str!("graphql/SetBirthdayMutation.graphql"),
                 self,
             )
-            .await?
-            .me
-            .into())
+            .await
     }
 }

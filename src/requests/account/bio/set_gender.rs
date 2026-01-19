@@ -20,12 +20,10 @@ impl SetGenderRequest {
 
 impl Request for SetGenderRequest {
     type Response = EmptyResponse;
-    type Target = ();
 
-    async fn send_request(&self, client: &Client) -> Result<()> {
+    async fn send_request(&self, client: &Client) -> Result<EmptyResponse> {
         client
             .send_request("RAccountsBioSetSex", self, Vec::default())
-            .await?;
-        Ok(())
+            .await
     }
 }

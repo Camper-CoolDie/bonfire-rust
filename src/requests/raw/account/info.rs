@@ -1,10 +1,10 @@
 use chrono::{DateTime, Utc};
-use serde::de::Error;
+use serde::de::Error as _;
 use serde::Deserialize;
 
 use crate::models::account::Info;
 use crate::requests::raw::{RawImageRef, RawLink, RawPost, RawPublication};
-use crate::Result;
+use crate::{Error, Result};
 
 #[derive(Deserialize)]
 struct Links {
@@ -58,7 +58,7 @@ pub(crate) struct RawInfo {
 }
 
 impl TryFrom<RawInfo> for Info {
-    type Error = crate::Error;
+    type Error = Error;
 
     fn try_from(value: RawInfo) -> Result<Self> {
         Ok(Self {

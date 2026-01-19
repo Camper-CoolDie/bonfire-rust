@@ -2,7 +2,7 @@ use serde::Deserialize;
 
 use crate::models::Post;
 use crate::requests::raw::publication::{RawPublicationInheritor, RawPublicationKind};
-use crate::Result;
+use crate::{Error, Result};
 
 #[derive(Deserialize)]
 struct InnerData {
@@ -37,7 +37,7 @@ impl RawPublicationInheritor for RawPost {
 }
 
 impl TryFrom<RawPost> for Post {
-    type Error = crate::Error;
+    type Error = Error;
 
     fn try_from(value: RawPost) -> Result<Self> {
         Ok(Self {

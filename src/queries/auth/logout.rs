@@ -13,16 +13,14 @@ impl LogoutQuery {
 
 impl Request for LogoutQuery {
     type Response = EmptyResponse;
-    type Target = ();
 
-    async fn send_request(&self, client: &Client) -> Result<()> {
+    async fn send_request(&self, client: &Client) -> Result<EmptyResponse> {
         client
             .send_query(
                 "LogoutMutation",
                 include_str!("graphql/LogoutMutation.graphql"),
                 self,
             )
-            .await?;
-        Ok(())
+            .await
     }
 }

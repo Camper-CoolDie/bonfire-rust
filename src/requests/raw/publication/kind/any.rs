@@ -3,7 +3,7 @@ use serde_json::Value;
 use crate::models::AnyPublication;
 use crate::requests::raw::publication::{RawPublicationInheritor, RawPublicationKind};
 use crate::requests::raw::RawPost;
-use crate::Result;
+use crate::{Error, Result};
 
 pub(crate) enum AnyRawPublication {
     Unknown,
@@ -44,7 +44,7 @@ impl RawPublicationInheritor for AnyRawPublication {
 }
 
 impl TryFrom<AnyRawPublication> for AnyPublication {
-    type Error = crate::Error;
+    type Error = Error;
 
     fn try_from(value: AnyRawPublication) -> Result<Self> {
         Ok(match value {

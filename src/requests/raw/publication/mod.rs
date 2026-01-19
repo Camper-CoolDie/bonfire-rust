@@ -6,7 +6,7 @@ use std::marker::PhantomData;
 use chrono::DateTime;
 pub(crate) use kind::*;
 pub(crate) use reaction::RawReaction;
-use serde::de::Error;
+use serde::de::Error as _;
 use serde::Deserialize;
 use serde_json::Value;
 use serde_repr::Deserialize_repr;
@@ -14,7 +14,7 @@ use serde_repr::Deserialize_repr;
 use crate::models::publication::{PublicationInheritor, PublicationKind, PublicationStatus};
 use crate::models::{Account, Fandom, Publication};
 use crate::requests::raw::{RawAccount, RawCategory, RawFandom};
-use crate::Result;
+use crate::{Error, Result};
 
 pub(crate) trait RawPublicationInheritor: Sized {
     type Target: PublicationInheritor;
@@ -87,9 +87,9 @@ pub(crate) struct RawPublication<T: RawPublicationInheritor = AnyRawPublication>
 impl<T: RawPublicationInheritor> TryFrom<RawPublication<T>> for Publication<T::Target>
 where
     T::Target: TryFrom<T>,
-    crate::Error: From<<T::Target as TryFrom<T>>::Error>,
+    Error: From<<T::Target as TryFrom<T>>::Error>,
 {
-    type Error = crate::Error;
+    type Error = Error;
 
     fn try_from(value: RawPublication<T>) -> Result<Self> {
         let parent_kind = match value.parent_kind {

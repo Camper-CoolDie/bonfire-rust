@@ -8,7 +8,6 @@ pub(crate) struct EmptyResponse {}
 
 pub(crate) trait Request: Serialize {
     type Response: DeserializeOwned;
-    type Target;
 
-    async fn send_request(&self, client: &Client) -> Result<Self::Target>;
+    async fn send_request(&self, client: &Client) -> Result<Self::Response>;
 }

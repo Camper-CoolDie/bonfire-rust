@@ -71,7 +71,10 @@ impl Account {
     /// account with the provided identifier or [Error][crate::Error] if any other error occurred
     /// while sending the request.
     pub async fn get_by_id(client: &Client, id: u64) -> Result<Self> {
-        GetAccountRequest::new_by_id(id).send_request(client).await
+        GetAccountRequest::new_by_id(id)
+            .send_request(client)
+            .await?
+            .try_into()
     }
 
     /// Get an account by its name. Doesn't require authentication.
@@ -84,7 +87,8 @@ impl Account {
     pub async fn get_by_name(client: &Client, name: &str) -> Result<Self> {
         GetAccountRequest::new_by_name(name)
             .send_request(client)
-            .await
+            .await?
+            .try_into()
     }
 
     /// Search for accounts by their name.
@@ -100,7 +104,8 @@ impl Account {
     ) -> Result<Vec<Self>> {
         SearchAccountsRequest::new(name, offset, follows_only)
             .send_request(client)
-            .await
+            .await?
+            .try_into()
     }
 
     /// Get [Info] about this account.
@@ -113,7 +118,8 @@ impl Account {
     pub async fn info(&self, client: &Client) -> Result<Info> {
         GetInfoRequest::new_by_id(self.id)
             .send_request(client)
-            .await
+            .await?
+            .try_into()
     }
 
     /// Get a list of accounts that are currently online (that were active less than
@@ -128,6 +134,7 @@ impl Account {
     ) -> Result<Vec<Self>> {
         GetOnlineRequest::new(offset_date)
             .send_request(client)
-            .await
+            .await?
+            .try_into()
     }
 }

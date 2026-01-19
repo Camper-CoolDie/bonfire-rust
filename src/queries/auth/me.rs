@@ -10,6 +10,12 @@ pub(crate) struct Response {
     me: RawMe,
 }
 
+impl From<Response> for Me {
+    fn from(value: Response) -> Self {
+        value.me.into()
+    }
+}
+
 #[derive(Serialize)]
 pub(crate) struct MeQuery {}
 impl MeQuery {
@@ -20,13 +26,10 @@ impl MeQuery {
 
 impl Request for MeQuery {
     type Response = Response;
-    type Target = Me;
 
-    async fn send_request(&self, client: &Client) -> Result<Me> {
-        Ok(client
+    async fn send_request(&self, client: &Client) -> Result<Response> {
+        client
             .send_query("MeQuery", include_str!("graphql/MeQuery.graphql"), self)
-            .await?
-            .me
-            .into())
+            .await
     }
 }

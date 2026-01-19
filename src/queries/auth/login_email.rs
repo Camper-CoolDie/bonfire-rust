@@ -1,11 +1,10 @@
 use serde::{Deserialize, Serialize};
 
 use crate::client::Request;
-use crate::models::auth::Error;
-use crate::models::Auth;
+use crate::models::{Auth, AuthError};
 use crate::queries::raw::auth::RawTfaRequired;
 use crate::queries::raw::RawAuth;
-use crate::{Client, Result};
+use crate::{Client, Error, Result};
 
 #[derive(Deserialize)]
 #[serde(tag = "__typename")]
@@ -20,6 +19,17 @@ enum LoginResult {
 pub(crate) struct Response {
     #[serde(rename = "loginEmail")]
     result: LoginResult,
+}
+
+impl TryFrom<Response> for Auth {
+    type Error = Error;
+
+    fn try_from(value: Response) -> Result<Self> {
+        match value.result {
+            LoginResult::Success(success) => Ok(success.into()),
+            LoginResult::TfaRequired(error) => Err(AuthError::TfaRequired(error.into()).into()),
+        }
+    }
 }
 
 #[derive(Serialize)]
@@ -42,20 +52,14 @@ impl<'a> LoginEmailQuery<'a> {
 
 impl Request for LoginEmailQuery<'_> {
     type Response = Response;
-    type Target = Auth;
 
-    async fn send_request(&self, client: &Client) -> Result<Auth> {
-        match client
+    async fn send_request(&self, client: &Client) -> Result<Response> {
+        client
             .send_query(
                 "LoginEmailMutation",
                 include_str!("graphql/LoginEmailMutation.graphql"),
                 self,
             )
-            .await?
-            .result
-        {
-            LoginResult::Success(success) => Ok(success.into()),
-            LoginResult::TfaRequired(error) => Err(Error::TfaRequired(error.into()).into()),
-        }
+            .await
     }
 }
