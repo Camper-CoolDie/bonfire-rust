@@ -5,7 +5,7 @@ mod service;
 mod token_provider;
 
 use std::fmt;
-use std::sync::Arc;
+use std::sync::{Arc, LazyLock};
 
 pub use error::{Error, Result};
 use http::{header, HeaderMap, Uri};
@@ -21,8 +21,10 @@ use crate::{MeliorQuery, RootRequest};
 
 // It's great when we can test our requests against a test server, hence the ability to specify
 // custom URIs
-const ROOT_SERVER_URI: &str = "https://cf2.bonfire.moe";
-const MELIOR_SERVER_URI: &str = "https://api.bonfire.moe";
+static ROOT_SERVER_URI: LazyLock<Uri> =
+    LazyLock::new(|| Uri::from_static("https://cf2.bonfire.moe"));
+static MELIOR_SERVER_URI: LazyLock<Uri> =
+    LazyLock::new(|| Uri::from_static("https://api.bonfire.moe"));
 
 // Some requests require this value and return various responses depending on it
 const API_VERSION: &str = "3.1.0";
@@ -72,9 +74,9 @@ impl Client {
     ///
     /// # Errors
     ///
-    /// * [auth::Error::AlreadyAuthenticated] if the client is already authenticated. You should
-    ///   call [Client::logout()] to terminate the current session
-    /// * [auth::Error::TfaRequired] if TFA is required to continue logging in
+    /// * [`auth::Error::AlreadyAuthenticated`] if the client is already authenticated. You should
+    ///   call [`Client::logout()`] to terminate the current session
+    /// * [`auth::Error::TfaRequired`] if TFA is required to continue logging in
     /// * [Error] if any other error occurred while sending the request.
     ///
     /// # Examples
@@ -104,7 +106,7 @@ impl Client {
     ///
     /// # Errors
     ///
-    /// Returns [auth::Error::Unauthenticated] if the client is unauthenticated or [Error] if any
+    /// Returns [`auth::Error::Unauthenticated`] if the client is unauthenticated or [Error] if any
     /// other error occurred while sending the log out request.
     ///
     /// # Examples
@@ -137,7 +139,7 @@ impl Client {
     /// this method since they refresh if needed. Returns `None` if the client is unauthenticated.
     ///
     /// Is usually called at the end of the program, after which the credentials are saved in a
-    /// secure place and used in [ClientBuilder::auth()] when the program runs again.
+    /// secure place and used in [`ClientBuilder::auth()`] when the program runs again.
     ///
     /// # Errors
     ///
@@ -187,7 +189,11 @@ impl Client {
         // Contains the length of each attachment
         let data_output = attachments
             .iter()
-            .map(|slice| (!slice.is_empty()).then_some(slice.len() as u32))
+            .map(
+                // The length of each attachment MUST be checked by the caller
+                #[allow(clippy::cast_possible_truncation)]
+                |slice| (!slice.is_empty()).then_some(slice.len() as u32),
+            )
             .collect::<Vec<Option<u32>>>();
 
         let request = RootRequest {
@@ -218,7 +224,7 @@ impl Client {
         if let Some(token) = token {
             headers.insert(
                 header::AUTHORIZATION,
-                format!("Bearer {}", token).parse().unwrap(),
+                format!("Bearer {token}").parse().unwrap(),
             );
         }
 
@@ -246,6 +252,7 @@ impl Client {
     }
 
     /// Create a new `ClientBuilder` with default values.
+    #[must_use]
     pub fn builder() -> ClientBuilder {
         ClientBuilder::new()
     }
@@ -265,10 +272,11 @@ pub struct ClientBuilder {
 }
 impl ClientBuilder {
     /// Create a new `ClientBuilder` with default values.
+    #[must_use]
     pub fn new() -> Self {
         Self {
-            root_uri: Uri::try_from(ROOT_SERVER_URI).unwrap(),
-            melior_uri: Uri::try_from(MELIOR_SERVER_URI).unwrap(),
+            root_uri: ROOT_SERVER_URI.clone(),
+            melior_uri: MELIOR_SERVER_URI.clone(),
             auth: None,
         }
     }
@@ -293,6 +301,7 @@ impl ClientBuilder {
     ///     .root_uri("http://localhost:7070")
     ///     .build();
     /// ```
+    #[must_use]
     pub fn root_uri<T>(mut self, uri: T) -> Self
     where
         Uri: TryFrom<T>,
@@ -317,6 +326,7 @@ impl ClientBuilder {
     ///     .melior_uri("http://localhost:8000")
     ///     .build();
     /// ```
+    #[must_use]
     pub fn melior_uri<T>(mut self, uri: T) -> Self
     where
         Uri: TryFrom<T>,
@@ -327,6 +337,10 @@ impl ClientBuilder {
     }
 
     /// Set the authentication credentials.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`JwtError`] if an error occurred while parsing the credentials.
     ///
     /// # Examples
     ///

@@ -17,6 +17,9 @@ pub type Result<T> = StdResult<T, Error>;
 /// An `Error` can be the result of operations like constructing a request or parsing a response.
 #[derive(Error, Debug)]
 pub enum Error {
+    /// The provided attachment weights more the server can accept
+    #[error("attachment is too large")]
+    AttachmentTooLarge,
     /// Can't authenticate
     #[error("authentication error")]
     AuthError(#[from] auth::Error),
@@ -41,6 +44,9 @@ pub enum Error {
     /// The melior server returned an error
     #[error("melior server error")]
     MeliorError(#[from] MeliorError),
+    /// The constructed request weights more than the server can accept
+    #[error("request is too large")]
+    RequestTooLarge,
     /// The root server returned an error
     #[error("root server error")]
     RootError(#[from] RootError),
@@ -52,7 +58,7 @@ pub enum Error {
     #[error(
         "unsuccessful response: {}{}",
         .0.as_u16(),
-        .0.canonical_reason().map_or("".to_owned(), |reason| " ".to_owned() + reason))
-    ]
+        .0.canonical_reason().map_or(String::new(), |reason| " ".to_owned() + reason)
+    )]
     UnsuccessfulResponse(StatusCode),
 }

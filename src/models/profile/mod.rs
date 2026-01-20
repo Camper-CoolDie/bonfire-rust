@@ -1,6 +1,6 @@
 use chrono::NaiveDate;
 
-use crate::client::Request;
+use crate::client::Request as _;
 use crate::queries::auth::MeQuery;
 use crate::queries::profile::SetBirthdayQuery;
 use crate::{Client, Result};
@@ -15,7 +15,7 @@ pub struct Me {
     /// Your email
     pub email: String,
     /// Your cached level
-    pub cached_level: f32,
+    pub cached_level: f64,
     /// Your day of birth or `None` if unset
     pub birthday: Option<NaiveDate>,
     /// Are you allowed to see NSFW posts? None if `birthday` is `None`

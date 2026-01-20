@@ -19,7 +19,7 @@ pub(crate) struct RawPost {
     rubric_id: u64,
     rubric_name: String,
     #[serde(rename = "rubricKarmaCof")]
-    rubric_karma_coef: i64,
+    rubric_karma_coef: f64,
     // #[serde(rename = "userActivity")]
     // relay_race: Option<RawRelayRace>,
     #[serde(rename = "jsonDB")]
@@ -54,7 +54,7 @@ impl TryFrom<RawPost> for Post {
             },
             rubric_karma_coef: match value.rubric_id {
                 0 => None,
-                _ => Some(value.rubric_karma_coef as f32 / 100.),
+                _ => Some(value.rubric_karma_coef / 100.),
             },
             // relay_race: value.relay_race.map(TryInto::try_into).transpose()?,
         })

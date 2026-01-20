@@ -1,9 +1,9 @@
 use std::result::Result as StdResult;
 
 use base64::prelude::BASE64_URL_SAFE_NO_PAD;
-use base64::Engine;
+use base64::Engine as _;
 use chrono::{DateTime, Utc};
-use serde::de::Error;
+use serde::de::Error as _;
 use serde::{Deserialize, Deserializer};
 use thiserror::Error;
 
@@ -12,7 +12,7 @@ fn deserialize_timestamp<'de, D: Deserializer<'de>>(
 ) -> StdResult<DateTime<Utc>, D::Error> {
     let seconds = i64::deserialize(deserializer)?;
     DateTime::from_timestamp(seconds, 0)
-        .ok_or_else(|| D::Error::custom(format!("timestamp {} is out of range", seconds)))
+        .ok_or_else(|| D::Error::custom(format!("timestamp {seconds} is out of range")))
 }
 
 pub(super) type JwtResult<T> = StdResult<T, JwtError>;

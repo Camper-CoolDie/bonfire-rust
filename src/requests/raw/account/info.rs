@@ -37,7 +37,7 @@ pub(crate) struct RawInfo {
     pinned_post: Option<RawPublication<RawPost>>,
     bans_count: u64,
     warns_count: u64,
-    karma_total: i64,
+    karma_total: f64,
     #[serde(rename = "rates")]
     rates_count: u64,
     #[serde(rename = "ratesPositive")]
@@ -68,7 +68,7 @@ impl TryFrom<RawInfo> for Info {
             banned_until: match value.banned_until {
                 0 => None,
                 timestamp => Some(DateTime::from_timestamp_millis(timestamp).ok_or_else(|| {
-                    serde_json::Error::custom(format!("timestamp {} is out of range", timestamp))
+                    serde_json::Error::custom(format!("timestamp {timestamp} is out of range"))
                 })?),
             }
             .filter(|date| *date > Utc::now()),
@@ -101,7 +101,7 @@ impl TryFrom<RawInfo> for Info {
                 .inner
                 .into_iter()
                 .filter_map(|link| {
-                    (!link.title.is_empty() && !link.uri.is_empty()).then_some(link.into())
+                    (!link.title.is_empty() && !link.uri.is_empty()).then(|| link.into())
                 })
                 .collect(),
             note: match value.note.as_str() {
@@ -111,7 +111,7 @@ impl TryFrom<RawInfo> for Info {
             pinned_post: value.pinned_post.map(TryInto::try_into).transpose()?,
             bans_count: value.bans_count,
             warns_count: value.warns_count,
-            karma_total: value.karma_total as f32 / 100.,
+            karma_total: value.karma_total / 100.,
             rates_count: value.rates_count,
             positive_rates_sum: value.positive_rates_sum,
             negative_rates_sum: value.negative_rates_sum,

@@ -3,7 +3,7 @@ mod error;
 pub use error::{Error, TfaKind, TfaRequired};
 use serde::{Deserialize, Serialize};
 
-use crate::client::Request;
+use crate::client::Request as _;
 use crate::models::Me;
 use crate::queries::auth::{LoginEmailQuery, LogoutQuery, MeQuery, RefreshQuery};
 use crate::{Client, Result};
@@ -57,7 +57,7 @@ impl Auth {
     }
 
     pub(crate) async fn refresh(&self, client: &Client) -> Result<Self> {
-        Ok(RefreshQuery::new(&self.access_token)
+        Ok(RefreshQuery::new(&self.refresh_token)
             .send_request(client)
             .await?
             .into())

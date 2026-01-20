@@ -2,7 +2,7 @@ use std::ops::Range;
 
 use chrono::{DateTime, Utc};
 
-use crate::client::Request;
+use crate::client::Request as _;
 use crate::models::{Gender, ImageRef, Link, Post, Publication};
 use crate::requests::account::bio::{
     SetAgeRequest, SetDescriptionRequest, SetGenderRequest, SetStatusRequest,
@@ -55,7 +55,7 @@ pub struct Info {
     /// The account's warns count
     pub warns_count: u64,
     /// The account's total karma
-    pub karma_total: f32,
+    pub karma_total: f64,
     /// The number of rates placed by this account
     pub rates_count: u64,
     /// The sum of this account's positive rates (each rate's amount is rounded to 1)
@@ -80,7 +80,7 @@ impl Info {
     ///
     /// # Errors
     ///
-    /// Returns [RootError::Unavailable][crate::models::RootError::Unavailable] if there's no
+    /// Returns [`RootError::Unavailable`][crate::models::RootError::Unavailable] if there's no
     /// account with the provided identifier or [Error][crate::Error] if any other error occurred
     /// while sending the request.
     pub async fn get_by_id(client: &Client, id: u64) -> Result<Self> {
@@ -94,7 +94,7 @@ impl Info {
     ///
     /// # Errors
     ///
-    /// Returns [RootError::Unavailable][crate::models::RootError::Unavailable] if there's no
+    /// Returns [`RootError::Unavailable`][crate::models::RootError::Unavailable] if there's no
     /// account with the provided name or [Error][crate::Error] if any other error occurred while
     /// sending the request.
     pub async fn get_by_name(client: &Client, name: &str) -> Result<Self> {
@@ -104,11 +104,11 @@ impl Info {
             .try_into()
     }
 
-    /// Set your age. Must be within [AGE_RANGE]. Zero or `None` means no age.
+    /// Set your age. Must be within [`AGE_RANGE`]. Zero or `None` means no age.
     ///
     /// # Errors
     ///
-    /// Returns [RootError::Other][crate::models::RootError::Other] with the code `E_BAD_AGE` if
+    /// Returns [`RootError::Other`][crate::models::RootError::Other] with the code `E_BAD_AGE` if
     /// the provided age is not within the range or [Error][crate::Error] if any other error
     /// occurred while sending the request.
     pub async fn set_age(client: &Client, age: Option<i64>) -> Result<()> {
@@ -116,14 +116,14 @@ impl Info {
         Ok(())
     }
 
-    /// Set your status. Must be no longer than [STATUS_MAX_LENGTH]. Empty or `None` means no
+    /// Set your status. Must be no longer than [`STATUS_MAX_LENGTH`]. Empty or `None` means no
     /// status.
     ///
     /// # Errors
     ///
-    /// * [RootError::AccessDenied][crate::models::RootError::AccessDenied] if you aren't yet
+    /// * [`RootError::AccessDenied`][crate::models::RootError::AccessDenied] if you aren't yet
     ///   allowed to change your status
-    /// * [RootRrror::Other][crate::models::RootError::Other] with the code `E_BAD_SIZE` if the
+    /// * [`RootRrror::Other`][crate::models::RootError::Other] with the code `E_BAD_SIZE` if the
     ///   provided status is longer than the maximum allowed length
     /// * [Error][crate::Error] if any other error occurred while sending the request.
     pub async fn set_status(client: &Client, status: Option<&str>) -> Result<()> {
@@ -131,12 +131,12 @@ impl Info {
         Ok(())
     }
 
-    /// Set your description. Must be no longer than [DESCRIPTION_MAX_LENGTH]. Empty or `None`
+    /// Set your description. Must be no longer than [`DESCRIPTION_MAX_LENGTH`]. Empty or `None`
     /// means no description.
     ///
     /// # Errors
     ///
-    /// Returns [RootError::Other][crate::models::RootError::Other] with the code `E_BAD_SIZE` if
+    /// Returns [`RootError::Other`][crate::models::RootError::Other] with the code `E_BAD_SIZE` if
     /// the provided description is longer than the maximum allowed length or [Error][crate::Error]
     /// if any other error occurred while sending the request.
     pub async fn set_description(client: &Client, description: Option<&str>) -> Result<()> {

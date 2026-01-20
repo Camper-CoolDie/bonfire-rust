@@ -29,7 +29,7 @@ pub(crate) struct RawAccountCustomization {
 impl From<RawAccountCustomization> for AccountCustomization {
     fn from(value: RawAccountCustomization) -> Self {
         Self {
-            name_color: value.name_color.map(|color| color as u32),
+            name_color: value.name_color.map(i32::cast_unsigned),
             active_badge: value.active_badge.map(Into::into),
         }
     }
@@ -40,7 +40,7 @@ pub(crate) struct RawAccount {
     #[serde(rename = "J_ID")]
     pub id: u64,
     #[serde(rename = "J_LVL")]
-    level: i64,
+    level: f64,
     #[serde(rename = "J_LAST_ONLINE_DATE")]
     last_online_at: i64,
     #[serde(rename = "J_NAME")]
@@ -48,7 +48,7 @@ pub(crate) struct RawAccount {
     avatar: RawImageRef,
     #[serde(rename = "sex")]
     gender: RawGender,
-    karma30: i64,
+    karma30: f64,
     #[serde(rename = "sponsor")]
     sponsor_amount: u64,
     #[serde(rename = "sponsorTimes")]
@@ -65,7 +65,7 @@ impl TryFrom<RawAccount> for Account {
     fn try_from(value: RawAccount) -> Result<Self> {
         Ok(Self {
             id: value.id,
-            level: value.level as f32 / 100.,
+            level: value.level / 100.,
             last_online_at: DateTime::from_timestamp_millis(value.last_online_at).ok_or_else(
                 || {
                     serde_json::Error::custom(format!(
@@ -80,7 +80,7 @@ impl TryFrom<RawAccount> for Account {
                 _ => Some(value.avatar.into()),
             },
             gender: value.gender.into(),
-            karma30: value.karma30 as f32 / 100.,
+            karma30: value.karma30 / 100.,
             sponsor_amount: value.sponsor_amount,
             sponsor_count: value.sponsor_count,
             effects: value

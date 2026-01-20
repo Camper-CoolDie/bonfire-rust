@@ -26,8 +26,8 @@ impl fmt::Display for MeliorError {
             write!(f, " (in ")?;
             for part in path {
                 match part {
-                    QueryPath::Key(key) => write!(f, ".{}", key)?,
-                    QueryPath::Index(index) => write!(f, "[{}]", index)?,
+                    QueryPath::Key(key) => write!(f, ".{key}")?,
+                    QueryPath::Index(index) => write!(f, "[{index}]")?,
                 }
             }
             write!(f, ")")?;

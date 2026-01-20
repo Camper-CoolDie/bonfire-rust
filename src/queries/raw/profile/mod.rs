@@ -10,7 +10,7 @@ pub(crate) struct RawMe {
     #[serde(rename = "username")]
     name: String,
     email: String,
-    cached_level: i64,
+    cached_level: f64,
     birthday: Option<NaiveDate>,
     is_nsfw_allowed: Option<bool>,
 }
@@ -21,7 +21,7 @@ impl From<RawMe> for Me {
             id: value.id,
             name: value.name,
             email: value.email,
-            cached_level: value.cached_level as f32 / 100.,
+            cached_level: value.cached_level / 100.,
             birthday: value.birthday,
             is_nsfw_allowed: value.is_nsfw_allowed,
         }

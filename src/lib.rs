@@ -2,7 +2,7 @@
 //!
 //! - **Efficiency**. Fast asynchronous requests thanks to [hyper](https://crates.io/crates/hyper)
 //! - **Simplicity**. Well-documented request-sending methods like
-//!   [Account::search()][models::Account::search()]
+//!   [`Account::search()`][models::Account::search()]
 //! - **Debuggability**. Requesting and errors are logged using [tracing](https://crates.io/crates/tracing)
 //!
 //! ## Example
@@ -67,7 +67,15 @@
 //! tokio = { version = "1.49", features = ["macros", "rt-multi-thread"] }
 //! tracing-subscriber = "0.3"
 //! ```
+
+// General lints
+#![forbid(unsafe_code)]
 #![warn(missing_docs)]
+#![warn(unreachable_pub)]
+// Clippy lints
+#![warn(clippy::all)]
+#![warn(clippy::pedantic)]
+#![allow(clippy::struct_excessive_bools)]
 
 /// HTTP Client implementation which is used all across the library for making requests.
 pub mod client;

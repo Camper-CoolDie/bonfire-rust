@@ -8,7 +8,7 @@ pub use reaction::Reaction;
 use crate::models::{Account, Category, Fandom};
 
 /// A type of publication which contains other useful fields alongside the main [Publication]
-/// struct. [AnyPublication] is used as a catch-all publication.
+/// struct. [`AnyPublication`] is used as a catch-all publication.
 pub trait PublicationInheritor {
     /// Get the type of this publication.
     fn kind(&self) -> PublicationKind;
@@ -53,12 +53,12 @@ pub struct Publication<T: PublicationInheritor = AnyPublication> {
     /// The parent publication's type (if any)
     pub parent_kind: Option<PublicationKind>,
     /// The publication's karma amount
-    pub karma: f32,
+    pub karma: f64,
     /// The amount of karma you've placed on this publication
-    pub my_karma: Option<f32>,
+    pub my_karma: Option<f64>,
     /// The publication's status
     pub status: PublicationStatus,
-    /// Will this publication appear in feed? (not to be confused with [Fandom::is_closed])
+    /// Will this publication appear in feed? (not to be confused with [`Fandom::is_closed`])
     pub is_closed: bool,
     /// The number of comments on this publication
     pub comments_count: u64,

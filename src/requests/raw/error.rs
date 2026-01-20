@@ -51,10 +51,9 @@ impl TryFrom<RawRootError> for RootError {
                 RootError::Banned {
                     until: {
                         DateTime::from_timestamp_millis(millis).ok_or_else(|| {
-                            serde_json::Error::custom(format!(
-                                "timestamp {} is out of range",
-                                millis
-                            ))
+                            serde_json::Error::custom(
+                                format!("timestamp {millis} is out of range",),
+                            )
                         })?
                     },
                 }

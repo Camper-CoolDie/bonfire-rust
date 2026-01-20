@@ -1,6 +1,6 @@
 use bytes::Bytes;
 use http::{header, HeaderMap, HeaderValue, Method, Uri};
-use http_body_util::{BodyExt, Full};
+use http_body_util::{BodyExt as _, Full};
 use hyper_rustls::{HttpsConnector, HttpsConnectorBuilder};
 use hyper_util::client::legacy::connect::HttpConnector;
 use hyper_util::client::legacy::Client as HyperClient;
@@ -68,9 +68,10 @@ impl MeliorService {
         let response = self.hyper_client.request(request).await?;
 
         let status = response.status();
-        match status.is_success() {
-            true => Ok(response.collect().await?.to_bytes()),
-            false => Err(Error::UnsuccessfulResponse(status)),
+        if status.is_success() {
+            Ok(response.collect().await?.to_bytes())
+        } else {
+            Err(Error::UnsuccessfulResponse(status))
         }
     }
 }

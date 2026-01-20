@@ -11,7 +11,7 @@ pub use gender::Gender;
 pub use info::*;
 pub use link::Link;
 
-use crate::client::Request;
+use crate::client::Request as _;
 use crate::models::ImageRef;
 use crate::requests::account::{
     GetAccountRequest, GetInfoRequest, GetOnlineRequest, SearchAccountsRequest,
@@ -37,7 +37,7 @@ pub struct Account {
     /// with `{ ... }`
     pub id: u64,
     /// The account's level
-    pub level: f32,
+    pub level: f64,
     /// The time when the account was last online
     pub last_online_at: DateTime<Utc>,
     /// The account's name
@@ -47,7 +47,7 @@ pub struct Account {
     /// The account's gender
     pub gender: Gender,
     /// The account's karma in the last 30 days
-    pub karma30: f32,
+    pub karma30: f64,
     /// The amount that the account has donated
     pub sponsor_amount: u64,
     /// The number of times this account has donated sequentially
@@ -59,6 +59,7 @@ pub struct Account {
 }
 impl Account {
     /// Check if this account is currently online.
+    #[must_use]
     pub fn is_online(&self) -> bool {
         Utc::now() - self.last_online_at < ONLINE_DURATION
     }
@@ -67,7 +68,7 @@ impl Account {
     ///
     /// # Errors
     ///
-    /// Returns [RootError::Unavailable][crate::models::RootError::Unavailable] if there's no
+    /// Returns [`RootError::Unavailable`][crate::models::RootError::Unavailable] if there's no
     /// account with the provided identifier or [Error][crate::Error] if any other error occurred
     /// while sending the request.
     pub async fn get_by_id(client: &Client, id: u64) -> Result<Self> {
@@ -81,7 +82,7 @@ impl Account {
     ///
     /// # Errors
     ///
-    /// Returns [RootError::Unavailable][crate::models::RootError::Unavailable] if there's no
+    /// Returns [`RootError::Unavailable`][crate::models::RootError::Unavailable] if there's no
     /// account with the provided name or [Error][crate::Error] if any other error occurred while
     /// sending the request.
     pub async fn get_by_name(client: &Client, name: &str) -> Result<Self> {
@@ -112,7 +113,7 @@ impl Account {
     ///
     /// # Errors
     ///
-    /// Returns [RootError::Unavailable][crate::models::RootError::Unavailable] if there's no
+    /// Returns [`RootError::Unavailable`][crate::models::RootError::Unavailable] if there's no
     /// account with the contained identifier or [Error][crate::Error] if any other error occurred
     /// while sending the request.
     pub async fn info(&self, client: &Client) -> Result<Info> {
@@ -123,7 +124,7 @@ impl Account {
     }
 
     /// Get a list of accounts that are currently online (that were active less than
-    /// [ONLINE_DURATION] ago).
+    /// [`ONLINE_DURATION`] ago).
     ///
     /// # Errors
     ///

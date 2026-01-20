@@ -1,11 +1,12 @@
 mod melior;
 mod root;
 
+use std::sync::LazyLock;
+
 pub(super) use melior::MeliorService;
-use once_cell::sync::Lazy;
 pub(super) use root::RootService;
 
-static USER_AGENT: Lazy<String> = Lazy::new(|| {
+static USER_AGENT: LazyLock<String> = LazyLock::new(|| {
     format!(
         "{}/{} ({})",
         env!("CARGO_PKG_NAME"),

@@ -63,8 +63,8 @@ pub(crate) struct RawPublication<T: RawPublicationInheritor = AnyRawPublication>
     #[serde(rename = "parentUnitType")]
     parent_kind: i64,
     #[serde(rename = "karmaCount")]
-    karma: i64,
-    my_karma: i64,
+    karma: f64,
+    my_karma: f64,
     status: RawPublicationStatus,
     #[serde(rename = "closed")]
     is_closed: bool,
@@ -124,10 +124,10 @@ where
                 id => Some(id),
             },
             parent_kind,
-            karma: value.karma as f32 / 100.,
+            karma: value.karma / 100.,
             my_karma: match value.my_karma {
-                0 => None,
-                karma => Some(karma as f32 / 100.),
+                0. => None,
+                karma => Some(karma / 100.),
             },
             status: value.status.into(),
             is_closed: value.is_closed,

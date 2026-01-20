@@ -40,7 +40,7 @@ pub(crate) struct RawFandom {
     #[serde(rename = "closed")]
     is_closed: bool,
     #[serde(rename = "karmaCof")]
-    karma_coef: i64,
+    karma_coef: f64,
     #[serde(rename = "creatorId")]
     suggester_id: u64,
     #[serde(rename = "dateCreate")]
@@ -70,7 +70,7 @@ impl TryFrom<RawFandom> for Fandom {
                 language,
                 [-1, 1, 2, 3, 4, 5, 6, 7, 8]
                     .iter()
-                    .map(|i| i.to_string())
+                    .map(ToString::to_string)
                     .collect::<Vec<String>>()
                     .join(", ")
             )))?,
@@ -92,7 +92,7 @@ impl TryFrom<RawFandom> for Fandom {
                 _ => Some(value.background_gif.into()),
             },
             is_closed: value.is_closed,
-            karma_coef: value.karma_coef as f32 / 100.,
+            karma_coef: value.karma_coef / 100.,
             suggester_id: match value.suggester_id {
                 0 => None,
                 id => Some(id),
@@ -101,10 +101,7 @@ impl TryFrom<RawFandom> for Fandom {
                 0 => None,
                 timestamp => Some(
                     DateTime::from_timestamp_millis(value.suggested_at).ok_or_else(|| {
-                        serde_json::Error::custom(format!(
-                            "timestamp {} is out of range",
-                            timestamp
-                        ))
+                        serde_json::Error::custom(format!("timestamp {timestamp} is out of range",))
                     })?,
                 ),
             },

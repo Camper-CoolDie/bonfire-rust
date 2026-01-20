@@ -2,14 +2,14 @@ use chrono::{DateTime, Utc};
 use thiserror::Error;
 
 /// Represents an error from the root server. Some most common ones are split into predefined
-/// variants. [RootError::Other] is used for errors that aren't predefined.
+/// variants. [`RootError::Other`] is used for errors that aren't predefined.
 #[derive(Error, Debug)]
 pub enum RootError {
     /// You don't have enough permission. In very rare cases the server may also say why the access
     /// was denied
     #[error(
         "access denied{}",
-        .message.as_ref().map(|message| format!(": {}", message)).unwrap_or_default())
+        .message.as_ref().map(|message| format!(": {message}")).unwrap_or_default())
     ]
     AccessDenied {
         /// The reason of denying the access
@@ -33,7 +33,7 @@ pub enum RootError {
     /// Some other request-specific error
     #[error(
         "unknown error: {code}{}",
-        .message.as_ref().map(|message| format!(" ({})", message)).unwrap_or_default())
+        .message.as_ref().map(|message| format!(" ({message})")).unwrap_or_default())
     ]
     Other {
         /// Code of the error
@@ -45,7 +45,7 @@ pub enum RootError {
     },
 }
 
-/// Represents a specific type of [RootError::Unavailable].
+/// Represents a specific type of [`RootError::Unavailable`].
 #[derive(Error, Debug)]
 pub enum UnavailableError {
     /// The publication was blocked by a moderator

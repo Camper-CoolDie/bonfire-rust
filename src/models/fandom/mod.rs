@@ -32,7 +32,7 @@ pub struct Fandom {
     /// Will publications from this fandom appear in feed?
     pub is_closed: bool,
     /// The fandom's karma coefficient
-    pub karma_coef: f32,
+    pub karma_coef: f64,
     /// An account identifier who suggested this fandom
     pub suggester_id: Option<u64>,
     /// The date when this fandom was suggested
