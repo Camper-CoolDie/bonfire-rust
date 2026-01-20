@@ -2,8 +2,9 @@ use chrono::Utc;
 use tokio::sync::RwLock;
 
 use crate::client::jwt::{decode_token, JwtClaims};
-use crate::client::{JwtError, JwtResult};
+use crate::client::{JwtError, JwtResult, Request};
 use crate::models::Auth;
+use crate::queries::auth::RefreshQuery;
 use crate::{Client, Result};
 
 enum InnerState {
@@ -68,12 +69,19 @@ impl TokenProvider {
         let option = match &*guard {
             InnerState::Authenticated(auth, claims) if claims.expires_at < Utc::now() => {
                 tracing::debug!("auth has expired, refreshing");
-                Some(auth.refresh(client).await?)
+                Some(Self::refresh_now(client, auth).await?)
             }
             InnerState::Authenticated(auth, _) => return Ok(Some(auth.clone())),
             InnerState::Unauthenticated => return Ok(None),
         };
         *guard = option.clone().try_into()?;
         Ok(option)
+    }
+
+    async fn refresh_now(client: &Client, auth: &Auth) -> Result<Auth> {
+        Ok(RefreshQuery::new(&auth.refresh_token)
+            .send_request(client)
+            .await?
+            .into())
     }
 }

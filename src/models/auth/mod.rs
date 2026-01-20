@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::client::Request as _;
 use crate::models::Me;
-use crate::queries::auth::{LoginEmailQuery, LogoutQuery, MeQuery, RefreshQuery};
+use crate::queries::auth::MeQuery;
 use crate::{Client, Result};
 
 /// Represents an authentication session.
@@ -42,24 +42,5 @@ impl Auth {
     /// ```
     pub async fn me(client: &Client) -> Result<Me> {
         Ok(MeQuery::new().send_request(client).await?.into())
-    }
-
-    pub(crate) async fn login(client: &Client, email: &str, password: &str) -> Result<Self> {
-        LoginEmailQuery::new(email, password)
-            .send_request(client)
-            .await?
-            .try_into()
-    }
-
-    pub(crate) async fn logout(client: &Client) -> Result<()> {
-        LogoutQuery::new().send_request(client).await?;
-        Ok(())
-    }
-
-    pub(crate) async fn refresh(&self, client: &Client) -> Result<Self> {
-        Ok(RefreshQuery::new(&self.refresh_token)
-            .send_request(client)
-            .await?
-            .into())
     }
 }

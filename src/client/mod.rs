@@ -17,6 +17,7 @@ use token_provider::TokenProvider;
 
 use crate::client::jwt::decode_token;
 use crate::models::{auth, Auth};
+use crate::queries::auth::{LoginEmailQuery, LogoutQuery};
 use crate::{MeliorQuery, RootRequest};
 
 // It's great when we can test our requests against a test server, hence the ability to specify
@@ -97,7 +98,11 @@ impl Client {
             Err(auth::Error::AlreadyAuthenticated)?;
         }
 
-        let auth = Auth::login(self, email, password).await?;
+        let auth = Auth::try_from(
+            LoginEmailQuery::new(email, password)
+                .send_request(self)
+                .await?,
+        )?;
         self.inner.token_provider.set_auth(Some(auth)).await?;
         Ok(())
     }
@@ -130,7 +135,7 @@ impl Client {
             Err(auth::Error::Unauthenticated)?;
         }
 
-        Auth::logout(self).await?;
+        LogoutQuery::new().send_request(self).await?;
         self.inner.token_provider.set_auth(None).await?;
         Ok(())
     }
