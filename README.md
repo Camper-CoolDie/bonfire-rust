@@ -54,7 +54,7 @@ async fn main() -> Result<()> {
     };
 
     // Get information about the currently authenicated user
-    println!("{:#?}", Auth::me(&client).await?);
+    println!("{:#?}", Auth::get_me(&client).await?);
 
     // Save authentication credentials and exit program
     save_credentials(&client).await?;

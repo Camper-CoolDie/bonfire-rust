@@ -85,6 +85,8 @@ impl TryFrom<RawEffect> for Effect {
     type Error = Error;
 
     fn try_from(value: RawEffect) -> Result<Self> {
+        let is_system = value.is_system == 1;
+
         Ok(Self {
             id: value.id,
             account_id: value.account_id,
@@ -94,11 +96,11 @@ impl TryFrom<RawEffect> for Effect {
             ends_at: DateTime::from_timestamp_millis(value.ends_at).ok_or_else(|| {
                 serde_json::Error::custom(format!("timestamp {} is out of range", value.ends_at))
             })?,
-            reason: value.reason,
+            reason: (!is_system).then_some(value.reason),
             kind: value.kind.into(),
-            is_system: value.is_system == 1,
+            is_system,
             reason_kind: value.reason_kind.into(),
-            from_account_name: value.from_account_name,
+            from_account_name: (!is_system).then_some(value.from_account_name),
         })
     }
 }

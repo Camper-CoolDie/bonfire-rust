@@ -7,7 +7,7 @@ pub use reaction::Reaction;
 
 use crate::models::{Account, Category, Fandom};
 
-/// A type of publication which contains other useful fields alongside the main [Publication]
+/// A type of publication which contains other useful fields alongside the main [`Publication`]
 /// struct. [`AnyPublication`] is used as a catch-all publication.
 pub trait PublicationInheritor {
     /// Get the type of this publication.

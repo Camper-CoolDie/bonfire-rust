@@ -20,7 +20,7 @@ impl Request for SetStatusRequest<'_> {
 
     async fn send_request(&self, client: &Client) -> Result<EmptyResponse> {
         client
-            .send_request("RAccountsStatusSet", self, Vec::default())
+            .send_request("RAccountsStatusSet", self, Vec::new())
             .await
     }
 }

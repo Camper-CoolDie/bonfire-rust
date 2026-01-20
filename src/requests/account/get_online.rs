@@ -37,7 +37,7 @@ impl Request for GetOnlineRequest {
 
     async fn send_request(&self, client: &Client) -> Result<Response> {
         client
-            .send_request("RAccountsGetAllOnline", self, Vec::default())
+            .send_request("RAccountsGetAllOnline", self, Vec::new())
             .await
     }
 }

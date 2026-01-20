@@ -26,7 +26,7 @@ impl Request for GetInfoRequest<'_> {
 
     async fn send_request(&self, client: &Client) -> Result<RawInfo> {
         client
-            .send_request("RAccountsGetProfile", self, Vec::default())
+            .send_request("RAccountsGetProfile", self, Vec::new())
             .await
     }
 }

@@ -20,7 +20,7 @@ impl Request for SetDescriptionRequest<'_> {
 
     async fn send_request(&self, client: &Client) -> Result<EmptyResponse> {
         client
-            .send_request("RAccountsBioSetDescription", self, Vec::default())
+            .send_request("RAccountsBioSetDescription", self, Vec::new())
             .await
     }
 }

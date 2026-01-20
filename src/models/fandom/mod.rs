@@ -20,8 +20,8 @@ pub struct Fandom {
     /// A unique identifier of this fandom. Should always be set to a valid value if constructing
     /// with `{ ... }`
     pub id: u64,
-    /// The fandom's language. Should be set in most cases if constructing with `{ ... }`. None if
-    /// multilingual
+    /// The fandom's language. Should be set in most cases if constructing with `{ ... }`. `None`
+    /// if multilingual
     pub language: Option<Language>,
     /// The fandom's avatar
     pub icon: Option<ImageRef>,

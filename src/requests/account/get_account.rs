@@ -39,8 +39,6 @@ impl Request for GetAccountRequest<'_> {
     type Response = Response;
 
     async fn send_request(&self, client: &Client) -> Result<Response> {
-        client
-            .send_request("RAccountsGet", self, Vec::default())
-            .await
+        client.send_request("RAccountsGet", self, Vec::new()).await
     }
 }

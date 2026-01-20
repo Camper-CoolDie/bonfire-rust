@@ -41,7 +41,7 @@ impl Request for SearchAccountsRequest<'_> {
 
     async fn send_request(&self, client: &Client) -> Result<Response> {
         client
-            .send_request("RAccountsGetAll", self, Vec::default())
+            .send_request("RAccountsGetAll", self, Vec::new())
             .await
     }
 }

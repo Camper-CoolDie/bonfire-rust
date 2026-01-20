@@ -57,7 +57,7 @@ pub enum UnavailableError {
     /// Something you're searching for can't be found
     #[error("resource was not found")]
     NotFound,
-    /// The publication was removed by author
+    /// The publication was removed by its author
     #[error("resource was removed by author")]
     Removed,
     /// Some other request-specific error

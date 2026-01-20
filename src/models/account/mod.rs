@@ -58,7 +58,33 @@ pub struct Account {
     pub customization: AccountCustomization,
 }
 impl Account {
-    /// Check if this account is currently online.
+    /// Create a new `Account` with only its identifier set. Useful when you don't need other
+    /// fields but need to send an associated request, however using a struct obtained from
+    /// [`Account::get_by_id()`] or [`Account::get_by_name()`] is preferable.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// # use bonfire::models::Account;
+    /// # use bonfire::{Client, Result};
+    /// #
+    /// # #[tokio::main]
+    /// # async fn main() -> Result<()> {
+    /// # let client = Client::default();
+    /// let account = Account::new(1234);
+    /// println!("{:#?}", account.get_info(&client).await?);
+    /// #    Ok(())
+    /// # }
+    /// ```
+    #[must_use]
+    pub fn new(id: u64) -> Self {
+        Self {
+            id,
+            ..Self::default()
+        }
+    }
+
+    /// Check if this account is currently online. Requires [`Account::last_online_at`] to be set.
     #[must_use]
     pub fn is_online(&self) -> bool {
         Utc::now() - self.last_online_at < ONLINE_DURATION
@@ -68,9 +94,9 @@ impl Account {
     ///
     /// # Errors
     ///
-    /// Returns [`RootError::Unavailable`][crate::models::RootError::Unavailable] if there's no
-    /// account with the provided identifier or [Error][crate::Error] if any other error occurred
-    /// while sending the request.
+    /// Returns [`RootError::Unavailable`][crate::RootError::Unavailable] if there's no account
+    /// with the provided identifier or [`Error`][crate::Error] if any other error occurred while
+    /// sending the request.
     pub async fn get_by_id(client: &Client, id: u64) -> Result<Self> {
         GetAccountRequest::new_by_id(id)
             .send_request(client)
@@ -82,9 +108,9 @@ impl Account {
     ///
     /// # Errors
     ///
-    /// Returns [`RootError::Unavailable`][crate::models::RootError::Unavailable] if there's no
-    /// account with the provided name or [Error][crate::Error] if any other error occurred while
-    /// sending the request.
+    /// Returns [`RootError::Unavailable`][crate::RootError::Unavailable] if there's no account
+    /// with the provided name or [`Error`][crate::Error] if any other error occurred while sending
+    /// the request.
     pub async fn get_by_name(client: &Client, name: &str) -> Result<Self> {
         GetAccountRequest::new_by_name(name)
             .send_request(client)
@@ -96,7 +122,7 @@ impl Account {
     ///
     /// # Errors
     ///
-    /// Returns [Error][crate::Error] if an error occurred while sending the request.
+    /// Returns [`Error`][crate::Error] if an error occurred while sending the request.
     pub async fn search(
         client: &Client,
         name: Option<&str>,
@@ -113,10 +139,10 @@ impl Account {
     ///
     /// # Errors
     ///
-    /// Returns [`RootError::Unavailable`][crate::models::RootError::Unavailable] if there's no
-    /// account with the contained identifier or [Error][crate::Error] if any other error occurred
-    /// while sending the request.
-    pub async fn info(&self, client: &Client) -> Result<Info> {
+    /// Returns [`RootError::Unavailable`][crate::RootError::Unavailable] if there's no account
+    /// with the contained identifier or [`Error`][crate::Error] if any other error occurred while
+    /// sending the request.
+    pub async fn get_info(&self, client: &Client) -> Result<Info> {
         GetInfoRequest::new_by_id(self.id)
             .send_request(client)
             .await?
@@ -128,7 +154,7 @@ impl Account {
     ///
     /// # Errors
     ///
-    /// Returns [Error][crate::Error] if an error occurred while sending the request.
+    /// Returns [`Error`][crate::Error] if an error occurred while sending the request.
     pub async fn get_online(
         client: &Client,
         offset_date: Option<DateTime<Utc>>,

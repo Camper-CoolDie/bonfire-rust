@@ -21,26 +21,23 @@ impl Auth {
     ///
     /// # Errors
     ///
-    /// Returns [Error][crate::Error] if an error occurred while sending the request.
+    /// Returns [`Error`][crate::Error] if an error occurred while sending the request.
     ///
     /// # Examples
     ///
     /// ```no_run
     /// # use bonfire::models::Auth;
-    /// # use bonfire::Result;
-    /// use bonfire::Client;
-    ///
+    /// # use bonfire::{Client, Result};
+    /// #
     /// # #[tokio::main]
     /// # async fn main() -> Result<()> {
-    /// let client = Client::default();
-    /// client.login("email", "password").await?;
-    ///
-    /// let me = Auth::me(&client).await.unwrap();
+    /// # let client = Client::default();
+    /// let me = Auth::get_me(&client).await?;
     /// println!("Logged in as {}", me.name);
     /// #    Ok(())
     /// # }
     /// ```
-    pub async fn me(client: &Client) -> Result<Me> {
+    pub async fn get_me(client: &Client) -> Result<Me> {
         Ok(MeQuery::new().send_request(client).await?.into())
     }
 }

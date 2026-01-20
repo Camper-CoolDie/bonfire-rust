@@ -20,7 +20,7 @@ impl Request for SetAgeRequest {
 
     async fn send_request(&self, client: &Client) -> Result<EmptyResponse> {
         client
-            .send_request("RAccountsBioSetAge", self, Vec::default())
+            .send_request("RAccountsBioSetAge", self, Vec::new())
             .await
     }
 }

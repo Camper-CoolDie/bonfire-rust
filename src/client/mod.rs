@@ -36,7 +36,7 @@ struct Inner {
     token_provider: TokenProvider,
 }
 
-/// Represents an HTTP wrapper for the Bonfire API. It manages the authentication session [Auth]
+/// Represents an HTTP wrapper for the Bonfire API. It manages the authentication session [`Auth`]
 /// and automatically handles token validation and refreshing.
 ///
 /// # Examples
@@ -78,7 +78,7 @@ impl Client {
     /// * [`auth::Error::AlreadyAuthenticated`] if the client is already authenticated. You should
     ///   call [`Client::logout()`] to terminate the current session
     /// * [`auth::Error::TfaRequired`] if TFA is required to continue logging in
-    /// * [Error] if any other error occurred while sending the request.
+    /// * [`Error`] if any other error occurred while sending the request.
     ///
     /// # Examples
     ///
@@ -111,8 +111,8 @@ impl Client {
     ///
     /// # Errors
     ///
-    /// Returns [`auth::Error::Unauthenticated`] if the client is unauthenticated or [Error] if any
-    /// other error occurred while sending the log out request.
+    /// Returns [`auth::Error::Unauthenticated`] if the client is already unauthenticated or
+    /// [`Error`] if any other error occurred while sending the log out request.
     ///
     /// # Examples
     ///
@@ -140,15 +140,16 @@ impl Client {
         Ok(())
     }
 
-    /// Get the current authentication credentials [Auth]. Are guaranteed to be valid after calling
-    /// this method since they refresh if needed. Returns `None` if the client is unauthenticated.
+    /// Get the current authentication credentials [`Auth`]. Are guaranteed to be valid after
+    /// calling this method since they refresh if needed. Returns `None` if the client is
+    /// unauthenticated.
     ///
     /// Is usually called at the end of the program, after which the credentials are saved in a
     /// secure place and used in [`ClientBuilder::auth()`] when the program runs again.
     ///
     /// # Errors
     ///
-    /// Returns [Error] if an error occurred while sending the refresh request.
+    /// Returns [`Error`] if an error occurred while sending the refresh request.
     ///
     /// # Examples
     ///
@@ -286,7 +287,7 @@ impl ClientBuilder {
         }
     }
 
-    /// Builds and transforms `ClientBuilder` into a `Client`.
+    /// Builds and transforms `ClientBuilder` into a [`Client`].
     pub fn build(self) -> Client {
         Client::new(&self.root_uri, &self.melior_uri, self.auth)
     }

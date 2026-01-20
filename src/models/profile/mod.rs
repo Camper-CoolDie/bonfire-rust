@@ -18,7 +18,7 @@ pub struct Me {
     pub cached_level: f64,
     /// Your day of birth or `None` if unset
     pub birthday: Option<NaiveDate>,
-    /// Are you allowed to see NSFW posts? None if `birthday` is `None`
+    /// Are you allowed to see NSFW posts? None if [`birthday`][Me::birthday] is also `None`
     pub is_nsfw_allowed: Option<bool>,
 }
 impl Me {
@@ -26,21 +26,18 @@ impl Me {
     ///
     /// # Errors
     ///
-    /// Returns [Error][crate::Error] if an error occurred while sending the request.
+    /// Returns [`Error`][crate::Error] if an error occurred while sending the request.
     ///
     /// # Examples
     ///
     /// ```no_run
     /// # use bonfire::models::Me;
-    /// # use bonfire::Result;
-    /// use bonfire::Client;
-    ///
+    /// # use bonfire::{Client, Result};
+    /// #
     /// # #[tokio::main]
     /// # async fn main() -> Result<()> {
-    /// let client = Client::default();
-    /// client.login("email", "password").await?;
-    ///
-    /// let me = Me::get(&client).await.unwrap();
+    /// # let client = Client::default();
+    /// let me = Me::get(&client).await?;
     /// println!("Logged in as {}", me.name);
     /// #    Ok(())
     /// # }
@@ -53,7 +50,7 @@ impl Me {
     ///
     /// # Errors
     ///
-    /// Returns [Error][crate::Error] if an error occurred while sending the request.
+    /// Returns [`Error`][crate::Error] if an error occurred while sending the request.
     ///
     /// # Examples
     ///
@@ -66,7 +63,7 @@ impl Me {
     /// # async fn main() -> Result<()> {
     /// # let client = Client::default();
     /// let birthday = NaiveDate::from_ymd_opt(2000, 1, 1).unwrap();
-    /// Me::set_birthday(&client, birthday).await.unwrap();
+    /// Me::set_birthday(&client, birthday).await?;
     /// #    Ok(())
     /// # }
     /// ```

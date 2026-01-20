@@ -24,9 +24,9 @@ impl fmt::Display for TfaKind {
 /// Represents data to continue logging in using TFA (Two-Factor Authentication).
 #[derive(Debug)]
 pub struct TfaRequired {
-    /// A type of the TFA
+    /// The type of this TFA
     pub kind: TfaKind,
-    /// A wait token of the TFA
+    /// The wait token for this TFA
     pub wait_token: String,
 }
 
@@ -40,7 +40,7 @@ impl fmt::Display for TfaRequired {
 ///
 /// # Source
 ///
-/// An `auth::Error` can be the result of a non-standart response or an unauthenticated client.
+/// An `AuthError` can be the result of a non-standart response or an unauthenticated client.
 #[derive(Error, Debug)]
 pub enum Error {
     /// Client is already authenticated

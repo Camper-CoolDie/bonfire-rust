@@ -64,7 +64,7 @@ pub struct Info {
     pub negative_rates_sum: i64,
     /// The number of fandoms this account can moderate
     pub moderating_fandoms_count: u64,
-    /// The number of fandoms this account subscribed to
+    /// The number of fandoms this account is subscribed to
     pub subscriptions_count: u64,
     /// The number of fandoms this account is viceroy in
     pub viceroys_count: u64,
@@ -80,9 +80,9 @@ impl Info {
     ///
     /// # Errors
     ///
-    /// Returns [`RootError::Unavailable`][crate::models::RootError::Unavailable] if there's no
-    /// account with the provided identifier or [Error][crate::Error] if any other error occurred
-    /// while sending the request.
+    /// Returns [`RootError::Unavailable`][crate::RootError::Unavailable] if there's no account
+    /// with the provided identifier or [`Error`][crate::Error] if any other error occurred while
+    /// sending the request.
     pub async fn get_by_id(client: &Client, id: u64) -> Result<Self> {
         GetInfoRequest::new_by_id(id)
             .send_request(client)
@@ -94,9 +94,9 @@ impl Info {
     ///
     /// # Errors
     ///
-    /// Returns [`RootError::Unavailable`][crate::models::RootError::Unavailable] if there's no
-    /// account with the provided name or [Error][crate::Error] if any other error occurred while
-    /// sending the request.
+    /// Returns [`RootError::Unavailable`][crate::RootError::Unavailable] if there's no account
+    /// with the provided name or [`Error`][crate::Error] if any other error occurred while sending
+    /// the request.
     pub async fn get_by_name(client: &Client, name: &str) -> Result<Self> {
         GetInfoRequest::new_by_name(name)
             .send_request(client)
@@ -108,9 +108,9 @@ impl Info {
     ///
     /// # Errors
     ///
-    /// Returns [`RootError::Other`][crate::models::RootError::Other] with the code `E_BAD_AGE` if
-    /// the provided age is not within the range or [Error][crate::Error] if any other error
-    /// occurred while sending the request.
+    /// Returns [`RootError::Other`][crate::RootError::Other] with the code `E_BAD_AGE` if the
+    /// provided age is not within the range or [`Error`][crate::Error] if any other error occurred
+    /// while sending the request.
     pub async fn set_age(client: &Client, age: Option<i64>) -> Result<()> {
         SetAgeRequest::new(age).send_request(client).await?;
         Ok(())
@@ -121,11 +121,11 @@ impl Info {
     ///
     /// # Errors
     ///
-    /// * [`RootError::AccessDenied`][crate::models::RootError::AccessDenied] if you aren't yet
-    ///   allowed to change your status
-    /// * [`RootRrror::Other`][crate::models::RootError::Other] with the code `E_BAD_SIZE` if the
-    ///   provided status is longer than the maximum allowed length
-    /// * [Error][crate::Error] if any other error occurred while sending the request.
+    /// * [`RootError::AccessDenied`][crate::RootError::AccessDenied] if you aren't yet allowed to
+    ///   change your status
+    /// * [`RootRrror::Other`][crate::RootError::Other] with the code `E_BAD_SIZE` if the provided
+    ///   status is longer than the maximum allowed length
+    /// * [`Error`][crate::Error] if any other error occurred while sending the request.
     pub async fn set_status(client: &Client, status: Option<&str>) -> Result<()> {
         SetStatusRequest::new(status).send_request(client).await?;
         Ok(())
@@ -136,8 +136,8 @@ impl Info {
     ///
     /// # Errors
     ///
-    /// Returns [`RootError::Other`][crate::models::RootError::Other] with the code `E_BAD_SIZE` if
-    /// the provided description is longer than the maximum allowed length or [Error][crate::Error]
+    /// Returns [`RootError::Other`][crate::RootError::Other] with the code `E_BAD_SIZE` if the
+    /// provided description is longer than the maximum allowed length or [`Error`][crate::Error]
     /// if any other error occurred while sending the request.
     pub async fn set_description(client: &Client, description: Option<&str>) -> Result<()> {
         SetDescriptionRequest::new(description)
@@ -150,7 +150,7 @@ impl Info {
     ///
     /// # Errors
     ///
-    /// Returns [Error][crate::Error] if an error occurred while sending the request.
+    /// Returns [`Error`][crate::Error] if an error occurred while sending the request.
     pub async fn set_gender(client: &Client, gender: Gender) -> Result<()> {
         SetGenderRequest::new(gender).send_request(client).await?;
         Ok(())

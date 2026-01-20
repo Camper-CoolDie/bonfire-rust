@@ -7,7 +7,7 @@ use crate::client::JwtError;
 use crate::models::auth;
 use crate::{MeliorError, RootError};
 
-/// A type alias for [Result<T, Error>][StdResult<T, Error>].
+/// A type alias for [`Result<T, Error>`][StdResult<T, Error>].
 pub type Result<T> = StdResult<T, Error>;
 
 /// Represents errors that can occur while operating with a client.
@@ -17,7 +17,7 @@ pub type Result<T> = StdResult<T, Error>;
 /// An `Error` can be the result of operations like constructing a request or parsing a response.
 #[derive(Error, Debug)]
 pub enum Error {
-    /// The provided attachment weights more the server can accept
+    /// The provided attachment weights more the server can process
     #[error("attachment is too large")]
     AttachmentTooLarge,
     /// Can't authenticate
@@ -44,7 +44,7 @@ pub enum Error {
     /// The melior server returned an error
     #[error("melior server error")]
     MeliorError(#[from] MeliorError),
-    /// The constructed request weights more than the server can accept
+    /// The constructed request weights more than the server can process
     #[error("request is too large")]
     RequestTooLarge,
     /// The root server returned an error

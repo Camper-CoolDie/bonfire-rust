@@ -10,9 +10,9 @@ pub enum EffectKind {
     Pig,
     /// The user can't block publications
     Watchman,
-    /// A goose is running across the user's screen which you can't get rid of
+    /// A goose is running across this user's screen which you can't get rid of
     Goose,
-    /// It is constantly snowing for the user
+    /// It is constantly snowing for this user
     EternalWinter,
     /// The user can't perform admin actions
     Punished,
@@ -54,15 +54,16 @@ pub struct Effect {
     pub applied_at: DateTime<Utc>,
     /// The effect's end date
     pub ends_at: DateTime<Utc>,
-    /// A reason for applying this effect. Empty if `is_system` is true
-    pub reason: String,
+    /// A reason for applying this effect. `None` if [`is_system`][Effect::is_system] is true
+    pub reason: Option<String>,
     /// The effect's type
     pub kind: EffectKind,
     /// Was this effect applied by the system?
     pub is_system: bool,
-    /// A preselected reason for applying this effect. Useful only if `is_system` is true,
-    /// otherwise use `reason`
+    /// A preselected reason for applying this effect. Useful only if
+    /// [`is_system`][Effect::is_system] is true, otherwise use the [`reason`][Effect::reason]
+    /// field
     pub reason_kind: EffectReasonKind,
-    /// An account name who applied this effect. Empty if `is_system` is true
-    pub from_account_name: String,
+    /// An account name who applied this effect. `None` if [`is_system`][Effect::is_system] is true
+    pub from_account_name: Option<String>,
 }

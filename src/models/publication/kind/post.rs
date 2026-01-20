@@ -10,11 +10,11 @@ pub struct Post {
     // pub pages: Vec<Page>,
     // /// A comment which earned the highest amount of karma
     // pub best_comment: Option<Publication<Comment>>,
-    /// The post's rubric identifier
+    /// The rubric's identifier
     pub rubric_id: Option<u64>,
-    /// The post's rubric name
+    /// The rubric's name
     pub rubric_name: Option<String>,
-    /// The post's rubric karma coefficient
+    /// The rubric's karma coefficient
     pub rubric_karma_coef: Option<f64>,
     // /// The post's relay race
     // pub relay_race: Option<RelayRace>,
