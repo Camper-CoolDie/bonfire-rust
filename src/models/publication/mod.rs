@@ -17,7 +17,7 @@ pub trait PublicationInheritor {
 /// Represents a publication status.
 #[derive(Default, Clone, Debug)]
 pub enum PublicationStatus {
-    /// The publication's status is unspecified
+    /// The status is unspecified
     #[default]
     Unspecified,
     /// The publication is a draft
@@ -40,34 +40,36 @@ pub struct Publication<T: PublicationInheritor = AnyPublication> {
     pub id: u64,
     /// Additional data which depends on a type of this publication
     pub kind: T,
-    /// The publication's fandom
+    /// A fandom which this publication was posted in
     pub fandom: Fandom,
-    /// The publication's author
+    /// An account who made this publication
     pub author: Account,
-    /// The publication's category
+    /// A category of a fandom which this publication was posted in (the
+    /// [`fandom`][Publication::fandom] field will usually have an [`Unknown`][Category::Unknown]
+    /// category)
     pub category: Category,
-    /// The date when this publication was created (published)
+    /// The date when this publication was created (or published, when referring to a post/quest)
     pub created_at: DateTime<Utc>,
-    /// The parent publication's ID (if any)
+    /// An identifier of the parent publication (if any)
     pub parent_id: Option<u64>,
-    /// The parent publication's type (if any)
+    /// A type of the parent publication (if any)
     pub parent_kind: Option<PublicationKind>,
-    /// The publication's karma amount
+    /// Total karma placed on this publication, positive or negative
     pub karma: f64,
-    /// The amount of karma you've placed on this publication
+    /// How much karma you've placed on this publication?
     pub my_karma: Option<f64>,
-    /// The publication's status
+    /// A status of this publication
     pub status: PublicationStatus,
     /// Will this publication appear in feed? (not to be confused with [`Fandom::is_closed`])
     pub is_closed: bool,
-    /// The number of comments on this publication
+    /// The number of comments this publication has
     pub comments_count: u64,
-    /// Is this publication marked as important?
+    /// Was this publication marked as important?
     pub is_important: bool,
-    /// Does this publication come from a blacklisted fandom or account?
+    /// Does this publication come from a blacklisted fandom/account?
     pub is_blacklisted: bool,
-    /// Is this publication marked as Not Safe For Work?
+    /// Was this publication marked as Not Safe For Work?
     pub is_nsfw: bool,
-    /// The publication's hotness
+    /// How red is the karma button on this publication
     pub hotness: f32,
 }

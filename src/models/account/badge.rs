@@ -1,10 +1,10 @@
 use crate::models::ImageRef;
 
-/// Represents a badge in an account's profile.
+/// Represents a badge inside a profile.
 #[derive(Default, Clone, Debug)]
 pub struct Badge {
-    /// The badge's index
+    /// An index of this badge
     pub index: i64,
-    /// The badge's image
+    /// A unique image of this badge
     pub image: ImageRef,
 }

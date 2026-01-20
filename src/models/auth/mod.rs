@@ -8,12 +8,12 @@ use crate::models::Me;
 use crate::queries::auth::MeQuery;
 use crate::{Client, Result};
 
-/// Represents an authentication session.
+/// Represents authentication credentials.
 #[derive(Default, Clone, Debug, Deserialize, Serialize)]
 pub struct Auth {
-    /// The session's access token
+    /// An access token of the associated authentication session
     pub access_token: String,
-    /// The session's refresh token
+    /// A refresh token of the associated authentication session
     pub refresh_token: String,
 }
 impl Auth {

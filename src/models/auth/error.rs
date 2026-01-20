@@ -2,7 +2,7 @@ use std::fmt;
 
 use thiserror::Error;
 
-/// Represents a type of the TFA.
+/// Represents a type of a TFA session.
 #[derive(Debug)]
 pub enum TfaKind {
     /// Log in again using a TOTP (Time-based One Time Password)
@@ -24,9 +24,9 @@ impl fmt::Display for TfaKind {
 /// Represents data to continue logging in using TFA (Two-Factor Authentication).
 #[derive(Debug)]
 pub struct TfaRequired {
-    /// The type of this TFA
+    /// A type of this TFA session
     pub kind: TfaKind,
-    /// The wait token for this TFA
+    /// A wait token for this TFA session
     pub wait_token: String,
 }
 
@@ -43,13 +43,13 @@ impl fmt::Display for TfaRequired {
 /// An `AuthError` can be the result of a non-standart response or an unauthenticated client.
 #[derive(Error, Debug)]
 pub enum Error {
-    /// Client is already authenticated
+    /// The client is already authenticated
     #[error("authenticated client")]
     AlreadyAuthenticated,
     /// TFA is required to continue logging in
     #[error("TFA is required to continue logging in ({0})")]
     TfaRequired(TfaRequired),
-    /// Client is unauthenticated
+    /// The client is unauthenticated
     #[error("unauthenticated client")]
     Unauthenticated,
 }

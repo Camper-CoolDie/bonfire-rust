@@ -24,9 +24,9 @@ pub const ONLINE_DURATION: Duration = Duration::minutes(15);
 /// Represents an account customization.
 #[derive(Default, Clone, Debug)]
 pub struct AccountCustomization {
-    /// The account's name color
+    /// A color of this account's name
     pub name_color: Option<u32>,
-    /// The account's active badge
+    /// A badge which this account has picked as main
     pub active_badge: Option<Badge>,
 }
 
@@ -36,25 +36,25 @@ pub struct Account {
     /// A unique identifier of this account. Should always be set to a valid value if constructing
     /// with `{ ... }`
     pub id: u64,
-    /// The account's level
+    /// A level of this account
     pub level: f64,
-    /// The time when the account was last online
+    /// The time when this account was last online
     pub last_online_at: DateTime<Utc>,
-    /// The account's name
+    /// A name of this account
     pub name: String,
-    /// The account's avatar
+    /// An avatar of this account
     pub avatar: Option<ImageRef>,
-    /// The account's gender
+    /// A gender of this account
     pub gender: Gender,
-    /// The account's karma in the last 30 days
+    /// Karma earned by this account in the last 30 days
     pub karma30: f64,
-    /// The amount that the account has donated
+    /// How much money the account has donated
     pub sponsor_amount: u64,
-    /// The number of times this account has donated sequentially
+    /// The number of sequential times this account has donated
     pub sponsor_count: u64,
-    /// The account's effects
+    /// Effects which this account currently holds
     pub effects: Vec<Effect>,
-    /// The account's customization
+    /// A customization of this account
     pub customization: AccountCustomization,
 }
 impl Account {
@@ -135,7 +135,7 @@ impl Account {
             .try_into()
     }
 
-    /// Get [Info] about this account.
+    /// Get [`Info`] about this account.
     ///
     /// # Errors
     ///

@@ -1,4 +1,4 @@
-/// Represents a category.
+/// Represents a category of a fandom.
 #[derive(Default, Clone, Debug)]
 pub enum Category {
     /// The fandom has an unknown or unspecified category

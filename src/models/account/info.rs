@@ -12,7 +12,7 @@ use crate::{Client, Result};
 
 /// The number of links an account can contain.
 pub const LINKS_COUNT: usize = 7;
-/// The allowed range for an age.
+/// The allowed range for an account age.
 pub const AGE_RANGE: Range<i64> = 0..201;
 /// The maximum allowed status length.
 pub const STATUS_MAX_LENGTH: usize = 100;
@@ -22,13 +22,13 @@ pub const DESCRIPTION_MAX_LENGTH: usize = 1000;
 /// Represents information about an account.
 #[derive(Default, Clone, Debug)]
 pub struct Info {
-    /// The date when this account was created
+    /// The date when this account was registered
     pub created_at: DateTime<Utc>,
     /// The date when this account's ban ends
     pub banned_until: Option<DateTime<Utc>>,
-    /// The account's background
+    /// A background inside this account's profile
     pub background: Option<ImageRef>,
-    /// The account's GIF background
+    /// A GIF background inside this account's profile
     pub background_gif: Option<ImageRef>,
     /// Are you following this account?
     pub is_following: bool,
@@ -38,29 +38,29 @@ pub struct Info {
     pub follows_count: u64,
     /// The number of users who are following this account
     pub followers_count: u64,
-    /// The account's status
+    /// A status which this account has set in their profile
     pub status: Option<String>,
-    /// The account's age
+    /// What age this account has given themselves?
     pub age: Option<i64>,
-    /// The account's description
+    /// A description (bio) of this account
     pub description: Option<String>,
-    /// The account's links
+    /// Links which this account has added to their profile
     pub links: Vec<Link>,
     /// Your note to this account
     pub note: Option<String>,
     /// A post which this account has pinned inside their profile
     pub pinned_post: Option<Publication<Post>>,
-    /// The account's bans count
+    /// How many times this account was banned?
     pub bans_count: u64,
-    /// The account's warns count
+    /// How many times this account was warned?
     pub warns_count: u64,
-    /// The account's total karma
+    /// Total karma earned by this account
     pub karma_total: f64,
     /// The number of rates placed by this account
     pub rates_count: u64,
-    /// The sum of this account's positive rates (each rate's amount is rounded to 1)
+    /// The sum of positive rates (karma of each rate is rounded to 1) placed by this account
     pub positive_rates_sum: i64,
-    /// The sum of this account's negative rates (each rate's amount is rounded to 1)
+    /// The sum of negative rates (karma of each rate is rounded to 1) placed by this account
     pub negative_rates_sum: i64,
     /// The number of fandoms this account can moderate
     pub moderating_fandoms_count: u64,
@@ -68,7 +68,7 @@ pub struct Info {
     pub subscriptions_count: u64,
     /// The number of fandoms this account is viceroy in
     pub viceroys_count: u64,
-    /// The number of stickers this account has added to their collection
+    /// The number of stickers this account has added to their sticker collection
     pub stickers_count: u64,
     /// The number of users this account has blacklisted
     pub blacklisted_accounts_count: u64,

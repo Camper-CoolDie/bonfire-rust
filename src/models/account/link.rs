@@ -1,8 +1,8 @@
-/// Represents a link in an account's profile.
+/// Represents a link inside a profile.
 #[derive(Default, Clone, Debug)]
 pub struct Link {
-    /// The link's title
+    /// A title of this link
     pub title: String,
-    /// The link's URI
+    /// A URI which this link is leading to
     pub uri: String,
 }
