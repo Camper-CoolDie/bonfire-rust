@@ -1,71 +1,74 @@
 use chrono::{DateTime, Utc};
 use thiserror::Error;
 
-/// Represents an error from the root server. Some most common ones are split into predefined
-/// variants. [`RootError::Other`] is used for errors that aren't predefined.
+/// Represents errors returned by the Root server.
+///
+/// Common errors are categorized into predefined variants, while [`RootError::Other`]
+/// captures any non-predefined request-specific errors.
 #[derive(Error, Debug)]
 pub enum RootError {
-    /// You don't have enough permission. In very rare cases the server may also say why the access
-    /// was denied
+    /// The request was denied due to insufficient permissions
     #[error(
         "access denied{}",
         .message.as_ref().map(|message| format!(": {message}")).unwrap_or_default())
     ]
     AccessDenied {
-        /// The reason of denying the access
+        /// The specific reason why access was denied
         message: Option<String>,
     },
-    /// Something already exists (e.g. you already reacted)
+    /// A resource already exists (e.g., attempting to react multiple times)
     #[error("resource already exists")]
     AlreadyExists,
-    /// Your moderation reason is too long/too short or it contains profanity
+    /// The provided moderation reason is invalid (e.g., too long, too short, or contains
+    /// profanity)
     #[error("bad reason")]
     BadReason,
-    /// You're banned
+    /// The account is banned until a specified date and time
     #[error("account is banned until {until}")]
     Banned {
-        /// The date when your ban ends
+        /// The date and time when the ban on this account ends
         until: DateTime<Utc>,
     },
-    /// Something you're looking for is not available
+    /// The requested resource is unavailable
     #[error("resource is unavailable")]
     Unavailable(#[from] UnavailableError),
-    /// Some other request-specific error
+    /// An unknown request-specific error
     #[error(
         "unknown error: {code}{}",
         .message.as_ref().map(|message| format!(" ({message})")).unwrap_or_default())
     ]
     Other {
-        /// Code of the error
+        /// The error code
         code: String,
-        /// Message of the error
+        /// A descriptive error message
         message: Option<String>,
-        /// Parameters of the error
+        /// Additional parameters associated with the error
         params: Vec<String>,
     },
 }
 
-/// Represents a specific type of [`RootError::Unavailable`].
+/// Represents specific reasons why a resource might be unavailable, typically associated with a
+/// [`RootError::Unavailable`].
 #[derive(Error, Debug)]
 pub enum UnavailableError {
     /// The publication was blocked by a moderator
-    #[error("resource was blocked by moderators (moderation ID: {moderation_id})")]
+    #[error("publication was blocked by a moderator (moderation ID: {moderation_id})")]
     Blocked {
-        /// The ID of a moderation which contains the reason of blocking
+        /// The ID of the moderation event that contains the reason for blocking
         moderation_id: i64,
     },
-    /// Something you're searching for can't be found
-    #[error("resource was not found")]
+    /// The requested resource could not be found
+    #[error("resource could not be found")]
     NotFound,
     /// The publication was removed by its author
-    #[error("resource was removed by author")]
+    #[error("publication was removed by author")]
     Removed,
-    /// Some other request-specific error
+    /// An unknown unavailable error
     #[error("unknown unavailable error: {message}")]
     Other {
-        /// Message of the error
+        /// A descriptive error message
         message: String,
-        /// Parameters of the error
+        /// Additional parameters associated with the error
         params: Vec<String>,
     },
 }

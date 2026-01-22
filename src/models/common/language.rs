@@ -1,21 +1,21 @@
-/// Represents a language.
+/// Represents a supported language.
 #[derive(Default, Clone, Debug)]
 pub enum Language {
-    /// English language
+    /// The English language
     #[default]
     English,
-    /// Russian language
+    /// The Russian language
     Russian,
-    /// Portuguese language
+    /// The Portuguese language
     Portuguese,
-    /// Ukrainian language
+    /// The Ukrainian language
     Ukrainian,
-    /// Deutsch language
-    Deutsch,
-    /// Italian language
+    /// The German language
+    German,
+    /// The Italian language
     Italian,
-    /// Polish language
+    /// The Polish language
     Polish,
-    /// French language
+    /// The French language
     French,
 }

@@ -8,20 +8,20 @@ use crate::models::Me;
 use crate::queries::auth::MeQuery;
 use crate::{Client, Result};
 
-/// Represents authentication credentials.
+/// Represents authentication credentials for a user session.
 #[derive(Default, Clone, Debug, Deserialize, Serialize)]
 pub struct Auth {
-    /// An access token of the associated authentication session
+    /// The access token for the authenticated session
     pub access_token: String,
-    /// A refresh token of the associated authentication session
+    /// The refresh token used to obtain new access tokens
     pub refresh_token: String,
 }
 impl Auth {
-    /// Get information about the currently authenticated user.
+    /// Retrieves information about the currently authenticated user.
     ///
     /// # Errors
     ///
-    /// Returns [`Error`][crate::Error] if an error occurred while sending the request.
+    /// Returns [`Error`][crate::Error] if an error occurs while sending the request.
     ///
     /// # Examples
     ///

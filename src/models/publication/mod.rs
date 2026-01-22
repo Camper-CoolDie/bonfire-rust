@@ -7,69 +7,68 @@ pub use reaction::Reaction;
 
 use crate::models::{Account, Category, Fandom};
 
-/// A type of publication which contains other useful fields alongside the main [`Publication`]
-/// struct. [`AnyPublication`] is used as a catch-all publication.
+/// A trait for publication types that extend the core [`Publication`] struct.
+///
+/// This trait allows for adding type-specific fields beyond the generic [`Publication`] data.
+/// [`AnyPublication`] serves as a catch-all for publications with unspecified specific types.
 pub trait PublicationInheritor {
-    /// Get the type of this publication.
+    /// Returns the specific kind of this publication.
     fn kind(&self) -> PublicationKind;
 }
 
-/// Represents a publication status.
+/// Represents the current status of a publication.
 #[derive(Default, Clone, Debug)]
 pub enum PublicationStatus {
-    /// The status is unspecified
+    /// The publication status is unspecified
     #[default]
     Unspecified,
-    /// The publication is a draft
+    /// The publication is a draft, not yet published
     Draft,
-    /// The publication is published
+    /// The publication has been published
     Published,
-    /// The publication is blocked
+    /// The publication has been blocked
     Blocked,
-    /// The publication is deep-blocked (cannot be revert unless you're a protoadmin)
+    /// The publication has been deep-blocked (cannot be reverted without protoadmin privileges)
     DeepBlocked,
-    /// The publication is waiting to be published
+    /// The publication is scheduled to be published at a future date by the author
     Pending,
 }
 
-/// Represents a publication.
+/// Represents a generic Bonfire publication.
 #[derive(Default, Clone, Debug)]
 pub struct Publication<T: PublicationInheritor = AnyPublication> {
-    /// A unique identifier of this publication. Should always be set to a valid value if
-    /// constructing with `{ ... }`
+    /// The unique identifier of this publication
     pub id: u64,
-    /// Additional data which depends on a type of this publication
+    /// Additional, type-specific data for this publication
     pub kind: T,
-    /// A fandom which this publication was posted in
+    /// The fandom in which this publication was posted
     pub fandom: Fandom,
-    /// An account who made this publication
+    /// The account that authored this publication
     pub author: Account,
-    /// A category of a fandom which this publication was posted in (the
-    /// [`fandom`][Publication::fandom] field will usually have an [`Unknown`][Category::Unknown]
-    /// category)
+    /// The specific category of the fandom in which this publication was posted
     pub category: Category,
-    /// The date when this publication was created (or published, when referring to a post/quest)
+    /// The date and time when this publication was created (or published, for posts/quests)
     pub created_at: DateTime<Utc>,
-    /// An identifier of the parent publication (if any)
+    /// The identifier of the parent publication, if this is a reply or sticker
     pub parent_id: Option<u64>,
-    /// A type of the parent publication (if any)
+    /// The type of the parent publication, if applicable
     pub parent_kind: Option<PublicationKind>,
-    /// Total karma placed on this publication, positive or negative
+    /// The total karma received by this publication (can be positive or negative)
     pub karma: f64,
-    /// How much karma you've placed on this publication?
+    /// The karma you personally placed on this publication, if any
     pub my_karma: Option<f64>,
-    /// A status of this publication
+    /// The current status of this publication
     pub status: PublicationStatus,
-    /// Will this publication appear in feed? (not to be confused with [`Fandom::is_closed`])
+    /// Indicates if this publication will appear in the main feed
     pub is_closed: bool,
-    /// The number of comments this publication has
+    /// The total number of comments associated with this publication
     pub comments_count: u64,
-    /// Was this publication marked as important?
+    /// Indicates if this publication has been marked as important
     pub is_important: bool,
-    /// Does this publication come from a blacklisted fandom/account?
+    /// Indicates if this publication originates from a blacklisted fandom or account
     pub is_blacklisted: bool,
-    /// Was this publication marked as Not Safe For Work?
+    /// Indicates if this publication has been marked as NSFW
     pub is_nsfw: bool,
-    /// How red is the karma button on this publication
+    /// A value indicating the "hotness" or popularity of this publication
     pub hotness: f32,
 }

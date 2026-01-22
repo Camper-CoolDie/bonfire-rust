@@ -1,4 +1,4 @@
-/// Represents an account gender.
+/// Represents the declared gender of an account.
 #[derive(Default, Clone, Debug)]
 pub enum Gender {
     /// Male gender

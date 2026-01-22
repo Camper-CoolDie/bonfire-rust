@@ -1,32 +1,31 @@
 use chrono::{DateTime, Utc};
 
-/// Represents an effect type.
+/// Represents the type of an effect applied to an account.
 #[derive(Default, Clone, Debug)]
 pub enum EffectKind {
-    /// This user can't place negative rates
+    /// This user cannot place negative rates
     #[default]
     Hater,
-    /// An avatar of this user is replaced with a pig
+    /// The user's avatar is replaced with a pig image
     Pig,
-    /// This user can't block publications
+    /// This user cannot block publications
     Watchman,
-    /// A goose is running across the entire screen of this user which they can't get rid of
+    /// A persistent goose runs across the user's screen
     Goose,
-    /// It is constantly snowing for this user
+    /// The user experiences a constant snowing animation
     EternalWinter,
-    /// This user can't perform admin actions
+    /// This user is temporarily restricted from performing administrative actions
     Punished,
-    /// This user has the privilege to translate the application regardless of their level and
-    /// karma
+    /// This user has privileges to translate the application regardless of their level and karma
     Translator,
-    /// This user can't mention others by using "@"
+    /// This user cannot mention others using the "@" symbol
     MentionLock,
 }
 
-/// Represents a preselected reason kind of an effect.
+/// Represents a preselected reason for an effect being applied.
 #[derive(Default, Clone, Debug)]
 pub enum EffectReasonKind {
-    /// The reason is not preselected
+    /// The reason for the effect is not preselected
     #[default]
     None,
     /// Punished for inappropriate behavior towards the gods
@@ -37,35 +36,33 @@ pub enum EffectReasonKind {
     TooManyBlocks,
     /// Punished for swearing in the service
     Swearing,
-    /// Punished for placing negative rates to every publication they saw
+    /// Punished for placing negative rates on every publication seen
     Hater,
     /// Punished for being uncultured
     Uncultured,
 }
 
-/// Represents an account effect.
+/// Represents an effect applied to an account.
 #[derive(Default, Clone, Debug)]
 pub struct Effect {
-    /// A unique identifier of this effect. Should always be set to a valid value if constructing
-    /// with `{ ... }`
+    /// The unique identifier of this effect
     pub id: u64,
-    /// An identifier of an account to whom this effect is applied
+    /// The identifier of the account to whom this effect is applied
     pub account_id: u64,
-    /// The date when this effect was applied
+    /// The date and time when this effect was applied
     pub applied_at: DateTime<Utc>,
-    /// The effect's end date
+    /// The date and time when this effect is scheduled to end
     pub ends_at: DateTime<Utc>,
-    /// A reason for applying this effect. `None` if [`is_system`][Effect::is_system] is true
+    /// The reason for applying this effect (`None` if [`is_system`][Effect::is_system] is true)
     pub reason: Option<String>,
-    /// A type of this effect
+    /// The type of this effect
     pub kind: EffectKind,
-    /// Was this effect applied by the system?
+    /// Indicates if this effect was applied automatically by the system
     pub is_system: bool,
-    /// A preselected reason for applying this effect. Useful only if
-    /// [`is_system`][Effect::is_system] is true, otherwise use the [`reason`][Effect::reason]
-    /// field
+    /// A preselected reason for applying this effect ([`reason`][Effect::reason] should be used
+    /// otherwise)
     pub reason_kind: EffectReasonKind,
-    /// A name of an account who applied this effect. `None` if [`is_system`][Effect::is_system] is
-    /// true
+    /// The name of the account that applied this effect (`None` if
+    /// [`is_system`][Effect::is_system] is true)
     pub from_account_name: Option<String>,
 }

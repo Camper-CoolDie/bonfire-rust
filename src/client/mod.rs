@@ -36,8 +36,10 @@ struct Inner {
     token_provider: TokenProvider,
 }
 
-/// Represents an HTTP wrapper for the Bonfire API. It manages the authentication session [`Auth`]
-/// and automatically handles token validation and refreshing.
+/// An asynchronous, thread-safe HTTP client for the Bonfire API.
+///
+/// This client manages the user's authentication session, automatically handling token validation
+/// and refreshing. It is designed to be cloned and shared across multiple asynchronous tasks.
 ///
 /// # Examples
 ///
@@ -71,14 +73,15 @@ impl Client {
         }
     }
 
-    /// Log in using email.
+    /// Logs the client into Bonfire using email and password.
     ///
     /// # Errors
     ///
-    /// * [`auth::Error::AlreadyAuthenticated`] if the client is already authenticated. You should
-    ///   call [`Client::logout()`] to terminate the current session
-    /// * [`auth::Error::TfaRequired`] if TFA is required to continue logging in
-    /// * [`Error`] if any other error occurred while sending the request.
+    /// * Returns [`auth::Error::AlreadyAuthenticated`] if the client is already authenticated. Call
+    ///   [`Client::logout()`] to terminate the current session before logging in again.
+    /// * Returns [`auth::Error::TfaRequired`] if Two-Factor Authentication (TFA) is required to
+    ///   complete the login process.
+    /// * Returns [`Error`] if any other error occurs while sending the login request.
     ///
     /// # Examples
     ///
@@ -107,12 +110,15 @@ impl Client {
         Ok(())
     }
 
-    /// Log out. The client becomes unauthenticated.
+    /// Logs the client out, invalidating the current authentication session.
+    ///
+    /// After logging out, the client becomes unauthenticated but can still send requests that do
+    /// not require authentication.
     ///
     /// # Errors
     ///
-    /// Returns [`auth::Error::Unauthenticated`] if the client is already unauthenticated or
-    /// [`Error`] if any other error occurred while sending the log out request.
+    /// Returns [`auth::Error::Unauthenticated`] if the client is already unauthenticated, or
+    /// [`Error`] if any other error occurs while sending the logout request.
     ///
     /// # Examples
     ///
@@ -140,16 +146,17 @@ impl Client {
         Ok(())
     }
 
-    /// Get the current authentication credentials [`Auth`]. Are guaranteed to be valid after
-    /// calling this method since they refresh if needed. Returns `None` if the client is
-    /// unauthenticated.
+    /// Retrieves the current authentication credentials.
     ///
-    /// Is usually called at the end of the program, after which the credentials are saved in a
-    /// secure place and used in [`ClientBuilder::auth()`] when the program runs again.
+    /// This method ensures the returned credentials are valid by automatically refreshing them if
+    /// they are expired. Returns `None` if the client is unauthenticated.
+    ///
+    /// This method is typically called at the end of a program's execution to save the valid
+    /// credentials securely for use in [`ClientBuilder::auth()`] when the program restarts.
     ///
     /// # Errors
     ///
-    /// Returns [`Error`] if an error occurred while sending the refresh request.
+    /// Returns [`Error`] if an error occurs while sending the refresh request.
     ///
     /// # Examples
     ///
@@ -270,14 +277,15 @@ impl Default for Client {
     }
 }
 
-/// Represents a builder that can be used to construct a `Client` through a builder-like pattern.
+/// A builder-like pattern for constructing and configuring a [`Client`] instance.
 pub struct ClientBuilder {
     root_uri: Uri,
     melior_uri: Uri,
     auth: Option<Auth>,
 }
 impl ClientBuilder {
-    /// Create a new `ClientBuilder` with default values.
+    /// Creates a new `ClientBuilder` with default API endpoint URIs and no authentication
+    /// credentials.
     #[must_use]
     pub fn new() -> Self {
         Self {
@@ -287,16 +295,16 @@ impl ClientBuilder {
         }
     }
 
-    /// Builds and transforms `ClientBuilder` into a [`Client`].
+    /// Consumes the `ClientBuilder` and creates a [`Client`] instance.
     pub fn build(self) -> Client {
         Client::new(&self.root_uri, &self.melior_uri, self.auth)
     }
 
-    /// Set the root server's URI.
+    /// Sets the URI for the Root API server.
     ///
     /// # Panics
     ///
-    /// Panics if the provided argument couldn't be converted to `Uri`.
+    /// Panics if the provided argument cannot be converted to a valid `Uri`.
     ///
     /// # Examples
     ///
@@ -317,11 +325,11 @@ impl ClientBuilder {
         self
     }
 
-    /// Set the melior server's URI.
+    /// Sets the URI for the Melior API server.
     ///
     /// # Panics
     ///
-    /// Panics if the provided argument couldn't be converted to `Uri`.
+    /// Panics if the provided argument cannot be converted to a valid `Uri`.
     ///
     /// # Examples
     ///
@@ -342,11 +350,11 @@ impl ClientBuilder {
         self
     }
 
-    /// Set the authentication credentials.
+    /// Sets the initial authentication credentials for the client.
     ///
     /// # Errors
     ///
-    /// Returns [`JwtError`] if an error occurred while parsing the credentials.
+    /// Returns [`JwtError`] if an error occurs while parsing the provided credentials.
     ///
     /// # Examples
     ///

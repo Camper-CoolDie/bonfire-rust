@@ -7,54 +7,55 @@ use crate::client::JwtError;
 use crate::models::auth;
 use crate::{MeliorError, RootError};
 
-/// A type alias for [`Result<T, Error>`][StdResult<T, Error>].
+/// A type alias for [`Result<T, Error>`][StdResult].
 pub type Result<T> = StdResult<T, Error>;
 
-/// Represents errors that can occur while operating with a client.
+/// Represents errors that can occur while operating with the client.
 ///
 /// # Source
 ///
-/// An `Error` can be the result of operations like constructing a request or parsing a response.
+/// An `Error` can be the result of operations such as constructing a request or parsing a
+/// response.
 #[derive(Error, Debug)]
 pub enum Error {
-    /// The provided attachment weights more the server can process
+    /// The provided attachment exceeds the maximum size the server can process
     #[error("attachment is too large")]
     AttachmentTooLarge,
-    /// Can't authenticate
+    /// An authentication-related error occurred
     #[error("authentication error")]
     AuthError(#[from] auth::Error),
-    /// Can't parse authentication credentials
+    /// An error occurred while parsing authentication credentials
     #[error("JWT error")]
     JwtError(#[from] JwtError),
-    /// Can't (de)serialize a JSON object
+    /// An error occurred during JSON serialization or deserialization
     #[error("JSON error")]
     JsonError(#[from] serde_json::Error),
-    /// Can't build a request
+    /// An HTTP-related error occurred during request construction
     #[error("HTTP error")]
     HttpError(#[from] http::Error),
-    /// Can't send data to the server
+    /// An error occurred within the Hyper client
     #[error("hyper client error")]
     HyperClientError(#[from] hyper_util::client::legacy::Error),
-    /// Can't receive data from the server
+    /// A Hyper-related error occurred, typically during network communication
     #[error("hyper error")]
     HyperError(#[from] hyper::Error),
-    /// The melior server returned neither data nor an error
+    /// The Melior server returned a response with neither data nor a specific error
     #[error("invalid melior response")]
     InvalidMeliorResponse,
-    /// The melior server returned an error
+    /// The Melior server returned an error
     #[error("melior server error")]
     MeliorError(#[from] MeliorError),
-    /// The constructed request weights more than the server can process
+    /// The constructed request exceeds the maximum size the server can process
     #[error("request is too large")]
     RequestTooLarge,
-    /// The root server returned an error
+    /// The Root server returned an error
     #[error("root server error")]
     RootError(#[from] RootError),
-    /// The server returned an unsuccessful HTTP status code. Some of the most common codes are:
+    /// The server returned an unsuccessful HTTP status code. Some common codes include:
     ///
     /// * `429`: Too many requests in a short period of time
-    /// * `500`: The server couldn't parse the request
-    /// * `502`: The server is down
+    /// * `500`: The server encountered an internal error
+    /// * `502`: The server is currently unavailable or down
     #[error(
         "unsuccessful response: {}{}",
         .0.as_u16(),

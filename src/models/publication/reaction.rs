@@ -1,8 +1,8 @@
-/// Represents a reaction on a publication.
+/// Represents a reaction (emoji) placed on a chat message or comment.
 #[derive(Default, Clone, Debug)]
 pub struct Reaction {
-    /// An identifier of an account who placed this reaction
-    pub from_account_id: u64,
-    /// An index of this reaction
+    /// The index of this reaction
     pub index: i64,
+    /// The unique identifier of the account that placed this reaction
+    pub from_account_id: u64,
 }

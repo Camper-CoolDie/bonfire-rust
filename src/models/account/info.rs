@@ -10,65 +10,65 @@ use crate::requests::account::bio::{
 use crate::requests::account::GetInfoRequest;
 use crate::{Client, Result};
 
-/// The number of links an account can contain.
+/// The maximum number of links an account's profile can contain.
 pub const LINKS_COUNT: usize = 7;
-/// The allowed range for an account age.
+/// The allowed range for an account's age.
 pub const AGE_RANGE: Range<i64> = 0..201;
-/// The maximum allowed status length.
+/// The maximum allowed length for an account's status message.
 pub const STATUS_MAX_LENGTH: usize = 100;
-/// The maximum allowed description length.
+/// The maximum allowed length for an account's description (bio).
 pub const DESCRIPTION_MAX_LENGTH: usize = 1000;
 
-/// Represents information about an account.
+/// Represents detailed information about an account's profile.
 #[derive(Default, Clone, Debug)]
 pub struct Info {
     /// The date when this account was registered
     pub created_at: DateTime<Utc>,
-    /// The date when this account's ban ends
+    /// The date when this account's ban is scheduled to end
     pub banned_until: Option<DateTime<Utc>>,
-    /// A background inside this account's profile
+    /// The background image set for this account's profile
     pub background: Option<ImageRef>,
-    /// A GIF background inside this account's profile
+    /// The GIF background image set for this account's profile
     pub background_gif: Option<ImageRef>,
-    /// Are you following this account?
+    /// Indicates if you are currently following this account
     pub is_following: bool,
-    /// Is this account following you?
+    /// Indicates if this account is currently following you
     pub follows_me: bool,
-    /// The number of users this account is followed to
+    /// The total number of users this account is following
     pub follows_count: u64,
-    /// The number of users who are following this account
+    /// The total number of users who are following this account
     pub followers_count: u64,
-    /// A status which this account has set in their profile
+    /// The custom status message set by this account in their profile
     pub status: Option<String>,
-    /// What age this account has given themselves?
+    /// The age provided by this account, if set
     pub age: Option<i64>,
-    /// A description (bio) of this account
+    /// The description (bio) provided by this account
     pub description: Option<String>,
-    /// Links which this account has added to their profile
+    /// External links added by this account to their profile
     pub links: Vec<Link>,
-    /// Your note to this account
+    /// Your private note associated with this account
     pub note: Option<String>,
-    /// A post which this account has pinned inside their profile
+    /// A specific post that this account has pinned to their profile
     pub pinned_post: Option<Publication<Post>>,
-    /// How many times this account was banned?
+    /// The total number of times this account has been banned
     pub bans_count: u64,
-    /// How many times this account was warned?
+    /// The total number of times this account has received a warning
     pub warns_count: u64,
-    /// Total karma earned by this account
+    /// The total karma earned by this account
     pub karma_total: f64,
-    /// The number of rates placed by this account
+    /// The total number of rates placed by this account
     pub rates_count: u64,
-    /// The sum of positive rates (karma of each rate is rounded to 1) placed by this account
+    /// The sum of all positive rates (each rounded to 1) placed by this account
     pub positive_rates_sum: i64,
-    /// The sum of negative rates (karma of each rate is rounded to 1) placed by this account
+    /// The sum of all negative rates (each rounded to 1) placed by this account
     pub negative_rates_sum: i64,
-    /// The number of fandoms this account can moderate
+    /// The number of fandoms this account has moderation privileges in
     pub moderating_fandoms_count: u64,
     /// The number of fandoms this account is subscribed to
     pub subscriptions_count: u64,
-    /// The number of fandoms this account is viceroy in
+    /// The number of fandoms this account serves as a viceroy in
     pub viceroys_count: u64,
-    /// The number of stickers this account has added to their sticker collection
+    /// The number of stickers this account has added to their collection
     pub stickers_count: u64,
     /// The number of users this account has blacklisted
     pub blacklisted_accounts_count: u64,
@@ -76,13 +76,13 @@ pub struct Info {
     pub blacklisted_fandoms_count: u64,
 }
 impl Info {
-    /// Get account information by its identifier.
+    /// Retrieves detailed account information by its unique identifier.
     ///
     /// # Errors
     ///
-    /// Returns [`RootError::Unavailable`][crate::RootError::Unavailable] if there's no account
-    /// with the provided identifier or [`Error`][crate::Error] if any other error occurred while
-    /// sending the request.
+    /// Returns [`RootError::Unavailable`][crate::RootError::Unavailable] if no account with the
+    /// provided identifier exists, or [`Error`][crate::Error] if any other error occurs during the
+    /// request.
     pub async fn get_by_id(client: &Client, id: u64) -> Result<Self> {
         GetInfoRequest::new_by_id(id)
             .send_request(client)
@@ -90,13 +90,13 @@ impl Info {
             .try_into()
     }
 
-    /// Get account information by its name.
+    /// Retrieves detailed account information by its name.
     ///
     /// # Errors
     ///
-    /// Returns [`RootError::Unavailable`][crate::RootError::Unavailable] if there's no account
-    /// with the provided name or [`Error`][crate::Error] if any other error occurred while sending
-    /// the request.
+    /// Returns [`RootError::Unavailable`][crate::RootError::Unavailable] if no account with the
+    /// provided name exists, or [`Error`][crate::Error] if any other error occurs during the
+    /// request.
     pub async fn get_by_name(client: &Client, name: &str) -> Result<Self> {
         GetInfoRequest::new_by_name(name)
             .send_request(client)
@@ -104,41 +104,47 @@ impl Info {
             .try_into()
     }
 
-    /// Set your age. Must be within [`AGE_RANGE`]. Zero or `None` means no age.
+    /// Sets the account's age.
+    ///
+    /// The age must be within the [`AGE_RANGE`]. A value of `0` or `None` indicates no age is set.
     ///
     /// # Errors
     ///
     /// Returns [`RootError::Other`][crate::RootError::Other] with the code `E_BAD_AGE` if the
-    /// provided age is not within the range or [`Error`][crate::Error] if any other error occurred
-    /// while sending the request.
+    /// provided age is outside the allowed range, or [`Error`][crate::Error] if any other error
+    /// occurs during the request.
     pub async fn set_age(client: &Client, age: Option<i64>) -> Result<()> {
         SetAgeRequest::new(age).send_request(client).await?;
         Ok(())
     }
 
-    /// Set your status. Must be no longer than [`STATUS_MAX_LENGTH`]. Empty or `None` means no
+    /// Sets the account's status message.
+    ///
+    /// The status must not exceed [`STATUS_MAX_LENGTH`]. An empty string or `None` clears the
     /// status.
     ///
     /// # Errors
     ///
-    /// * [`RootError::AccessDenied`][crate::RootError::AccessDenied] if you aren't yet allowed to
-    ///   change your status
-    /// * [`RootRrror::Other`][crate::RootError::Other] with the code `E_BAD_SIZE` if the provided
-    ///   status is longer than the maximum allowed length
-    /// * [`Error`][crate::Error] if any other error occurred while sending the request.
+    /// * Returns [`RootError::AccessDenied`][crate::RootError::AccessDenied] if the user is not yet
+    ///   permitted to change their status.
+    /// * Returns [`RootError::Other`][crate::RootError::Other] with the code `E_BAD_SIZE` if the
+    ///   provided status exceeds the maximum allowed length.
+    /// * Returns [`Error`][crate::Error] if any other error occurs during the request.
     pub async fn set_status(client: &Client, status: Option<&str>) -> Result<()> {
         SetStatusRequest::new(status).send_request(client).await?;
         Ok(())
     }
 
-    /// Set your description. Must be no longer than [`DESCRIPTION_MAX_LENGTH`]. Empty or `None`
-    /// means no description.
+    /// Sets the account's description (bio).
+    ///
+    /// The description must not exceed [`DESCRIPTION_MAX_LENGTH`]. An empty string or `None` clears
+    /// the description.
     ///
     /// # Errors
     ///
     /// Returns [`RootError::Other`][crate::RootError::Other] with the code `E_BAD_SIZE` if the
-    /// provided description is longer than the maximum allowed length or [`Error`][crate::Error]
-    /// if any other error occurred while sending the request.
+    /// provided description exceeds the maximum allowed length, or [`Error`][crate::Error] if any
+    /// other error occurs during the request.
     pub async fn set_description(client: &Client, description: Option<&str>) -> Result<()> {
         SetDescriptionRequest::new(description)
             .send_request(client)
@@ -146,11 +152,11 @@ impl Info {
         Ok(())
     }
 
-    /// Set your gender.
+    /// Sets the account's declared gender.
     ///
     /// # Errors
     ///
-    /// Returns [`Error`][crate::Error] if an error occurred while sending the request.
+    /// Returns [`Error`][crate::Error] if an error occurs while sending the request.
     pub async fn set_gender(client: &Client, gender: Gender) -> Result<()> {
         SetGenderRequest::new(gender).send_request(client).await?;
         Ok(())

@@ -1,12 +1,12 @@
-/// Represents a reference to an external image.
+/// Represents a reference to an external image, including its metadata.
 #[derive(Default, Clone, Debug)]
 pub struct ImageRef {
-    /// A unique identifier of this image.
+    /// The unique identifier of this image
     pub id: u64,
-    /// A URI which can be used to download this image.
+    /// The URI from which this image can be downloaded
     pub uri: String,
-    /// The image's width. Can be zero
+    /// The width of the image in pixels; can be zero if unknown
     pub width: u32,
-    /// The image's height. Can be zero
+    /// The height of the image in pixels; can be zero if unknown
     pub height: u32,
 }

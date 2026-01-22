@@ -5,28 +5,29 @@ use crate::queries::auth::MeQuery;
 use crate::queries::profile::SetBirthdayQuery;
 use crate::{Client, Result};
 
-/// Represents information about an authenticated user.
+/// Represents detailed information about the currently authenticated user's profile.
 #[derive(Default, Clone, Debug)]
 pub struct Me {
-    /// A unique identifier of your account. Isn't guaranteed to be an integer
+    /// The unique identifier of your account (not guaranteed to be an integer)
     pub id: String,
-    /// Your name
+    /// Your display name
     pub name: String,
-    /// Your email
+    /// Your registered email address
     pub email: String,
-    /// Your cached level
+    /// Your last known level, cached by the API
     pub cached_level: f64,
-    /// Your day of birth or `None` if unset
+    /// Your date of birth, or `None` if not set
     pub birthday: Option<NaiveDate>,
-    /// Are you allowed to see NSFW posts? None if [`birthday`][Me::birthday] is also `None`
+    /// Indicates whether you are allowed to view NSFW content, or `None` if `birthday` is also
+    /// `None`
     pub is_nsfw_allowed: Option<bool>,
 }
 impl Me {
-    /// Get information about the currently authenticated user.
+    /// Retrieves information about the currently authenticated user.
     ///
     /// # Errors
     ///
-    /// Returns [`Error`][crate::Error] if an error occurred while sending the request.
+    /// Returns [`Error`][crate::Error] if an error occurs while sending the request.
     ///
     /// # Examples
     ///
@@ -46,11 +47,11 @@ impl Me {
         Ok(MeQuery::new().send_request(client).await?.into())
     }
 
-    /// Set your birthday.
+    /// Sets the authenticated user's birthday.
     ///
     /// # Errors
     ///
-    /// Returns [`Error`][crate::Error] if an error occurred while sending the request.
+    /// Returns [`Error`][crate::Error] if an error occurs while sending the request.
     ///
     /// # Examples
     ///

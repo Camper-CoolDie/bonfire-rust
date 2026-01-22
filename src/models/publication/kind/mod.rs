@@ -4,7 +4,7 @@ mod post;
 pub use any::AnyPublication;
 pub use post::Post;
 
-/// Represents a publication type.
+/// Represents the specific type of a publication.
 #[derive(Default, Clone, Debug)]
 pub enum PublicationKind {
     /// The publication has an unknown or unspecified type
@@ -18,7 +18,7 @@ pub enum PublicationKind {
     Post,
     /// The publication is a post tag
     PostTag,
-    /// The publication is a moderation
+    /// The publication is a moderation action
     Moderation,
     /// The publication is a user event
     UserEvent,

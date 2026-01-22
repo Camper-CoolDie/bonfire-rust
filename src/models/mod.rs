@@ -1,14 +1,14 @@
-/// Account implementation and helper structs.
+/// Contains structs and helper types related to user accounts.
 pub mod account;
-/// Authentication implementation, errors and helper structs.
+/// Contains structs, errors, and helper types for authentication processes.
 pub mod auth;
-/// Common, shared models used across the API.
+/// Contains common, reusable models and types used across the API.
 pub mod common;
-/// Fandom implementations and helper structs.
+/// Contains structs and helper types related to fandoms.
 pub mod fandom;
-/// Profile implementation and helper structs.
+/// Contains structs and helper types related to user profiles.
 pub mod profile;
-/// Publication implementations, kinds and helper structs.
+/// Contains structs, kind enums, and helper types for publications.
 pub mod publication;
 
 pub use account::{Account, Badge, Effect, Gender, Info as AccountInfo, Link};

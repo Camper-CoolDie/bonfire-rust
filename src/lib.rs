@@ -33,7 +33,7 @@
 //!     // Set up tracing
 //!     tracing_subscriber::fmt::init();
 //!
-//!     // Build client & authenticate (either by using `credentials.json` or sending a log-in request)
+//!     // Build client & authenticate (either by using `credentials.json` or sending a login request)
 //!     let auth_data = fs::read("credentials.json")
 //!         .ok()
 //!         .map(|data| serde_json::from_slice::<Auth>(&data))
@@ -77,9 +77,10 @@
 #![warn(clippy::pedantic)]
 #![allow(clippy::struct_excessive_bools)]
 
-/// HTTP Client implementation which is used all across the library for making requests.
+/// Provides the core HTTP client implementation used for making requests across the library.
 pub mod client;
-/// Structs, errors and enums for constructing requests and parsing responses.
+/// Contains data structures, error types, and enums for constructing requests and parsing
+/// responses.
 pub mod models;
 mod queries;
 mod requests;

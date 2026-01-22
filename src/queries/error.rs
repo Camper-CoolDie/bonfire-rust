@@ -1,14 +1,14 @@
 use std::error::Error;
 use std::fmt;
 
-/// Represents an error from the melior server.
+/// Represents an error returned by the Melior (GraphQL) server.
 #[derive(Debug)]
 pub struct MeliorError {
-    /// Message of the error
+    /// The error message
     pub message: String,
-    /// Query locations that caused the error
+    /// The locations within the query that caused the error
     pub locations: Option<Vec<QueryLocation>>,
-    /// Part of a query path that caused the error
+    /// The path within the query that caused the error
     pub path: Option<Vec<QueryPath>>,
 }
 
@@ -38,20 +38,20 @@ impl fmt::Display for MeliorError {
 
 impl Error for MeliorError {}
 
-/// Represents a location inside a query.
+/// Represents a specific location within a GraphQL query.
 #[derive(Debug)]
 pub struct QueryLocation {
-    /// Line number in the query
+    /// The line number in the query
     pub line: i32,
-    /// Column number in the query
+    /// The column number in the query
     pub column: i32,
 }
 
-/// Represents a part of a query path.
+/// Represents a single part of a query's path, used to pinpoint the exact location of an error.
 #[derive(Debug)]
 pub enum QueryPath {
-    /// A key inside an object
+    /// A key within an object
     Key(String),
-    /// An index inside an array
+    /// An index within an array
     Index(i32),
 }

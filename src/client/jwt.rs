@@ -17,17 +17,16 @@ fn deserialize_timestamp<'de, D: Deserializer<'de>>(
 
 pub(super) type JwtResult<T> = StdResult<T, JwtError>;
 
-/// Represents an error parsing the authentication credentials (more specifically, parsing its
-/// access token).
+/// Represents an error that can occur while parsing or validating JSON Web Tokens (JWT).
 #[derive(Error, Debug)]
 pub enum JwtError {
-    /// The contained access token doesn't have a payload
+    /// The provided access token does not contain a payload
     #[error("no payload")]
     NoPayload,
-    /// Can't decode payload of the contained access token
+    /// An error occurred during Base64 decoding of the token payload
     #[error("base64 error")]
     Base64Error(#[from] base64::DecodeError),
-    /// Can't deserialize the contained access token
+    /// An error occurred during JSON deserialization of the token claims
     #[error("JSON error")]
     JsonError(#[from] serde_json::Error),
 }

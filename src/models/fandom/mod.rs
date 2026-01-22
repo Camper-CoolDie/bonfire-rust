@@ -2,46 +2,45 @@ use chrono::{DateTime, Utc};
 
 use crate::models::{Category, ImageRef, Language};
 
-/// Represents a fandom status.
+/// Represents the current status of a fandom.
 #[derive(Default, Clone, Debug)]
 pub enum FandomStatus {
-    /// The status is unspecified
+    /// The fandom's status is unspecified
     #[default]
     Unspecified,
-    /// The fandom is waiting for approval
+    /// The fandom has been suggested and is awaiting approval
     Suggested,
-    /// The fandom was accepted
+    /// The fandom has been accepted
     Accepted,
 }
 
-/// Represents a fandom.
+/// Represents a fandom, which is a community centered around a specific topic.
 #[derive(Default, Clone, Debug)]
 pub struct Fandom {
-    /// A unique identifier of this fandom. Should always be set to a valid value if constructing
-    /// with `{ ... }`
+    /// The unique identifier of this fandom
     pub id: u64,
-    /// A language which the fandom's community is speaking in. This field isn't linked to a
-    /// separate fandom but further identifies it. Should be set in most cases if constructing with
-    /// `{ ... }`. `None` if multilingual
+    /// The specific language for this fandom. A single fandom can exist in multiple languages,
+    /// with each `Language` representing a distinct community instance. `None` if this fandom
+    /// instance isn't linked to a specific language
     pub language: Option<Language>,
-    /// An avatar of this fandom
+    /// The icon image representing this fandom
     pub icon: Option<ImageRef>,
-    /// A background of this fandom
+    /// The background image set for this fandom's profile
     pub background: Option<ImageRef>,
-    /// A GIF background of this fandom
+    /// The GIF background image set for this fandom's profile
     pub background_gif: Option<ImageRef>,
-    /// Can publications from this fandom randomly appear in feed?
+    /// Indicates if publications from this fandom can randomly appear in the feed
     pub is_closed: bool,
-    /// A karma coefficient of this fandom
+    /// The karma coefficient applied to this fandom
     pub karma_coef: f64,
-    /// An identifier of an account who suggested this fandom
+    /// The identifier of the account that originally suggested this fandom
     pub suggester_id: Option<u64>,
-    /// The date when this fandom was suggested
+    /// The date and time when this fandom was suggested
     pub suggested_at: Option<DateTime<Utc>>,
-    /// The number of users who subscribed to this fandom
+    /// The number of users currently subscribed to this fandom
     pub subscribers_count: u64,
-    /// A status of this fandom
+    /// The current status of this fandom
     pub status: FandomStatus,
-    /// A category of this fandom
+    /// The category that this fandom belongs to
     pub category: Category,
 }

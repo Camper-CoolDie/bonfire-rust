@@ -1,10 +1,13 @@
 use crate::models::publication::{PublicationInheritor, PublicationKind};
 use crate::models::Post;
 
-/// Represents any type of additional data stored alongside the main publication data.
+/// Represents a union of all possible additional data types for a publication.
+///
+/// This enum acts as a catch-all for various publication kinds when the specific type is not
+/// known or needed, storing additional data relevant to that type.
 #[derive(Default, Clone, Debug)]
 pub enum AnyPublication {
-    /// The publication has an unknown or unspecified type, hence no data can be parsed
+    /// The publication has an unknown or unspecified type, thus no specific data can be parsed
     #[default]
     Unknown,
     /// The publication contains additional comment data

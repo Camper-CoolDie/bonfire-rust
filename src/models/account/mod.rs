@@ -18,49 +18,50 @@ use crate::requests::account::{
 };
 use crate::{Client, Result};
 
-/// The duration of an account's online status since when it was last online.
+/// The maximum duration an account can be offline while still considered "online".
 pub const ONLINE_DURATION: Duration = Duration::minutes(15);
 
-/// Represents an account customization.
+/// Represents customizable aspects of an account's appearance.
 #[derive(Default, Clone, Debug)]
 pub struct AccountCustomization {
-    /// A color of this account's name
+    /// The hexadecimal color code for this account's name (e.g., `0xFFFFFF`).
     pub name_color: Option<u32>,
-    /// A badge which this account has picked as main
+    /// The badge currently selected and displayed for this account.
     pub active_badge: Option<Badge>,
 }
 
-/// Represents an account.
+/// Represents a Bonfire user account.
 #[derive(Default, Clone, Debug)]
 pub struct Account {
-    /// A unique identifier of this account. Should always be set to a valid value if constructing
-    /// with `{ ... }`
+    /// The unique identifier of this account
     pub id: u64,
-    /// A level of this account
+    /// The current level of this account
     pub level: f64,
-    /// The time when this account was last online
+    /// The timestamp when this account was last detected online
     pub last_online_at: DateTime<Utc>,
-    /// A name of this account
+    /// The display name of this account
     pub name: String,
-    /// An avatar of this account
+    /// The avatar image of this account, if set
     pub avatar: Option<ImageRef>,
-    /// A gender of this account
+    /// The declared gender of this account
     pub gender: Gender,
-    /// Karma earned by this account in the last 30 days
+    /// The karma earned by this account over the last 30 days
     pub karma30: f64,
-    /// How much money the account has donated
+    /// The amount of money this account has donated sequentially
     pub sponsor_amount: u64,
-    /// The number of sequential times this account has donated
+    /// The number of consecutive times this account has donated
     pub sponsor_count: u64,
-    /// Effects which this account currently holds
+    /// A list of effects currently applied to this account
     pub effects: Vec<Effect>,
-    /// A customization of this account
+    /// Customization settings applied to this account's appearance
     pub customization: AccountCustomization,
 }
 impl Account {
-    /// Create a new `Account` with only its identifier set. Useful when you don't need other
-    /// fields but need to send an associated request, however using a struct obtained from
-    /// [`Account::get_by_id()`] or [`Account::get_by_name()`] is preferable.
+    /// Creates a new `Account` instance with only its identifier set.
+    ///
+    /// This is useful when you only need to reference an account by its ID for sending associated
+    /// requests. However, obtaining a fully populated `Account` struct from methods like
+    /// [`Account::get_by_id()`] or [`Account::get_by_name()`] is generally preferred.
     ///
     /// # Examples
     ///
@@ -84,19 +85,23 @@ impl Account {
         }
     }
 
-    /// Check if this account is currently online. Requires [`Account::last_online_at`] to be set.
+    /// Checks if this account is currently considered online.
+    ///
+    /// This method relies on the [`Account::last_online_at`] field being set.
     #[must_use]
     pub fn is_online(&self) -> bool {
         Utc::now() - self.last_online_at < ONLINE_DURATION
     }
 
-    /// Get an account by its identifier. Doesn't require authentication.
+    /// Retrieves an account by its unique identifier.
+    ///
+    /// This method does not require authentication.
     ///
     /// # Errors
     ///
-    /// Returns [`RootError::Unavailable`][crate::RootError::Unavailable] if there's no account
-    /// with the provided identifier or [`Error`][crate::Error] if any other error occurred while
-    /// sending the request.
+    /// Returns [`RootError::Unavailable`][crate::RootError::Unavailable] if no account with the
+    /// provided identifier exists, or [`Error`][crate::Error] if any other error occurs during the
+    /// request.
     pub async fn get_by_id(client: &Client, id: u64) -> Result<Self> {
         GetAccountRequest::new_by_id(id)
             .send_request(client)
@@ -104,13 +109,15 @@ impl Account {
             .try_into()
     }
 
-    /// Get an account by its name. Doesn't require authentication.
+    /// Retrieves an account by its name.
+    ///
+    /// This method does not require authentication.
     ///
     /// # Errors
     ///
-    /// Returns [`RootError::Unavailable`][crate::RootError::Unavailable] if there's no account
-    /// with the provided name or [`Error`][crate::Error] if any other error occurred while sending
-    /// the request.
+    /// Returns [`RootError::Unavailable`][crate::RootError::Unavailable] if no account with the
+    /// provided name exists, or [`Error`][crate::Error] if any other error occurs during the
+    /// request.
     pub async fn get_by_name(client: &Client, name: &str) -> Result<Self> {
         GetAccountRequest::new_by_name(name)
             .send_request(client)
@@ -118,11 +125,11 @@ impl Account {
             .try_into()
     }
 
-    /// Search for accounts by their name.
+    /// Searches for accounts by their name.
     ///
     /// # Errors
     ///
-    /// Returns [`Error`][crate::Error] if an error occurred while sending the request.
+    /// Returns [`Error`][crate::Error] if an error occurs while sending the request.
     pub async fn search(
         client: &Client,
         name: Option<&str>,
@@ -135,13 +142,13 @@ impl Account {
             .try_into()
     }
 
-    /// Get [`Info`] about this account.
+    /// Retrieves detailed [`Info`] about this account.
     ///
     /// # Errors
     ///
-    /// Returns [`RootError::Unavailable`][crate::RootError::Unavailable] if there's no account
-    /// with the contained identifier or [`Error`][crate::Error] if any other error occurred while
-    /// sending the request.
+    /// Returns [`RootError::Unavailable`][crate::RootError::Unavailable] if no account with the
+    /// contained identifier exists, or [`Error`][crate::Error] if any other error occurs during
+    /// the request.
     pub async fn get_info(&self, client: &Client) -> Result<Info> {
         GetInfoRequest::new_by_id(self.id)
             .send_request(client)
@@ -149,12 +156,13 @@ impl Account {
             .try_into()
     }
 
-    /// Get a list of accounts that are currently online (that were active less than
-    /// [`ONLINE_DURATION`] ago).
+    /// Retrieves a list of accounts that are currently online.
+    ///
+    /// An account is considered online if it was active less than [`ONLINE_DURATION`] ago.
     ///
     /// # Errors
     ///
-    /// Returns [`Error`][crate::Error] if an error occurred while sending the request.
+    /// Returns [`Error`][crate::Error] if an error occurs while sending the request.
     pub async fn get_online(
         client: &Client,
         offset_date: Option<DateTime<Utc>>,

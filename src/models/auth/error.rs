@@ -2,13 +2,12 @@ use std::fmt;
 
 use thiserror::Error;
 
-/// Represents a type of a TFA session.
+/// Represents the type of a Two-Factor Authentication (TFA) session.
 #[derive(Debug)]
 pub enum TfaKind {
-    /// Log in again using a TOTP (Time-based One Time Password)
+    /// Log in using a Time-based One-Time Password (TOTP)
     Totp,
-    /// Log in after an owner of the account verified this log-in attempt through a link sent to
-    /// their email
+    /// Log in after verifying the attempt through a link sent to the account owner's email
     EmailLink,
 }
 
@@ -21,12 +20,12 @@ impl fmt::Display for TfaKind {
     }
 }
 
-/// Represents data to continue logging in using TFA (Two-Factor Authentication).
+/// Represents data required to continue logging in using Two-Factor Authentication (TFA).
 #[derive(Debug)]
 pub struct TfaRequired {
-    /// A type of this TFA session
+    /// The type of this TFA session
     pub kind: TfaKind,
-    /// A wait token for this TFA session
+    /// A wait token specific to this TFA session
     pub wait_token: String,
 }
 
@@ -36,17 +35,17 @@ impl fmt::Display for TfaRequired {
     }
 }
 
-/// Represents errors that can occur while authenticating.
+/// Represents errors that can occur during authentication operations.
 ///
 /// # Source
 ///
-/// An `AuthError` can be the result of a non-standart response or an unauthenticated client.
+/// An `Error` can arise from an unexpected server response or an unauthenticated client state.
 #[derive(Error, Debug)]
 pub enum Error {
     /// The client is already authenticated
     #[error("authenticated client")]
     AlreadyAuthenticated,
-    /// TFA is required to continue logging in
+    /// Two-Factor Authentication (TFA) is required to continue logging in
     #[error("TFA is required to continue logging in ({0})")]
     TfaRequired(TfaRequired),
     /// The client is unauthenticated

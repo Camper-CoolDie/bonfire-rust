@@ -61,7 +61,7 @@ impl TryFrom<RawFandom> for Fandom {
             2 => Some(Language::Russian),
             3 => Some(Language::Portuguese),
             4 => Some(Language::Ukrainian),
-            5 => Some(Language::Deutsch),
+            5 => Some(Language::German),
             6 => Some(Language::Italian),
             7 => Some(Language::Polish),
             8 => Some(Language::French),
@@ -101,7 +101,7 @@ impl TryFrom<RawFandom> for Fandom {
                 0 => None,
                 timestamp => Some(
                     DateTime::from_timestamp_millis(value.suggested_at).ok_or_else(|| {
-                        serde_json::Error::custom(format!("timestamp {timestamp} is out of range",))
+                        serde_json::Error::custom(format!("timestamp {timestamp} is out of range"))
                     })?,
                 ),
             },

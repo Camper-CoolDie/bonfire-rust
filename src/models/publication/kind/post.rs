@@ -1,27 +1,26 @@
 use crate::models::publication::{PublicationInheritor, PublicationKind};
 
-/// Represents a post.
+/// Represents the specific data for a post publication.
 #[derive(Default, Clone, Debug)]
 pub struct Post {
-    /// An identifier of the corresponding publication. Should always be set to a valid value if
-    /// constructing with `{ ... }` and should always match
-    /// [`Publication::id`][crate::models::Publication::id]
+    /// The unique identifier of the corresponding publication
     pub id: u64,
     // /// The content of this post
     // pub pages: Vec<Page>,
     // /// A comment which earned the highest amount of karma
     // pub best_comment: Option<Publication<Comment>>,
-    /// An identifier of a rubric which this post is linked to
+    /// The identifier of the rubric this post is linked to
     pub rubric_id: Option<u64>,
-    /// A name of a rubric which this post is linked to
+    /// The name of the rubric this post is linked to
     pub rubric_name: Option<String>,
-    /// A karma coefficient of a rubric which this post is linked to
+    /// The karma coefficient of the rubric this post is linked to
     pub rubric_karma_coef: Option<f64>,
-    // /// A relay race which this post is linked to
+    // /// A relay race this post is linked to
     // pub relay_race: Option<RelayRace>,
 }
 
 impl PublicationInheritor for Post {
+    /// Returns the publication kind as `PublicationKind::Post`.
     fn kind(&self) -> PublicationKind {
         PublicationKind::Post
     }
