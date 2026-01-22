@@ -20,11 +20,9 @@
 //! const PASSWORD: &str = "password";
 //!
 //! async fn save_credentials(client: &Client) -> Result<()> {
-//!     if let Some(ref auth) = client.auth().await? {
-//!         let data = serde_json::to_string(&auth)?;
-//!         let mut file = File::create("credentials.json")?;
-//!         file.write_all(data.as_bytes())?;
-//!     }
+//!     let data = serde_json::to_string(&client.auth().await?)?;
+//!     let mut file = File::create("credentials.json")?;
+//!     file.write_all(data.as_bytes())?;
 //!     Ok(())
 //! }
 //!

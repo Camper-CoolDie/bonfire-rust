@@ -16,7 +16,7 @@ use service::{MeliorService, RootService};
 use token_provider::TokenProvider;
 
 use crate::client::jwt::decode_token;
-use crate::models::{auth, Auth};
+use crate::models::{Auth, AuthError};
 use crate::queries::auth::{LoginEmailQuery, LogoutQuery};
 use crate::{MeliorQuery, RootRequest};
 
@@ -73,13 +73,39 @@ impl Client {
         }
     }
 
+    /// Checks if the client is currently authenticated.
+    ///
+    /// This method does not attempt to refresh tokens; it only reflects the current
+    /// authentication state.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// # use bonfire::{Client, Result};
+    /// #
+    /// # #[tokio::main]
+    /// # async fn main() -> Result<()> {
+    /// # let client = Client::default();
+    /// client.login("email", "password").await?;
+    /// assert!(client.is_auth().await); // is_auth() is true
+    ///
+    /// client.logout().await?;
+    /// assert!(!client.is_auth().await); // is_auth() is false
+    /// #     Ok(())
+    /// # }
+    /// ```
+    #[must_use]
+    pub async fn is_auth(&self) -> bool {
+        self.inner.token_provider.is_auth().await
+    }
+
     /// Logs the client into Bonfire using email and password.
     ///
     /// # Errors
     ///
-    /// * Returns [`auth::Error::AlreadyAuthenticated`] if the client is already authenticated. Call
+    /// * Returns [`AuthError::AlreadyAuthenticated`] if the client is already authenticated. Call
     ///   [`Client::logout()`] to terminate the current session before logging in again.
-    /// * Returns [`auth::Error::TfaRequired`] if Two-Factor Authentication (TFA) is required to
+    /// * Returns [`AuthError::TfaRequired`] if Two-Factor Authentication (TFA) is required to
     ///   complete the login process.
     /// * Returns [`Error`] if any other error occurs while sending the login request.
     ///
@@ -98,7 +124,7 @@ impl Client {
     /// ```
     pub async fn login(&self, email: &str, password: &str) -> Result<()> {
         if self.inner.token_provider.is_auth().await {
-            Err(auth::Error::AlreadyAuthenticated)?;
+            Err(AuthError::AlreadyAuthenticated)?;
         }
 
         let auth = Auth::try_from(
@@ -117,7 +143,7 @@ impl Client {
     ///
     /// # Errors
     ///
-    /// Returns [`auth::Error::Unauthenticated`] if the client is already unauthenticated, or
+    /// Returns [`AuthError::Unauthenticated`] if the client is already unauthenticated, or
     /// [`Error`] if any other error occurs while sending the logout request.
     ///
     /// # Examples
@@ -127,7 +153,7 @@ impl Client {
     /// #
     /// # #[tokio::main]
     /// # async fn main() -> Result<()> {
-    /// let client = Client::default();
+    /// # let client = Client::default();
     /// client.login("email", "password").await?;
     /// // ...
     /// client.logout().await?;
@@ -138,7 +164,7 @@ impl Client {
     /// ```
     pub async fn logout(&self) -> Result<()> {
         if !self.inner.token_provider.is_auth().await {
-            Err(auth::Error::Unauthenticated)?;
+            Err(AuthError::Unauthenticated)?;
         }
 
         LogoutQuery::new().send_request(self).await?;
@@ -149,14 +175,15 @@ impl Client {
     /// Retrieves the current authentication credentials.
     ///
     /// This method ensures the returned credentials are valid by automatically refreshing them if
-    /// they are expired. Returns `None` if the client is unauthenticated.
+    /// they are expired.
     ///
     /// This method is typically called at the end of a program's execution to save the valid
     /// credentials securely for use in [`ClientBuilder::auth()`] when the program restarts.
     ///
     /// # Errors
     ///
-    /// Returns [`Error`] if an error occurs while sending the refresh request.
+    /// Returns [`AuthError::Unauthenticated`] if the client is not authenticated, or [`Error`] if
+    /// any other error occurs while sending the refresh request.
     ///
     /// # Examples
     ///
@@ -168,11 +195,9 @@ impl Client {
     /// use anyhow::Result;
     ///
     /// async fn save_credentials(client: &Client) -> Result<()> {
-    ///     if let Some(ref auth) = client.auth().await? {
-    ///         let data = serde_json::to_string(&auth)?;
-    ///         let mut file = File::create("credentials.json")?;
-    ///         file.write_all(data.as_bytes())?;
-    ///     }
+    ///     let data = serde_json::to_string(&client.auth().await?)?;
+    ///     let mut file = File::create("credentials.json")?;
+    ///     file.write_all(data.as_bytes())?;
     ///     Ok(())
     /// }
     ///
@@ -186,8 +211,12 @@ impl Client {
     /// #    Ok(())
     /// # }
     /// ```
-    pub async fn auth(&self) -> Result<Option<Auth>> {
-        self.inner.token_provider.get_auth(self).await
+    pub async fn auth(&self) -> Result<Auth> {
+        self.inner
+            .token_provider
+            .get_auth(self)
+            .await?
+            .ok_or(AuthError::Unauthenticated.into())
     }
 
     pub(crate) async fn send_request<R: Request>(

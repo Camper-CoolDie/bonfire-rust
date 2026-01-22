@@ -5,7 +5,7 @@ use http::StatusCode;
 use thiserror::Error;
 
 use crate::client::JwtError;
-use crate::models::auth;
+use crate::models::AuthError;
 use crate::{MeliorError, RootError};
 
 /// A type alias for [`Result<T, Error>`][StdResult].
@@ -24,7 +24,7 @@ pub enum Error {
     AttachmentTooLarge,
     /// An authentication-related error occurred
     #[error("authentication error")]
-    AuthError(#[from] auth::Error),
+    AuthError(#[from] AuthError),
     /// An error occurred while parsing authentication credentials
     #[error("JWT error")]
     JwtError(#[from] Arc<JwtError>),
