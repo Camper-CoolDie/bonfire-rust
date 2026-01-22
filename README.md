@@ -72,3 +72,9 @@ serde_json = "1.0"
 tokio = { version = "1.49", features = ["macros", "rt-multi-thread"] }
 tracing-subscriber = "0.3"
 ```
+
+## License
+
+Copyright (c) 2024-2026 Camper CoolDie <campercooldie@gmail.com>
+
+This project is licensed under the [MIT License](LICENSE).
