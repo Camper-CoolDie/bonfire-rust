@@ -1,4 +1,5 @@
 use std::result::Result as StdResult;
+use std::sync::Arc;
 
 use http::StatusCode;
 use thiserror::Error;
@@ -26,7 +27,7 @@ pub enum Error {
     AuthError(#[from] auth::Error),
     /// An error occurred while parsing authentication credentials
     #[error("JWT error")]
-    JwtError(#[from] JwtError),
+    JwtError(#[from] Arc<JwtError>),
     /// An error occurred during JSON serialization or deserialization
     #[error("JSON error")]
     JsonError(#[from] serde_json::Error),
@@ -62,4 +63,10 @@ pub enum Error {
         .0.canonical_reason().map_or(String::new(), |reason| " ".to_owned() + reason)
     )]
     UnsuccessfulResponse(StatusCode),
+}
+
+impl From<JwtError> for Error {
+    fn from(value: JwtError) -> Self {
+        Self::JwtError(Arc::new(value))
+    }
 }

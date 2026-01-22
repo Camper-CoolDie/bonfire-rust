@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use chrono::Utc;
 use tokio::sync::RwLock;
 
@@ -10,6 +12,7 @@ use crate::{Client, Result};
 enum InnerState {
     Authenticated(Auth, JwtClaims),
     Unauthenticated,
+    InvalidToken(Arc<JwtError>),
 }
 impl InnerState {
     fn is_auth(&self) -> bool {
@@ -51,6 +54,7 @@ impl TokenProvider {
             }
             InnerState::Authenticated(auth, _) => Ok(Some(auth.clone())),
             InnerState::Unauthenticated => Ok(None),
+            InnerState::InvalidToken(error) => Err(error.clone().into()),
         }
     }
 
@@ -73,9 +77,17 @@ impl TokenProvider {
             }
             InnerState::Authenticated(auth, _) => return Ok(Some(auth.clone())),
             InnerState::Unauthenticated => return Ok(None),
+            InnerState::InvalidToken(error) => Err(error.clone())?,
         };
-        *guard = option.clone().try_into()?;
-        Ok(option)
+
+        *guard = option
+            .clone()
+            .try_into()
+            .unwrap_or_else(|error| InnerState::InvalidToken(Arc::new(error)));
+        match &*guard {
+            InnerState::InvalidToken(error) => Err(error.clone().into()),
+            _ => Ok(option),
+        }
     }
 
     async fn refresh_now(client: &Client, auth: &Auth) -> Result<Auth> {
