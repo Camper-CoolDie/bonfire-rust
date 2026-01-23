@@ -1,4 +1,5 @@
 pub(crate) mod bio;
+pub(crate) mod blocklist;
 mod get_account;
 mod get_info;
 mod get_online;

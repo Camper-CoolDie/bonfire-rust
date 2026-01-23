@@ -3,6 +3,7 @@ use serde::de::Error as _;
 use serde::Deserialize;
 
 use crate::models::account::Info;
+use crate::models::Link;
 use crate::requests::raw::{RawImageRef, RawLink, RawPost, RawPublication};
 use crate::{Error, Result};
 
@@ -52,9 +53,9 @@ pub(crate) struct RawInfo {
     viceroys_count: u64,
     stickers_count: u64,
     #[serde(rename = "blackAccountsCount")]
-    blacklisted_accounts_count: u64,
+    blocked_accounts_count: u64,
     #[serde(rename = "blackFandomsCount")]
-    blacklisted_fandoms_count: u64,
+    blocked_fandoms_count: u64,
 }
 
 impl TryFrom<RawInfo> for Info {
@@ -100,9 +101,18 @@ impl TryFrom<RawInfo> for Info {
                 .links
                 .inner
                 .into_iter()
-                .filter_map(|link| {
-                    (!link.title.is_empty() && !link.uri.is_empty()).then(|| link.into())
-                })
+                .enumerate()
+                .filter_map(
+                    // There cannot be more than LINKS_MAX_COUNT links
+                    #[allow(clippy::cast_possible_truncation)]
+                    |(index, raw_link)| {
+                        (!raw_link.title.is_empty() && !raw_link.uri.is_empty()).then(|| {
+                            let mut link = Link::from(raw_link);
+                            link.index = index as u32;
+                            link
+                        })
+                    },
+                )
                 .collect(),
             note: match value.note.as_str() {
                 "" => None,
@@ -119,8 +129,8 @@ impl TryFrom<RawInfo> for Info {
             subscriptions_count: value.subscriptions_count,
             viceroys_count: value.viceroys_count,
             stickers_count: value.stickers_count,
-            blacklisted_accounts_count: value.blacklisted_accounts_count,
-            blacklisted_fandoms_count: value.blacklisted_fandoms_count,
+            blocked_accounts_count: value.blocked_accounts_count,
+            blocked_fandoms_count: value.blocked_fandoms_count,
         })
     }
 }

@@ -20,7 +20,7 @@ pub struct Post {
 }
 
 impl PublicationInheritor for Post {
-    /// Returns the publication kind as `PublicationKind::Post`.
+    /// Returns the publication kind as [`PublicationKind::Post`].
     fn kind(&self) -> PublicationKind {
         PublicationKind::Post
     }

@@ -13,6 +13,10 @@ pub use link::Link;
 
 use crate::client::Request as _;
 use crate::models::ImageRef;
+use crate::requests::account::blocklist::{
+    BlockRequest, CheckBlockedRequest, GetBlockedAccountsRequest, GetBlockedFandomIdsRequest,
+    UnblockRequest,
+};
 use crate::requests::account::{
     GetAccountRequest, GetInfoRequest, GetOnlineRequest, SearchAccountsRequest,
 };
@@ -171,5 +175,66 @@ impl Account {
             .send_request(client)
             .await?
             .try_into()
+    }
+
+    /// Blocks this account, making its publications show as "ignored" and disallowing direct
+    /// messages from it.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`RootError::AccessDenied`][crate::RootError::AccessDenied] if you attempt to block
+    /// your own account, or [`Error`][crate::Error] if any other error occurs during the request.
+    pub async fn block(&self, client: &Client) -> Result<()> {
+        BlockRequest::new(self.id).send_request(client).await?;
+        Ok(())
+    }
+
+    /// Unblocks this account, making its publications reappear and allowing it to send you direct
+    /// messages.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error`][crate::Error] if an error occurs while sending the request.
+    pub async fn unblock(&self, client: &Client) -> Result<()> {
+        UnblockRequest::new(self.id).send_request(client).await?;
+        Ok(())
+    }
+
+    /// Checks if this account is currently blocked by you.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`RootError::AccessDenied`][crate::RootError::AccessDenied] if you attempt to check
+    /// the block status of your own account, or [`Error`][crate::Error] if any other error occurs
+    /// during the request.
+    pub async fn check_blocked(&self, client: &Client) -> Result<bool> {
+        Ok(CheckBlockedRequest::new(self.id)
+            .send_request(client)
+            .await?
+            .into())
+    }
+
+    /// Retrieves a list of accounts that are currently blocked by this account.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error`][crate::Error] if an error occurs while sending the request.
+    pub async fn get_blocked_accounts(&self, client: &Client, offset: u64) -> Result<Vec<Account>> {
+        GetBlockedAccountsRequest::new(self.id, offset)
+            .send_request(client)
+            .await?
+            .try_into()
+    }
+
+    /// Retrieves a list of IDs of fandoms that are currently blocked by this account.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error`][crate::Error] if an error occurs while sending the request.
+    pub async fn get_blocked_fandom_ids(&self, client: &Client) -> Result<Vec<u64>> {
+        Ok(GetBlockedFandomIdsRequest::new(self.id)
+            .send_request(client)
+            .await?
+            .into())
     }
 }

@@ -65,8 +65,8 @@ pub struct Publication<T: PublicationInheritor = AnyPublication> {
     pub comments_count: u64,
     /// Indicates if this publication has been marked as important
     pub is_important: bool,
-    /// Indicates if this publication originates from a blacklisted fandom or account
-    pub is_blacklisted: bool,
+    /// Indicates if this publication originates from a blocked fandom or account
+    pub is_hidden: bool,
     /// Indicates if this publication has been marked as NSFW
     pub is_nsfw: bool,
     /// A value indicating the "hotness" or popularity of this publication

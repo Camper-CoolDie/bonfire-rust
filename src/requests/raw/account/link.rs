@@ -12,6 +12,8 @@ pub(crate) struct RawLink {
 impl From<RawLink> for Link {
     fn from(value: RawLink) -> Self {
         Self {
+            // The index will be set inside Info::try_from()
+            index: 0,
             title: value.title,
             uri: value.uri,
         }

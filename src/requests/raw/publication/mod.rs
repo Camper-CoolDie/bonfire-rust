@@ -73,7 +73,7 @@ pub(crate) struct RawPublication<T: RawPublicationInheritor = AnyRawPublication>
     #[serde(rename = "important")]
     importance: i64,
     #[serde(rename = "blacklisted")]
-    is_blacklisted: bool,
+    is_hidden: bool,
     #[serde(rename = "nsfw")]
     is_nsfw: bool,
     hotness: f32,
@@ -133,7 +133,7 @@ where
             is_closed: value.is_closed,
             comments_count: value.comments_count,
             is_important: matches!(value.importance, -1),
-            is_blacklisted: value.is_blacklisted,
+            is_hidden: value.is_hidden,
             is_nsfw: value.is_nsfw,
             hotness: value.hotness,
         })

@@ -5,19 +5,23 @@ use chrono::{DateTime, Utc};
 use crate::client::Request as _;
 use crate::models::{Gender, ImageRef, Link, Post, Publication};
 use crate::requests::account::bio::{
-    SetAgeRequest, SetDescriptionRequest, SetGenderRequest, SetStatusRequest,
+    SetAgeRequest, SetDescriptionRequest, SetGenderRequest, SetLinkRequest, SetStatusRequest,
 };
 use crate::requests::account::GetInfoRequest;
 use crate::{Client, Result};
 
-/// The maximum number of links an account's profile can contain.
-pub const LINKS_COUNT: usize = 7;
 /// The allowed range for an account's age.
 pub const AGE_RANGE: Range<i64> = 0..201;
 /// The maximum allowed length for an account's status message.
 pub const STATUS_MAX_LENGTH: usize = 100;
 /// The maximum allowed length for an account's description (bio).
 pub const DESCRIPTION_MAX_LENGTH: usize = 1000;
+/// The maximum number of links an account's profile can contain.
+pub const LINKS_MAX_COUNT: usize = 7;
+/// The maximum allowed length for a link's title.
+pub const LINK_TITLE_MAX_LENGTH: usize = 30;
+/// The maximum allowed length for a link's URI.
+pub const LINK_URI_MAX_LENGTH: usize = 500;
 
 /// Represents detailed information about an account's profile.
 #[derive(Default, Clone, Debug)]
@@ -44,7 +48,8 @@ pub struct Info {
     pub age: Option<i64>,
     /// The description (bio) provided by this account
     pub description: Option<String>,
-    /// External links added by this account to their profile
+    /// External links added by this account to their profile, always ordered by [`Link::index`]
+    /// but may contain gaps in indices
     pub links: Vec<Link>,
     /// Your private note associated with this account
     pub note: Option<String>,
@@ -70,10 +75,10 @@ pub struct Info {
     pub viceroys_count: u64,
     /// The number of stickers this account has added to their collection
     pub stickers_count: u64,
-    /// The number of users this account has blacklisted
-    pub blacklisted_accounts_count: u64,
-    /// The number of fandoms this account has blacklisted
-    pub blacklisted_fandoms_count: u64,
+    /// The number of users this account has blocked
+    pub blocked_accounts_count: u64,
+    /// The number of fandoms this account has blocked
+    pub blocked_fandoms_count: u64,
 }
 impl Info {
     /// Retrieves detailed account information by its unique identifier.
@@ -159,6 +164,43 @@ impl Info {
     /// Returns [`Error`][crate::Error] if an error occurs while sending the request.
     pub async fn set_gender(client: &Client, gender: Gender) -> Result<()> {
         SetGenderRequest::new(gender).send_request(client).await?;
+        Ok(())
+    }
+
+    /// Sets an external link in the account's profile.
+    ///
+    /// The link is identified by its `index` (0-based, up to [`LINKS_MAX_COUNT`] - 1). The `title`
+    /// must not exceed [`LINK_TITLE_MAX_LENGTH`] and the `uri` must not exceed
+    /// [`LINK_URI_MAX_LENGTH`]. To delete a link at a specific index, both `title` and `uri` must
+    /// be provided as empty strings.
+    ///
+    /// # Errors
+    ///
+    /// * Returns [`RootError::Other`][crate::RootError::Other] with the code `E_BAD_TITLE` if the
+    ///   provided title exceeds the maximum allowed length.
+    /// * Returns [`RootError::Other`][crate::RootError::Other] with the code `E_BAD_URL` if the
+    ///   provided URI exceeds the maximum allowed length.
+    /// * Returns [`Error::UnsuccessfulResponse`][crate::Error::UnsuccessfulResponse] with the
+    ///   status `500` if the provided `index` is greater than or equal to [`LINKS_MAX_COUNT`].
+    /// * Returns [`Error`][crate::Error] if any other error occurs during the request.
+    pub async fn set_link(client: &Client, index: u32, title: &str, uri: &str) -> Result<()> {
+        SetLinkRequest::new(index, title, uri)
+            .send_request(client)
+            .await?;
+        Ok(())
+    }
+
+    /// Removes an external link from the account's profile at the specified index.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::UnsuccessfulResponse`][crate::Error::UnsuccessfulResponse] with the status
+    /// `500` if the provided `index` is greater than or equal to [`LINKS_MAX_COUNT`], or
+    /// [`Error`][crate::Error] if any other error occurs while sending the request.
+    pub async fn remove_link(client: &Client, index: u32) -> Result<()> {
+        SetLinkRequest::new(index, "", "")
+            .send_request(client)
+            .await?;
         Ok(())
     }
 }
