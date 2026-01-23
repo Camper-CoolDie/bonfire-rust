@@ -33,7 +33,7 @@ impl Request for RefreshQuery<'_> {
 
     async fn send_request(&self, client: &Client) -> Result<Response> {
         client
-            .send_refresh_query(
+            .send_query_authless(
                 "LoginRefreshMutation",
                 include_str!("graphql/LoginRefreshMutation.graphql"),
                 self,

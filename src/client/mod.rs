@@ -75,8 +75,8 @@ impl Client {
 
     /// Checks if the client is currently authenticated.
     ///
-    /// This method does not attempt to refresh tokens; it only reflects the current
-    /// authentication state.
+    /// This method does not attempt to refresh tokens; it only reflects the current authentication
+    /// state.
     ///
     /// # Examples
     ///
@@ -100,6 +100,9 @@ impl Client {
     }
 
     /// Logs the client into Bonfire using email and password.
+    ///
+    /// This method can also be used to establish a new, valid session if the client is in an
+    /// invalid token state.
     ///
     /// # Errors
     ///
@@ -182,8 +185,10 @@ impl Client {
     ///
     /// # Errors
     ///
-    /// Returns [`AuthError::Unauthenticated`] if the client is not authenticated, or [`Error`] if
-    /// any other error occurs while sending the refresh request.
+    /// * Returns [`AuthError::Unauthenticated`] if the client is not authenticated.
+    /// * Returns [`Error::JwtError`] if the session becomes invalid after a token refresh (e.g.,
+    ///   the server returns a malformed token).
+    /// * Returns [`Error`] if any other error occurs while sending the refresh request.
     ///
     /// # Examples
     ///
@@ -277,20 +282,19 @@ impl Client {
             .inspect_err(|error| tracing::error!(?error, "failed to send query"))
     }
 
-    // `send_query` that doesn't validate credentials
-    pub(crate) async fn send_refresh_query<R: Request>(
+    pub(crate) async fn send_query_authless<R: Request>(
         &self,
         operation_name: &'static str,
         query: &'static str,
         variables: &R,
     ) -> Result<R::Response> {
-        tracing::info!(operation_name, "sending refresh query");
+        tracing::info!(operation_name, "sending query without auth");
 
         self.inner
             .melior_service
             .send_query(MeliorQuery { variables, query }, HeaderMap::new())
             .await
-            .inspect_err(|error| tracing::error!(?error, "failed to send refresh query"))
+            .inspect_err(|error| tracing::error!(?error, "failed to send an authless query"))
     }
 
     /// Create a new `ClientBuilder` with default values.

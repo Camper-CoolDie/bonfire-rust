@@ -25,7 +25,12 @@ pub enum Error {
     /// An authentication-related error occurred
     #[error("authentication error")]
     AuthError(#[from] AuthError),
-    /// An error occurred while parsing authentication credentials
+    /// An error occurred while parsing authentication credentials.
+    ///
+    /// This error can also indicate that the client's internal authentication state management has
+    /// encountered an invalid token (e.g., a malformed token received after a refresh). In this
+    /// state, all subsequent requests (including logout) will fail with this error until a new
+    /// session is established by calling [`Client::login()`][crate::Client::login()].
     #[error("JWT error")]
     JwtError(#[from] Arc<JwtError>),
     /// An error occurred during JSON serialization or deserialization

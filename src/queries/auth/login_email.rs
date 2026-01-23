@@ -55,7 +55,7 @@ impl Request for LoginEmailQuery<'_> {
 
     async fn send_request(&self, client: &Client) -> Result<Response> {
         client
-            .send_query(
+            .send_query_authless(
                 "LoginEmailMutation",
                 include_str!("graphql/LoginEmailMutation.graphql"),
                 self,
