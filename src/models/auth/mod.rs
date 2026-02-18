@@ -1,6 +1,6 @@
 mod error;
 
-pub use error::{Error, TfaKind, TfaRequired};
+pub use error::*;
 use serde::{Deserialize, Serialize};
 
 use crate::client::Request as _;

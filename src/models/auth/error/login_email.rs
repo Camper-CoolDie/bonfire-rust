@@ -2,6 +2,9 @@ use std::fmt;
 
 use thiserror::Error;
 
+use crate::client::RequestError;
+use crate::{MeliorError, Result};
+
 /// Represents the type of a Two-Factor Authentication (TFA) session.
 #[derive(Debug)]
 pub enum TfaKind {
@@ -35,20 +38,34 @@ impl fmt::Display for TfaRequired {
     }
 }
 
-/// Represents errors that can occur during authentication operations.
-///
-/// # Source
-///
-/// An `Error` can arise from an unexpected server response or an unauthenticated client state.
+/// Represents errors that can occur during the login process.
 #[derive(Error, Debug)]
-pub enum Error {
-    /// The client is already authenticated
-    #[error("authenticated client")]
-    AlreadyAuthenticated,
+pub enum LoginError {
+    /// The provided email address is invalid
+    #[error("invalid email")]
+    InvalidEmail,
+    /// The provided email address is not registered
+    #[error("wrong email")]
+    WrongEmail,
+    /// The provided password is incorrect
+    #[error("wrong password")]
+    WrongPassword,
+    /// The account attempting to log in is permanently banned
+    #[error("account is hard banned")]
+    HardBanned,
     /// Two-Factor Authentication (TFA) is required to continue logging in
     #[error("TFA is required to continue logging in ({0})")]
     TfaRequired(TfaRequired),
-    /// The client is unauthenticated
-    #[error("unauthenticated client")]
-    Unauthenticated,
+}
+
+impl RequestError for LoginError {
+    fn try_from_melior(error: &MeliorError) -> Result<Option<Self>> {
+        Ok(match error.message.split_once(':') {
+            Some(("InvalidEmail", _)) => Some(LoginError::InvalidEmail),
+            Some(("WrongEmail", _)) => Some(LoginError::WrongEmail),
+            Some(("WrongPassword", _)) => Some(LoginError::WrongPassword),
+            Some(("HardBanned", _)) => Some(LoginError::HardBanned),
+            _ => None,
+        })
+    }
 }

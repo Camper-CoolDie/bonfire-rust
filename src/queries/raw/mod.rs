@@ -3,5 +3,6 @@ pub(super) mod error;
 pub(super) mod profile;
 
 pub(super) use auth::RawAuth;
-pub(super) use error::{RawMeliorError, RawQueryLocation, RawQueryPath};
+pub(crate) use error::RawMeliorError;
+pub(super) use error::{RawQueryLocation, RawQueryPath};
 pub(super) use profile::RawMe;

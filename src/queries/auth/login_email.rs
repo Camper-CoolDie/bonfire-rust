@@ -1,7 +1,8 @@
 use serde::{Deserialize, Serialize};
 
 use crate::client::Request;
-use crate::models::{Auth, AuthError};
+use crate::models::auth::LoginError;
+use crate::models::Auth;
 use crate::queries::raw::auth::RawTfaRequired;
 use crate::queries::raw::RawAuth;
 use crate::{Client, Error, Result};
@@ -27,7 +28,9 @@ impl TryFrom<Response> for Auth {
     fn try_from(value: Response) -> Result<Self> {
         match value.result {
             LoginResult::Success(success) => Ok(success.into()),
-            LoginResult::TfaRequired(error) => Err(AuthError::TfaRequired(error.into()).into()),
+            LoginResult::TfaRequired(error) => Err(Error::RequestError(Box::new(
+                LoginError::TfaRequired(error.into()),
+            ))),
         }
     }
 }
@@ -52,6 +55,7 @@ impl<'a> LoginEmailQuery<'a> {
 
 impl Request for LoginEmailQuery<'_> {
     type Response = Response;
+    type Error = LoginError;
 
     async fn send_request(&self, client: &Client) -> Result<Response> {
         client

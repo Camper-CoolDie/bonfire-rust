@@ -1,10 +1,12 @@
+use std::fmt::Debug;
+
 use chrono::{DateTime, Utc};
 use thiserror::Error;
 
 /// Represents errors returned by the Root server.
 ///
 /// Common errors are categorized into predefined variants, while [`RootError::Other`]
-/// captures any non-predefined request-specific errors.
+/// captures any non-predefined errors.
 #[derive(Error, Debug)]
 pub enum RootError {
     /// The request was denied due to insufficient permissions
@@ -32,7 +34,7 @@ pub enum RootError {
     /// The requested resource is unavailable
     #[error("resource is unavailable")]
     Unavailable(#[from] UnavailableError),
-    /// An unknown request-specific error
+    /// An unknown error with a specific code and message
     #[error(
         "unknown error: {code}{}",
         .message.as_ref().map(|message| format!(" ({message})")).unwrap_or_default())

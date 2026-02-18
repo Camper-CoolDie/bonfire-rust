@@ -1,6 +1,7 @@
 use serde::Serialize;
 
 use crate::client::{EmptyResponse, Request};
+use crate::models::account::SetLinkError;
 use crate::{Client, Result};
 
 #[derive(Serialize)]
@@ -18,6 +19,7 @@ impl<'a> SetLinkRequest<'a> {
 
 impl Request for SetLinkRequest<'_> {
     type Response = EmptyResponse;
+    type Error = SetLinkError;
 
     async fn send_request(&self, client: &Client) -> Result<EmptyResponse> {
         client

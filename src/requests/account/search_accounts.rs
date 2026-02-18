@@ -1,3 +1,5 @@
+use std::convert::Infallible;
+
 use serde::{Deserialize, Serialize};
 
 use crate::client::Request;
@@ -38,6 +40,7 @@ impl<'a> SearchAccountsRequest<'a> {
 
 impl Request for SearchAccountsRequest<'_> {
     type Response = Response;
+    type Error = Infallible;
 
     async fn send_request(&self, client: &Client) -> Result<Response> {
         client

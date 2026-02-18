@@ -73,6 +73,4 @@ tracing-subscriber = "0.3"
 
 ## License
 
-Copyright (c) 2024-2026 Camper CoolDie <campercooldie@gmail.com>
-
-This project is licensed under the [MIT License](LICENSE).
+bonfire-rust is provided under the [MIT License](LICENSE).

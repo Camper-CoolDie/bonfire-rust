@@ -1,3 +1,5 @@
+use std::convert::Infallible;
+
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
@@ -34,6 +36,7 @@ impl GetOnlineRequest {
 
 impl Request for GetOnlineRequest {
     type Response = Response;
+    type Error = Infallible;
 
     async fn send_request(&self, client: &Client) -> Result<Response> {
         client

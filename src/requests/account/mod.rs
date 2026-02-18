@@ -1,8 +1,8 @@
-pub(crate) mod bio;
 pub(crate) mod blocklist;
 mod get_account;
 mod get_info;
 mod get_online;
+pub(crate) mod profile;
 mod search_accounts;
 
 pub(crate) use get_account::GetAccountRequest;

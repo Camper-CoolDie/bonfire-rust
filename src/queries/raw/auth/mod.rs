@@ -1,6 +1,6 @@
 mod error;
 
-pub(crate) use error::{RawTfaKind, RawTfaRequired};
+pub(crate) use error::*;
 use serde::Deserialize;
 
 use crate::models::Auth;

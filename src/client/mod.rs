@@ -11,12 +11,12 @@ pub use error::{Error, Result};
 use http::{header, HeaderMap, Uri};
 pub use jwt::JwtError;
 use jwt::JwtResult;
-pub(crate) use request::{EmptyResponse, Request};
+pub(crate) use request::{EmptyResponse, Request, RequestError};
 use service::{MeliorService, RootService};
 use token_provider::TokenProvider;
 
 use crate::client::jwt::decode_token;
-use crate::models::{Auth, AuthError};
+use crate::models::Auth;
 use crate::queries::auth::{LoginEmailQuery, LogoutQuery};
 use crate::{MeliorQuery, RootRequest};
 
@@ -29,6 +29,9 @@ static MELIOR_SERVER_URI: LazyLock<Uri> =
 
 // Some requests require this value and return various responses depending on it
 const API_VERSION: &str = "3.1.0";
+
+// The maximum allowed size for any type of attachment (6 MiB)
+const ATTACHMENT_MAX_SIZE: usize = 6 * 1024 * 1024;
 
 struct Inner {
     root_service: RootService,
@@ -58,6 +61,7 @@ struct Inner {
 ///     Ok(())
 /// }
 /// ```
+#[derive(Clone)]
 pub struct Client {
     inner: Arc<Inner>,
 }
@@ -106,10 +110,17 @@ impl Client {
     ///
     /// # Errors
     ///
-    /// * Returns [`AuthError::AlreadyAuthenticated`] if the client is already authenticated. Call
-    ///   [`Client::logout()`] to terminate the current session before logging in again.
-    /// * Returns [`AuthError::TfaRequired`] if Two-Factor Authentication (TFA) is required to
-    ///   complete the login process.
+    /// * Returns [`Error::AlreadyAuthenticated`] if the client is already authenticated. Call
+    ///   [`Client::logout`][crate::Client::logout] to terminate the current session before logging
+    ///   in again.
+    /// * Returns [`LoginError::InvalidEmail`][crate::models::auth::LoginError::InvalidEmail],
+    ///   [`LoginError::WrongEmail`][crate::models::auth::LoginError::WrongEmail], or
+    ///   [`LoginError::WrongPassword`][crate::models::auth::LoginError::WrongPassword] if the
+    ///   provided credentials are incorrect.
+    /// * Returns [`LoginError::HardBanned`][crate::models::auth::LoginError::HardBanned] if the
+    ///   account is permanently banned.
+    /// * Returns [`LoginError::TfaRequired`][crate::models::auth::LoginError::TfaRequired] if
+    ///   Two-Factor Authentication (TFA) is required to complete the login process.
     /// * Returns [`Error`] if any other error occurs while sending the login request.
     ///
     /// # Examples
@@ -127,7 +138,7 @@ impl Client {
     /// ```
     pub async fn login(&self, email: &str, password: &str) -> Result<()> {
         if self.inner.token_provider.is_auth().await {
-            Err(AuthError::AlreadyAuthenticated)?;
+            Err(Error::AlreadyAuthenticated)?;
         }
 
         let auth = Auth::try_from(
@@ -146,8 +157,10 @@ impl Client {
     ///
     /// # Errors
     ///
-    /// Returns [`AuthError::Unauthenticated`] if the client is already unauthenticated, or
-    /// [`Error`] if any other error occurs while sending the logout request.
+    /// * Returns [`Error::Unauthenticated`] if the client is already unauthenticated.
+    /// * Returns [`LogoutError::HardBanned`][crate::models::auth::LogoutError::HardBanned] if the
+    ///   account attempting to log out is permanently banned.
+    /// * Returns [`Error`] if any other error occurs while sending the logout request.
     ///
     /// # Examples
     ///
@@ -167,7 +180,7 @@ impl Client {
     /// ```
     pub async fn logout(&self) -> Result<()> {
         if !self.inner.token_provider.is_auth().await {
-            Err(AuthError::Unauthenticated)?;
+            Err(Error::Unauthenticated)?;
         }
 
         LogoutQuery::new().send_request(self).await?;
@@ -185,7 +198,9 @@ impl Client {
     ///
     /// # Errors
     ///
-    /// * Returns [`AuthError::Unauthenticated`] if the client is not authenticated.
+    /// * Returns [`Error::Unauthenticated`] if the client is not authenticated.
+    /// * Returns [`RefreshError::TokenExpired`][crate::models::auth::RefreshError::TokenExpired] if
+    ///   the refresh token has expired, requiring a new login.
     /// * Returns [`Error::JwtError`] if the session becomes invalid after a token refresh (e.g.,
     ///   the server returns a malformed token).
     /// * Returns [`Error`] if any other error occurs while sending the refresh request.
@@ -221,7 +236,7 @@ impl Client {
             .token_provider
             .get_auth(self)
             .await?
-            .ok_or(AuthError::Unauthenticated.into())
+            .ok_or(Error::Unauthenticated)
     }
 
     pub(crate) async fn send_request<R: Request>(
@@ -236,12 +251,22 @@ impl Client {
         // Contains the length of each attachment
         let data_output = attachments
             .iter()
-            .map(
-                // The length of each attachment MUST be checked by the caller
-                #[allow(clippy::cast_possible_truncation)]
-                |slice| (!slice.is_empty()).then_some(slice.len() as u32),
-            )
-            .collect::<Vec<Option<u32>>>();
+            .map(|slice| {
+                (!slice.is_empty())
+                    .then(|| {
+                        let length = slice.len();
+
+                        #[allow(clippy::cast_possible_truncation)]
+                        #[allow(clippy::cast_possible_wrap)]
+                        if length > ATTACHMENT_MAX_SIZE {
+                            Err(Error::AttachmentTooLarge)
+                        } else {
+                            Ok(slice.len() as i32)
+                        }
+                    })
+                    .transpose()
+            })
+            .collect::<Result<Vec<Option<i32>>>>()?;
 
         let request = RootRequest {
             content,

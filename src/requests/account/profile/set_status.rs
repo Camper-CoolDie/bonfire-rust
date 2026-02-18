@@ -1,6 +1,7 @@
 use serde::Serialize;
 
 use crate::client::{EmptyResponse, Request};
+use crate::models::account::SetProfileTextError;
 use crate::{Client, Result};
 
 #[derive(Serialize)]
@@ -17,6 +18,7 @@ impl<'a> SetStatusRequest<'a> {
 
 impl Request for SetStatusRequest<'_> {
     type Response = EmptyResponse;
+    type Error = SetProfileTextError;
 
     async fn send_request(&self, client: &Client) -> Result<EmptyResponse> {
         client

@@ -1,3 +1,5 @@
+use std::convert::Infallible;
+
 use serde::Serialize;
 
 use crate::client::{EmptyResponse, Request};
@@ -16,6 +18,7 @@ impl UnblockRequest {
 
 impl Request for UnblockRequest {
     type Response = EmptyResponse;
+    type Error = Infallible;
 
     async fn send_request(&self, client: &Client) -> Result<EmptyResponse> {
         client

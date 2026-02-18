@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::client::Request;
+use crate::models::auth::RefreshError;
 use crate::models::Auth;
 use crate::queries::raw::RawAuth;
 use crate::{Client, Result};
@@ -30,6 +31,7 @@ impl<'a> RefreshQuery<'a> {
 
 impl Request for RefreshQuery<'_> {
     type Response = Response;
+    type Error = RefreshError;
 
     async fn send_request(&self, client: &Client) -> Result<Response> {
         client

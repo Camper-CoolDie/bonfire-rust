@@ -1,5 +1,6 @@
 mod badge;
 mod effect;
+mod error;
 mod gender;
 mod info;
 mod link;
@@ -7,6 +8,7 @@ mod link;
 pub use badge::Badge;
 use chrono::{DateTime, Duration, Utc};
 pub use effect::{Effect, EffectKind, EffectReasonKind};
+pub use error::*;
 pub use gender::Gender;
 pub use info::*;
 pub use link::Link;
@@ -177,8 +179,7 @@ impl Account {
             .try_into()
     }
 
-    /// Blocks this account, making its publications show as "ignored" and disallowing direct
-    /// messages from it.
+    /// Blocks this account, hiding all its publications and disallowing direct messages from it.
     ///
     /// # Errors
     ///
@@ -219,7 +220,7 @@ impl Account {
     /// # Errors
     ///
     /// Returns [`Error`][crate::Error] if an error occurs while sending the request.
-    pub async fn get_blocked_accounts(&self, client: &Client, offset: u64) -> Result<Vec<Account>> {
+    pub async fn get_blocked_accounts(&self, client: &Client, offset: u64) -> Result<Vec<Self>> {
         GetBlockedAccountsRequest::new(self.id, offset)
             .send_request(client)
             .await?

@@ -1,11 +1,12 @@
+use std::error::Error as StdError;
+use std::fmt::Debug;
 use std::result::Result as StdResult;
 use std::sync::Arc;
 
 use http::StatusCode;
 use thiserror::Error;
 
-use crate::client::JwtError;
-use crate::models::AuthError;
+use crate::client::{JwtError, RequestError};
 use crate::{MeliorError, RootError};
 
 /// A type alias for [`Result<T, Error>`][StdResult].
@@ -19,12 +20,15 @@ pub type Result<T> = StdResult<T, Error>;
 /// response.
 #[derive(Error, Debug)]
 pub enum Error {
+    /// The client is already authenticated
+    #[error("authenticated client")]
+    AlreadyAuthenticated,
     /// The provided attachment exceeds the maximum size the server can process
     #[error("attachment is too large")]
     AttachmentTooLarge,
-    /// An authentication-related error occurred
-    #[error("authentication error")]
-    AuthError(#[from] AuthError),
+    /// An error occurred during JSON serialization or deserialization
+    #[error("JSON error")]
+    JsonError(#[from] serde_json::Error),
     /// An error occurred while parsing authentication credentials.
     ///
     /// This error can also indicate that the client's internal authentication state management has
@@ -33,9 +37,6 @@ pub enum Error {
     /// session is established by calling [`Client::login()`][crate::Client::login()].
     #[error("JWT error")]
     JwtError(#[from] Arc<JwtError>),
-    /// An error occurred during JSON serialization or deserialization
-    #[error("JSON error")]
-    JsonError(#[from] serde_json::Error),
     /// An HTTP-related error occurred during request construction
     #[error("HTTP error")]
     HttpError(#[from] http::Error),
@@ -50,13 +51,19 @@ pub enum Error {
     InvalidMeliorResponse,
     /// The Melior server returned an error
     #[error("melior server error")]
-    MeliorError(#[from] MeliorError),
+    MeliorError(#[source] MeliorError),
+    /// A request-specific error
+    #[error("request-specific error")]
+    RequestError(#[source] Box<dyn StdError + Send + Sync + 'static>),
     /// The constructed request exceeds the maximum size the server can process
     #[error("request is too large")]
     RequestTooLarge,
     /// The Root server returned an error
     #[error("root server error")]
-    RootError(#[from] RootError),
+    RootError(#[source] RootError),
+    /// The client is unauthenticated
+    #[error("unauthenticated client")]
+    Unauthenticated,
     /// The server returned an unsuccessful HTTP status code. Some common codes include:
     ///
     /// * `429`: Too many requests in a short period of time
@@ -68,6 +75,21 @@ pub enum Error {
         .0.canonical_reason().map_or(String::new(), |reason| " ".to_owned() + reason)
     )]
     UnsuccessfulResponse(StatusCode),
+}
+impl Error {
+    pub(super) fn try_from_root<E: RequestError>(root_error: RootError) -> Result<Error> {
+        Ok(match E::try_from_root(&root_error)? {
+            Some(error) => Error::RequestError(Box::new(error)),
+            None => Error::RootError(root_error),
+        })
+    }
+
+    pub(super) fn try_from_melior<E: RequestError>(melior_error: MeliorError) -> Result<Error> {
+        Ok(match E::try_from_melior(&melior_error)? {
+            Some(error) => Error::RequestError(Box::new(error)),
+            None => Error::MeliorError(melior_error),
+        })
+    }
 }
 
 impl From<JwtError> for Error {

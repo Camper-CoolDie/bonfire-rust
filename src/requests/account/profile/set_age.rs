@@ -1,6 +1,7 @@
 use serde::Serialize;
 
 use crate::client::{EmptyResponse, Request};
+use crate::models::account::SetAgeError;
 use crate::{Client, Result};
 
 #[derive(Serialize)]
@@ -17,6 +18,7 @@ impl SetAgeRequest {
 
 impl Request for SetAgeRequest {
     type Response = EmptyResponse;
+    type Error = SetAgeError;
 
     async fn send_request(&self, client: &Client) -> Result<EmptyResponse> {
         client

@@ -1,3 +1,5 @@
+use std::convert::Infallible;
+
 use serde::{Deserialize, Serialize};
 
 use crate::client::Request;
@@ -37,6 +39,7 @@ impl<'a> GetAccountRequest<'a> {
 
 impl Request for GetAccountRequest<'_> {
     type Response = Response;
+    type Error = Infallible;
 
     async fn send_request(&self, client: &Client) -> Result<Response> {
         client.send_request("RAccountsGet", self, Vec::new()).await

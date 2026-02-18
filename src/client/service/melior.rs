@@ -5,10 +5,10 @@ use hyper_rustls::{HttpsConnector, HttpsConnectorBuilder};
 use hyper_util::client::legacy::connect::HttpConnector;
 use hyper_util::client::legacy::Client as HyperClient;
 use hyper_util::rt::TokioExecutor;
-use serde::de::DeserializeOwned;
-use serde::Serialize;
 
 use crate::client::service::USER_AGENT;
+use crate::client::{Request, RequestError};
+use crate::queries::RawMeliorError;
 use crate::{Error, MeliorError, MeliorQuery, MeliorResponse, Result};
 
 pub(crate) struct MeliorService {
@@ -29,28 +29,31 @@ impl MeliorService {
         }
     }
 
-    pub(crate) async fn send_query<R: Serialize, S: DeserializeOwned>(
+    pub(crate) async fn send_query<R: Request>(
         &self,
-        query: MeliorQuery<R>,
+        query: MeliorQuery<'_, R>,
         headers: HeaderMap<HeaderValue>,
-    ) -> Result<S> {
+    ) -> Result<R::Response> {
         let body = serde_json::to_vec(&query)?;
 
         let bytes = self.send_raw(Bytes::from(body), &headers).await?;
-        let response = serde_json::from_slice::<MeliorResponse<S>>(&bytes)?;
+        let response = serde_json::from_slice::<MeliorResponse<R>>(&bytes)?;
 
-        response.data.ok_or(
-            response
-                .errors
-                .and_then(|errors| {
-                    errors
-                        .into_iter()
-                        .next()
-                        .map(MeliorError::from)
-                        .map(Error::from)
+        response
+            .data
+            .ok_or_else(|| Self::map_errors::<R::Error>(response.errors))
+    }
+
+    fn map_errors<E: RequestError>(errors: Option<Vec<RawMeliorError>>) -> Error {
+        errors
+            .and_then(|errors| errors.into_iter().next())
+            .ok_or(Error::InvalidMeliorResponse)
+            .and_then(|error| {
+                Error::try_from_melior::<E>(MeliorError::from(error)).inspect_err(|error| {
+                    tracing::error!(?error, "failed to parse a request-specific melior error");
                 })
-                .unwrap_or(Error::InvalidMeliorResponse),
-        )
+            })
+            .unwrap_or_else(|error| error)
     }
 
     async fn send_raw(&self, body: Bytes, headers: &HeaderMap<HeaderValue>) -> Result<Bytes> {

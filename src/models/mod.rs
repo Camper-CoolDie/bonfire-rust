@@ -12,7 +12,7 @@ pub mod profile;
 pub mod publication;
 
 pub use account::{Account, Badge, Effect, Gender, Info as AccountInfo, Link};
-pub use auth::{Auth, Error as AuthError};
+pub use auth::Auth;
 pub use common::{Category, ImageRef, Language};
 pub use fandom::Fandom;
 pub use profile::Me;

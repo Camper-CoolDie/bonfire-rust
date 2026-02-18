@@ -1,3 +1,5 @@
+use std::convert::Infallible;
+
 use serde::{Deserialize, Serialize};
 
 use crate::client::Request;
@@ -26,6 +28,7 @@ impl MeQuery {
 
 impl Request for MeQuery {
     type Response = Response;
+    type Error = Infallible;
 
     async fn send_request(&self, client: &Client) -> Result<Response> {
         client

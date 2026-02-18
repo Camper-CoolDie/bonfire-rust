@@ -1,6 +1,7 @@
 use serde::Serialize;
 
 use crate::client::{EmptyResponse, Request};
+use crate::models::auth::LogoutError;
 use crate::{Client, Result};
 
 #[derive(Serialize)]
@@ -13,6 +14,7 @@ impl LogoutQuery {
 
 impl Request for LogoutQuery {
     type Response = EmptyResponse;
+    type Error = LogoutError;
 
     async fn send_request(&self, client: &Client) -> Result<EmptyResponse> {
         client

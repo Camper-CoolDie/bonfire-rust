@@ -1,3 +1,5 @@
+use std::convert::Infallible;
+
 use serde::Serialize;
 
 use crate::client::{EmptyResponse, Request};
@@ -20,6 +22,7 @@ impl SetGenderRequest {
 
 impl Request for SetGenderRequest {
     type Response = EmptyResponse;
+    type Error = Infallible;
 
     async fn send_request(&self, client: &Client) -> Result<EmptyResponse> {
         client

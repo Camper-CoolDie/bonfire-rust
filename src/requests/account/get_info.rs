@@ -1,3 +1,5 @@
+use std::convert::Infallible;
+
 use serde::Serialize;
 
 use crate::client::Request;
@@ -23,6 +25,7 @@ impl<'a> GetInfoRequest<'a> {
 
 impl Request for GetInfoRequest<'_> {
     type Response = RawInfo;
+    type Error = Infallible;
 
     async fn send_request(&self, client: &Client) -> Result<RawInfo> {
         client

@@ -9,16 +9,19 @@ pub(crate) struct RawImageRef {
     #[serde(rename = "u")]
     uri: String,
     #[serde(rename = "w")]
-    width: u32,
+    width: usize,
     #[serde(rename = "h")]
-    height: u32,
+    height: usize,
 }
 
 impl From<RawImageRef> for ImageRef {
     fn from(value: RawImageRef) -> Self {
         Self {
             id: value.id,
-            uri: value.uri,
+            uri: match value.uri.as_str() {
+                "" => None,
+                _ => Some(value.uri),
+            },
             width: value.width,
             height: value.height,
         }

@@ -1,3 +1,5 @@
+use std::convert::Infallible;
+
 use serde::{Deserialize, Serialize};
 
 use crate::client::Request;
@@ -32,6 +34,7 @@ impl GetBlockedAccountsRequest {
 
 impl Request for GetBlockedAccountsRequest {
     type Response = Response;
+    type Error = Infallible;
 
     async fn send_request(&self, client: &Client) -> Result<Response> {
         client

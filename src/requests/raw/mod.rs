@@ -8,6 +8,7 @@ pub(super) use account::{
     RawAccount, RawBadge, RawEffect, RawGender, RawInfo as RawAccountInfo, RawLink,
 };
 pub(super) use common::{RawCategory, RawImageRef, RawLanguage};
-pub(super) use error::{RawRootError, RawUnavailableError};
+pub(crate) use error::RawRootError;
+pub(super) use error::RawUnavailableError;
 pub(super) use fandom::RawFandom;
 pub(super) use publication::{AnyRawPublication, RawPost, RawPublication, RawReaction};
