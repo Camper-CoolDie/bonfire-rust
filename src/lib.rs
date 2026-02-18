@@ -36,7 +36,7 @@
 //!         .ok()
 //!         .map(|data| serde_json::from_slice::<Auth>(&data))
 //!         .transpose()?;
-//!     let client = match auth_data {
+//!     let client = &match auth_data {
 //!         Some(auth) => Client::builder().auth(auth).expect("invalid auth").build(),
 //!         None => {
 //!             let client = Client::default();
@@ -47,10 +47,10 @@
 //!     };
 //!
 //!     // Get information about the currently authenicated user
-//!     println!("{:#?}", Auth::get_me(&client).await?);
+//!     println!("{:#?}", Auth::get_me(client).await?);
 //!
 //!     // Save authentication credentials and exit program
-//!     save_credentials(&client).await?;
+//!     save_credentials(client).await?;
 //!     Ok(())
 //! }
 //! ```
@@ -88,3 +88,8 @@ pub use queries::{MeliorError, QueryLocation, QueryPath};
 pub(crate) use queries::{MeliorQuery, MeliorResponse};
 pub use requests::{RootError, UnavailableError};
 pub(crate) use requests::{RootRequest, RootResponse};
+
+mod sealed {
+    // Unreachable from outside the crate
+    pub trait Sealed {}
+}

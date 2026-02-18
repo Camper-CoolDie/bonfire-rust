@@ -3,8 +3,8 @@ use std::sync::Arc;
 use chrono::Utc;
 use tokio::sync::RwLock;
 
-use crate::client::jwt::{decode_token, JwtClaims};
-use crate::client::{JwtError, JwtResult, Request};
+use crate::client::jwt::{decode_token, JwtClaims, JwtResult};
+use crate::client::{JwtError, Request};
 use crate::models::Auth;
 use crate::queries::auth::RefreshQuery;
 use crate::{Client, Result};

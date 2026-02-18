@@ -37,8 +37,8 @@ impl Me {
     /// #
     /// # #[tokio::main]
     /// # async fn main() -> Result<()> {
-    /// # let client = Client::default();
-    /// let me = Me::get(&client).await?;
+    /// # let client = &Client::default();
+    /// let me = Me::get(client).await?;
     /// println!("Logged in as {}", me.name);
     /// #    Ok(())
     /// # }
@@ -62,9 +62,9 @@ impl Me {
     ///
     /// # #[tokio::main]
     /// # async fn main() -> Result<()> {
-    /// # let client = Client::default();
+    /// # let client = &Client::default();
     /// let birthday = NaiveDate::from_ymd_opt(2000, 1, 1).unwrap();
-    /// Me::set_birthday(&client, birthday).await?;
+    /// Me::set_birthday(client, birthday).await?;
     /// #    Ok(())
     /// # }
     /// ```

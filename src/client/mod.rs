@@ -1,33 +1,25 @@
+mod builder;
 mod error;
 mod jwt;
 mod request;
 mod service;
 mod token_provider;
 
-use std::fmt;
-use std::sync::{Arc, LazyLock};
+use std::sync::Arc;
 
+pub use builder::ClientBuilder;
 pub use error::{Error, Result};
 use http::{header, HeaderMap, Uri};
 pub use jwt::JwtError;
-use jwt::JwtResult;
 pub(crate) use request::{
     EmptyResponse, InfallibleRequest, Request, RequestError, RequestErrorSource,
 };
 use service::{MeliorService, RootService};
 use token_provider::TokenProvider;
 
-use crate::client::jwt::decode_token;
 use crate::models::Auth;
 use crate::queries::auth::{LoginEmailQuery, LogoutQuery};
 use crate::{MeliorError, MeliorQuery, RootError, RootRequest};
-
-// It's great when we can test our requests against a test server, hence the ability to specify
-// custom URIs
-static ROOT_SERVER_URI: LazyLock<Uri> =
-    LazyLock::new(|| Uri::from_static("https://cf2.bonfire.moe"));
-static MELIOR_SERVER_URI: LazyLock<Uri> =
-    LazyLock::new(|| Uri::from_static("https://api.bonfire.moe"));
 
 // Some requests require this value and return various responses depending on it
 const API_VERSION: &str = "3.1.0";
@@ -54,11 +46,11 @@ struct Inner {
 ///
 /// #[tokio::main]
 /// async fn main() -> Result<()> {
-///     let client = Client::default();
+///     let client = &Client::default();
 ///     client.login("user@example.com", "password").await?;
 ///
 ///     // Get brief information about the account with id `1`
-///     println!("{:#?}", Account::get_by_id(&client, 1).await?);
+///     println!("{:#?}", Account::get_by_id(client, 1).await?);
 ///
 ///     Ok(())
 /// }
@@ -91,7 +83,7 @@ impl Client {
     /// #
     /// # #[tokio::main]
     /// # async fn main() -> Result<()> {
-    /// # let client = Client::default();
+    /// # let client = &Client::default();
     /// client.login("email", "password").await?;
     /// assert!(client.is_auth().await); // is_auth() is true
     ///
@@ -132,13 +124,13 @@ impl Client {
     /// #
     /// # #[tokio::main]
     /// # async fn main() -> Result<()> {
-    /// let client = Client::default();
+    /// let client = &Client::default();
     /// client.login("email", "password").await?;
     /// // You can now send requests using `client` as an authenticated user
     /// #     Ok(())
     /// # }
     /// ```
-    pub async fn login(&self, email: &str, password: &str) -> Result<()> {
+    pub async fn login(&self, email: &str, password: &str) -> Result<&Self> {
         if self.inner.token_provider.is_auth().await {
             Err(Error::AlreadyAuthenticated)?;
         }
@@ -149,7 +141,7 @@ impl Client {
                 .await?,
         )?;
         self.inner.token_provider.set_auth(Some(auth)).await?;
-        Ok(())
+        Ok(self)
     }
 
     /// Logs the client out, invalidating the current authentication session.
@@ -171,7 +163,7 @@ impl Client {
     /// #
     /// # #[tokio::main]
     /// # async fn main() -> Result<()> {
-    /// # let client = Client::default();
+    /// # let client = &Client::default();
     /// client.login("email", "password").await?;
     /// // ...
     /// client.logout().await?;
@@ -180,14 +172,14 @@ impl Client {
     /// #     Ok(())
     /// # }
     /// ```
-    pub async fn logout(&self) -> Result<()> {
+    pub async fn logout(&self) -> Result<&Self> {
         if !self.inner.token_provider.is_auth().await {
             Err(Error::Unauthenticated)?;
         }
 
         LogoutQuery::new().send_request(self).await?;
         self.inner.token_provider.set_auth(None).await?;
-        Ok(())
+        Ok(self)
     }
 
     /// Retrieves the current authentication credentials.
@@ -226,10 +218,10 @@ impl Client {
     /// #
     /// # #[tokio::main]
     /// # async fn main() -> Result<()> {
-    /// let client = Client::default();
+    /// let client = &Client::default();
     /// client.login("email", "password").await?;
     /// // ...
-    /// save_credentials(&client).await?;
+    /// save_credentials(client).await?;
     /// #    Ok(())
     /// # }
     /// ```
@@ -343,112 +335,5 @@ impl Client {
 impl Default for Client {
     fn default() -> Self {
         Self::builder().build()
-    }
-}
-
-/// A builder-like pattern for constructing and configuring a [`Client`] instance.
-pub struct ClientBuilder {
-    root_uri: Uri,
-    melior_uri: Uri,
-    auth: Option<Auth>,
-}
-impl ClientBuilder {
-    /// Creates a new `ClientBuilder` with default API endpoint URIs and no authentication
-    /// credentials.
-    #[must_use]
-    pub fn new() -> Self {
-        Self {
-            root_uri: ROOT_SERVER_URI.clone(),
-            melior_uri: MELIOR_SERVER_URI.clone(),
-            auth: None,
-        }
-    }
-
-    /// Consumes the `ClientBuilder` and creates a [`Client`] instance.
-    pub fn build(self) -> Client {
-        Client::new(&self.root_uri, &self.melior_uri, self.auth)
-    }
-
-    /// Sets the URI for the Root API server.
-    ///
-    /// # Panics
-    ///
-    /// Panics if the provided argument cannot be converted to a valid `Uri`.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use bonfire::ClientBuilder;
-    /// #
-    /// let client = ClientBuilder::new()
-    ///     .root_uri("http://localhost:7070")
-    ///     .build();
-    /// ```
-    #[must_use]
-    pub fn root_uri<T>(mut self, uri: T) -> Self
-    where
-        Uri: TryFrom<T>,
-        <Uri as TryFrom<T>>::Error: fmt::Debug,
-    {
-        self.root_uri = Uri::try_from(uri).unwrap();
-        self
-    }
-
-    /// Sets the URI for the Melior API server.
-    ///
-    /// # Panics
-    ///
-    /// Panics if the provided argument cannot be converted to a valid `Uri`.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use bonfire::ClientBuilder;
-    /// #
-    /// let client = ClientBuilder::new()
-    ///     .melior_uri("http://localhost:8000")
-    ///     .build();
-    /// ```
-    #[must_use]
-    pub fn melior_uri<T>(mut self, uri: T) -> Self
-    where
-        Uri: TryFrom<T>,
-        <Uri as TryFrom<T>>::Error: fmt::Debug,
-    {
-        self.melior_uri = Uri::try_from(uri).unwrap();
-        self
-    }
-
-    /// Sets the initial authentication credentials for the client.
-    ///
-    /// # Errors
-    ///
-    /// Returns [`JwtError`] if an error occurs while parsing the provided credentials.
-    ///
-    /// # Examples
-    ///
-    /// ```no_run
-    /// # use bonfire::ClientBuilder;
-    /// use std::fs;
-    ///
-    /// use bonfire::models::Auth;
-    ///
-    /// let auth_data = fs::read("credentials.json").expect("failed to read from 'credentials.json'");
-    /// let auth = serde_json::from_slice::<Auth>(&auth_data).expect("failed to parse auth");
-    /// let client = ClientBuilder::new()
-    ///     .auth(auth)
-    ///     .expect("invalid auth")
-    ///     .build();
-    /// ```
-    pub fn auth(mut self, auth: Auth) -> JwtResult<Self> {
-        decode_token(&auth.access_token)?;
-        self.auth = Some(auth);
-        Ok(self)
-    }
-}
-
-impl Default for ClientBuilder {
-    fn default() -> Self {
-        Self::new()
     }
 }

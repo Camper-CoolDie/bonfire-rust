@@ -41,7 +41,7 @@ async fn main() -> Result<()> {
         .ok()
         .map(|data| serde_json::from_slice::<Auth>(&data))
         .transpose()?;
-    let client = match auth {
+    let client = &match auth_data {
         Some(auth) => Client::builder().auth(auth).expect("invalid auth").build(),
         None => {
             let client = Client::default();
@@ -52,10 +52,10 @@ async fn main() -> Result<()> {
     };
 
     // Get information about the currently authenicated user
-    println!("{:#?}", Auth::get_me(&client).await?);
+    println!("{:#?}", Auth::get_me(client).await?);
 
     // Save authentication credentials and exit program
-    save_credentials(&client).await?;
+    save_credentials(client).await?;
     Ok(())
 }
 ```

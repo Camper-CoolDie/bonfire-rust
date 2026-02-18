@@ -31,8 +31,8 @@ impl Auth {
     /// #
     /// # #[tokio::main]
     /// # async fn main() -> Result<()> {
-    /// # let client = Client::default();
-    /// let me = Auth::get_me(&client).await?;
+    /// # let client = &Client::default();
+    /// let me = Auth::get_me(client).await?;
     /// println!("Logged in as {}", me.name);
     /// #    Ok(())
     /// # }

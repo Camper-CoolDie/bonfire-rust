@@ -6,12 +6,13 @@ pub use kind::*;
 pub use reaction::Reaction;
 
 use crate::models::{Account, Category, Fandom};
+use crate::sealed::Sealed;
 
 /// A trait for publication types that extend the core [`Publication`] struct.
 ///
 /// This trait allows for adding type-specific fields beyond the generic [`Publication`] data.
 /// [`AnyPublication`] serves as a catch-all for publications with unspecified specific types.
-pub trait PublicationInheritor {
+pub trait PublicationInheritor: Sealed {
     /// Returns the specific kind of this publication.
     fn kind(&self) -> PublicationKind;
 }

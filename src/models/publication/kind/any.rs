@@ -1,5 +1,6 @@
 use crate::models::publication::{PublicationInheritor, PublicationKind};
 use crate::models::Post;
+use crate::sealed::Sealed;
 
 /// Represents a union of all possible additional data types for a publication.
 ///
@@ -55,3 +56,5 @@ impl PublicationInheritor for AnyPublication {
         }
     }
 }
+
+impl Sealed for AnyPublication {}

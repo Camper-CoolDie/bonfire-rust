@@ -77,9 +77,9 @@ impl Account {
     /// #
     /// # #[tokio::main]
     /// # async fn main() -> Result<()> {
-    /// # let client = Client::default();
+    /// # let client = &Client::default();
     /// let account = Account::new(1234);
-    /// println!("{:#?}", account.get_info(&client).await?);
+    /// println!("{:#?}", account.get_info(client).await?);
     /// #    Ok(())
     /// # }
     /// ```
@@ -185,9 +185,9 @@ impl Account {
     ///
     /// Returns [`RootError::AccessDenied`][crate::RootError::AccessDenied] if you attempt to block
     /// your own account, or [`Error`][crate::Error] if any other error occurs during the request.
-    pub async fn block(&self, client: &Client) -> Result<()> {
+    pub async fn block(&self, client: &Client) -> Result<&Self> {
         BlockRequest::new(self.id).send_request(client).await?;
-        Ok(())
+        Ok(self)
     }
 
     /// Unblocks this account, making its publications reappear and allowing it to send you direct
@@ -196,9 +196,9 @@ impl Account {
     /// # Errors
     ///
     /// Returns [`Error`][crate::Error] if an error occurs while sending the request.
-    pub async fn unblock(&self, client: &Client) -> Result<()> {
+    pub async fn unblock(&self, client: &Client) -> Result<&Self> {
         UnblockRequest::new(self.id).send_request(client).await?;
-        Ok(())
+        Ok(self)
     }
 
     /// Checks if this account is currently blocked by you.

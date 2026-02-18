@@ -1,4 +1,5 @@
 use crate::models::publication::{PublicationInheritor, PublicationKind};
+use crate::sealed::Sealed;
 
 /// Represents the specific data for a post publication.
 #[derive(Default, Clone, Debug)]
@@ -25,3 +26,5 @@ impl PublicationInheritor for Post {
         PublicationKind::Post
     }
 }
+
+impl Sealed for Post {}
