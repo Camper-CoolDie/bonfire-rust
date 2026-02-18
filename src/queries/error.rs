@@ -1,6 +1,8 @@
 use std::error::Error;
 use std::fmt;
 
+use crate::client::RequestErrorSource;
+
 /// Represents an error returned by the Melior (GraphQL) server.
 #[derive(Debug)]
 pub struct MeliorError {
@@ -37,6 +39,8 @@ impl fmt::Display for MeliorError {
 }
 
 impl Error for MeliorError {}
+
+impl RequestErrorSource for MeliorError {}
 
 /// Represents a specific location within a GraphQL query.
 #[derive(Debug)]

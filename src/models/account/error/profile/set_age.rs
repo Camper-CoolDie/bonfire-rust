@@ -12,7 +12,9 @@ pub enum SetAgeError {
 }
 
 impl RequestError for SetAgeError {
-    fn try_from_root(error: &RootError) -> Result<Option<Self>> {
+    type Source = RootError;
+
+    fn try_convert(error: &RootError) -> Result<Option<Self>> {
         Ok(match error {
             RootError::Other { code, .. } if code == "E_BAD_AGE" => Some(SetAgeError::InvalidAge),
             _ => None,

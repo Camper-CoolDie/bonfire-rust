@@ -1,11 +1,9 @@
-use std::convert::Infallible;
-
 use serde::Serialize;
 
-use crate::client::{EmptyResponse, Request};
+use crate::client::{EmptyResponse, InfallibleRequest, Request};
 use crate::models::Gender;
 use crate::requests::raw::RawGender;
-use crate::{Client, Result};
+use crate::{Client, Result, RootError};
 
 #[derive(Serialize)]
 pub(crate) struct SetGenderRequest {
@@ -22,7 +20,7 @@ impl SetGenderRequest {
 
 impl Request for SetGenderRequest {
     type Response = EmptyResponse;
-    type Error = Infallible;
+    type Error = InfallibleRequest<RootError>;
 
     async fn send_request(&self, client: &Client) -> Result<EmptyResponse> {
         client

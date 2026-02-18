@@ -1,10 +1,8 @@
-use std::convert::Infallible;
-
 use serde::Serialize;
 
-use crate::client::Request;
+use crate::client::{InfallibleRequest, Request};
 use crate::requests::raw::account::RawInfo;
-use crate::{Client, Result};
+use crate::{Client, Result, RootError};
 
 #[derive(Serialize)]
 pub(crate) enum GetInfoRequest<'a> {
@@ -25,7 +23,7 @@ impl<'a> GetInfoRequest<'a> {
 
 impl Request for GetInfoRequest<'_> {
     type Response = RawInfo;
-    type Error = Infallible;
+    type Error = InfallibleRequest<RootError>;
 
     async fn send_request(&self, client: &Client) -> Result<RawInfo> {
         client

@@ -33,7 +33,10 @@ impl MeliorService {
         &self,
         query: MeliorQuery<'_, R>,
         headers: HeaderMap<HeaderValue>,
-    ) -> Result<R::Response> {
+    ) -> Result<R::Response>
+    where
+        for<'a> &'a <R::Error as RequestError>::Source: From<&'a MeliorError>,
+    {
         let body = serde_json::to_vec(&query)?;
 
         let bytes = self.send_raw(Bytes::from(body), &headers).await?;
@@ -44,7 +47,10 @@ impl MeliorService {
             .ok_or_else(|| Self::map_errors::<R::Error>(response.errors))
     }
 
-    fn map_errors<E: RequestError>(errors: Option<Vec<RawMeliorError>>) -> Error {
+    fn map_errors<E: RequestError>(errors: Option<Vec<RawMeliorError>>) -> Error
+    where
+        for<'a> &'a E::Source: From<&'a MeliorError>,
+    {
         errors
             .and_then(|errors| errors.into_iter().next())
             .ok_or(Error::InvalidMeliorResponse)

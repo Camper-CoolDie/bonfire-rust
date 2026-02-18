@@ -11,14 +11,16 @@ pub use error::{Error, Result};
 use http::{header, HeaderMap, Uri};
 pub use jwt::JwtError;
 use jwt::JwtResult;
-pub(crate) use request::{EmptyResponse, Request, RequestError};
+pub(crate) use request::{
+    EmptyResponse, InfallibleRequest, Request, RequestError, RequestErrorSource,
+};
 use service::{MeliorService, RootService};
 use token_provider::TokenProvider;
 
 use crate::client::jwt::decode_token;
 use crate::models::Auth;
 use crate::queries::auth::{LoginEmailQuery, LogoutQuery};
-use crate::{MeliorQuery, RootRequest};
+use crate::{MeliorError, MeliorQuery, RootError, RootRequest};
 
 // It's great when we can test our requests against a test server, hence the ability to specify
 // custom URIs
@@ -244,7 +246,10 @@ impl Client {
         request_name: &'static str,
         content: &R,
         attachments: Vec<&[u8]>,
-    ) -> Result<R::Response> {
+    ) -> Result<R::Response>
+    where
+        for<'a> &'a <R::Error as RequestError>::Source: From<&'a RootError>,
+    {
         tracing::info!(request_name, "sending request");
         let token = self.inner.token_provider.get_token(self).await?;
 
@@ -261,7 +266,7 @@ impl Client {
                         if length > ATTACHMENT_MAX_SIZE {
                             Err(Error::AttachmentTooLarge)
                         } else {
-                            Ok(slice.len() as i32)
+                            Ok(length as i32)
                         }
                     })
                     .transpose()
@@ -288,7 +293,10 @@ impl Client {
         operation_name: &'static str,
         query: &'static str,
         variables: &R,
-    ) -> Result<R::Response> {
+    ) -> Result<R::Response>
+    where
+        for<'a> &'a <R::Error as RequestError>::Source: From<&'a MeliorError>,
+    {
         tracing::info!(operation_name, "sending query");
         let token = self.inner.token_provider.get_token(self).await?;
 
@@ -312,7 +320,10 @@ impl Client {
         operation_name: &'static str,
         query: &'static str,
         variables: &R,
-    ) -> Result<R::Response> {
+    ) -> Result<R::Response>
+    where
+        for<'a> &'a <R::Error as RequestError>::Source: From<&'a MeliorError>,
+    {
         tracing::info!(operation_name, "sending query without auth");
 
         self.inner

@@ -1,9 +1,7 @@
-use std::convert::Infallible;
-
 use serde::Serialize;
 
-use crate::client::{EmptyResponse, Request};
-use crate::{Client, Result};
+use crate::client::{EmptyResponse, InfallibleRequest, Request};
+use crate::{Client, Result, RootError};
 
 #[derive(Serialize)]
 pub(crate) struct BlockRequest {
@@ -18,7 +16,7 @@ impl BlockRequest {
 
 impl Request for BlockRequest {
     type Response = EmptyResponse;
-    type Error = Infallible;
+    type Error = InfallibleRequest<RootError>;
 
     async fn send_request(&self, client: &Client) -> Result<EmptyResponse> {
         client

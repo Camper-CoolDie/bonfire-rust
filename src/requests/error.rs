@@ -3,6 +3,8 @@ use std::fmt::Debug;
 use chrono::{DateTime, Utc};
 use thiserror::Error;
 
+use crate::client::RequestErrorSource;
+
 /// Represents errors returned by the Root server.
 ///
 /// Common errors are categorized into predefined variants, while [`RootError::Other`]
@@ -48,6 +50,8 @@ pub enum RootError {
         params: Vec<String>,
     },
 }
+
+impl RequestErrorSource for RootError {}
 
 /// Represents specific reasons why a resource might be unavailable, typically associated with a
 /// [`RootError::Unavailable`].

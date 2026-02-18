@@ -15,7 +15,9 @@ pub enum SetLinkError {
 }
 
 impl RequestError for SetLinkError {
-    fn try_from_root(error: &RootError) -> Result<Option<Self>> {
+    type Source = RootError;
+
+    fn try_convert(error: &RootError) -> Result<Option<Self>> {
         Ok(match error {
             RootError::Other { code, .. } if code == "E_BAD_TITLE" => {
                 Some(SetLinkError::TitleTooLong)

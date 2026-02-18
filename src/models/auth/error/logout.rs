@@ -12,7 +12,9 @@ pub enum LogoutError {
 }
 
 impl RequestError for LogoutError {
-    fn try_from_melior(error: &MeliorError) -> Result<Option<Self>> {
+    type Source = MeliorError;
+
+    fn try_convert(error: &MeliorError) -> Result<Option<Self>> {
         Ok(match error.message.split_once(':') {
             Some(("HardBanned", _)) => Some(LogoutError::HardBanned),
             _ => None,

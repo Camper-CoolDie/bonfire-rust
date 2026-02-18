@@ -1,12 +1,10 @@
-use std::convert::Infallible;
-
 use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 
-use crate::client::Request;
+use crate::client::{InfallibleRequest, Request};
 use crate::models::Me;
 use crate::queries::raw::RawMe;
-use crate::{Client, Result};
+use crate::{Client, MeliorError, Result};
 
 #[derive(Deserialize)]
 pub(crate) struct Response {
@@ -32,7 +30,7 @@ impl SetBirthdayQuery {
 
 impl Request for SetBirthdayQuery {
     type Response = Response;
-    type Error = Infallible;
+    type Error = InfallibleRequest<MeliorError>;
 
     async fn send_request(&self, client: &Client) -> Result<Response> {
         client

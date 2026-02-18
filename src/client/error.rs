@@ -77,15 +77,21 @@ pub enum Error {
     UnsuccessfulResponse(StatusCode),
 }
 impl Error {
-    pub(super) fn try_from_root<E: RequestError>(root_error: RootError) -> Result<Error> {
-        Ok(match E::try_from_root(&root_error)? {
+    pub(super) fn try_from_root<E: RequestError>(root_error: RootError) -> Result<Error>
+    where
+        for<'a> &'a E::Source: From<&'a RootError>,
+    {
+        Ok(match E::try_convert(<&E::Source>::from(&root_error))? {
             Some(error) => Error::RequestError(Box::new(error)),
             None => Error::RootError(root_error),
         })
     }
 
-    pub(super) fn try_from_melior<E: RequestError>(melior_error: MeliorError) -> Result<Error> {
-        Ok(match E::try_from_melior(&melior_error)? {
+    pub(super) fn try_from_melior<E: RequestError>(melior_error: MeliorError) -> Result<Error>
+    where
+        for<'a> &'a E::Source: From<&'a MeliorError>,
+    {
+        Ok(match E::try_convert(<&E::Source>::from(&melior_error))? {
             Some(error) => Error::RequestError(Box::new(error)),
             None => Error::MeliorError(melior_error),
         })

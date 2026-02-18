@@ -59,7 +59,9 @@ pub enum LoginError {
 }
 
 impl RequestError for LoginError {
-    fn try_from_melior(error: &MeliorError) -> Result<Option<Self>> {
+    type Source = MeliorError;
+
+    fn try_convert(error: &MeliorError) -> Result<Option<Self>> {
         Ok(match error.message.split_once(':') {
             Some(("InvalidEmail", _)) => Some(LoginError::InvalidEmail),
             Some(("WrongEmail", _)) => Some(LoginError::WrongEmail),

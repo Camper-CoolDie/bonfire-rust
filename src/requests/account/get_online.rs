@@ -1,12 +1,10 @@
-use std::convert::Infallible;
-
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
-use crate::client::Request;
+use crate::client::{InfallibleRequest, Request};
 use crate::models::Account;
 use crate::requests::raw::RawAccount;
-use crate::{Client, Error, Result};
+use crate::{Client, Error, Result, RootError};
 
 #[derive(Deserialize)]
 pub(crate) struct Response {
@@ -36,7 +34,7 @@ impl GetOnlineRequest {
 
 impl Request for GetOnlineRequest {
     type Response = Response;
-    type Error = Infallible;
+    type Error = InfallibleRequest<RootError>;
 
     async fn send_request(&self, client: &Client) -> Result<Response> {
         client

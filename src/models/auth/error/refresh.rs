@@ -12,7 +12,9 @@ pub enum RefreshError {
 }
 
 impl RequestError for RefreshError {
-    fn try_from_melior(error: &MeliorError) -> Result<Option<Self>> {
+    type Source = MeliorError;
+
+    fn try_convert(error: &MeliorError) -> Result<Option<Self>> {
         Ok(match error.message.split_once(':') {
             Some(("TokenExpired", _)) => Some(RefreshError::TokenExpired),
             _ => None,

@@ -37,7 +37,10 @@ impl RootService {
         request: RootRequest<'_, R>,
         attachments: Vec<&[u8]>,
         headers: HeaderMap<HeaderValue>,
-    ) -> Result<R::Response> {
+    ) -> Result<R::Response>
+    where
+        for<'a> &'a <R::Error as RequestError>::Source: From<&'a RootError>,
+    {
         let json_body = serde_json::to_vec(&request)?;
 
         let attachments_length = attachments.iter().map(|slice| slice.len()).sum::<usize>();
@@ -64,7 +67,10 @@ impl RootService {
         }
     }
 
-    fn map_error<E: RequestError>(error: RawRootError) -> Error {
+    fn map_error<E: RequestError>(error: RawRootError) -> Error
+    where
+        for<'a> &'a E::Source: From<&'a RootError>,
+    {
         RootError::try_from(error)
             .inspect_err(|error| tracing::error!(?error, "failed to parse root error"))
             .and_then(|root_error| {
