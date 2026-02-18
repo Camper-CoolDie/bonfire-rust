@@ -1,3 +1,5 @@
+mod change_follow;
+mod get_follows;
 mod set_age;
 mod set_avatar;
 mod set_background;
@@ -6,6 +8,8 @@ mod set_gender;
 mod set_link;
 mod set_status;
 
+pub(crate) use change_follow::ChangeFollowRequest;
+pub(crate) use get_follows::GetFollowsRequest;
 pub(crate) use set_age::SetAgeRequest;
 pub(crate) use set_avatar::SetAvatarRequest;
 pub(crate) use set_background::SetBackgroundRequest;

@@ -3,6 +3,7 @@ mod effect;
 mod gender;
 mod info;
 mod link;
+mod prison;
 
 pub(crate) use badge::RawBadge;
 use chrono::DateTime;
@@ -10,6 +11,7 @@ pub(crate) use effect::{RawEffect, RawEffectKind, RawEffectReasonKind};
 pub(crate) use gender::RawGender;
 pub(crate) use info::RawInfo;
 pub(crate) use link::RawLink;
+pub(crate) use prison::RawPrisonEntry;
 use serde::de::Error as _;
 use serde::Deserialize;
 

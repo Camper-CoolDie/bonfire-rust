@@ -111,9 +111,9 @@ impl Info {
     ///
     /// # Errors
     ///
-    /// Returns [`RootError::Unavailable`][crate::RootError::Unavailable] if no account with the
-    /// provided identifier exists, or [`Error`][crate::Error] if any other error occurs during the
-    /// request.
+    /// Returns [`UnavailableError::NotFound`][crate::UnavailableError::NotFound] if no account with
+    /// the provided identifier exists, or [`Error`][crate::Error] if any other error occurs during
+    /// the request.
     pub async fn get_by_id(client: &Client, id: u64) -> Result<Self> {
         GetInfoRequest::new_by_id(id)
             .send_request(client)
@@ -125,8 +125,8 @@ impl Info {
     ///
     /// # Errors
     ///
-    /// Returns [`RootError::Unavailable`][crate::RootError::Unavailable] if no account with the
-    /// provided name exists, or [`Error`][crate::Error] if any other error occurs during the
+    /// Returns [`UnavailableError::NotFound`][crate::UnavailableError::NotFound] if no account with
+    /// the provided name exists, or [`Error`][crate::Error] if any other error occurs during the
     /// request.
     pub async fn get_by_name(client: &Client, name: &str) -> Result<Self> {
         GetInfoRequest::new_by_name(name)

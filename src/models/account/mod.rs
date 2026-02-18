@@ -4,6 +4,7 @@ mod error;
 mod gender;
 mod info;
 mod link;
+mod prison;
 
 pub use badge::Badge;
 use chrono::{DateTime, Duration, Utc};
@@ -12,6 +13,7 @@ pub use error::*;
 pub use gender::Gender;
 pub use info::*;
 pub use link::Link;
+pub use prison::PrisonEntry;
 
 use crate::client::Request as _;
 use crate::models::ImageRef;
@@ -19,8 +21,10 @@ use crate::requests::account::blocklist::{
     BlockRequest, CheckBlockedRequest, GetBlockedAccountsRequest, GetBlockedFandomIdsRequest,
     UnblockRequest,
 };
+use crate::requests::account::profile::{ChangeFollowRequest, GetFollowsRequest};
 use crate::requests::account::{
-    GetAccountRequest, GetInfoRequest, GetOnlineRequest, SearchAccountsRequest,
+    GetAccountRequest, GetInfoRequest, GetOnlineRequest, GetPrisonRequest, ReportRequest,
+    SearchAccountsRequest, SetReferrerRequest,
 };
 use crate::{Client, Result};
 
@@ -105,9 +109,9 @@ impl Account {
     ///
     /// # Errors
     ///
-    /// Returns [`RootError::Unavailable`][crate::RootError::Unavailable] if no account with the
-    /// provided identifier exists, or [`Error`][crate::Error] if any other error occurs during the
-    /// request.
+    /// Returns [`UnavailableError::NotFound`][crate::UnavailableError::NotFound] if no account with
+    /// the provided identifier exists, or [`Error`][crate::Error] if any other error occurs during
+    /// the request.
     pub async fn get_by_id(client: &Client, id: u64) -> Result<Self> {
         GetAccountRequest::new_by_id(id)
             .send_request(client)
@@ -121,8 +125,8 @@ impl Account {
     ///
     /// # Errors
     ///
-    /// Returns [`RootError::Unavailable`][crate::RootError::Unavailable] if no account with the
-    /// provided name exists, or [`Error`][crate::Error] if any other error occurs during the
+    /// Returns [`UnavailableError::NotFound`][crate::UnavailableError::NotFound] if no account with
+    /// the provided name exists, or [`Error`][crate::Error] if any other error occurs during the
     /// request.
     pub async fn get_by_name(client: &Client, name: &str) -> Result<Self> {
         GetAccountRequest::new_by_name(name)
@@ -152,8 +156,8 @@ impl Account {
     ///
     /// # Errors
     ///
-    /// Returns [`RootError::Unavailable`][crate::RootError::Unavailable] if no account with the
-    /// contained identifier exists, or [`Error`][crate::Error] if any other error occurs during
+    /// Returns [`UnavailableError::NotFound`][crate::UnavailableError::NotFound] if no account with
+    /// the contained identifier exists, or [`Error`][crate::Error] if any other error occurs during
     /// the request.
     pub async fn get_info(&self, client: &Client) -> Result<Info> {
         GetInfoRequest::new_by_id(self.id)
@@ -174,6 +178,69 @@ impl Account {
         offset_date: Option<DateTime<Utc>>,
     ) -> Result<Vec<Self>> {
         GetOnlineRequest::new(offset_date)
+            .send_request(client)
+            .await?
+            .try_into()
+    }
+
+    /// Retrieves a list of all currently banned accounts.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error`][crate::Error] if an error occurs while sending the request.
+    pub async fn get_prison(client: &Client, offset: u64) -> Result<Vec<PrisonEntry>> {
+        GetPrisonRequest::new(offset)
+            .send_request(client)
+            .await?
+            .try_into()
+    }
+
+    /// Follows this account.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`RootError::AccessDenied`][crate::RootError::AccessDenied] if you attempt to follow
+    /// your own account, or [`Error`][crate::Error] if any other error occurs during the request.
+    pub async fn follow(&self, client: &Client) -> Result<&Self> {
+        ChangeFollowRequest::new_follow(self.id)
+            .send_request(client)
+            .await?;
+        Ok(self)
+    }
+
+    /// Unfollows this account.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`RootError::AccessDenied`][crate::RootError::AccessDenied] if you attempt to
+    /// unfollow your own account, or [`Error`][crate::Error] if any other error occurs during the
+    /// request.
+    pub async fn unfollow(&self, client: &Client) -> Result<&Self> {
+        ChangeFollowRequest::new_unfollow(self.id)
+            .send_request(client)
+            .await?;
+        Ok(self)
+    }
+
+    /// Retrieves a list of accounts this account is following.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error`][crate::Error] if an error occurs while sending the request.
+    pub async fn get_follows(&self, client: &Client, offset: u64) -> Result<Vec<Self>> {
+        GetFollowsRequest::new_follows(self.id, offset)
+            .send_request(client)
+            .await?
+            .try_into()
+    }
+
+    /// Retrieves a list of accounts that are following this account.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error`][crate::Error] if an error occurs while sending the request.
+    pub async fn get_followers(&self, client: &Client, offset: u64) -> Result<Vec<Self>> {
+        GetFollowsRequest::new_followers(self.id, offset)
             .send_request(client)
             .await?
             .try_into()
@@ -237,5 +304,33 @@ impl Account {
             .send_request(client)
             .await?
             .into())
+    }
+
+    /// Sets this account as the referrer for the currently logged-in account.
+    ///
+    /// # Errors
+    ///
+    /// * Returns [`SetReferrerError::AlreadySet`][crate::models::account::SetReferrerError::AlreadySet]
+    ///   if the referrer has already been set.
+    /// * Returns [`Error`][crate::Error] if any other error occurs during the request.
+    pub async fn set_referrer(&self, client: &Client) -> Result<&Self> {
+        SetReferrerRequest::new(self.id)
+            .send_request(client)
+            .await?;
+        Ok(self)
+    }
+
+    /// Reports this account.
+    ///
+    /// # Errors
+    ///
+    /// * Returns [`ReportError::AlreadyReported`][crate::models::account::ReportError::AlreadyReported]
+    ///   if this account has already been reported.
+    /// * Returns [`Error`][crate::Error] if any other error occurs during the request.
+    pub async fn report(&self, client: &Client, comment: &str) -> Result<&Self> {
+        ReportRequest::new(self.id, comment)
+            .send_request(client)
+            .await?;
+        Ok(self)
     }
 }
