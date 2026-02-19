@@ -1,5 +1,8 @@
 mod change_follow;
+mod get_curated_fandoms;
 mod get_follows;
+mod get_moderated_fandoms;
+mod get_subscriptions;
 mod set_age;
 mod set_avatar;
 mod set_background;
@@ -9,7 +12,10 @@ mod set_link;
 mod set_status;
 
 pub(crate) use change_follow::ChangeFollowRequest;
+pub(crate) use get_curated_fandoms::GetCuratedFandomsRequest;
 pub(crate) use get_follows::GetFollowsRequest;
+pub(crate) use get_moderated_fandoms::GetModeratedFandomsRequest;
+pub(crate) use get_subscriptions::GetSubscriptionsRequest;
 pub(crate) use set_age::SetAgeRequest;
 pub(crate) use set_avatar::SetAvatarRequest;
 pub(crate) use set_background::SetBackgroundRequest;

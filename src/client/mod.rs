@@ -242,8 +242,8 @@ impl Client {
     where
         for<'a> &'a <R::Error as RequestError>::Source: From<&'a RootError>,
     {
-        tracing::info!(request_name, "sending request");
         let token = self.inner.token_provider.get_token(self).await?;
+        tracing::info!(request_name, "sending request");
 
         // Contains the length of each attachment
         let data_output = attachments
@@ -289,8 +289,8 @@ impl Client {
     where
         for<'a> &'a <R::Error as RequestError>::Source: From<&'a MeliorError>,
     {
-        tracing::info!(operation_name, "sending query");
         let token = self.inner.token_provider.get_token(self).await?;
+        tracing::info!(operation_name, "sending query");
 
         let mut headers = HeaderMap::new();
         if let Some(token) = token {

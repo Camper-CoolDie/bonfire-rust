@@ -40,7 +40,8 @@ impl MeliorService {
         let body = serde_json::to_vec(&query)?;
 
         let bytes = self.send_raw(Bytes::from(body), &headers).await?;
-        let response = serde_json::from_slice::<MeliorResponse<R>>(&bytes)?;
+        let response = serde_json::from_slice::<MeliorResponse<R>>(&bytes)
+            .inspect_err(|error| tracing::error!(?error, "failed to parse melior response"))?;
 
         response
             .data

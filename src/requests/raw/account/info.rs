@@ -46,11 +46,11 @@ pub(crate) struct RawInfo {
     #[serde(rename = "ratesNegative")]
     negative_rates_sum: i64,
     #[serde(rename = "moderationFandomsCount")]
-    moderating_fandoms_count: u64,
+    moderated_fandoms_count: u64,
+    #[serde(rename = "viceroyFandomsCount")]
+    curated_fandoms_count: u64,
     #[serde(rename = "subscribedFandomsCount")]
     subscriptions_count: u64,
-    #[serde(rename = "viceroyFandomsCount")]
-    viceroys_count: u64,
     stickers_count: u64,
     #[serde(rename = "blackAccountsCount")]
     blocked_accounts_count: u64,
@@ -125,9 +125,9 @@ impl TryFrom<RawInfo> for Info {
             rates_count: value.rates_count,
             positive_rates_sum: value.positive_rates_sum,
             negative_rates_sum: value.negative_rates_sum,
-            moderating_fandoms_count: value.moderating_fandoms_count,
+            moderated_fandoms_count: value.moderated_fandoms_count,
             subscriptions_count: value.subscriptions_count,
-            viceroys_count: value.viceroys_count,
+            curated_fandoms_count: value.curated_fandoms_count,
             stickers_count: value.stickers_count,
             blocked_accounts_count: value.blocked_accounts_count,
             blocked_fandoms_count: value.blocked_fandoms_count,

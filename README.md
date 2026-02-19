@@ -37,7 +37,7 @@ async fn main() -> Result<()> {
     tracing_subscriber::fmt::init();
 
     // Build client & authenticate (either by using `credentials.json` or sending a login request)
-    let auth = fs::read("credentials.json")
+    let auth_data = fs::read("credentials.json")
         .ok()
         .map(|data| serde_json::from_slice::<Auth>(&data))
         .transpose()?;

@@ -1,7 +1,7 @@
 use serde::Serialize;
 
 use crate::client::{EmptyResponse, Request};
-use crate::models::account::SetLinkError;
+use crate::models::profile::SetLinkError;
 use crate::{Client, Result};
 
 #[derive(Serialize)]

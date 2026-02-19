@@ -56,7 +56,8 @@ impl TryFrom<RawFandom> for Fandom {
 
     fn try_from(value: RawFandom) -> Result<Self> {
         let language = match value.language {
-            -1 => None,
+            // 0 is rarely used and means an unspecified language, rather than a multilingual fandom
+            -1 | 0 => None,
             1 => Some(Language::English),
             2 => Some(Language::Russian),
             3 => Some(Language::Portuguese),
@@ -68,9 +69,8 @@ impl TryFrom<RawFandom> for Fandom {
             language => Err(serde_json::Error::custom(format!(
                 "invalid value: {}, expected one of: {}",
                 language,
-                [-1, 1, 2, 3, 4, 5, 6, 7, 8]
-                    .iter()
-                    .map(ToString::to_string)
+                (-1..=8)
+                    .map(|n| n.to_string())
                     .collect::<Vec<String>>()
                     .join(", ")
             )))?,

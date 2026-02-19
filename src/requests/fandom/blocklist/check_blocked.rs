@@ -5,7 +5,7 @@ use crate::{Client, Result, RootError};
 
 #[derive(Deserialize)]
 pub(crate) struct Response {
-    #[serde(rename = "isInBlackList")]
+    #[serde(rename = "contains")]
     is_blocked: bool,
 }
 
@@ -16,23 +16,23 @@ impl From<Response> for bool {
 }
 
 #[derive(Serialize)]
-pub(crate) struct CheckAccountBlockedRequest {
-    #[serde(rename = "accountId")]
+pub(crate) struct CheckFandomBlockedRequest {
+    #[serde(rename = "fandomId")]
     id: u64,
 }
-impl CheckAccountBlockedRequest {
+impl CheckFandomBlockedRequest {
     pub(crate) fn new(id: u64) -> Self {
         Self { id }
     }
 }
 
-impl Request for CheckAccountBlockedRequest {
+impl Request for CheckFandomBlockedRequest {
     type Response = Response;
     type Error = InfallibleRequest<RootError>;
 
     async fn send_request(&self, client: &Client) -> Result<Response> {
         client
-            .send_request("RAccountsBlackListCheck", self, Vec::new())
+            .send_request("RFandomsBlackListContains", self, Vec::new())
             .await
     }
 }

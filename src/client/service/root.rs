@@ -59,9 +59,11 @@ impl RootService {
             payload.put_slice(attachment);
         }
 
-        let response = self.send_raw(payload.freeze(), &headers).await?;
+        let bytes = self.send_raw(payload.freeze(), &headers).await?;
 
-        match serde_json::from_slice::<RootResponse<R>>(&response)? {
+        match serde_json::from_slice::<RootResponse<R>>(&bytes)
+            .inspect_err(|error| tracing::error!(?error, "failed to parse root response"))?
+        {
             RootResponse::Ok(content) => Ok(content),
             RootResponse::Error(error) => Err(Self::map_error::<R::Error>(error)),
         }

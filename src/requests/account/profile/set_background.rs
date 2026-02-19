@@ -4,7 +4,7 @@ use serde::de::Error as _;
 use serde::{Deserialize, Serialize};
 
 use crate::client::Request;
-use crate::models::account::SetProfileImageError;
+use crate::models::profile::SetProfileImageError;
 use crate::models::ImageRef;
 use crate::requests::raw::RawImageRef;
 use crate::{Client, Error, Result};

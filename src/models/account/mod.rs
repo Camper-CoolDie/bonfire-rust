@@ -11,21 +11,25 @@ use chrono::{DateTime, Duration, Utc};
 pub use effect::{Effect, EffectKind, EffectReasonKind};
 pub use error::*;
 pub use gender::Gender;
-pub use info::*;
+pub use info::Info;
 pub use link::Link;
 pub use prison::PrisonEntry;
 
 use crate::client::Request as _;
-use crate::models::ImageRef;
+use crate::models::{Fandom, ImageRef};
 use crate::requests::account::blocklist::{
-    BlockRequest, CheckBlockedRequest, GetBlockedAccountsRequest, GetBlockedFandomIdsRequest,
-    UnblockRequest,
+    BlockAccountRequest, CheckAccountBlockedRequest, GetBlockedAccountsRequest,
+    UnblockAccountRequest,
 };
-use crate::requests::account::profile::{ChangeFollowRequest, GetFollowsRequest};
+use crate::requests::account::profile::{
+    ChangeFollowRequest, GetCuratedFandomsRequest, GetFollowsRequest, GetModeratedFandomsRequest,
+    GetSubscriptionsRequest,
+};
 use crate::requests::account::{
     GetAccountRequest, GetInfoRequest, GetOnlineRequest, GetPrisonRequest, ReportRequest,
     SearchAccountsRequest, SetReferrerRequest,
 };
+use crate::requests::fandom::blocklist::GetBlockedFandomIdsRequest;
 use crate::{Client, Result};
 
 /// The maximum duration an account can be offline while still considered "online".
@@ -253,7 +257,9 @@ impl Account {
     /// Returns [`RootError::AccessDenied`][crate::RootError::AccessDenied] if you attempt to block
     /// your own account, or [`Error`][crate::Error] if any other error occurs during the request.
     pub async fn block(&self, client: &Client) -> Result<&Self> {
-        BlockRequest::new(self.id).send_request(client).await?;
+        BlockAccountRequest::new(self.id)
+            .send_request(client)
+            .await?;
         Ok(self)
     }
 
@@ -264,7 +270,9 @@ impl Account {
     ///
     /// Returns [`Error`][crate::Error] if an error occurs while sending the request.
     pub async fn unblock(&self, client: &Client) -> Result<&Self> {
-        UnblockRequest::new(self.id).send_request(client).await?;
+        UnblockAccountRequest::new(self.id)
+            .send_request(client)
+            .await?;
         Ok(self)
     }
 
@@ -276,7 +284,7 @@ impl Account {
     /// the block status of your own account, or [`Error`][crate::Error] if any other error occurs
     /// during the request.
     pub async fn check_blocked(&self, client: &Client) -> Result<bool> {
-        Ok(CheckBlockedRequest::new(self.id)
+        Ok(CheckAccountBlockedRequest::new(self.id)
             .send_request(client)
             .await?
             .into())
@@ -306,20 +314,6 @@ impl Account {
             .into())
     }
 
-    /// Sets this account as the referrer for the currently logged-in account.
-    ///
-    /// # Errors
-    ///
-    /// * Returns [`SetReferrerError::AlreadySet`][crate::models::account::SetReferrerError::AlreadySet]
-    ///   if the referrer has already been set.
-    /// * Returns [`Error`][crate::Error] if any other error occurs during the request.
-    pub async fn set_referrer(&self, client: &Client) -> Result<&Self> {
-        SetReferrerRequest::new(self.id)
-            .send_request(client)
-            .await?;
-        Ok(self)
-    }
-
     /// Reports this account.
     ///
     /// # Errors
@@ -329,6 +323,56 @@ impl Account {
     /// * Returns [`Error`][crate::Error] if any other error occurs during the request.
     pub async fn report(&self, client: &Client, comment: &str) -> Result<&Self> {
         ReportRequest::new(self.id, comment)
+            .send_request(client)
+            .await?;
+        Ok(self)
+    }
+
+    /// Retrieves a list of fandoms this account is subscribed to.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error`][crate::Error] if an error occurs while sending the request.
+    pub async fn get_subscriptions(&self, client: &Client, offset: u64) -> Result<Vec<Fandom>> {
+        GetSubscriptionsRequest::new(self.id, offset)
+            .send_request(client)
+            .await?
+            .try_into()
+    }
+
+    /// Retrieves a list of fandoms this account moderates.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error`][crate::Error] if an error occurs while sending the request.
+    pub async fn get_moderated_fandoms(&self, client: &Client, offset: u64) -> Result<Vec<Fandom>> {
+        GetModeratedFandomsRequest::new(self.id, offset)
+            .send_request(client)
+            .await?
+            .try_into()
+    }
+
+    /// Retrieves a list of fandoms this account curates.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error`][crate::Error] if an error occurs while sending the request.
+    pub async fn get_curated_fandoms(&self, client: &Client, offset: u64) -> Result<Vec<Fandom>> {
+        GetCuratedFandomsRequest::new(self.id, offset)
+            .send_request(client)
+            .await?
+            .try_into()
+    }
+
+    /// Sets this account as the referrer for the currently logged-in account.
+    ///
+    /// # Errors
+    ///
+    /// * Returns [`SetReferrerError::AlreadySet`][crate::models::account::SetReferrerError::AlreadySet]
+    ///   if the referrer has already been set.
+    /// * Returns [`Error`][crate::Error] if any other error occurs during the request.
+    pub async fn set_referrer(&self, client: &Client) -> Result<&Self> {
+        SetReferrerRequest::new(self.id)
             .send_request(client)
             .await?;
         Ok(self)
