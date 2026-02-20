@@ -4,6 +4,7 @@ mod gender;
 mod info;
 mod link;
 mod prison;
+mod stat;
 
 pub(crate) use badge::RawBadge;
 use chrono::DateTime;
@@ -14,6 +15,7 @@ pub(crate) use link::RawLink;
 pub(crate) use prison::RawPrisonEntry;
 use serde::de::Error as _;
 use serde::Deserialize;
+pub(crate) use stat::RawStat;
 
 use crate::models::account::AccountCustomization;
 use crate::models::{Account, Effect};

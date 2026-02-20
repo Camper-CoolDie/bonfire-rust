@@ -5,6 +5,7 @@ mod gender;
 mod info;
 mod link;
 mod prison;
+mod stat;
 
 pub use badge::Badge;
 use chrono::{DateTime, Duration, Utc};
@@ -14,6 +15,7 @@ pub use gender::Gender;
 pub use info::Info;
 pub use link::Link;
 pub use prison::PrisonEntry;
+pub use stat::Stat;
 
 use crate::client::Request as _;
 use crate::models::{Fandom, ImageRef};
@@ -26,8 +28,8 @@ use crate::requests::account::profile::{
     GetSubscriptionsRequest,
 };
 use crate::requests::account::{
-    GetAccountRequest, GetInfoRequest, GetOnlineRequest, GetPrisonRequest, ReportRequest,
-    SearchAccountsRequest, SetReferrerRequest,
+    GetAccountRequest, GetInfoRequest, GetOnlineRequest, GetPrisonRequest, GetStatRequest,
+    ReportRequest, SearchAccountsRequest,
 };
 use crate::requests::fandom::blocklist::GetBlockedFandomIdsRequest;
 use crate::{Client, Result};
@@ -168,6 +170,19 @@ impl Account {
             .send_request(client)
             .await?
             .try_into()
+    }
+
+    /// Retrieves this account's statistics. If no account with the contained identifier exists,
+    /// this method returns a default, empty `Stat`.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error`][crate::Error] if any other error occurs during the request.
+    pub async fn get_stat(&self, client: &Client) -> Result<Stat> {
+        Ok(GetStatRequest::new(self.id)
+            .send_request(client)
+            .await?
+            .into())
     }
 
     /// Retrieves a list of accounts that are currently online.
@@ -362,19 +377,5 @@ impl Account {
             .send_request(client)
             .await?
             .try_into()
-    }
-
-    /// Sets this account as the referrer for the currently logged-in account.
-    ///
-    /// # Errors
-    ///
-    /// * Returns [`SetReferrerError::AlreadySet`][crate::models::account::SetReferrerError::AlreadySet]
-    ///   if the referrer has already been set.
-    /// * Returns [`Error`][crate::Error] if any other error occurs during the request.
-    pub async fn set_referrer(&self, client: &Client) -> Result<&Self> {
-        SetReferrerRequest::new(self.id)
-            .send_request(client)
-            .await?;
-        Ok(self)
     }
 }

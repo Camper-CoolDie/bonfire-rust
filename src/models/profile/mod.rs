@@ -13,6 +13,7 @@ use crate::requests::account::profile::{
     SetAgeRequest, SetAvatarRequest, SetBackgroundRequest, SetDescriptionRequest, SetGenderRequest,
     SetLinkRequest, SetStatusRequest,
 };
+use crate::requests::account::SetReferrerRequest;
 use crate::{Client, Result};
 
 /// The allowed range for an account's age.
@@ -289,5 +290,17 @@ impl Me {
             .send_request(client)
             .await?
             .try_into()
+    }
+
+    /// Sets the prrovided account as the referrer for the currently logged-in account.
+    ///
+    /// # Errors
+    ///
+    /// * Returns [`SetReferrerError::AlreadySet`][crate::models::account::SetReferrerError::AlreadySet]
+    ///   if the referrer has already been set.
+    /// * Returns [`Error`][crate::Error] if any other error occurs during the request.
+    pub async fn set_referrer(&self, client: &Client, id: u64) -> Result<&Self> {
+        SetReferrerRequest::new(id).send_request(client).await?;
+        Ok(self)
     }
 }

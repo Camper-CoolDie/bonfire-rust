@@ -11,7 +11,7 @@ pub mod profile;
 /// Contains structs, kind enums, and helper types for publications.
 pub mod publication;
 
-pub use account::{Account, Badge, Effect, Gender, Info as AccountInfo, Link};
+pub use account::{Account, Badge, Effect, Gender, Info as AccountInfo, Link, Stat as AccountStat};
 pub use auth::Auth;
 pub use common::{Category, ImageRef, Language};
 pub use fandom::Fandom;
