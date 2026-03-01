@@ -80,6 +80,8 @@ pub mod client;
 /// Contains data structures, error types, and enums for constructing requests and parsing
 /// responses.
 pub mod models;
+/// A set of exports which can be helpful to use.
+pub mod prelude;
 mod queries;
 mod requests;
 

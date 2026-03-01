@@ -35,7 +35,7 @@ impl Stat {
     ///
     /// # Errors
     ///
-    /// Returns [`Error`][crate::Error] if any other error occurs during the request.
+    /// Returns [`Error`][crate::Error] if an error occurs while sending the request.
     pub async fn get(client: &Client, id: u64) -> Result<Self> {
         Ok(GetStatRequest::new(id).send_request(client).await?.into())
     }

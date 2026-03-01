@@ -2,6 +2,7 @@ mod builder;
 mod error;
 mod jwt;
 mod request;
+mod request_limiter;
 mod service;
 mod token_provider;
 
@@ -14,6 +15,7 @@ pub use jwt::JwtError;
 pub(crate) use request::{
     EmptyResponse, InfallibleRequest, Request, RequestError, RequestErrorSource,
 };
+use request_limiter::RequestLimiter;
 use service::{MeliorService, RootService};
 use token_provider::TokenProvider;
 
@@ -31,6 +33,7 @@ struct Inner {
     root_service: RootService,
     melior_service: MeliorService,
     token_provider: TokenProvider,
+    request_limiter: RequestLimiter,
 }
 
 /// An asynchronous, thread-safe HTTP client for the Bonfire API.
@@ -60,13 +63,14 @@ pub struct Client {
     inner: Arc<Inner>,
 }
 impl Client {
-    fn new(root_uri: &Uri, melior_uri: &Uri, auth: Option<Auth>) -> Self {
+    fn new(root_uri: &Uri, melior_uri: &Uri, auth: Option<Auth>, limit: u16) -> Self {
         Self {
             inner: Arc::new(Inner {
                 root_service: RootService::new(root_uri),
                 melior_service: MeliorService::new(melior_uri),
                 // This error was previously caught in ClientBuilder::auth()
                 token_provider: TokenProvider::new(auth).expect("failed to create TokenProvider"),
+                request_limiter: RequestLimiter::new(limit),
             }),
         }
     }
@@ -242,6 +246,8 @@ impl Client {
     where
         for<'a> &'a <R::Error as RequestError>::Source: From<&'a RootError>,
     {
+        self.inner.request_limiter.wait_for_permit().await;
+
         let token = self.inner.token_provider.get_token(self).await?;
         tracing::info!(request_name, "sending request");
 
@@ -289,6 +295,8 @@ impl Client {
     where
         for<'a> &'a <R::Error as RequestError>::Source: From<&'a MeliorError>,
     {
+        self.inner.request_limiter.wait_for_permit().await;
+
         let token = self.inner.token_provider.get_token(self).await?;
         tracing::info!(operation_name, "sending query");
 
@@ -316,6 +324,8 @@ impl Client {
     where
         for<'a> &'a <R::Error as RequestError>::Source: From<&'a MeliorError>,
     {
+        self.inner.request_limiter.wait_for_permit().await;
+
         tracing::info!(operation_name, "sending query without auth");
 
         self.inner

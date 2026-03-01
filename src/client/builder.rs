@@ -14,11 +14,14 @@ static ROOT_SERVER_URI: LazyLock<Uri> =
 static MELIOR_SERVER_URI: LazyLock<Uri> =
     LazyLock::new(|| Uri::from_static("https://api.bonfire.moe"));
 
+const REQUESTS_PER_MINUTE: u16 = 30;
+
 /// A builder-like pattern for constructing and configuring a [`Client`] instance.
 pub struct ClientBuilder {
     root_uri: Uri,
     melior_uri: Uri,
     auth: Option<Auth>,
+    requests_per_minute: u16,
 }
 impl ClientBuilder {
     /// Creates a new `ClientBuilder` with default API endpoint URIs and no authentication
@@ -29,12 +32,18 @@ impl ClientBuilder {
             root_uri: ROOT_SERVER_URI.clone(),
             melior_uri: MELIOR_SERVER_URI.clone(),
             auth: None,
+            requests_per_minute: REQUESTS_PER_MINUTE,
         }
     }
 
     /// Consumes the `ClientBuilder` and creates a [`Client`] instance.
     pub fn build(self) -> Client {
-        Client::new(&self.root_uri, &self.melior_uri, self.auth)
+        Client::new(
+            &self.root_uri,
+            &self.melior_uri,
+            self.auth,
+            self.requests_per_minute,
+        )
     }
 
     /// Sets the URI for the Root API server.
@@ -113,6 +122,29 @@ impl ClientBuilder {
         decode_token(&auth.access_token)?;
         self.auth = Some(auth);
         Ok(self)
+    }
+
+    /// Sets the maximum number of requests per minute for the client. The default value is `30`.
+    ///
+    /// This rate limit ensures that the application adheres to the server's rate-limiting policy
+    /// from a single IP address.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the provided limit is `0`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use bonfire::ClientBuilder;
+    /// #
+    /// let client = &ClientBuilder::new().requests_per_minute(15).build();
+    /// ```
+    #[must_use]
+    pub fn requests_per_minute(mut self, limit: u16) -> Self {
+        assert!(limit > 0, "requests per minute cannot be 0");
+        self.requests_per_minute = limit;
+        self
     }
 }
 

@@ -177,7 +177,7 @@ impl Account {
     ///
     /// # Errors
     ///
-    /// Returns [`Error`][crate::Error] if any other error occurs during the request.
+    /// Returns [`Error`][crate::Error] if an error occurs while sending the request.
     pub async fn get_stat(&self, client: &Client) -> Result<Stat> {
         Ok(GetStatRequest::new(self.id)
             .send_request(client)
