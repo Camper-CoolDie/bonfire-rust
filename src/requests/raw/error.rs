@@ -1,6 +1,6 @@
 use chrono::DateTime;
-use serde::de::Error as _;
 use serde::Deserialize;
+use serde::de::Error as _;
 
 use crate::{Error, Result, RootError, UnavailableError};
 

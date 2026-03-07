@@ -13,8 +13,8 @@ pub(crate) use gender::RawGender;
 pub(crate) use info::RawInfo;
 pub(crate) use link::RawLink;
 pub(crate) use prison::RawPrisonEntry;
-use serde::de::Error as _;
 use serde::Deserialize;
+use serde::de::Error as _;
 pub(crate) use stat::RawStat;
 
 use crate::models::account::AccountCustomization;
@@ -46,7 +46,7 @@ pub(crate) struct RawAccount {
     #[serde(rename = "J_LVL")]
     level: f64,
     #[serde(rename = "J_LAST_ONLINE_DATE")]
-    last_online_at: i64,
+    pub(crate) last_online_at: i64,
     #[serde(rename = "J_NAME")]
     name: String,
     avatar: RawImageRef,

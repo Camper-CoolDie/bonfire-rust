@@ -13,16 +13,13 @@ pub(crate) struct RequestLimiter {
     bucket: Mutex<Bucket>,
 }
 impl RequestLimiter {
-    // `limit`: requests per minute
-    pub(crate) fn new(limit: u16) -> Self {
-        let capacity = f32::from(limit);
-
+    pub(crate) fn new(rate: f32) -> Self {
         Self {
             bucket: Mutex::new(Bucket {
-                capacity,
-                tokens: capacity, // Start with a full bucket
+                capacity: rate * 30.0,
+                tokens: rate * 30.0, // Start with a full bucket
                 last_refill: Instant::now(),
-                refill_rate: capacity / 60.,
+                refill_rate: rate,
             }),
         }
     }
@@ -37,8 +34,8 @@ impl RequestLimiter {
         bucket.last_refill = now;
 
         // Check if a token is available
-        if bucket.tokens >= 1. {
-            bucket.tokens -= 1.;
+        if bucket.tokens >= 1.0 {
+            bucket.tokens -= 1.0;
 
             tracing::debug!(
                 tokens = bucket.tokens,
@@ -54,6 +51,10 @@ impl RequestLimiter {
             );
 
             let wait_duration = Duration::from_secs_f32((1. - bucket.tokens) / bucket.refill_rate);
+
+            // Can become a negative
+            bucket.tokens -= 1.0;
+
             drop(bucket);
             tokio::time::sleep(wait_duration).await;
         }

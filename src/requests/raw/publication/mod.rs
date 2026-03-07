@@ -6,8 +6,8 @@ use std::marker::PhantomData;
 use chrono::DateTime;
 pub(crate) use kind::*;
 pub(crate) use reaction::RawReaction;
-use serde::de::Error as _;
 use serde::Deserialize;
+use serde::de::Error as _;
 use serde_json::Value;
 use serde_repr::Deserialize_repr;
 

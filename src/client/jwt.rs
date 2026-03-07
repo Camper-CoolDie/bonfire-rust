@@ -1,7 +1,7 @@
 use std::result::Result as StdResult;
 
-use base64::prelude::BASE64_URL_SAFE_NO_PAD;
 use base64::Engine as _;
+use base64::prelude::BASE64_URL_SAFE_NO_PAD;
 use chrono::{DateTime, Utc};
 use serde::de::Error as _;
 use serde::{Deserialize, Deserializer};

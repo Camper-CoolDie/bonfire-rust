@@ -1,6 +1,6 @@
 use chrono::DateTime;
-use serde::de::Error as _;
 use serde::Deserialize;
+use serde::de::Error as _;
 
 use crate::models::account::PrisonEntry;
 use crate::requests::raw::RawAccount;

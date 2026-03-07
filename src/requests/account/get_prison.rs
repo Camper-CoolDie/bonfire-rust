@@ -5,6 +5,8 @@ use crate::models::account::PrisonEntry;
 use crate::requests::raw::account::RawPrisonEntry;
 use crate::{Client, Error, Result, RootError};
 
+pub(crate) const PAGE_SIZE: usize = 20;
+
 #[derive(Deserialize)]
 pub(crate) struct Response {
     #[serde(rename = "accounts")]

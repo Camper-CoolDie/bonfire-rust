@@ -1,8 +1,8 @@
 use serde::{Deserialize, Serialize};
 
 use crate::client::Request;
-use crate::models::auth::RefreshError;
 use crate::models::Auth;
+use crate::models::auth::RefreshError;
 use crate::queries::raw::RawAuth;
 use crate::{Client, Result};
 

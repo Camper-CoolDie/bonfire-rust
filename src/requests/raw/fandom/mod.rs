@@ -1,6 +1,6 @@
 use chrono::DateTime;
-use serde::de::Error as _;
 use serde::Deserialize;
+use serde::de::Error as _;
 use serde_repr::Deserialize_repr;
 
 use crate::models::fandom::FandomStatus;

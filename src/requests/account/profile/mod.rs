@@ -12,10 +12,14 @@ mod set_link;
 mod set_status;
 
 pub(crate) use change_follow::ChangeFollowRequest;
-pub(crate) use get_curated_fandoms::GetCuratedFandomsRequest;
-pub(crate) use get_follows::GetFollowsRequest;
-pub(crate) use get_moderated_fandoms::GetModeratedFandomsRequest;
-pub(crate) use get_subscriptions::GetSubscriptionsRequest;
+pub(crate) use get_curated_fandoms::{
+    GetCuratedFandomsRequest, PAGE_SIZE as CURATED_FANDOMS_PAGE_SIZE,
+};
+pub(crate) use get_follows::{GetFollowsRequest, PAGE_SIZE as FOLLOWS_PAGE_SIZE};
+pub(crate) use get_moderated_fandoms::{
+    GetModeratedFandomsRequest, PAGE_SIZE as MODERATED_FANDOMS_PAGE_SIZE,
+};
+pub(crate) use get_subscriptions::{GetSubscriptionsRequest, PAGE_SIZE as SUBSCRIPTIONS_PAGE_SIZE};
 pub(crate) use set_age::SetAgeRequest;
 pub(crate) use set_avatar::SetAvatarRequest;
 pub(crate) use set_background::SetBackgroundRequest;

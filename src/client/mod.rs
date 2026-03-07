@@ -10,7 +10,7 @@ use std::sync::Arc;
 
 pub use builder::ClientBuilder;
 pub use error::{Error, Result};
-use http::{header, HeaderMap, Uri};
+use http::{HeaderMap, Uri, header};
 pub use jwt::JwtError;
 pub(crate) use request::{
     EmptyResponse, InfallibleRequest, Request, RequestError, RequestErrorSource,
@@ -63,14 +63,14 @@ pub struct Client {
     inner: Arc<Inner>,
 }
 impl Client {
-    fn new(root_uri: &Uri, melior_uri: &Uri, auth: Option<Auth>, limit: u16) -> Self {
+    fn new(root_uri: &Uri, melior_uri: &Uri, auth: Option<Auth>, rate: f32) -> Self {
         Self {
             inner: Arc::new(Inner {
                 root_service: RootService::new(root_uri),
                 melior_service: MeliorService::new(melior_uri),
                 // This error was previously caught in ClientBuilder::auth()
                 token_provider: TokenProvider::new(auth).expect("failed to create TokenProvider"),
-                request_limiter: RequestLimiter::new(limit),
+                request_limiter: RequestLimiter::new(rate),
             }),
         }
     }
@@ -93,6 +93,7 @@ impl Client {
     ///
     /// client.logout().await?;
     /// assert!(!client.is_auth().await); // is_auth() is false
+    ///
     /// #     Ok(())
     /// # }
     /// ```

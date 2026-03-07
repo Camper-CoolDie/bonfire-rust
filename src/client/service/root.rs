@@ -1,9 +1,9 @@
 use bytes::{BufMut as _, Bytes, BytesMut};
-use http::{header, HeaderMap, HeaderValue, Method, Uri};
+use http::{HeaderMap, HeaderValue, Method, Uri, header};
 use http_body_util::{BodyExt as _, Full};
 use hyper_rustls::{HttpsConnector, HttpsConnectorBuilder};
-use hyper_util::client::legacy::connect::HttpConnector;
 use hyper_util::client::legacy::Client as HyperClient;
+use hyper_util::client::legacy::connect::HttpConnector;
 use hyper_util::rt::TokioExecutor;
 
 use crate::client::service::USER_AGENT;

@@ -1,9 +1,9 @@
 use chrono::{DateTime, Utc};
-use serde::de::Error as _;
 use serde::Deserialize;
+use serde::de::Error as _;
 
-use crate::models::account::Info;
 use crate::models::Link;
+use crate::models::account::Info;
 use crate::requests::raw::{RawImageRef, RawLink, RawPost, RawPublication};
 use crate::{Error, Result};
 

@@ -1,10 +1,10 @@
 use serde::{Deserialize, Serialize};
 
 use crate::client::Request;
-use crate::models::auth::LoginError;
 use crate::models::Auth;
-use crate::queries::raw::auth::RawTfaRequired;
+use crate::models::auth::LoginError;
 use crate::queries::raw::RawAuth;
+use crate::queries::raw::auth::RawTfaRequired;
 use crate::{Client, Error, Result};
 
 #[derive(Deserialize)]

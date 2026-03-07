@@ -3,9 +3,9 @@ use std::sync::LazyLock;
 
 use http::Uri;
 
-use crate::client::jwt::{decode_token, JwtResult};
-use crate::models::Auth;
 use crate::Client;
+use crate::client::jwt::{JwtResult, decode_token};
+use crate::models::Auth;
 
 // It's great when we can test our requests against a test server, hence the ability to specify
 // custom URIs
@@ -14,14 +14,14 @@ static ROOT_SERVER_URI: LazyLock<Uri> =
 static MELIOR_SERVER_URI: LazyLock<Uri> =
     LazyLock::new(|| Uri::from_static("https://api.bonfire.moe"));
 
-const REQUESTS_PER_MINUTE: u16 = 30;
+const REQUESTS_PER_SECOND: f32 = 0.5;
 
 /// A builder-like pattern for constructing and configuring a [`Client`] instance.
 pub struct ClientBuilder {
     root_uri: Uri,
     melior_uri: Uri,
     auth: Option<Auth>,
-    requests_per_minute: u16,
+    requests_per_second: f32,
 }
 impl ClientBuilder {
     /// Creates a new `ClientBuilder` with default API endpoint URIs and no authentication
@@ -32,7 +32,7 @@ impl ClientBuilder {
             root_uri: ROOT_SERVER_URI.clone(),
             melior_uri: MELIOR_SERVER_URI.clone(),
             auth: None,
-            requests_per_minute: REQUESTS_PER_MINUTE,
+            requests_per_second: REQUESTS_PER_SECOND,
         }
     }
 
@@ -42,7 +42,7 @@ impl ClientBuilder {
             &self.root_uri,
             &self.melior_uri,
             self.auth,
-            self.requests_per_minute,
+            self.requests_per_second,
         )
     }
 
@@ -124,26 +124,29 @@ impl ClientBuilder {
         Ok(self)
     }
 
-    /// Sets the maximum number of requests per minute for the client. The default value is `30`.
+    /// Sets the maximum number of requests per second for the client. The default value is `0.5` (1
+    /// request every 2 seconds).
     ///
-    /// This rate limit ensures that the application adheres to the server's rate-limiting policy
-    /// from a single IP address.
+    /// The client's request limiting mechanism allows for bursts of requests up to `rate * 30.0`
+    /// requests, after which it will block until new tokens are available. This rate limit ensures
+    /// that the application adheres to the server's rate-limiting policy from a single IP address.
     ///
     /// # Panics
     ///
-    /// Panics if the provided limit is `0`.
+    /// Panics if the provided rate is not a positive value or `0`.
     ///
     /// # Examples
     ///
     /// ```
     /// # use bonfire::ClientBuilder;
     /// #
-    /// let client = &ClientBuilder::new().requests_per_minute(15).build();
+    /// // Set the rate to 1 request every 5 seconds
+    /// let client = &ClientBuilder::new().requests_per_second(0.2).build();
     /// ```
     #[must_use]
-    pub fn requests_per_minute(mut self, limit: u16) -> Self {
-        assert!(limit > 0, "requests per minute cannot be 0");
-        self.requests_per_minute = limit;
+    pub fn requests_per_second(mut self, rate: f32) -> Self {
+        assert!(rate > 0.0, "requests per second must be > 0.0");
+        self.requests_per_second = rate;
         self
     }
 }

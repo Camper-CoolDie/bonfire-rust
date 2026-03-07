@@ -10,6 +10,7 @@ pub mod fandom;
 pub mod profile;
 /// Contains structs, kind enums, and helper types for publications.
 pub mod publication;
+mod streams;
 
 pub use account::{Account, Badge, Effect, Gender, Info as AccountInfo, Link, Stat as AccountStat};
 pub use auth::Auth;

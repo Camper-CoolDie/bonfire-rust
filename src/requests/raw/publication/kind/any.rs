@@ -1,8 +1,8 @@
 use serde_json::Value;
 
 use crate::models::AnyPublication;
-use crate::requests::raw::publication::{RawPublicationInheritor, RawPublicationKind};
 use crate::requests::raw::RawPost;
+use crate::requests::raw::publication::{RawPublicationInheritor, RawPublicationKind};
 use crate::{Error, Result};
 
 pub(crate) enum AnyRawPublication {

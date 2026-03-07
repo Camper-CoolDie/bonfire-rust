@@ -67,7 +67,7 @@ The following dependencies are required for this example to work:
 anyhow = "1.0"
 bonfire = "1.0"
 serde_json = "1.0"
-tokio = { version = "1.49", features = ["macros", "rt-multi-thread"] }
+tokio = { version = "1.50", features = ["macros", "rt-multi-thread"] }
 tracing-subscriber = "0.3"
 ```
 

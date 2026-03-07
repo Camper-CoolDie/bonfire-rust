@@ -9,11 +9,11 @@ use crate::client::Request as _;
 use crate::models::{Gender, ImageRef};
 use crate::queries::auth::MeQuery;
 use crate::queries::profile::SetBirthdayQuery;
+use crate::requests::account::SetReferrerRequest;
 use crate::requests::account::profile::{
     SetAgeRequest, SetAvatarRequest, SetBackgroundRequest, SetDescriptionRequest, SetGenderRequest,
     SetLinkRequest, SetStatusRequest,
 };
-use crate::requests::account::SetReferrerRequest;
 use crate::{Client, Result};
 
 /// The allowed range for an account's age.
