@@ -52,7 +52,7 @@ impl RequestLimiter {
 
             let wait_duration = Duration::from_secs_f32((1. - bucket.tokens) / bucket.refill_rate);
 
-            // Can become a negative
+            // Can become negative
             bucket.tokens -= 1.0;
 
             drop(bucket);

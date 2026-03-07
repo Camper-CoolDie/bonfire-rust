@@ -7,12 +7,12 @@ pub use error::*;
 
 use crate::client::Request as _;
 use crate::models::{Gender, ImageRef};
-use crate::queries::auth::MeQuery;
+use crate::queries::auth::GetProfileQuery;
 use crate::queries::profile::SetBirthdayQuery;
 use crate::requests::account::SetReferrerRequest;
 use crate::requests::account::profile::{
     SetAgeRequest, SetAvatarRequest, SetBackgroundRequest, SetDescriptionRequest, SetGenderRequest,
-    SetLinkRequest, SetStatusRequest,
+    SetLinkRequest, SetNameRequest, SetStatusRequest,
 };
 use crate::{Client, Result};
 
@@ -54,9 +54,14 @@ pub const BACKGROUND_GIF_MAX_WIDTH: usize = 400;
 /// The maximum allowed height for a GIF background image.
 pub const BACKGROUND_GIF_MAX_HEIGHT: usize = 200;
 
+/// A regular expression to validate a valid account name.
+pub const NAME_REGEX: &str = r"^(?=.*[a-zA-Z])[a-zA-Z0-9]{3,25}$";
+/// A regular expression to validate a name that has been unset (e.g., "User#1234").
+pub const UNSET_NAME_REGEX: &str = r"^(?=[a-zA-Z0-9]*#)[a-zA-Z0-9#]+$";
+
 /// Represents detailed information about the currently authenticated user's profile.
 #[derive(Default, Clone, Debug)]
-pub struct Me {
+pub struct Profile {
     /// The unique identifier of your account (not guaranteed to be an integer)
     pub id: String,
     /// Your display name
@@ -71,7 +76,7 @@ pub struct Me {
     /// `None`
     pub is_nsfw_allowed: Option<bool>,
 }
-impl Me {
+impl Profile {
     /// Retrieves information about the currently authenticated user.
     ///
     /// # Errors
@@ -81,19 +86,19 @@ impl Me {
     /// # Examples
     ///
     /// ```no_run
-    /// # use bonfire::models::Me;
+    /// # use bonfire::models::Profile;
     /// # use bonfire::{Client, Result};
     /// #
     /// # #[tokio::main]
     /// # async fn main() -> Result<()> {
     /// # let client = &Client::default();
-    /// let me = Me::get(client).await?;
+    /// let me = Profile::get(client).await?;
     /// println!("Logged in as {}", me.name);
     /// #    Ok(())
     /// # }
     /// ```
     pub async fn get(client: &Client) -> Result<Self> {
-        Ok(MeQuery::new().send_request(client).await?.into())
+        Ok(GetProfileQuery::new().send_request(client).await?.into())
     }
 
     /// Sets the authenticated user's birthday.
@@ -105,7 +110,7 @@ impl Me {
     /// # Examples
     ///
     /// ```no_run
-    /// # use bonfire::models::Me;
+    /// # use bonfire::models::Profile;
     /// # use bonfire::{Client, Result};
     /// use chrono::NaiveDate;
     ///
@@ -113,11 +118,11 @@ impl Me {
     /// # async fn main() -> Result<()> {
     /// # let client = &Client::default();
     /// let birthday = NaiveDate::from_ymd_opt(2000, 1, 1).unwrap();
-    /// Me::set_birthday(client, birthday).await?;
+    /// Profile::set_birthday(client, birthday).await?;
     /// #    Ok(())
     /// # }
     /// ```
-    pub async fn set_birthday(client: &Client, birthday: NaiveDate) -> Result<Me> {
+    pub async fn set_birthday(client: &Client, birthday: NaiveDate) -> Result<Self> {
         Ok(SetBirthdayQuery::new(birthday)
             .send_request(client)
             .await?
@@ -292,15 +297,32 @@ impl Me {
             .try_into()
     }
 
-    /// Sets the prrovided account as the referrer for the currently logged-in account.
+    /// Sets the provided account as the referrer for the currently logged-in account.
     ///
     /// # Errors
     ///
     /// * Returns [`SetReferrerError::AlreadySet`][crate::models::account::SetReferrerError::AlreadySet]
     ///   if the referrer has already been set.
     /// * Returns [`Error`][crate::Error] if any other error occurs during the request.
-    pub async fn set_referrer(&self, client: &Client, id: u64) -> Result<&Self> {
+    pub async fn set_referrer(client: &Client, id: u64) -> Result<()> {
         SetReferrerRequest::new(id).send_request(client).await?;
-        Ok(self)
+        Ok(())
+    }
+
+    /// Sets the authenticated user's display name.
+    ///
+    /// The new name must adhere to the pattern defined by [`NAME_REGEX`]. If the name has been
+    /// cleared by administrators, it can be set again. To check if the current name can be changed,
+    /// use [`UNSET_NAME_REGEX`].
+    ///
+    /// # Errors
+    ///
+    /// * Returns [`SetNameError::AlreadySet`] if the name has already been set.
+    /// * Returns [`SetNameError::InvalidName`] if the provided name does not match [`NAME_REGEX`].
+    /// * Returns [`SetNameError::Taken`] if the provided name is already in use by another account.
+    /// * Returns [`Error`][crate::Error] if any other error occurs during the request.
+    pub async fn set_name(client: &Client, name: &str) -> Result<()> {
+        SetNameRequest::new(name).send_request(client).await?;
+        Ok(())
     }
 }

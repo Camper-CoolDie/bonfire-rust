@@ -4,8 +4,8 @@ pub use error::*;
 use serde::{Deserialize, Serialize};
 
 use crate::client::Request as _;
-use crate::models::Me;
-use crate::queries::auth::MeQuery;
+use crate::models::Profile;
+use crate::queries::auth::GetProfileQuery;
 use crate::{Client, Result};
 
 /// Represents authentication credentials for a user session.
@@ -32,12 +32,12 @@ impl Auth {
     /// # #[tokio::main]
     /// # async fn main() -> Result<()> {
     /// # let client = &Client::default();
-    /// let me = Auth::get_me(client).await?;
+    /// let me = Auth::get_profile(client).await?;
     /// println!("Logged in as {}", me.name);
     /// #    Ok(())
     /// # }
     /// ```
-    pub async fn get_me(client: &Client) -> Result<Me> {
-        Ok(MeQuery::new().send_request(client).await?.into())
+    pub async fn get_profile(client: &Client) -> Result<Profile> {
+        Ok(GetProfileQuery::new().send_request(client).await?.into())
     }
 }

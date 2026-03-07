@@ -16,5 +16,5 @@ pub use account::{Account, Badge, Effect, Gender, Info as AccountInfo, Link, Sta
 pub use auth::Auth;
 pub use common::{Category, ImageRef, Language};
 pub use fandom::Fandom;
-pub use profile::Me;
+pub use profile::Profile;
 pub use publication::{AnyPublication, Post, Publication, Reaction};

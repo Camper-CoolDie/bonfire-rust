@@ -20,7 +20,6 @@ impl TryFrom<Response> for Vec<PrisonEntry> {
 }
 
 #[derive(Serialize)]
-#[serde(rename_all = "camelCase")]
 pub(crate) struct GetPrisonRequest {
     offset: u64,
 }

@@ -108,7 +108,7 @@ impl Fandom {
     /// the provided identifier exists, or [`Error`][crate::Error] if any other error occurs during
     /// the request.
     pub async fn get_by_id(client: &Client, id: u64) -> Result<Self> {
-        GetFandomsRequest::new_single(id)
+        GetFandomsRequest::new(&[id])
             .send_request(client)
             .await?
             .try_into()
@@ -122,7 +122,7 @@ impl Fandom {
     /// # Errors
     ///
     /// Returns [`Error`][crate::Error] if an error occurs during the request.
-    pub async fn get_by_ids(client: &Client, ids: Vec<u64>) -> Result<Vec<Option<Self>>> {
+    pub async fn get_by_ids(client: &Client, ids: &[u64]) -> Result<Vec<Option<Self>>> {
         GetFandomsRequest::new(ids)
             .send_request(client)
             .await?
@@ -139,7 +139,7 @@ impl Fandom {
     /// Returns [`UnavailableError::NotFound`][crate::UnavailableError::NotFound] if at least one
     /// fandom for a given ID is not found, or [`Error`][crate::Error] if any other error occurs
     /// during the request.
-    pub async fn get_by_ids_strict(client: &Client, ids: Vec<u64>) -> Result<Vec<Self>> {
+    pub async fn get_by_ids_strict(client: &Client, ids: &[u64]) -> Result<Vec<Self>> {
         GetFandomsRequest::new(ids)
             .send_request(client)
             .await?
