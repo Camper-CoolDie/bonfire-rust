@@ -9,6 +9,7 @@ mod set_background;
 mod set_description;
 mod set_gender;
 mod set_link;
+mod set_name;
 mod set_status;
 
 pub(crate) use change_follow::ChangeFollowRequest;
@@ -22,4 +23,5 @@ pub(crate) use set_background::SetBackgroundRequest;
 pub(crate) use set_description::SetDescriptionRequest;
 pub(crate) use set_gender::SetGenderRequest;
 pub(crate) use set_link::SetLinkRequest;
+pub(crate) use set_name::SetNameRequest;
 pub(crate) use set_status::SetStatusRequest;

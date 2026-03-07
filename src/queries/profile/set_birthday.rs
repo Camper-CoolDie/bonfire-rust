@@ -2,17 +2,17 @@ use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 
 use crate::client::{InfallibleRequest, Request};
-use crate::models::Me;
-use crate::queries::raw::RawMe;
+use crate::models::Profile;
+use crate::queries::raw::RawProfile;
 use crate::{Client, MeliorError, Result};
 
 #[derive(Deserialize)]
 pub(crate) struct Response {
     #[serde(rename = "setBirthday")]
-    me: RawMe,
+    me: RawProfile,
 }
 
-impl From<Response> for Me {
+impl From<Response> for Profile {
     fn from(value: Response) -> Self {
         value.me.into()
     }

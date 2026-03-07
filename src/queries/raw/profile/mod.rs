@@ -1,11 +1,11 @@
 use chrono::NaiveDate;
 use serde::Deserialize;
 
-use crate::models::Me;
+use crate::models::Profile;
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub(crate) struct RawMe {
+pub(crate) struct RawProfile {
     pub id: String,
     #[serde(rename = "username")]
     name: String,
@@ -15,8 +15,8 @@ pub(crate) struct RawMe {
     is_nsfw_allowed: Option<bool>,
 }
 
-impl From<RawMe> for Me {
-    fn from(value: RawMe) -> Self {
+impl From<RawProfile> for Profile {
+    fn from(value: RawProfile) -> Self {
         Self {
             id: value.id,
             name: value.name,

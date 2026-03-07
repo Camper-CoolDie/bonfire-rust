@@ -76,21 +76,17 @@ impl TryFrom<Response> for Vec<Option<Fandom>> {
 }
 
 #[derive(Serialize)]
-pub(crate) struct GetFandomsRequest {
+pub(crate) struct GetFandomsRequest<'a> {
     #[serde(rename = "fandomsIds")]
-    ids: Vec<u64>,
+    ids: &'a [u64],
 }
-impl GetFandomsRequest {
-    pub(crate) fn new(ids: Vec<u64>) -> Self {
+impl<'a> GetFandomsRequest<'a> {
+    pub(crate) fn new(ids: &'a [u64]) -> Self {
         Self { ids }
     }
-
-    pub(crate) fn new_single(id: u64) -> Self {
-        Self { ids: vec![id] }
-    }
 }
 
-impl Request for GetFandomsRequest {
+impl Request for GetFandomsRequest<'_> {
     type Response = Response;
     type Error = InfallibleRequest<RootError>;
 
@@ -99,7 +95,7 @@ impl Request for GetFandomsRequest {
             .send_request("RFandomsGetAllById", self, Vec::new())
             .await?;
 
-        response.ids.clone_from(&self.ids);
+        response.ids = self.ids.to_vec();
         Ok(response)
     }
 }
