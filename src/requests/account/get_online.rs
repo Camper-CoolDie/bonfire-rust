@@ -6,8 +6,6 @@ use crate::models::Account;
 use crate::requests::raw::RawAccount;
 use crate::{Client, Error, Result, RootError};
 
-pub(crate) const PAGE_SIZE: usize = 50;
-
 #[derive(Deserialize)]
 pub(crate) struct Response {
     accounts: Vec<RawAccount>,
@@ -42,6 +40,8 @@ pub(crate) struct GetOnlineRequest {
     limit_date: i64,
 }
 impl GetOnlineRequest {
+    pub(crate) const PAGE_SIZE: usize = 50;
+
     pub(crate) fn new(offset_date: Option<DateTime<Utc>>, limit_date: DateTime<Utc>) -> Self {
         Self {
             offset_date: offset_date.map_or(0, |date| date.timestamp_millis()),

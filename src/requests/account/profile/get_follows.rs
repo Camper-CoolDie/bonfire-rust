@@ -5,8 +5,6 @@ use crate::models::Account;
 use crate::requests::raw::RawAccount;
 use crate::{Client, Error, Result, RootError};
 
-pub(crate) const PAGE_SIZE: usize = 20;
-
 #[derive(Deserialize)]
 pub(crate) struct Response {
     accounts: Vec<RawAccount>,
@@ -28,6 +26,8 @@ pub(crate) struct GetFollowsRequest {
     followers: bool,
 }
 impl GetFollowsRequest {
+    pub(crate) const PAGE_SIZE: usize = 20;
+
     pub(crate) fn new_follows(id: u64, offset: u64) -> Self {
         Self {
             id,

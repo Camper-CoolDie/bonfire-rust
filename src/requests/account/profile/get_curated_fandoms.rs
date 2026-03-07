@@ -5,8 +5,6 @@ use crate::models::Fandom;
 use crate::requests::raw::RawFandom;
 use crate::{Client, Error, Result, RootError};
 
-pub(crate) const PAGE_SIZE: usize = 20;
-
 #[derive(Deserialize)]
 pub(crate) struct Response {
     fandoms: Vec<RawFandom>,
@@ -27,6 +25,8 @@ pub(crate) struct GetCuratedFandomsRequest {
     offset: u64,
 }
 impl GetCuratedFandomsRequest {
+    pub(crate) const PAGE_SIZE: usize = 20;
+
     pub(crate) fn new(id: u64, offset: u64) -> Self {
         Self { id, offset }
     }

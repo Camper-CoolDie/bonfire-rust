@@ -5,8 +5,6 @@ use crate::models::Account;
 use crate::requests::raw::RawAccount;
 use crate::{Client, Error, Result, RootError};
 
-pub(crate) const PAGE_SIZE: usize = 20;
-
 #[derive(Deserialize)]
 pub(crate) struct Response {
     accounts: Vec<RawAccount>,
@@ -29,6 +27,8 @@ pub(crate) struct SearchAccountsRequest<'a> {
     follows_only: bool,
 }
 impl<'a> SearchAccountsRequest<'a> {
+    pub(crate) const PAGE_SIZE: usize = 20;
+
     pub(crate) fn new(name: Option<&'a str>, offset: u64, follows_only: bool) -> Self {
         Self {
             name: name.unwrap_or(""),

@@ -19,21 +19,19 @@ pub use prison::PrisonEntry;
 pub use stat::Stat;
 
 use crate::client::Request as _;
-use crate::models::streams::{paginated_by_date_stream, paginated_stream};
+use crate::models::streams::paginated_stream;
 use crate::models::{Fandom, ImageRef};
 use crate::requests::account::blocklist::{
-    BLOCKED_ACCOUNTS_PAGE_SIZE, BlockAccountRequest, CheckAccountBlockedRequest,
-    GetBlockedAccountsRequest, UnblockAccountRequest,
+    BlockAccountRequest, CheckAccountBlockedRequest, GetBlockedAccountsRequest,
+    UnblockAccountRequest,
 };
 use crate::requests::account::profile::{
-    CURATED_FANDOMS_PAGE_SIZE, ChangeFollowRequest, FOLLOWS_PAGE_SIZE, GetCuratedFandomsRequest,
-    GetFollowsRequest, GetModeratedFandomsRequest, GetSubscriptionsRequest,
-    MODERATED_FANDOMS_PAGE_SIZE, SUBSCRIPTIONS_PAGE_SIZE,
+    ChangeFollowRequest, GetCuratedFandomsRequest, GetFollowsRequest, GetModeratedFandomsRequest,
+    GetSubscriptionsRequest,
 };
 use crate::requests::account::{
-    ACCOUNTS_SEARCH_PAGE_SIZE, GetAccountRequest, GetInfoRequest, GetOnlineRequest,
-    GetPrisonRequest, GetStatRequest, ONLINE_PAGE_SIZE, PRISON_PAGE_SIZE, ReportRequest,
-    SearchAccountsRequest,
+    GetAccountRequest, GetInfoRequest, GetOnlineRequest, GetPrisonRequest, GetStatRequest,
+    ReportRequest, SearchAccountsRequest,
 };
 use crate::requests::fandom::blocklist::GetBlockedFandomIdsRequest;
 use crate::{Client, Result};
@@ -164,7 +162,10 @@ impl Account {
                     .try_into()
             },
             0,
-            ACCOUNTS_SEARCH_PAGE_SIZE,
+            |accounts, offset| {
+                let length = accounts.len();
+                (length >= SearchAccountsRequest::PAGE_SIZE).then_some(offset + length as u64)
+            },
         )
     }
 
@@ -212,7 +213,7 @@ impl Account {
     pub fn get_online(client: &Client) -> impl Stream<Item = Result<Self>> + '_ {
         let limit_date = Utc::now();
 
-        paginated_by_date_stream(
+        paginated_stream(
             move |offset_date| async move {
                 GetOnlineRequest::new(offset_date, limit_date)
                     .send_request(client)
@@ -220,8 +221,13 @@ impl Account {
                     .try_into()
             },
             None,
-            ONLINE_PAGE_SIZE,
-            |last_account| last_account.last_online_at,
+            |accounts, _| {
+                let length = accounts.len();
+                (length >= GetOnlineRequest::PAGE_SIZE)
+                    .then(|| accounts.last())
+                    .flatten()
+                    .map(|account| Some(account.last_online_at))
+            },
         )
     }
 
@@ -240,7 +246,10 @@ impl Account {
                     .try_into()
             },
             0,
-            PRISON_PAGE_SIZE,
+            |entries, offset| {
+                let length = entries.len();
+                (length >= GetPrisonRequest::PAGE_SIZE).then_some(offset + length as u64)
+            },
         )
     }
 
@@ -286,7 +295,10 @@ impl Account {
                     .try_into()
             },
             0,
-            FOLLOWS_PAGE_SIZE,
+            |accounts, offset| {
+                let length = accounts.len();
+                (length >= GetFollowsRequest::PAGE_SIZE).then_some(offset + length as u64)
+            },
         )
     }
 
@@ -308,7 +320,10 @@ impl Account {
                     .try_into()
             },
             0,
-            FOLLOWS_PAGE_SIZE,
+            |accounts, offset| {
+                let length = accounts.len();
+                (length >= GetFollowsRequest::PAGE_SIZE).then_some(offset + length as u64)
+            },
         )
     }
 
@@ -370,7 +385,10 @@ impl Account {
                     .try_into()
             },
             0,
-            BLOCKED_ACCOUNTS_PAGE_SIZE,
+            |accounts, offset| {
+                let length = accounts.len();
+                (length >= GetBlockedAccountsRequest::PAGE_SIZE).then_some(offset + length as u64)
+            },
         )
     }
 
@@ -417,7 +435,10 @@ impl Account {
                     .try_into()
             },
             0,
-            SUBSCRIPTIONS_PAGE_SIZE,
+            |accounts, offset| {
+                let length = accounts.len();
+                (length >= GetSubscriptionsRequest::PAGE_SIZE).then_some(offset + length as u64)
+            },
         )
     }
 
@@ -439,7 +460,10 @@ impl Account {
                     .try_into()
             },
             0,
-            MODERATED_FANDOMS_PAGE_SIZE,
+            |accounts, offset| {
+                let length = accounts.len();
+                (length >= GetModeratedFandomsRequest::PAGE_SIZE).then_some(offset + length as u64)
+            },
         )
     }
 
@@ -461,7 +485,10 @@ impl Account {
                     .try_into()
             },
             0,
-            CURATED_FANDOMS_PAGE_SIZE,
+            |accounts, offset| {
+                let length = accounts.len();
+                (length >= GetCuratedFandomsRequest::PAGE_SIZE).then_some(offset + length as u64)
+            },
         )
     }
 }

@@ -5,8 +5,6 @@ use crate::models::Account;
 use crate::requests::raw::RawAccount;
 use crate::{Client, Error, Result, RootError};
 
-pub(crate) const PAGE_SIZE: usize = 20;
-
 #[derive(Deserialize)]
 pub(crate) struct Response {
     accounts: Vec<RawAccount>,
@@ -27,6 +25,8 @@ pub(crate) struct GetBlockedAccountsRequest {
     offset: u64,
 }
 impl GetBlockedAccountsRequest {
+    pub(crate) const PAGE_SIZE: usize = 20;
+
     pub(crate) fn new(id: u64, offset: u64) -> Self {
         Self { id, offset }
     }
