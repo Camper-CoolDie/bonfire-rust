@@ -4,13 +4,51 @@
 [![Documentation](https://img.shields.io/docsrs/bonfire)](https://docs.rs/bonfire)
 [![Continuous Integration](https://github.com/Camper-CoolDie/bonfire-rust/workflows/Continuous%20Integration/badge.svg)](https://github.com/Camper-CoolDie/bonfire-rust/actions/workflows/ci.yml)
 
-bonfire is an asynchronous Rust client library for the [Bonfire](https://github.com/timas130/bonfire) API.
+A modern, well-documented asynchronous Rust client library for the
+[Bonfire API](https://github.com/timas130/bonfire).
 
-- **Efficiency**. Fast asynchronous requests thanks to [hyper](https://crates.io/crates/hyper)
-- **Simplicity**. Well-documented request-sending methods like `Account::search()`
-- **Debuggability**. Requesting and errors are logged using [tracing](https://crates.io/crates/tracing)
+## Features
 
-## Example
+- **Modern asynchronous design**: Built on [`tokio`](https://crates.io/crates/tokio) and
+  [`hyper`](https://crates.io/crates/hyper) for non-blocking, high-performance network requests.
+- **Ergonomic and fluent API**: Interact with API models like `Account` and `Fandom` directly (e.g.,
+  `account.get_follows()`) rather than managing request structs manually.
+- **Automatic session management**: Handles authentication token refreshing transparently. Log in
+  once and the client manages the rest.
+
+## Usage
+
+### Quick Start: Login and print user's email and ID
+
+This simple example shows how to create a client, log in and fetch the profile of the currently
+authenticated user:
+
+```rust
+use bonfire::prelude::*;
+
+const EMAIL: &str = "user@example.com";
+const PASSWORD: &str = "password";
+
+#[tokio::main]
+async fn main() -> ApiResult<()> {
+    // Create a client with default settings and log in. Use `Client::builder` to edit these
+    // settings
+    let client = &Client::default();
+    client.login(EMAIL, PASSWORD).await?;
+
+    // Fetch the authenticated user's profile
+    let profile = Profile::get(client).await?;
+    println!("Logged in as {} (ID: {})", profile.name, profile.id);
+
+    Ok(())
+}
+```
+
+### Advanced usage: Searching accounts by name
+
+Some methods like `Account::search` return a `Stream`, allowing you to asynchronously iterate over
+accounts while the API loads them. This example also shows how to properly save and load
+authentication tokens to reuse the same session:
 
 ```rust
 use std::fs;
@@ -18,8 +56,8 @@ use std::fs::File;
 use std::io::Write;
 
 use anyhow::Result;
-use bonfire::models::Auth;
-use bonfire::Client;
+use bonfire::prelude::*;
+use futures_util::TryStreamExt as _;
 
 const EMAIL: &str = "user@example.com";
 const PASSWORD: &str = "password";
@@ -33,9 +71,6 @@ async fn save_credentials(client: &Client) -> Result<()> {
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // Set up tracing
-    tracing_subscriber::fmt::init();
-
     // Build client & authenticate (either by using `credentials.json` or sending a login request)
     let auth_data = fs::read("credentials.json")
         .ok()
@@ -51,8 +86,13 @@ async fn main() -> Result<()> {
         }
     };
 
-    // Get information about the currently authenicated user
-    println!("{:#?}", Auth::get_profile(client).await?);
+    // Fetch accounts that have "Sus" in their name
+    Account::search(client, Some("Sus"), false, 0)
+        .try_for_each(|account| async move {
+            println!("User {} (ID: {})", account.name, account.id);
+            Ok(())
+        })
+        .await?;
 
     // Save authentication credentials and exit program
     save_credentials(client).await?;
@@ -60,17 +100,6 @@ async fn main() -> Result<()> {
 }
 ```
 
-The following dependencies are required for this example to work:
-
-```toml
-[dependencies]
-anyhow = "1.0"
-bonfire = "1.0"
-serde_json = "1.0"
-tokio = { version = "1.50", features = ["macros", "rt-multi-thread"] }
-tracing-subscriber = "0.3"
-```
-
 ## License
 
-bonfire-rust is provided under the [MIT License](LICENSE).
+bonfire-rust is provided under the MIT License. See [LICENSE](LICENSE).

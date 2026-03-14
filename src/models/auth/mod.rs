@@ -32,8 +32,8 @@ impl Auth {
     /// # #[tokio::main]
     /// # async fn main() -> Result<()> {
     /// # let client = &Client::default();
-    /// let me = Auth::get_profile(client).await?;
-    /// println!("Logged in as {}", me.name);
+    /// let profile = Auth::get_profile(client).await?;
+    /// println!("Logged in as {} (ID: {})", profile.name, profile.id);
     /// #    Ok(())
     /// # }
     /// ```

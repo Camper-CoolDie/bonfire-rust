@@ -89,8 +89,8 @@ impl Profile {
     /// # #[tokio::main]
     /// # async fn main() -> Result<()> {
     /// # let client = &Client::default();
-    /// let me = Profile::get(client).await?;
-    /// println!("Logged in as {}", me.name);
+    /// let profile = Profile::get(client).await?;
+    /// println!("Logged in as {} (ID: {})", profile.name, profile.id);
     /// #    Ok(())
     /// # }
     /// ```

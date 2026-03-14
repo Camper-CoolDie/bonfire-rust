@@ -132,9 +132,9 @@ impl ClientBuilder {
     ///
     /// ```
     /// # use bonfire::ClientBuilder;
-    /// # use governor::Quota;
-    /// # use nonzero_ext::nonzero;
-    /// #
+    /// use governor::Quota;
+    /// use nonzero_ext::nonzero;
+    ///
     /// // Set the rate limit to 15 requests per minute with a burst of 5 requests
     /// let client = &ClientBuilder::new()
     ///     .quota(Quota::per_minute(nonzero!(15u32)).allow_burst(nonzero!(5u32)))
