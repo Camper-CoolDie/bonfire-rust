@@ -1,17 +1,13 @@
 mod badge;
 mod effect;
-mod gender;
 mod info;
-mod link;
 mod prison;
 mod stat;
 
 pub(crate) use badge::RawBadge;
 use chrono::DateTime;
 pub(crate) use effect::{RawEffect, RawEffectKind, RawEffectReasonKind};
-pub(crate) use gender::RawGender;
 pub(crate) use info::RawInfo;
-pub(crate) use link::RawLink;
 pub(crate) use prison::RawPrisonEntry;
 use serde::Deserialize;
 use serde::de::Error as _;
@@ -19,7 +15,7 @@ pub(crate) use stat::RawStat;
 
 use crate::models::account::AccountCustomization;
 use crate::models::{Account, Effect};
-use crate::requests::raw::RawImageRef;
+use crate::requests::raw::{RawGender, RawImageRef};
 use crate::{Error, Result};
 
 #[derive(Deserialize)]
@@ -69,7 +65,7 @@ impl TryFrom<RawAccount> for Account {
     fn try_from(value: RawAccount) -> Result<Self> {
         Ok(Self {
             id: value.id,
-            level: value.level / 100.,
+            level: value.level / 100.0,
             last_online_at: DateTime::from_timestamp_millis(value.last_online_at).ok_or_else(
                 || {
                     serde_json::Error::custom(format!(
@@ -84,7 +80,7 @@ impl TryFrom<RawAccount> for Account {
                 _ => Some(value.avatar.into()),
             },
             gender: value.gender.into(),
-            karma30: value.karma30 / 100.,
+            karma30: value.karma30 / 100.0,
             sponsor_amount: value.sponsor_amount,
             sponsor_count: value.sponsor_count,
             effects: value

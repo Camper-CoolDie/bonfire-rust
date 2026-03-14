@@ -121,7 +121,7 @@ impl TryFrom<RawInfo> for Info {
             pinned_post: value.pinned_post.map(TryInto::try_into).transpose()?,
             bans_count: value.bans_count,
             warns_count: value.warns_count,
-            karma_total: value.karma_total / 100.,
+            karma_total: value.karma_total / 100.0,
             rates_count: value.rates_count,
             positive_rates_sum: value.positive_rates_sum,
             negative_rates_sum: value.negative_rates_sum,

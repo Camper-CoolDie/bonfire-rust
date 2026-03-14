@@ -4,17 +4,19 @@ use serde::{Deserialize, Serialize};
 use crate::client::{InfallibleRequest, Request};
 use crate::models::Profile;
 use crate::queries::raw::RawProfile;
-use crate::{Client, MeliorError, Result};
+use crate::{Client, Error, MeliorError, Result};
 
 #[derive(Deserialize)]
 pub(crate) struct Response {
     #[serde(rename = "setBirthday")]
-    me: RawProfile,
+    profile: RawProfile,
 }
 
-impl From<Response> for Profile {
-    fn from(value: Response) -> Self {
-        value.me.into()
+impl TryFrom<Response> for Profile {
+    type Error = Error;
+
+    fn try_from(value: Response) -> Result<Self> {
+        value.profile.try_into()
     }
 }
 

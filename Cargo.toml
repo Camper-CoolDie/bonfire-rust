@@ -1,7 +1,6 @@
 [package]
 name = "bonfire"
 version = "0.1.0"
-authors = ["Camper CoolDie <campercooldie@gmail.com>"]
 edition = "2024"
 description = "Client library for the Bonfire API"
 documentation = "https://docs.rs/bonfire"
@@ -16,11 +15,13 @@ base64 = "0.22"
 bytes = "1.11"
 chrono = { version = "0.4", features = ["serde"] }
 futures = "0.3"
+governor = "0.10"
 http = "1.4"
 http-body-util = "0.1"
 hyper = "1.8"
 hyper-rustls = { version = "0.27", features = ["http2", "webpki-roots"] }
 hyper-util = { version = "0.1", features = ["tokio"] }
+nonzero_ext = "0.3"
 os_info = "3.14"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"

@@ -1,7 +1,9 @@
 use std::fmt;
 use std::sync::LazyLock;
 
+use governor::Quota;
 use http::Uri;
+use nonzero_ext::nonzero;
 
 use crate::Client;
 use crate::client::jwt::{JwtResult, decode_token};
@@ -14,14 +16,15 @@ static ROOT_SERVER_URI: LazyLock<Uri> =
 static MELIOR_SERVER_URI: LazyLock<Uri> =
     LazyLock::new(|| Uri::from_static("https://api.bonfire.moe"));
 
-const REQUESTS_PER_SECOND: f32 = 0.5;
+// 30 requests per minute with a burst of 15 requests
+const DEFAULT_QUOTA: Quota = Quota::per_minute(nonzero!(30u32)).allow_burst(nonzero!(15u32));
 
 /// A builder-like pattern for constructing and configuring a [`Client`] instance.
 pub struct ClientBuilder {
     root_uri: Uri,
     melior_uri: Uri,
     auth: Option<Auth>,
-    requests_per_second: f32,
+    quota: Quota,
 }
 impl ClientBuilder {
     /// Creates a new `ClientBuilder` with default API endpoint URIs and no authentication
@@ -32,18 +35,13 @@ impl ClientBuilder {
             root_uri: ROOT_SERVER_URI.clone(),
             melior_uri: MELIOR_SERVER_URI.clone(),
             auth: None,
-            requests_per_second: REQUESTS_PER_SECOND,
+            quota: DEFAULT_QUOTA,
         }
     }
 
     /// Consumes the `ClientBuilder` and creates a [`Client`] instance.
     pub fn build(self) -> Client {
-        Client::new(
-            &self.root_uri,
-            &self.melior_uri,
-            self.auth,
-            self.requests_per_second,
-        )
+        Client::new(&self.root_uri, &self.melior_uri, self.auth, self.quota)
     }
 
     /// Sets the URI for the Root API server.
@@ -124,29 +122,27 @@ impl ClientBuilder {
         Ok(self)
     }
 
-    /// Sets the maximum number of requests per second for the client. The default value is `0.5` (1
-    /// request every 2 seconds).
+    /// Sets the rate limiting quota for the client.
     ///
-    /// The client's request limiting mechanism allows for bursts of requests up to `rate * 30.0`
-    /// requests, after which it will block until new tokens are available. This rate limit ensures
-    /// that the application adheres to the server's rate-limiting policy from a single IP address.
-    ///
-    /// # Panics
-    ///
-    /// Panics if the provided rate is not a positive value or `0`.
+    /// The default value is 30 requests per minute, with a burst size of 15 requests. This rate
+    /// limit ensures that the application adheres to the server's rate-limiting policy from a
+    /// single IP address.
     ///
     /// # Examples
     ///
     /// ```
     /// # use bonfire::ClientBuilder;
+    /// # use governor::Quota;
+    /// # use nonzero_ext::nonzero;
     /// #
-    /// // Set the rate to 1 request every 5 seconds
-    /// let client = &ClientBuilder::new().requests_per_second(0.2).build();
+    /// // Set the rate limit to 15 requests per minute with a burst of 5 requests
+    /// let client = &ClientBuilder::new()
+    ///     .quota(Quota::per_minute(nonzero!(15u32)).allow_burst(nonzero!(5u32)))
+    ///     .build();
     /// ```
     #[must_use]
-    pub fn requests_per_second(mut self, rate: f32) -> Self {
-        assert!(rate > 0.0, "requests per second must be > 0.0");
-        self.requests_per_second = rate;
+    pub fn quota(mut self, quota: Quota) -> Self {
+        self.quota = quota;
         self
     }
 }

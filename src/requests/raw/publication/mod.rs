@@ -124,7 +124,7 @@ where
                 id => Some(id),
             },
             parent_kind,
-            karma: value.karma / 100.,
+            karma: value.karma / 100.0,
             my_karma: match value.my_karma {
                 0. => None,
                 karma => Some(karma / 100.),

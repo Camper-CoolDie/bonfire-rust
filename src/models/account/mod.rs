@@ -1,10 +1,10 @@
 mod badge;
+mod blocklist;
 mod effect;
 mod error;
-mod gender;
 mod info;
-mod link;
 mod prison;
+mod profile;
 mod stat;
 
 pub use badge::Badge;
@@ -12,28 +12,16 @@ use chrono::{DateTime, Duration, Utc};
 pub use effect::{Effect, EffectKind, EffectReasonKind};
 pub use error::*;
 use futures::Stream;
-pub use gender::Gender;
 pub use info::Info;
-pub use link::Link;
 pub use prison::PrisonEntry;
 pub use stat::Stat;
 
 use crate::client::Request as _;
 use crate::models::streams::paginated_stream;
-use crate::models::{Fandom, ImageRef};
-use crate::requests::account::blocklist::{
-    BlockAccountRequest, CheckAccountBlockedRequest, GetBlockedAccountsRequest,
-    UnblockAccountRequest,
-};
-use crate::requests::account::profile::{
-    ChangeFollowRequest, GetCuratedFandomsRequest, GetFollowsRequest, GetModeratedFandomsRequest,
-    GetSubscriptionsRequest,
-};
+use crate::models::{Gender, ImageRef};
 use crate::requests::account::{
-    GetAccountRequest, GetInfoRequest, GetOnlineRequest, GetPrisonRequest, GetStatRequest,
-    ReportRequest, SearchAccountsRequest,
+    GetAccountRequest, GetOnlineRequest, GetPrisonRequest, ReportRequest, SearchAccountsRequest,
 };
-use crate::requests::fandom::blocklist::GetBlockedFandomIdsRequest;
 use crate::{Client, Result};
 
 /// The maximum duration an account can be offline while still considered "online".
@@ -147,58 +135,36 @@ impl Account {
     ///
     /// This method returns a [`Stream`] that yields individual [`Account`] instances as they are
     /// retrieved. The stream handles pagination automatically, fetching new pages of results as
-    /// needed. If an [`Error`][crate::Error] occurs during the retrieval of any page, the stream
-    /// will yield that single error and then terminate.
+    /// needed. The `start_offset` parameter can be used to skip a number of accounts from the
+    /// beginning of the list. If an [`Error`][crate::Error] occurs during the retrieval of any
+    /// page, the stream will yield that single error and then terminate.
     pub fn search<'a>(
         client: &'a Client,
         name: Option<&'a str>,
         follows_only: bool,
+        start_offset: u64,
     ) -> impl Stream<Item = Result<Self>> + 'a {
         paginated_stream(
-            move |offset| async move {
-                SearchAccountsRequest::new(name, offset, follows_only)
-                    .send_request(client)
-                    .await?
-                    .try_into()
-            },
-            0,
-            |accounts, offset| {
+            Box::new(move |offset| {
+                Box::pin(async move {
+                    SearchAccountsRequest::new(name, offset, follows_only)
+                        .send_request(client)
+                        .await?
+                        .try_into()
+                })
+            }),
+            start_offset,
+            Box::new(|accounts, offset| {
                 let length = accounts.len();
                 (length >= SearchAccountsRequest::PAGE_SIZE).then_some(offset + length as u64)
-            },
+            }),
         )
-    }
-
-    /// Retrieves detailed [`Info`] about this account.
-    ///
-    /// # Errors
-    ///
-    /// Returns [`UnavailableError::NotFound`][crate::UnavailableError::NotFound] if no account with
-    /// the contained identifier exists, or [`Error`][crate::Error] if any other error occurs during
-    /// the request.
-    pub async fn get_info(&self, client: &Client) -> Result<Info> {
-        GetInfoRequest::new_by_id(self.id)
-            .send_request(client)
-            .await?
-            .try_into()
-    }
-
-    /// Retrieves this account's statistics. If no account with the contained identifier exists,
-    /// this method returns a default, empty [`Stat`].
-    ///
-    /// # Errors
-    ///
-    /// Returns [`Error`][crate::Error] if an error occurs while sending the request.
-    pub async fn get_stat(&self, client: &Client) -> Result<Stat> {
-        Ok(GetStatRequest::new(self.id)
-            .send_request(client)
-            .await?
-            .into())
     }
 
     /// Retrieves a [`Stream`] of accounts that are currently online.
     ///
     /// An account is considered online if it was active less than [`ONLINE_DURATION`] ago. The
+    /// `offset_date` parameter can be used to skip accounts online before a specific time. The
     /// stream handles pagination automatically, fetching new pages of results as needed. The
     /// resulting stream is sorted by [`Account::last_online_at`] in ascending order, meaning the
     /// oldest online accounts are yielded first.
@@ -210,24 +176,29 @@ impl Account {
     ///
     /// If an [`Error`][crate::Error] occurs during the retrieval of any page, the stream will yield
     /// that single error and then terminate.
-    pub fn get_online(client: &Client) -> impl Stream<Item = Result<Self>> + '_ {
+    pub fn get_online(
+        client: &Client,
+        offset_date: Option<DateTime<Utc>>,
+    ) -> impl Stream<Item = Result<Self>> + '_ {
         let limit_date = Utc::now();
 
         paginated_stream(
-            move |offset_date| async move {
-                GetOnlineRequest::new(offset_date, limit_date)
-                    .send_request(client)
-                    .await?
-                    .try_into()
-            },
-            None,
-            |accounts, _| {
+            Box::new(move |offset_date| {
+                Box::pin(async move {
+                    GetOnlineRequest::new(offset_date, limit_date)
+                        .send_request(client)
+                        .await?
+                        .try_into()
+                })
+            }),
+            offset_date,
+            Box::new(|accounts, _| {
                 let length = accounts.len();
                 (length >= GetOnlineRequest::PAGE_SIZE)
                     .then(|| accounts.last())
                     .flatten()
                     .map(|account| Some(account.last_online_at))
-            },
+            }),
         )
     }
 
@@ -235,173 +206,28 @@ impl Account {
     ///
     /// This method returns a [`Stream`] that yields individual [`PrisonEntry`] instances as they
     /// are retrieved. The stream handles pagination automatically, fetching new pages of results as
-    /// needed. If an [`Error`][crate::Error] occurs during the retrieval of any page, the stream
-    /// will yield that single error and then terminate.
-    pub fn get_prison(client: &Client) -> impl Stream<Item = Result<PrisonEntry>> + '_ {
+    /// needed. The `start_offset` parameter can be used to skip a number of banned accounts from
+    /// the beginning of the list. If an [`Error`][crate::Error] occurs during the retrieval of any
+    /// page, the stream will yield that single error and then terminate.
+    pub fn get_prison(
+        client: &Client,
+        start_offset: u64,
+    ) -> impl Stream<Item = Result<PrisonEntry>> + '_ {
         paginated_stream(
-            move |offset| async move {
-                GetPrisonRequest::new(offset)
-                    .send_request(client)
-                    .await?
-                    .try_into()
-            },
-            0,
-            |entries, offset| {
+            Box::new(move |offset| {
+                Box::pin(async move {
+                    GetPrisonRequest::new(offset)
+                        .send_request(client)
+                        .await?
+                        .try_into()
+                })
+            }),
+            start_offset,
+            Box::new(|entries, offset| {
                 let length = entries.len();
                 (length >= GetPrisonRequest::PAGE_SIZE).then_some(offset + length as u64)
-            },
+            }),
         )
-    }
-
-    /// Follows this account.
-    ///
-    /// # Errors
-    ///
-    /// Returns [`RootError::AccessDenied`][crate::RootError::AccessDenied] if you attempt to follow
-    /// your own account, or [`Error`][crate::Error] if any other error occurs during the request.
-    pub async fn follow(&self, client: &Client) -> Result<&Self> {
-        ChangeFollowRequest::new_follow(self.id)
-            .send_request(client)
-            .await?;
-        Ok(self)
-    }
-
-    /// Unfollows this account.
-    ///
-    /// # Errors
-    ///
-    /// Returns [`RootError::AccessDenied`][crate::RootError::AccessDenied] if you attempt to
-    /// unfollow your own account, or [`Error`][crate::Error] if any other error occurs during the
-    /// request.
-    pub async fn unfollow(&self, client: &Client) -> Result<&Self> {
-        ChangeFollowRequest::new_unfollow(self.id)
-            .send_request(client)
-            .await?;
-        Ok(self)
-    }
-
-    /// Retrieves a [`Stream`] of accounts this account is following.
-    ///
-    /// This method returns a [`Stream`] that yields individual [`Account`] instances as they are
-    /// retrieved. The stream handles pagination automatically, fetching new pages of results as
-    /// needed. If an [`Error`][crate::Error] occurs during the retrieval of any page, the stream
-    /// will yield that single error and then terminate.
-    pub fn get_follows<'a>(&'a self, client: &'a Client) -> impl Stream<Item = Result<Self>> + 'a {
-        paginated_stream(
-            move |offset| async move {
-                GetFollowsRequest::new_follows(self.id, offset)
-                    .send_request(client)
-                    .await?
-                    .try_into()
-            },
-            0,
-            |accounts, offset| {
-                let length = accounts.len();
-                (length >= GetFollowsRequest::PAGE_SIZE).then_some(offset + length as u64)
-            },
-        )
-    }
-
-    /// Retrieves a [`Stream`] of accounts that are following this account.
-    ///
-    /// This method returns a [`Stream`] that yields individual [`Account`] instances as they are
-    /// retrieved. The stream handles pagination automatically, fetching new pages of results as
-    /// needed. If an [`Error`][crate::Error] occurs during the retrieval of any page, the stream
-    /// will yield that single error and then terminate.
-    pub fn get_followers<'a>(
-        &'a self,
-        client: &'a Client,
-    ) -> impl Stream<Item = Result<Self>> + 'a {
-        paginated_stream(
-            move |offset| async move {
-                GetFollowsRequest::new_followers(self.id, offset)
-                    .send_request(client)
-                    .await?
-                    .try_into()
-            },
-            0,
-            |accounts, offset| {
-                let length = accounts.len();
-                (length >= GetFollowsRequest::PAGE_SIZE).then_some(offset + length as u64)
-            },
-        )
-    }
-
-    /// Blocks this account, hiding all its publications and disallowing direct messages from it.
-    ///
-    /// # Errors
-    ///
-    /// Returns [`RootError::AccessDenied`][crate::RootError::AccessDenied] if you attempt to block
-    /// your own account, or [`Error`][crate::Error] if any other error occurs during the request.
-    pub async fn block(&self, client: &Client) -> Result<&Self> {
-        BlockAccountRequest::new(self.id)
-            .send_request(client)
-            .await?;
-        Ok(self)
-    }
-
-    /// Unblocks this account, making its publications reappear and allowing it to send you direct
-    /// messages.
-    ///
-    /// # Errors
-    ///
-    /// Returns [`Error`][crate::Error] if an error occurs while sending the request.
-    pub async fn unblock(&self, client: &Client) -> Result<&Self> {
-        UnblockAccountRequest::new(self.id)
-            .send_request(client)
-            .await?;
-        Ok(self)
-    }
-
-    /// Checks if this account is currently blocked by you.
-    ///
-    /// # Errors
-    ///
-    /// Returns [`RootError::AccessDenied`][crate::RootError::AccessDenied] if you attempt to check
-    /// the block status of your own account, or [`Error`][crate::Error] if any other error occurs
-    /// during the request.
-    pub async fn check_blocked(&self, client: &Client) -> Result<bool> {
-        Ok(CheckAccountBlockedRequest::new(self.id)
-            .send_request(client)
-            .await?
-            .into())
-    }
-
-    /// Retrieves a [`Stream`] of accounts that are currently blocked by this account.
-    ///
-    /// This method returns a [`Stream`] that yields individual [`Account`] instances as they are
-    /// retrieved. The stream handles pagination automatically, fetching new pages of results as
-    /// needed. If an [`Error`][crate::Error] occurs during the retrieval of any page, the stream
-    /// will yield that single error and then terminate.
-    pub fn get_blocked_accounts<'a>(
-        &'a self,
-        client: &'a Client,
-    ) -> impl Stream<Item = Result<Self>> + 'a {
-        paginated_stream(
-            move |offset| async move {
-                GetBlockedAccountsRequest::new(self.id, offset)
-                    .send_request(client)
-                    .await?
-                    .try_into()
-            },
-            0,
-            |accounts, offset| {
-                let length = accounts.len();
-                (length >= GetBlockedAccountsRequest::PAGE_SIZE).then_some(offset + length as u64)
-            },
-        )
-    }
-
-    /// Retrieves a list of IDs of fandoms that are currently blocked by this account.
-    ///
-    /// # Errors
-    ///
-    /// Returns [`Error`][crate::Error] if an error occurs while sending the request.
-    pub async fn get_blocked_fandom_ids(&self, client: &Client) -> Result<Vec<u64>> {
-        Ok(GetBlockedFandomIdsRequest::new(self.id)
-            .send_request(client)
-            .await?
-            .into())
     }
 
     /// Reports this account.
@@ -415,80 +241,5 @@ impl Account {
             .send_request(client)
             .await?;
         Ok(self)
-    }
-
-    /// Retrieves a [`Stream`] of fandoms this account is subscribed to.
-    ///
-    /// This method returns a [`Stream`] that yields individual [`Fandom`] instances as they are
-    /// retrieved. The stream handles pagination automatically, fetching new pages of results as
-    /// needed. If an [`Error`][crate::Error] occurs during the retrieval of any page, the stream
-    /// will yield that single error and then terminate.
-    pub fn get_subscriptions<'a>(
-        &'a self,
-        client: &'a Client,
-    ) -> impl Stream<Item = Result<Fandom>> + 'a {
-        paginated_stream(
-            move |offset| async move {
-                GetSubscriptionsRequest::new(self.id, offset)
-                    .send_request(client)
-                    .await?
-                    .try_into()
-            },
-            0,
-            |accounts, offset| {
-                let length = accounts.len();
-                (length >= GetSubscriptionsRequest::PAGE_SIZE).then_some(offset + length as u64)
-            },
-        )
-    }
-
-    /// Retrieves a [`Stream`] of fandoms this account moderates.
-    ///
-    /// This method returns a [`Stream`] that yields individual [`Fandom`] instances as they are
-    /// retrieved. The stream handles pagination automatically, fetching new pages of results as
-    /// needed. If an [`Error`][crate::Error] occurs during the retrieval of any page, the stream
-    /// will yield that single error and then terminate.
-    pub fn get_moderated_fandoms<'a>(
-        &'a self,
-        client: &'a Client,
-    ) -> impl Stream<Item = Result<Fandom>> + 'a {
-        paginated_stream(
-            move |offset| async move {
-                GetModeratedFandomsRequest::new(self.id, offset)
-                    .send_request(client)
-                    .await?
-                    .try_into()
-            },
-            0,
-            |accounts, offset| {
-                let length = accounts.len();
-                (length >= GetModeratedFandomsRequest::PAGE_SIZE).then_some(offset + length as u64)
-            },
-        )
-    }
-
-    /// Retrieves a [`Stream`] of fandoms this account curates.
-    ///
-    /// This method returns a [`Stream`] that yields individual [`Fandom`] instances as they are
-    /// retrieved. The stream handles pagination automatically, fetching new pages of results as
-    /// needed. If an [`Error`][crate::Error] occurs during the retrieval of any page, the stream
-    /// will yield that single error and then terminate.
-    pub fn get_curated_fandoms<'a>(
-        &'a self,
-        client: &'a Client,
-    ) -> impl Stream<Item = Result<Fandom>> + 'a {
-        paginated_stream(
-            move |offset| async move {
-                GetCuratedFandomsRequest::new(self.id, offset)
-                    .send_request(client)
-                    .await?
-                    .try_into()
-            },
-            0,
-            |accounts, offset| {
-                let length = accounts.len();
-                (length >= GetCuratedFandomsRequest::PAGE_SIZE).then_some(offset + length as u64)
-            },
-        )
     }
 }

@@ -1,7 +1,7 @@
 use chrono::{DateTime, Utc};
 
 use crate::client::Request as _;
-use crate::models::{ImageRef, Link, Post, Publication};
+use crate::models::{Account, ImageRef, Link, Post, Publication};
 use crate::requests::account::GetInfoRequest;
 use crate::{Client, Result};
 
@@ -86,6 +86,22 @@ impl Info {
     /// request.
     pub async fn get_by_name(client: &Client, name: &str) -> Result<Self> {
         GetInfoRequest::new_by_name(name)
+            .send_request(client)
+            .await?
+            .try_into()
+    }
+}
+
+impl Account {
+    /// Retrieves detailed [`Info`] about this account.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`UnavailableError::NotFound`][crate::UnavailableError::NotFound] if no account with
+    /// the contained identifier exists, or [`Error`][crate::Error] if any other error occurs during
+    /// the request.
+    pub async fn get_info(&self, client: &Client) -> Result<Info> {
+        GetInfoRequest::new_by_id(self.id)
             .send_request(client)
             .await?
             .try_into()

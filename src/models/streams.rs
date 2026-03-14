@@ -1,22 +1,28 @@
 use std::future::Future;
+use std::pin::Pin;
+use std::sync::Arc;
 
 use futures::future::OptionFuture;
 use futures::{Stream, StreamExt as _, stream};
 
 use crate::Result;
 
-pub(super) fn paginated_stream<'a, T, O, F, N, Fut>(
-    request_fn: F,
+type RequestFn<'a, O, T> =
+    Box<dyn Fn(O) -> Pin<Box<dyn Future<Output = Result<Vec<T>>> + Send + 'a>> + Send + Sync + 'a>;
+type NextOffsetFn<'a, O, T> = Box<dyn Fn(&Vec<T>, O) -> Option<O> + Send + Sync + 'a>;
+
+pub(super) fn paginated_stream<'a, O, T>(
+    request_fn: RequestFn<'a, O, T>,
     start_offset: O,
-    next_offset_fn: N,
+    next_offset_fn: NextOffsetFn<'a, O, T>,
 ) -> impl Stream<Item = Result<T>>
 where
     T: Send + 'a,
     O: Clone + Send + 'a,
-    F: Fn(O) -> Fut + Clone + Send + 'a,
-    for<'b> N: Fn(&'b Vec<T>, O) -> Option<O> + Clone + Send + 'a,
-    Fut: Future<Output = Result<Vec<T>>> + Send + 'a,
 {
+    let request_fn = Arc::new(request_fn);
+    let next_offset_fn = Arc::new(next_offset_fn);
+
     stream::unfold(Some(start_offset), move |offset_option| {
         let request_fn = request_fn.clone();
         let next_offset_fn = next_offset_fn.clone();

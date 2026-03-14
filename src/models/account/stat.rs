@@ -1,4 +1,5 @@
 use crate::client::Request as _;
+use crate::models::Account;
 use crate::models::publication::PublicationKind;
 use crate::requests::account::GetStatRequest;
 use crate::{Client, Result};
@@ -38,5 +39,20 @@ impl Stat {
     /// Returns [`Error`][crate::Error] if an error occurs while sending the request.
     pub async fn get(client: &Client, id: u64) -> Result<Self> {
         Ok(GetStatRequest::new(id).send_request(client).await?.into())
+    }
+}
+
+impl Account {
+    /// Retrieves this account's statistics. If no account with the contained identifier exists,
+    /// this method returns a default, empty [`Stat`].
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error`][crate::Error] if an error occurs while sending the request.
+    pub async fn get_stat(&self, client: &Client) -> Result<Stat> {
+        Ok(GetStatRequest::new(self.id)
+            .send_request(client)
+            .await?
+            .into())
     }
 }

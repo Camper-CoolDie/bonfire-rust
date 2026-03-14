@@ -1,18 +1,22 @@
 mod error;
+mod gender;
+mod link;
 
 use std::ops::RangeInclusive;
 
 use chrono::NaiveDate;
 pub use error::*;
+pub use gender::Gender;
+pub use link::*;
 
 use crate::client::Request as _;
-use crate::models::{Gender, ImageRef};
+use crate::models::ImageRef;
 use crate::queries::auth::GetProfileQuery;
 use crate::queries::profile::SetBirthdayQuery;
 use crate::requests::account::SetReferrerRequest;
 use crate::requests::account::profile::{
-    SetAgeRequest, SetAvatarRequest, SetBackgroundRequest, SetDescriptionRequest, SetGenderRequest,
-    SetLinkRequest, SetNameRequest, SetStatusRequest,
+    SetAgeRequest, SetAvatarRequest, SetBackgroundRequest, SetDescriptionRequest, SetNameRequest,
+    SetStatusRequest,
 };
 use crate::{Client, Result};
 
@@ -24,13 +28,6 @@ pub const STATUS_MAX_LENGTH: usize = 100;
 
 /// The maximum allowed length for an account's description (bio).
 pub const DESCRIPTION_MAX_LENGTH: usize = 1000;
-
-/// The maximum number of links an account's profile can contain.
-pub const LINKS_MAX_COUNT: usize = 7;
-/// The maximum allowed length for a link's title.
-pub const LINK_TITLE_MAX_LENGTH: usize = 30;
-/// The maximum allowed length for a link's URI.
-pub const LINK_URI_MAX_LENGTH: usize = 500;
 
 /// The maximum allowed size in bytes for a static avatar image.
 pub const AVATAR_MAX_SIZE: usize = 32 * 1024;
@@ -62,8 +59,8 @@ pub const UNSET_NAME_REGEX: &str = r"^(?=[a-zA-Z0-9]*#)[a-zA-Z0-9#]+$";
 /// Represents detailed information about the currently authenticated user's profile.
 #[derive(Default, Clone, Debug)]
 pub struct Profile {
-    /// The unique identifier of your account (not guaranteed to be an integer)
-    pub id: String,
+    /// The unique identifier of your account
+    pub id: u64,
     /// Your display name
     pub name: String,
     /// Your registered email address
@@ -98,7 +95,10 @@ impl Profile {
     /// # }
     /// ```
     pub async fn get(client: &Client) -> Result<Self> {
-        Ok(GetProfileQuery::new().send_request(client).await?.into())
+        GetProfileQuery::new()
+            .send_request(client)
+            .await?
+            .try_into()
     }
 
     /// Sets the authenticated user's birthday.
@@ -123,10 +123,10 @@ impl Profile {
     /// # }
     /// ```
     pub async fn set_birthday(client: &Client, birthday: NaiveDate) -> Result<Self> {
-        Ok(SetBirthdayQuery::new(birthday)
+        SetBirthdayQuery::new(birthday)
             .send_request(client)
             .await?
-            .into())
+            .try_into()
     }
 
     /// Sets the account's age.
@@ -170,53 +170,6 @@ impl Profile {
     /// allowed length, or [`Error`][crate::Error] if any other error occurs during the request.
     pub async fn set_description(client: &Client, description: Option<&str>) -> Result<()> {
         SetDescriptionRequest::new(description)
-            .send_request(client)
-            .await?;
-        Ok(())
-    }
-
-    /// Sets the account's declared gender.
-    ///
-    /// # Errors
-    ///
-    /// Returns [`Error`][crate::Error] if an error occurs while sending the request.
-    pub async fn set_gender(client: &Client, gender: Gender) -> Result<()> {
-        SetGenderRequest::new(gender).send_request(client).await?;
-        Ok(())
-    }
-
-    /// Sets an external link in the account's profile.
-    ///
-    /// The link is identified by its `index` (0-based, up to [`LINKS_MAX_COUNT`] - 1). The `title`
-    /// must not exceed [`LINK_TITLE_MAX_LENGTH`] and the `uri` must not exceed
-    /// [`LINK_URI_MAX_LENGTH`]. To delete a link at a specific index, both `title` and `uri` must
-    /// be provided as empty strings.
-    ///
-    /// # Errors
-    ///
-    /// * Returns [`SetLinkError::TitleTooLong`] if the provided title exceeds the maximum allowed
-    ///   length.
-    /// * Returns [`SetLinkError::UriTooLong`] if the provided URI exceeds the maximum allowed
-    ///   length.
-    /// * Returns [`Error::UnsuccessfulResponse`][crate::Error::UnsuccessfulResponse] with the
-    ///   status `500` if the provided `index` is greater than or equal to [`LINKS_MAX_COUNT`].
-    /// * Returns [`Error`][crate::Error] if any other error occurs during the request.
-    pub async fn set_link(client: &Client, index: u32, title: &str, uri: &str) -> Result<()> {
-        SetLinkRequest::new(index, title, uri)
-            .send_request(client)
-            .await?;
-        Ok(())
-    }
-
-    /// Removes an external link from the account's profile at the specified index.
-    ///
-    /// # Errors
-    ///
-    /// Returns [`Error::UnsuccessfulResponse`][crate::Error::UnsuccessfulResponse] with the status
-    /// `500` if the provided `index` is greater than or equal to [`LINKS_MAX_COUNT`], or
-    /// [`Error`][crate::Error] if any other error occurs during the request.
-    pub async fn remove_link(client: &Client, index: u32) -> Result<()> {
-        SetLinkRequest::new(index, "", "")
             .send_request(client)
             .await?;
         Ok(())

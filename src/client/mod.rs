@@ -2,7 +2,6 @@ mod builder;
 mod error;
 mod jwt;
 mod request;
-mod request_limiter;
 mod service;
 mod token_provider;
 
@@ -10,12 +9,14 @@ use std::sync::Arc;
 
 pub use builder::ClientBuilder;
 pub use error::{Error, Result};
+use governor::clock::DefaultClock;
+use governor::state::{InMemoryState, NotKeyed};
+use governor::{Quota, RateLimiter};
 use http::{HeaderMap, Uri, header};
 pub use jwt::JwtError;
 pub(crate) use request::{
     EmptyResponse, InfallibleRequest, Request, RequestError, RequestErrorSource,
 };
-use request_limiter::RequestLimiter;
 use service::{MeliorService, RootService};
 use token_provider::TokenProvider;
 
@@ -33,7 +34,7 @@ struct Inner {
     root_service: RootService,
     melior_service: MeliorService,
     token_provider: TokenProvider,
-    request_limiter: RequestLimiter,
+    rate_limiter: RateLimiter<NotKeyed, InMemoryState, DefaultClock>,
 }
 
 /// An asynchronous, thread-safe HTTP client for the Bonfire API.
@@ -63,14 +64,14 @@ pub struct Client {
     inner: Arc<Inner>,
 }
 impl Client {
-    fn new(root_uri: &Uri, melior_uri: &Uri, auth: Option<Auth>, rate: f32) -> Self {
+    fn new(root_uri: &Uri, melior_uri: &Uri, auth: Option<Auth>, quota: Quota) -> Self {
         Self {
             inner: Arc::new(Inner {
                 root_service: RootService::new(root_uri),
                 melior_service: MeliorService::new(melior_uri),
                 // This error was previously caught in ClientBuilder::auth()
                 token_provider: TokenProvider::new(auth).expect("failed to create TokenProvider"),
-                request_limiter: RequestLimiter::new(rate),
+                rate_limiter: RateLimiter::direct(quota),
             }),
         }
     }
@@ -247,7 +248,7 @@ impl Client {
     where
         for<'a> &'a <R::Error as RequestError>::Source: From<&'a RootError>,
     {
-        self.inner.request_limiter.wait_for_permit().await;
+        self.inner.rate_limiter.until_ready().await;
 
         let token = self.inner.token_provider.get_token(self).await?;
         tracing::info!(request_name, "sending request");
@@ -296,7 +297,7 @@ impl Client {
     where
         for<'a> &'a <R::Error as RequestError>::Source: From<&'a MeliorError>,
     {
-        self.inner.request_limiter.wait_for_permit().await;
+        self.inner.rate_limiter.until_ready().await;
 
         let token = self.inner.token_provider.get_token(self).await?;
         tracing::info!(operation_name, "sending query");
@@ -325,7 +326,7 @@ impl Client {
     where
         for<'a> &'a <R::Error as RequestError>::Source: From<&'a MeliorError>,
     {
-        self.inner.request_limiter.wait_for_permit().await;
+        self.inner.rate_limiter.until_ready().await;
 
         tracing::info!(operation_name, "sending query without auth");
 

@@ -38,6 +38,9 @@ impl Auth {
     /// # }
     /// ```
     pub async fn get_profile(client: &Client) -> Result<Profile> {
-        Ok(GetProfileQuery::new().send_request(client).await?.into())
+        GetProfileQuery::new()
+            .send_request(client)
+            .await?
+            .try_into()
     }
 }

@@ -92,7 +92,7 @@ impl TryFrom<RawFandom> for Fandom {
                 _ => Some(value.background_gif.into()),
             },
             is_closed: value.is_closed,
-            karma_coef: value.karma_coef / 100.,
+            karma_coef: value.karma_coef / 100.0,
             suggester_id: match value.suggester_id {
                 0 => None,
                 id => Some(id),

@@ -12,9 +12,9 @@ pub mod profile;
 pub mod publication;
 mod streams;
 
-pub use account::{Account, Badge, Effect, Gender, Info as AccountInfo, Link, Stat as AccountStat};
+pub use account::{Account, Badge, Effect, Info as AccountInfo, Stat as AccountStat};
 pub use auth::Auth;
 pub use common::{Category, ImageRef, Language};
 pub use fandom::Fandom;
-pub use profile::Profile;
+pub use profile::{Gender, Link, Profile};
 pub use publication::{AnyPublication, Post, Publication, Reaction};

@@ -49,10 +49,10 @@ impl From<RawStat> for Stat {
             });
 
         Self {
-            positive_rates_sum: value.positive_rates_sum / 100.,
-            negative_rates_sum: value.negative_rates_sum / 100.,
-            others_positive_rates_sum: value.others_positive_rates_sum / 100.,
-            others_negative_rates_sum: value.others_negative_rates_sum / 100.,
+            positive_rates_sum: value.positive_rates_sum / 100.0,
+            negative_rates_sum: value.negative_rates_sum / 100.0,
+            others_positive_rates_sum: value.others_positive_rates_sum / 100.0,
+            others_negative_rates_sum: value.others_negative_rates_sum / 100.0,
             posts_count: value.posts_count,
             comments_count: value.comments_count,
             messages_count: value.messages_count,
