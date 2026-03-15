@@ -19,7 +19,7 @@ use crate::{Error, Result};
 pub(crate) trait RawPublicationInheritor: Sized {
     type Target: PublicationInheritor;
 
-    fn new(data: Value, id: u64, kind: RawPublicationKind) -> Result<Self>;
+    fn new(data: Value, kind: RawPublicationKind) -> Result<Self>;
 }
 
 #[derive(Deserialize_repr)]
@@ -80,7 +80,7 @@ pub(crate) struct RawPublication<T: RawPublicationInheritor = AnyRawPublication>
     #[serde(flatten)]
     additional_data: Value,
     #[serde(skip)]
-    marker: PhantomData<T>,
+    _marker: PhantomData<T>,
     // TODO: tag_1, tag_2, tag_s_1, etc.
 }
 
@@ -110,7 +110,7 @@ where
         };
 
         Ok(Self {
-            kind: T::new(value.additional_data, value.id, value.kind)?.try_into()?,
+            kind: T::new(value.additional_data, value.kind)?.try_into()?,
             id: value.id,
             // For some mysterious reason .try_into() doesn't work here
             fandom: Fandom::try_from(value.fandom)?,
@@ -127,7 +127,7 @@ where
             karma: value.karma / 100.0,
             my_karma: match value.my_karma {
                 0. => None,
-                karma => Some(karma / 100.),
+                karma => Some(karma / 100.0),
             },
             status: value.status.into(),
             is_closed: value.is_closed,

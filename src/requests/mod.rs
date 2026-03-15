@@ -1,6 +1,7 @@
 pub(crate) mod account;
 mod error;
 pub(crate) mod fandom;
+pub(crate) mod publication;
 mod raw;
 
 use std::result::Result as StdResult;

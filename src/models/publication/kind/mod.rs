@@ -1,8 +1,10 @@
 mod any;
 mod post;
+mod post_tag;
 
 pub use any::AnyPublication;
 pub use post::Post;
+pub use post_tag::PostTag;
 
 /// Represents the specific type of a publication.
 #[derive(Default, Clone, Debug)]

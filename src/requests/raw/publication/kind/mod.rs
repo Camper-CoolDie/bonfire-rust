@@ -1,8 +1,10 @@
 mod any;
 mod post;
+mod post_tag;
 
 pub(crate) use any::AnyRawPublication;
 pub(crate) use post::RawPost;
+pub(crate) use post_tag::RawPostTag;
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
 use crate::models::publication::PublicationKind;
