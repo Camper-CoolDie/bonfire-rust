@@ -14,8 +14,6 @@ struct InnerData {
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct RawPost {
-    #[serde(skip)]
-    id: u64,
     rubric_id: u64,
     rubric_name: String,
     #[serde(rename = "rubricKarmaCof")]
@@ -29,10 +27,8 @@ pub(crate) struct RawPost {
 impl RawPublicationInheritor for RawPost {
     type Target = Post;
 
-    fn new(data: serde_json::Value, id: u64, _kind: RawPublicationKind) -> Result<Self> {
-        let mut post = serde_json::from_value::<RawPost>(data)?;
-        post.id = id;
-        Ok(post)
+    fn new(data: serde_json::Value, _kind: RawPublicationKind) -> Result<Self> {
+        Ok(serde_json::from_value::<RawPost>(data)?)
     }
 }
 
@@ -41,7 +37,6 @@ impl TryFrom<RawPost> for Post {
 
     fn try_from(value: RawPost) -> Result<Self> {
         Ok(Self {
-            id: value.id,
             // pages: value.inner.pages.map(TryInto::try_into).collect()?,
             // best_comment: value.inner.best_comment.map(TryInto::try_into).transpose()?,
             rubric_id: match value.rubric_id {
@@ -54,7 +49,7 @@ impl TryFrom<RawPost> for Post {
             },
             rubric_karma_coef: match value.rubric_id {
                 0 => None,
-                _ => Some(value.rubric_karma_coef / 100.),
+                _ => Some(value.rubric_karma_coef / 100.0),
             },
             // relay_race: value.relay_race.map(TryInto::try_into).transpose()?,
         })

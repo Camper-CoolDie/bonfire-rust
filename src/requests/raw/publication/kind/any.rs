@@ -1,8 +1,8 @@
 use serde_json::Value;
 
 use crate::models::AnyPublication;
-use crate::requests::raw::RawPost;
 use crate::requests::raw::publication::{RawPublicationInheritor, RawPublicationKind};
+use crate::requests::raw::{RawPost, RawPostTag};
 use crate::{Error, Result};
 
 pub(crate) enum AnyRawPublication {
@@ -10,7 +10,7 @@ pub(crate) enum AnyRawPublication {
     Comment,
     ChatMessage,
     Post(RawPost),
-    PostTag,
+    PostTag(RawPostTag),
     Moderation,
     UserEvent,
     StickerPack,
@@ -24,13 +24,13 @@ pub(crate) enum AnyRawPublication {
 impl RawPublicationInheritor for AnyRawPublication {
     type Target = AnyPublication;
 
-    fn new(data: Value, id: u64, kind: RawPublicationKind) -> Result<Self> {
+    fn new(data: Value, kind: RawPublicationKind) -> Result<Self> {
         Ok(match kind {
             RawPublicationKind::Unknown => AnyRawPublication::Unknown,
             RawPublicationKind::Comment => AnyRawPublication::Comment,
             RawPublicationKind::ChatMessage => AnyRawPublication::ChatMessage,
-            RawPublicationKind::Post => AnyRawPublication::Post(RawPost::new(data, id, kind)?),
-            RawPublicationKind::PostTag => AnyRawPublication::PostTag,
+            RawPublicationKind::Post => AnyRawPublication::Post(RawPost::new(data, kind)?),
+            RawPublicationKind::PostTag => AnyRawPublication::PostTag(RawPostTag::new(data, kind)?),
             RawPublicationKind::Moderation => AnyRawPublication::Moderation,
             RawPublicationKind::UserEvent => AnyRawPublication::UserEvent,
             RawPublicationKind::StickerPack => AnyRawPublication::StickerPack,
@@ -52,7 +52,7 @@ impl TryFrom<AnyRawPublication> for AnyPublication {
             AnyRawPublication::Comment => AnyPublication::Comment,
             AnyRawPublication::ChatMessage => AnyPublication::ChatMessage,
             AnyRawPublication::Post(post) => AnyPublication::Post(post.try_into()?),
-            AnyRawPublication::PostTag => AnyPublication::PostTag,
+            AnyRawPublication::PostTag(post_tag) => AnyPublication::PostTag(post_tag.try_into()?),
             AnyRawPublication::Moderation => AnyPublication::Moderation,
             AnyRawPublication::UserEvent => AnyPublication::UserEvent,
             AnyRawPublication::StickerPack => AnyPublication::StickerPack,

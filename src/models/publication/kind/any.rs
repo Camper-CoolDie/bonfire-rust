@@ -1,5 +1,5 @@
-use crate::models::Post;
 use crate::models::publication::{PublicationInheritor, PublicationKind};
+use crate::models::{Post, PostTag};
 use crate::sealed::Sealed;
 
 /// Represents a union of all possible additional data types for a publication.
@@ -18,7 +18,7 @@ pub enum AnyPublication {
     /// The publication contains additional post data
     Post(Post),
     /// The publication contains additional post tag data
-    PostTag,
+    PostTag(PostTag),
     /// The publication contains additional moderation data
     Moderation,
     /// The publication contains additional user event data
@@ -44,7 +44,7 @@ impl PublicationInheritor for AnyPublication {
             AnyPublication::Comment => PublicationKind::Comment,
             AnyPublication::ChatMessage => PublicationKind::ChatMessage,
             AnyPublication::Post(_) => PublicationKind::Post,
-            AnyPublication::PostTag => PublicationKind::PostTag,
+            AnyPublication::PostTag(_) => PublicationKind::PostTag,
             AnyPublication::Moderation => PublicationKind::Moderation,
             AnyPublication::UserEvent => PublicationKind::UserEvent,
             AnyPublication::StickerPack => PublicationKind::StickerPack,

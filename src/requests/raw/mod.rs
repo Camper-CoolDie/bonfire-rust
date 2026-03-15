@@ -13,4 +13,4 @@ pub(crate) use error::RawRootError;
 pub(super) use error::RawUnavailableError;
 pub(super) use fandom::RawFandom;
 pub(super) use profile::{RawGender, RawLink};
-pub(super) use publication::{AnyRawPublication, RawPost, RawPublication, RawReaction};
+pub(super) use publication::{AnyRawPublication, RawPost, RawPostTag, RawPublication, RawReaction};
