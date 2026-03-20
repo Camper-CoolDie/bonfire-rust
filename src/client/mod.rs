@@ -271,7 +271,7 @@ impl Client {
                     })
                     .transpose()
             })
-            .collect::<Result<Vec<Option<i32>>>>()?;
+            .collect::<Result<_>>()?;
 
         let request = RootRequest {
             content,

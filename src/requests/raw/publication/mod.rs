@@ -11,13 +11,13 @@ use serde::de::Error as _;
 use serde_json::Value;
 use serde_repr::Deserialize_repr;
 
-use crate::models::publication::{PublicationInheritor, PublicationKind, PublicationStatus};
+use crate::models::publication::{PublicationKind, PublicationStatus, Publishable};
 use crate::models::{Account, Fandom, Publication};
 use crate::requests::raw::{RawAccount, RawCategory, RawFandom};
 use crate::{Error, Result};
 
-pub(crate) trait RawPublicationInheritor: Sized {
-    type Target: PublicationInheritor;
+pub(crate) trait RawPublishable: Sized {
+    type Target: Publishable;
 
     fn new(data: Value, kind: RawPublicationKind) -> Result<Self>;
 }
@@ -48,7 +48,7 @@ impl From<RawPublicationStatus> for PublicationStatus {
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub(crate) struct RawPublication<T: RawPublicationInheritor = AnyRawPublication> {
+pub(crate) struct RawPublication<T: RawPublishable = AnyRawPublication> {
     pub id: u64,
     fandom: RawFandom,
     #[serde(rename = "creator")]
@@ -84,7 +84,7 @@ pub(crate) struct RawPublication<T: RawPublicationInheritor = AnyRawPublication>
     // TODO: tag_1, tag_2, tag_s_1, etc.
 }
 
-impl<T: RawPublicationInheritor> TryFrom<RawPublication<T>> for Publication<T::Target>
+impl<T: RawPublishable> TryFrom<RawPublication<T>> for Publication<T::Target>
 where
     T::Target: TryFrom<T>,
     Error: From<<T::Target as TryFrom<T>>::Error>,
@@ -126,7 +126,7 @@ where
             parent_kind,
             karma: value.karma / 100.0,
             my_karma: match value.my_karma {
-                0. => None,
+                0.0 => None,
                 karma => Some(karma / 100.0),
             },
             status: value.status.into(),

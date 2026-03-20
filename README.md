@@ -18,7 +18,7 @@ A modern, well-documented asynchronous Rust client library for the
 
 ## Usage
 
-### Quick Start: Login and print user's email and ID
+### Quick Start: Logging in and printing user's email and ID
 
 This simple example shows how to create a client, log in and fetch the profile of the currently
 authenticated user:

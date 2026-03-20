@@ -1,6 +1,6 @@
 use crate::client::Request as _;
 use crate::models::Publication;
-use crate::models::publication::{PostTag, PublicationInheritor, PublicationKind};
+use crate::models::publication::{PostTag, PublicationKind, Publishable};
 use crate::requests::publication::post::GetPostRequest;
 use crate::sealed::Sealed;
 use crate::{Client, Result};
@@ -22,7 +22,7 @@ pub struct Post {
     // pub relay_race: Option<RelayRace>,
 }
 
-impl PublicationInheritor for Post {
+impl Publishable for Post {
     /// Returns the publication kind as [`PublicationKind::Post`].
     fn kind(&self) -> PublicationKind {
         PublicationKind::Post

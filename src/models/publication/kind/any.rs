@@ -1,4 +1,4 @@
-use crate::models::publication::{PublicationInheritor, PublicationKind};
+use crate::models::publication::{PublicationKind, Publishable};
 use crate::models::{Post, PostTag};
 use crate::sealed::Sealed;
 
@@ -37,7 +37,7 @@ pub enum AnyPublication {
     Quest,
 }
 
-impl PublicationInheritor for AnyPublication {
+impl Publishable for AnyPublication {
     fn kind(&self) -> PublicationKind {
         match self {
             AnyPublication::Unknown => PublicationKind::Unknown,

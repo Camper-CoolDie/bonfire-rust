@@ -140,13 +140,13 @@ impl Account {
     /// stream will yield that single error and then terminate.
     pub fn search<'a>(
         client: &'a Client,
-        name: Option<&'a str>,
+        query: Option<&'a str>,
         follows_only: bool,
         offset: u64,
     ) -> impl Stream<Item = Result<Self>> + 'a {
         auto_paginated_stream(
             move |offset| async move {
-                SearchAccountsRequest::new(name, offset, follows_only)
+                SearchAccountsRequest::new(query, offset, follows_only)
                     .send_request(client)
                     .await?
                     .try_into()

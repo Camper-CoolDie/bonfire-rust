@@ -1,7 +1,7 @@
 use serde_json::Value;
 
 use crate::models::AnyPublication;
-use crate::requests::raw::publication::{RawPublicationInheritor, RawPublicationKind};
+use crate::requests::raw::publication::{RawPublicationKind, RawPublishable};
 use crate::requests::raw::{RawPost, RawPostTag};
 use crate::{Error, Result};
 
@@ -21,7 +21,7 @@ pub(crate) enum AnyRawPublication {
     Quest,
 }
 
-impl RawPublicationInheritor for AnyRawPublication {
+impl RawPublishable for AnyRawPublication {
     type Target = AnyPublication;
 
     fn new(data: Value, kind: RawPublicationKind) -> Result<Self> {

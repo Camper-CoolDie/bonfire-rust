@@ -2,7 +2,7 @@ use serde::Deserialize;
 
 use crate::models::PostTag;
 use crate::requests::raw::RawImageRef;
-use crate::requests::raw::publication::{RawPublicationInheritor, RawPublicationKind};
+use crate::requests::raw::publication::{RawPublicationKind, RawPublishable};
 use crate::{Error, Result};
 
 #[derive(Deserialize)]
@@ -19,7 +19,7 @@ pub(crate) struct RawPostTag {
     inner: InnerData,
 }
 
-impl RawPublicationInheritor for RawPostTag {
+impl RawPublishable for RawPostTag {
     type Target = PostTag;
 
     fn new(data: serde_json::Value, _kind: RawPublicationKind) -> Result<Self> {

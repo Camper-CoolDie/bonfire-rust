@@ -1,7 +1,7 @@
 use serde::Deserialize;
 
 use crate::models::Post;
-use crate::requests::raw::publication::{RawPublicationInheritor, RawPublicationKind};
+use crate::requests::raw::publication::{RawPublicationKind, RawPublishable};
 use crate::{Error, Result};
 
 #[derive(Deserialize)]
@@ -24,7 +24,7 @@ pub(crate) struct RawPost {
     inner: InnerData,
 }
 
-impl RawPublicationInheritor for RawPost {
+impl RawPublishable for RawPost {
     type Target = Post;
 
     fn new(data: serde_json::Value, _kind: RawPublicationKind) -> Result<Self> {

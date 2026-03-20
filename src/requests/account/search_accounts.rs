@@ -21,7 +21,7 @@ impl TryFrom<Response> for Vec<Account> {
 #[derive(Serialize)]
 pub(crate) struct SearchAccountsRequest<'a> {
     #[serde(rename = "username", skip_serializing_if = "str::is_empty")]
-    name: &'a str,
+    query: &'a str,
     offset: u64,
     #[serde(rename = "isSubscriptionsOnly")]
     follows_only: bool,
@@ -29,9 +29,9 @@ pub(crate) struct SearchAccountsRequest<'a> {
 impl<'a> SearchAccountsRequest<'a> {
     pub(crate) const PAGE_SIZE: usize = 20;
 
-    pub(crate) fn new(name: Option<&'a str>, offset: u64, follows_only: bool) -> Self {
+    pub(crate) fn new(query: Option<&'a str>, offset: u64, follows_only: bool) -> Self {
         Self {
-            name: name.unwrap_or(""),
+            query: query.unwrap_or(""),
             offset,
             follows_only,
         }

@@ -13,8 +13,8 @@ use serde::Deserialize;
 use serde::de::Error as _;
 pub(crate) use stat::RawStat;
 
+use crate::models::Account;
 use crate::models::account::AccountCustomization;
-use crate::models::{Account, Effect};
 use crate::requests::raw::{RawGender, RawImageRef};
 use crate::{Error, Result};
 
@@ -87,7 +87,7 @@ impl TryFrom<RawAccount> for Account {
                 .effects
                 .into_iter()
                 .map(TryInto::try_into)
-                .collect::<Result<Vec<Effect>>>()?,
+                .collect::<Result<_>>()?,
             customization: value.customization.into(),
         })
     }

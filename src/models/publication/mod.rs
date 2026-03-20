@@ -12,7 +12,7 @@ use crate::sealed::Sealed;
 ///
 /// This trait allows for adding type-specific fields beyond the generic [`Publication`] data.
 /// [`AnyPublication`] serves as a catch-all for publications with unspecified specific types.
-pub trait PublicationInheritor: Sealed {
+pub trait Publishable: Sealed {
     /// Returns the specific kind of this publication.
     fn kind(&self) -> PublicationKind;
 }
@@ -37,7 +37,7 @@ pub enum PublicationStatus {
 
 /// Represents a generic Bonfire publication.
 #[derive(Default, Clone, Debug)]
-pub struct Publication<T: PublicationInheritor = AnyPublication> {
+pub struct Publication<T: Publishable = AnyPublication> {
     /// The unique identifier of this publication
     pub id: u64,
     /// Additional, type-specific data for this publication
@@ -50,7 +50,7 @@ pub struct Publication<T: PublicationInheritor = AnyPublication> {
     pub category: Category,
     /// The date and time when this publication was created (or published, for posts/quests)
     pub created_at: DateTime<Utc>,
-    /// The identifier of the parent publication, if this is a reply or sticker
+    /// The identifier of the parent publication, if this is a reply, sticker or tag category
     pub parent_id: Option<u64>,
     /// The type of the parent publication, if applicable
     pub parent_kind: Option<PublicationKind>,
