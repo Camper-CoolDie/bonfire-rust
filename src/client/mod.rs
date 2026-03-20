@@ -19,6 +19,7 @@ pub(crate) use request::{
 };
 use service::{MeliorService, RootService};
 use token_provider::TokenProvider;
+use tracing::instrument;
 
 use crate::models::Auth;
 use crate::queries::auth::{LoginEmailQuery, LogoutQuery};
@@ -239,6 +240,7 @@ impl Client {
             .ok_or(Error::Unauthenticated)
     }
 
+    #[instrument(skip(self, content, attachments))]
     pub(crate) async fn send_request<R: Request>(
         &self,
         request_name: &'static str,
@@ -250,8 +252,8 @@ impl Client {
     {
         self.inner.rate_limiter.until_ready().await;
 
+        tracing::debug!("obtaining auth token");
         let token = self.inner.token_provider.get_token(self).await?;
-        tracing::info!(request_name, "sending request");
 
         // Contains the length of each attachment
         let data_output = attachments
@@ -281,6 +283,7 @@ impl Client {
             api_version: API_VERSION,
         };
 
+        tracing::info!("sending request");
         self.inner
             .root_service
             .send_request(request, attachments, HeaderMap::new())
@@ -288,6 +291,7 @@ impl Client {
             .inspect_err(|error| tracing::error!(?error, "failed to send request"))
     }
 
+    #[instrument(skip(self, query, variables))]
     pub(crate) async fn send_query<R: Request>(
         &self,
         operation_name: &'static str,
@@ -299,8 +303,8 @@ impl Client {
     {
         self.inner.rate_limiter.until_ready().await;
 
+        tracing::debug!("obtaining auth token");
         let token = self.inner.token_provider.get_token(self).await?;
-        tracing::info!(operation_name, "sending query");
 
         let mut headers = HeaderMap::new();
         if let Some(token) = token {
@@ -310,6 +314,7 @@ impl Client {
             );
         }
 
+        tracing::info!("sending query");
         self.inner
             .melior_service
             .send_query(MeliorQuery { variables, query }, headers)
@@ -317,6 +322,7 @@ impl Client {
             .inspect_err(|error| tracing::error!(?error, "failed to send query"))
     }
 
+    #[instrument(skip(self, query, variables))]
     pub(crate) async fn send_query_authless<R: Request>(
         &self,
         operation_name: &'static str,
@@ -328,8 +334,7 @@ impl Client {
     {
         self.inner.rate_limiter.until_ready().await;
 
-        tracing::info!(operation_name, "sending query without auth");
-
+        tracing::info!("sending query without auth");
         self.inner
             .melior_service
             .send_query(MeliorQuery { variables, query }, HeaderMap::new())
