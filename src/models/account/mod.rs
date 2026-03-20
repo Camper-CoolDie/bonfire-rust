@@ -17,7 +17,7 @@ pub use prison::PrisonEntry;
 pub use stat::Stat;
 
 use crate::client::Request as _;
-use crate::models::streams::paginated_stream;
+use crate::models::streams::{auto_paginated_stream, paginated_stream};
 use crate::models::{Gender, ImageRef};
 use crate::requests::account::{
     GetAccountRequest, GetOnlineRequest, GetPrisonRequest, ReportRequest, SearchAccountsRequest,
@@ -135,29 +135,24 @@ impl Account {
     ///
     /// This method returns a [`Stream`] that yields individual [`Account`] instances as they are
     /// retrieved. The stream handles pagination automatically, fetching new pages of results as
-    /// needed. The `start_offset` parameter can be used to skip a number of accounts from the
-    /// beginning of the list. If an [`Error`][crate::Error] occurs during the retrieval of any
-    /// page, the stream will yield that single error and then terminate.
+    /// needed. The `offset` parameter can be used to skip a number of accounts from the beginning
+    /// of the list. If an [`Error`][crate::Error] occurs during the retrieval of any page, the
+    /// stream will yield that single error and then terminate.
     pub fn search<'a>(
         client: &'a Client,
         name: Option<&'a str>,
         follows_only: bool,
-        start_offset: u64,
+        offset: u64,
     ) -> impl Stream<Item = Result<Self>> + 'a {
-        paginated_stream(
-            Box::new(move |offset| {
-                Box::pin(async move {
-                    SearchAccountsRequest::new(name, offset, follows_only)
-                        .send_request(client)
-                        .await?
-                        .try_into()
-                })
-            }),
-            start_offset,
-            Box::new(|accounts, offset| {
-                let length = accounts.len();
-                (length >= SearchAccountsRequest::PAGE_SIZE).then_some(offset + length as u64)
-            }),
+        auto_paginated_stream(
+            move |offset| async move {
+                SearchAccountsRequest::new(name, offset, follows_only)
+                    .send_request(client)
+                    .await?
+                    .try_into()
+            },
+            offset,
+            SearchAccountsRequest::PAGE_SIZE,
         )
     }
 
@@ -183,22 +178,20 @@ impl Account {
         let limit_date = Utc::now();
 
         paginated_stream(
-            Box::new(move |offset_date| {
-                Box::pin(async move {
-                    GetOnlineRequest::new(offset_date, limit_date)
-                        .send_request(client)
-                        .await?
-                        .try_into()
-                })
-            }),
+            move |offset_date| async move {
+                GetOnlineRequest::new(offset_date, limit_date)
+                    .send_request(client)
+                    .await?
+                    .try_into()
+            },
             offset_date,
-            Box::new(|accounts, _| {
+            |accounts, _| {
                 let length = accounts.len();
                 (length >= GetOnlineRequest::PAGE_SIZE)
                     .then(|| accounts.last())
                     .flatten()
                     .map(|account| Some(account.last_online_at))
-            }),
+            },
         )
     }
 
@@ -206,27 +199,22 @@ impl Account {
     ///
     /// This method returns a [`Stream`] that yields individual [`PrisonEntry`] instances as they
     /// are retrieved. The stream handles pagination automatically, fetching new pages of results as
-    /// needed. The `start_offset` parameter can be used to skip a number of banned accounts from
-    /// the beginning of the list. If an [`Error`][crate::Error] occurs during the retrieval of any
+    /// needed. The `offset` parameter can be used to skip a number of banned accounts from the
+    /// beginning of the list. If an [`Error`][crate::Error] occurs during the retrieval of any
     /// page, the stream will yield that single error and then terminate.
     pub fn get_prison(
         client: &Client,
-        start_offset: u64,
+        offset: u64,
     ) -> impl Stream<Item = Result<PrisonEntry>> + '_ {
-        paginated_stream(
-            Box::new(move |offset| {
-                Box::pin(async move {
-                    GetPrisonRequest::new(offset)
-                        .send_request(client)
-                        .await?
-                        .try_into()
-                })
-            }),
-            start_offset,
-            Box::new(|entries, offset| {
-                let length = entries.len();
-                (length >= GetPrisonRequest::PAGE_SIZE).then_some(offset + length as u64)
-            }),
+        auto_paginated_stream(
+            move |offset| async move {
+                GetPrisonRequest::new(offset)
+                    .send_request(client)
+                    .await?
+                    .try_into()
+            },
+            offset,
+            GetPrisonRequest::PAGE_SIZE,
         )
     }
 

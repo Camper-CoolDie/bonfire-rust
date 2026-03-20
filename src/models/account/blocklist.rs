@@ -2,7 +2,7 @@ use futures::Stream;
 
 use crate::client::Request;
 use crate::models::Account;
-use crate::models::streams::paginated_stream;
+use crate::models::streams::auto_paginated_stream;
 use crate::requests::account::blocklist::{
     BlockAccountRequest, CheckAccountBlockedRequest, GetBlockedAccountsRequest,
     UnblockAccountRequest,
@@ -55,28 +55,23 @@ impl Account {
     ///
     /// This method returns a [`Stream`] that yields individual [`Account`] instances as they are
     /// retrieved. The stream handles pagination automatically, fetching new pages of results as
-    /// needed. The `start_offset` parameter can be used to skip a number of accounts from the
-    /// beginning of the list. If an [`Error`][crate::Error] occurs during the retrieval of any
-    /// page, the stream will yield that single error and then terminate.
+    /// needed. The `offset` parameter can be used to skip a number of accounts from the beginning
+    /// of the list. If an [`Error`][crate::Error] occurs during the retrieval of any page, the
+    /// stream will yield that single error and then terminate.
     pub fn get_blocked_accounts<'a>(
         &'a self,
         client: &'a Client,
-        start_offset: u64,
+        offset: u64,
     ) -> impl Stream<Item = Result<Self>> + 'a {
-        paginated_stream(
-            Box::new(move |offset| {
-                Box::pin(async move {
-                    GetBlockedAccountsRequest::new(self.id, offset)
-                        .send_request(client)
-                        .await?
-                        .try_into()
-                })
-            }),
-            start_offset,
-            Box::new(|accounts, offset| {
-                let length = accounts.len();
-                (length >= GetBlockedAccountsRequest::PAGE_SIZE).then_some(offset + length as u64)
-            }),
+        auto_paginated_stream(
+            move |offset| async move {
+                GetBlockedAccountsRequest::new(self.id, offset)
+                    .send_request(client)
+                    .await?
+                    .try_into()
+            },
+            offset,
+            GetBlockedAccountsRequest::PAGE_SIZE,
         )
     }
 

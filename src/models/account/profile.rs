@@ -1,7 +1,7 @@
 use futures::Stream;
 
 use crate::client::Request;
-use crate::models::streams::paginated_stream;
+use crate::models::streams::auto_paginated_stream;
 use crate::models::{Account, Fandom};
 use crate::requests::account::profile::{
     ChangeFollowRequest, GetCuratedFandomsRequest, GetFollowsRequest, GetModeratedFandomsRequest,
@@ -41,28 +41,23 @@ impl Account {
     ///
     /// This method returns a [`Stream`] that yields individual [`Account`] instances as they are
     /// retrieved. The stream handles pagination automatically, fetching new pages of results as
-    /// needed. The `start_offset` parameter can be used to skip a number of accounts from the
-    /// beginning of the list. If an [`Error`][crate::Error] occurs during the retrieval of any
-    /// page, the stream will yield that single error and then terminate.
+    /// needed. The `offset` parameter can be used to skip a number of accounts from the beginning
+    /// of the list. If an [`Error`][crate::Error] occurs during the retrieval of any page, the
+    /// stream will yield that single error and then terminate.
     pub fn get_follows<'a>(
         &'a self,
         client: &'a Client,
-        start_offset: u64,
+        offset: u64,
     ) -> impl Stream<Item = Result<Self>> + 'a {
-        paginated_stream(
-            Box::new(move |offset| {
-                Box::pin(async move {
-                    GetFollowsRequest::new_follows(self.id, offset)
-                        .send_request(client)
-                        .await?
-                        .try_into()
-                })
-            }),
-            start_offset,
-            Box::new(|accounts, offset| {
-                let length = accounts.len();
-                (length >= GetFollowsRequest::PAGE_SIZE).then_some(offset + length as u64)
-            }),
+        auto_paginated_stream(
+            move |offset| async move {
+                GetFollowsRequest::new_follows(self.id, offset)
+                    .send_request(client)
+                    .await?
+                    .try_into()
+            },
+            offset,
+            GetFollowsRequest::PAGE_SIZE,
         )
     }
 
@@ -70,28 +65,23 @@ impl Account {
     ///
     /// This method returns a [`Stream`] that yields individual [`Account`] instances as they are
     /// retrieved. The stream handles pagination automatically, fetching new pages of results as
-    /// needed. The `start_offset` parameter can be used to skip a number of accounts from the
-    /// beginning of the list. If an [`Error`][crate::Error] occurs during the retrieval of any
-    /// page, the stream will yield that single error and then terminate.
+    /// needed. The `offset` parameter can be used to skip a number of accounts from the beginning
+    /// of the list. If an [`Error`][crate::Error] occurs during the retrieval of any page, the
+    /// stream will yield that single error and then terminate.
     pub fn get_followers<'a>(
         &'a self,
         client: &'a Client,
-        start_offset: u64,
+        offset: u64,
     ) -> impl Stream<Item = Result<Self>> + 'a {
-        paginated_stream(
-            Box::new(move |offset| {
-                Box::pin(async move {
-                    GetFollowsRequest::new_followers(self.id, offset)
-                        .send_request(client)
-                        .await?
-                        .try_into()
-                })
-            }),
-            start_offset,
-            Box::new(|accounts, offset| {
-                let length = accounts.len();
-                (length >= GetFollowsRequest::PAGE_SIZE).then_some(offset + length as u64)
-            }),
+        auto_paginated_stream(
+            move |offset| async move {
+                GetFollowsRequest::new_followers(self.id, offset)
+                    .send_request(client)
+                    .await?
+                    .try_into()
+            },
+            offset,
+            GetFollowsRequest::PAGE_SIZE,
         )
     }
 
@@ -99,28 +89,23 @@ impl Account {
     ///
     /// This method returns a [`Stream`] that yields individual [`Fandom`] instances as they are
     /// retrieved. The stream handles pagination automatically, fetching new pages of results as
-    /// needed. The `start_offset` parameter can be used to skip a number of fandoms from the
-    /// beginning of the list. If an [`Error`][crate::Error] occurs during the retrieval of any
-    /// page, the stream will yield that single error and then terminate.
+    /// needed. The `offset` parameter can be used to skip a number of fandoms from the beginning of
+    /// the list. If an [`Error`][crate::Error] occurs during the retrieval of any page, the stream
+    /// will yield that single error and then terminate.
     pub fn get_subscriptions<'a>(
         &'a self,
         client: &'a Client,
-        start_offset: u64,
+        offset: u64,
     ) -> impl Stream<Item = Result<Fandom>> + 'a {
-        paginated_stream(
-            Box::new(move |offset| {
-                Box::pin(async move {
-                    GetSubscriptionsRequest::new(self.id, offset)
-                        .send_request(client)
-                        .await?
-                        .try_into()
-                })
-            }),
-            start_offset,
-            Box::new(|fandoms, offset| {
-                let length = fandoms.len();
-                (length >= GetSubscriptionsRequest::PAGE_SIZE).then_some(offset + length as u64)
-            }),
+        auto_paginated_stream(
+            move |offset| async move {
+                GetSubscriptionsRequest::new(self.id, offset)
+                    .send_request(client)
+                    .await?
+                    .try_into()
+            },
+            offset,
+            GetSubscriptionsRequest::PAGE_SIZE,
         )
     }
 
@@ -128,28 +113,23 @@ impl Account {
     ///
     /// This method returns a [`Stream`] that yields individual [`Fandom`] instances as they are
     /// retrieved. The stream handles pagination automatically, fetching new pages of results as
-    /// needed. The `start_offset` parameter can be used to skip a number of fandoms from the
-    /// beginning of the list. If an [`Error`][crate::Error] occurs during the retrieval of any
-    /// page, the stream will yield that single error and then terminate.
+    /// needed. The `offset` parameter can be used to skip a number of fandoms from the beginning of
+    /// the list. If an [`Error`][crate::Error] occurs during the retrieval of any page, the stream
+    /// will yield that single error and then terminate.
     pub fn get_moderated_fandoms<'a>(
         &'a self,
         client: &'a Client,
-        start_offset: u64,
+        offset: u64,
     ) -> impl Stream<Item = Result<Fandom>> + 'a {
-        paginated_stream(
-            Box::new(move |offset| {
-                Box::pin(async move {
-                    GetModeratedFandomsRequest::new(self.id, offset)
-                        .send_request(client)
-                        .await?
-                        .try_into()
-                })
-            }),
-            start_offset,
-            Box::new(|fandoms, offset| {
-                let length = fandoms.len();
-                (length >= GetModeratedFandomsRequest::PAGE_SIZE).then_some(offset + length as u64)
-            }),
+        auto_paginated_stream(
+            move |offset| async move {
+                GetModeratedFandomsRequest::new(self.id, offset)
+                    .send_request(client)
+                    .await?
+                    .try_into()
+            },
+            offset,
+            GetModeratedFandomsRequest::PAGE_SIZE,
         )
     }
 
@@ -157,28 +137,23 @@ impl Account {
     ///
     /// This method returns a [`Stream`] that yields individual [`Fandom`] instances as they are
     /// retrieved. The stream handles pagination automatically, fetching new pages of results as
-    /// needed. The `start_offset` parameter can be used to skip a number of fandoms from the
-    /// beginning of the list. If an [`Error`][crate::Error] occurs during the retrieval of any
-    /// page, the stream will yield that single error and then terminate.
+    /// needed. The `offset` parameter can be used to skip a number of fandoms from the beginning of
+    /// the list. If an [`Error`][crate::Error] occurs during the retrieval of any page, the stream
+    /// will yield that single error and then terminate.
     pub fn get_curated_fandoms<'a>(
         &'a self,
         client: &'a Client,
-        start_offset: u64,
+        offset: u64,
     ) -> impl Stream<Item = Result<Fandom>> + 'a {
-        paginated_stream(
-            Box::new(move |offset| {
-                Box::pin(async move {
-                    GetCuratedFandomsRequest::new(self.id, offset)
-                        .send_request(client)
-                        .await?
-                        .try_into()
-                })
-            }),
-            start_offset,
-            Box::new(|fandoms, offset| {
-                let length = fandoms.len();
-                (length >= GetCuratedFandomsRequest::PAGE_SIZE).then_some(offset + length as u64)
-            }),
+        auto_paginated_stream(
+            move |offset| async move {
+                GetCuratedFandomsRequest::new(self.id, offset)
+                    .send_request(client)
+                    .await?
+                    .try_into()
+            },
+            offset,
+            GetCuratedFandomsRequest::PAGE_SIZE,
         )
     }
 }
