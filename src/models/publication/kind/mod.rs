@@ -9,8 +9,6 @@ pub use post_tag::PostTag;
 /// Represents the specific type of a publication.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum PublicationKind {
-    /// The publication has an unknown type
-    Unknown(i64),
     /// The publication is a comment
     Comment,
     /// The publication is a chat message
@@ -35,4 +33,6 @@ pub enum PublicationKind {
     FandomEvent,
     /// The publication is a quest
     Quest,
+    /// The publication has an unknown type
+    Unknown(i64),
 }

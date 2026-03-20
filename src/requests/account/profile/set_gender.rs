@@ -2,12 +2,13 @@ use serde::Serialize;
 
 use crate::client::{EmptyResponse, InfallibleRequest, Request};
 use crate::models::Gender;
+use crate::requests::raw::RawGender;
 use crate::{Client, Result, RootError};
 
 #[derive(Serialize)]
 pub(crate) struct SetGenderRequest {
     #[serde(rename = "sex")]
-    gender: i64,
+    gender: RawGender,
 }
 impl SetGenderRequest {
     pub(crate) fn new(gender: Gender) -> Self {

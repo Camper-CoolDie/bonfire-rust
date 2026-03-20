@@ -1,10 +1,11 @@
-use serde::de::Error as _;
+use std::result::Result as StdResult;
+
+use serde::{Deserialize, Serialize};
 
 use crate::models::Language;
 use crate::{Error, Result};
 
 pub(crate) enum RawLanguage {
-    Unknown(i64),
     English,
     Russian,
     Portuguese,
@@ -13,11 +14,36 @@ pub(crate) enum RawLanguage {
     Italian,
     Polish,
     French,
+    Unknown(i64),
 }
 
-impl From<i64> for RawLanguage {
-    fn from(value: i64) -> Self {
-        match value {
+impl Serialize for RawLanguage {
+    fn serialize<S>(&self, serializer: S) -> StdResult<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let kind = match self {
+            RawLanguage::English => 1,
+            RawLanguage::Russian => 2,
+            RawLanguage::Portuguese => 3,
+            RawLanguage::Ukrainian => 4,
+            RawLanguage::German => 5,
+            RawLanguage::Italian => 6,
+            RawLanguage::Polish => 7,
+            RawLanguage::French => 8,
+            RawLanguage::Unknown(unknown) => *unknown,
+        };
+
+        serializer.serialize_i64(kind)
+    }
+}
+
+impl<'de> Deserialize<'de> for RawLanguage {
+    fn deserialize<D>(deserializer: D) -> StdResult<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        Ok(match i64::deserialize(deserializer)? {
             1 => RawLanguage::English,
             2 => RawLanguage::Russian,
             3 => RawLanguage::Portuguese,
@@ -27,7 +53,7 @@ impl From<i64> for RawLanguage {
             7 => RawLanguage::Polish,
             8 => RawLanguage::French,
             other => RawLanguage::Unknown(other),
-        }
+        })
     }
 }
 
@@ -44,14 +70,7 @@ impl TryFrom<RawLanguage> for Language {
             RawLanguage::Italian => Language::Italian,
             RawLanguage::Polish => Language::Polish,
             RawLanguage::French => Language::French,
-            RawLanguage::Unknown(unknown) => Err(serde_json::Error::custom(format!(
-                "invalid value: {}, expected one of: {}",
-                unknown,
-                (1..=8)
-                    .map(|n| n.to_string())
-                    .collect::<Vec<String>>()
-                    .join(", ")
-            )))?,
+            RawLanguage::Unknown(unknown) => Err(Error::UnknownVariant(unknown))?,
         })
     }
 }
@@ -72,29 +91,22 @@ impl TryFrom<RawLanguage> for Option<Language> {
             RawLanguage::Italian => Some(Language::Italian),
             RawLanguage::Polish => Some(Language::Polish),
             RawLanguage::French => Some(Language::French),
-            RawLanguage::Unknown(unknown) => Err(serde_json::Error::custom(format!(
-                "invalid value: {}, expected one of: {}",
-                unknown,
-                (-1..=8)
-                    .map(|n| n.to_string())
-                    .collect::<Vec<String>>()
-                    .join(", ")
-            )))?,
+            RawLanguage::Unknown(unknown) => Err(Error::UnknownVariant(unknown))?,
         })
     }
 }
 
-impl From<Language> for i64 {
+impl From<Language> for RawLanguage {
     fn from(value: Language) -> Self {
         match value {
-            Language::English => 1,
-            Language::Russian => 2,
-            Language::Portuguese => 3,
-            Language::Ukrainian => 4,
-            Language::German => 5,
-            Language::Italian => 6,
-            Language::Polish => 7,
-            Language::French => 8,
+            Language::English => RawLanguage::English,
+            Language::Russian => RawLanguage::Russian,
+            Language::Portuguese => RawLanguage::Portuguese,
+            Language::Ukrainian => RawLanguage::Ukrainian,
+            Language::German => RawLanguage::German,
+            Language::Italian => RawLanguage::Italian,
+            Language::Polish => RawLanguage::Polish,
+            Language::French => RawLanguage::French,
         }
     }
 }

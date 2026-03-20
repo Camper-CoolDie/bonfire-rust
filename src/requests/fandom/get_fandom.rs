@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::client::{InfallibleRequest, Request};
 use crate::models::{Fandom, Language};
-use crate::requests::raw::RawFandom;
+use crate::requests::raw::{RawFandom, RawLanguage};
 use crate::{Client, Error, Result, RootError};
 
 #[derive(Deserialize)]
@@ -23,15 +23,15 @@ pub(crate) struct GetFandomRequest {
     #[serde(rename = "fandomId")]
     id: u64,
     #[serde(rename = "languageId")]
-    language: i64,
+    language: RawLanguage,
     #[serde(rename = "accountLanguageId")]
-    my_language: i64,
+    my_language: RawLanguage,
 }
 impl GetFandomRequest {
     pub(crate) fn new(id: u64, language: Option<Language>, my_language: Language) -> Self {
         Self {
             id,
-            language: language.map_or(-1, Into::into),
+            language: language.map_or(RawLanguage::Unknown(-1), Into::into),
             my_language: my_language.into(),
         }
     }

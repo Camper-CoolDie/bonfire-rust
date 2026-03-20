@@ -31,7 +31,7 @@ pub(crate) struct RawAccount {
     name: String,
     avatar: RawImageRef,
     #[serde(rename = "sex")]
-    gender: i64,
+    gender: RawGender,
     karma30: f64,
     #[serde(rename = "sponsor")]
     sponsor_amount: u64,
@@ -63,7 +63,7 @@ impl TryFrom<RawAccount> for Account {
                 0 => None,
                 _ => Some(value.avatar.into()),
             },
-            gender: RawGender::from(value.gender).try_into()?,
+            gender: value.gender.try_into()?,
             karma30: value.karma30 / 100.0,
             sponsor_amount: value.sponsor_amount,
             sponsor_count: value.sponsor_count,

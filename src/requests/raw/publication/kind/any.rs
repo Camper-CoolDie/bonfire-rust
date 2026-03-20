@@ -6,7 +6,6 @@ use crate::requests::raw::{RawPost, RawPostTag};
 use crate::{Error, Result};
 
 pub(crate) enum AnyRawPublication {
-    Unknown(i64),
     Comment,
     ChatMessage,
     Post(RawPost),
@@ -19,6 +18,7 @@ pub(crate) enum AnyRawPublication {
     AdminEvent,
     FandomEvent,
     Quest,
+    Unknown(i64),
 }
 
 impl RawPublishable for AnyRawPublication {
@@ -26,7 +26,6 @@ impl RawPublishable for AnyRawPublication {
 
     fn new(data: Value, kind: RawPublicationKind) -> Result<Self> {
         Ok(match kind {
-            RawPublicationKind::Unknown(kind) => AnyRawPublication::Unknown(kind),
             RawPublicationKind::Comment => AnyRawPublication::Comment,
             RawPublicationKind::ChatMessage => AnyRawPublication::ChatMessage,
             RawPublicationKind::Post => AnyRawPublication::Post(RawPost::new(data, kind)?),
@@ -39,6 +38,7 @@ impl RawPublishable for AnyRawPublication {
             RawPublicationKind::AdminEvent => AnyRawPublication::AdminEvent,
             RawPublicationKind::FandomEvent => AnyRawPublication::FandomEvent,
             RawPublicationKind::Quest => AnyRawPublication::Quest,
+            RawPublicationKind::Unknown(kind) => AnyRawPublication::Unknown(kind),
         })
     }
 }
@@ -48,7 +48,6 @@ impl TryFrom<AnyRawPublication> for AnyPublication {
 
     fn try_from(value: AnyRawPublication) -> Result<Self> {
         Ok(match value {
-            AnyRawPublication::Unknown(kind) => AnyPublication::Unknown(kind),
             AnyRawPublication::Comment => AnyPublication::Comment,
             AnyRawPublication::ChatMessage => AnyPublication::ChatMessage,
             AnyRawPublication::Post(post) => AnyPublication::Post(post.try_into()?),
@@ -61,6 +60,7 @@ impl TryFrom<AnyRawPublication> for AnyPublication {
             AnyRawPublication::AdminEvent => AnyPublication::AdminEvent,
             AnyRawPublication::FandomEvent => AnyPublication::FandomEvent,
             AnyRawPublication::Quest => AnyPublication::Quest,
+            AnyRawPublication::Unknown(kind) => AnyPublication::Unknown(kind),
         })
     }
 }

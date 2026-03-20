@@ -65,6 +65,11 @@ pub enum Error {
     /// The client is unauthenticated
     #[error("unauthenticated client")]
     Unauthenticated,
+    /// An unknown variant ID was received from the server for an enum type.
+    ///
+    /// The inner `i64` is the unrecognized ID.
+    #[error("unknown variant ID: {0}")]
+    UnknownVariant(i64),
     /// The server returned an unsuccessful HTTP status code. Some common codes include:
     ///
     /// * `429`: Too many requests in a short period of time

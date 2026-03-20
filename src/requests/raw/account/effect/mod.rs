@@ -22,11 +22,11 @@ pub(crate) struct RawEffect {
     #[serde(rename = "comment")]
     reason: String,
     #[serde(rename = "effectIndex")]
-    kind: i64,
+    kind: RawEffectKind,
     #[serde(rename = "tag")]
     is_system: i64,
     #[serde(rename = "commentTag")]
-    reason_kind: i64,
+    reason_kind: RawEffectReasonKind,
     from_account_name: String,
 }
 
@@ -46,9 +46,9 @@ impl TryFrom<RawEffect> for Effect {
                 serde_json::Error::custom(format!("timestamp {} is out of range", value.ends_at))
             })?,
             reason: (!is_system).then_some(value.reason),
-            kind: RawEffectKind::from(value.kind).try_into()?,
+            kind: value.kind.try_into()?,
             is_system,
-            reason_kind: RawEffectReasonKind::from(value.reason_kind).try_into()?,
+            reason_kind: value.reason_kind.try_into()?,
             from_account_name: (!is_system).then_some(value.from_account_name),
         })
     }

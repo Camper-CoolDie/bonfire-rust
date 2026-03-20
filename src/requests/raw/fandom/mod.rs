@@ -13,7 +13,7 @@ use crate::{Error, Result};
 pub(crate) struct RawFandom {
     pub id: u64,
     #[serde(rename = "languageId")]
-    language: i64,
+    language: RawLanguage,
     #[serde(rename = "image")]
     icon: RawImageRef,
     #[serde(rename = "imageTitle")]
@@ -30,8 +30,8 @@ pub(crate) struct RawFandom {
     suggested_at: i64,
     #[serde(rename = "subscribesCount")]
     subscribers_count: u64,
-    status: i64,
-    category: i64,
+    status: RawFandomStatus,
+    category: RawCategory,
 }
 
 impl TryFrom<RawFandom> for Fandom {
@@ -40,7 +40,7 @@ impl TryFrom<RawFandom> for Fandom {
     fn try_from(value: RawFandom) -> Result<Self> {
         Ok(Self {
             id: value.id,
-            language: RawLanguage::from(value.language).try_into()?,
+            language: value.language.try_into()?,
             icon: match value.icon.id {
                 0 => None,
                 _ => Some(value.icon.into()),
@@ -68,8 +68,8 @@ impl TryFrom<RawFandom> for Fandom {
                 ),
             },
             subscribers_count: value.subscribers_count,
-            status: RawFandomStatus::from(value.status).try_into()?,
-            category: RawCategory::from(value.category).into(),
+            status: value.status.try_into()?,
+            category: value.category.into(),
         })
     }
 }

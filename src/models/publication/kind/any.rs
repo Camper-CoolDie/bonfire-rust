@@ -8,8 +8,6 @@ use crate::sealed::Sealed;
 /// known or needed, storing additional data relevant to that type.
 #[derive(Clone, Debug)]
 pub enum AnyPublication {
-    /// The publication has an unknown type, thus no specific data can be parsed
-    Unknown(i64),
     /// The publication contains additional comment data
     Comment,
     /// The publication contains additional chat message data
@@ -34,12 +32,13 @@ pub enum AnyPublication {
     FandomEvent,
     /// The publication contains additional quest data
     Quest,
+    /// The publication has an unknown type, thus no specific data can be parsed
+    Unknown(i64),
 }
 
 impl Publishable for AnyPublication {
     fn kind(&self) -> PublicationKind {
         match self {
-            AnyPublication::Unknown(kind) => PublicationKind::Unknown(*kind),
             AnyPublication::Comment => PublicationKind::Comment,
             AnyPublication::ChatMessage => PublicationKind::ChatMessage,
             AnyPublication::Post(_) => PublicationKind::Post,
@@ -52,6 +51,7 @@ impl Publishable for AnyPublication {
             AnyPublication::AdminEvent => PublicationKind::AdminEvent,
             AnyPublication::FandomEvent => PublicationKind::FandomEvent,
             AnyPublication::Quest => PublicationKind::Quest,
+            AnyPublication::Unknown(kind) => PublicationKind::Unknown(*kind),
         }
     }
 }

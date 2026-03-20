@@ -1,7 +1,10 @@
+use std::result::Result as StdResult;
+
+use serde::Deserialize;
+
 use crate::models::Category;
 
 pub(crate) enum RawCategory {
-    Unknown(i64),
     Games,
     Anime,
     Movies,
@@ -9,11 +12,15 @@ pub(crate) enum RawCategory {
     Art,
     Roleplay,
     Other,
+    Unknown(i64),
 }
 
-impl From<i64> for RawCategory {
-    fn from(value: i64) -> Self {
-        match value {
+impl<'de> Deserialize<'de> for RawCategory {
+    fn deserialize<D>(deserializer: D) -> StdResult<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        Ok(match i64::deserialize(deserializer)? {
             1 => RawCategory::Games,
             2 => RawCategory::Anime,
             5 => RawCategory::Movies,
@@ -22,14 +29,13 @@ impl From<i64> for RawCategory {
             16 => RawCategory::Roleplay,
             100 => RawCategory::Other,
             other => RawCategory::Unknown(other),
-        }
+        })
     }
 }
 
 impl From<RawCategory> for Category {
     fn from(value: RawCategory) -> Self {
         match value {
-            RawCategory::Unknown(category) => Category::Unknown(category),
             RawCategory::Games => Category::Games,
             RawCategory::Anime => Category::Anime,
             RawCategory::Movies => Category::Movies,
@@ -37,6 +43,7 @@ impl From<RawCategory> for Category {
             RawCategory::Art => Category::Art,
             RawCategory::Roleplay => Category::Roleplay,
             RawCategory::Other => Category::Other,
+            RawCategory::Unknown(category) => Category::Unknown(category),
         }
     }
 }
@@ -45,7 +52,6 @@ impl From<RawCategory> for Option<Category> {
     fn from(value: RawCategory) -> Self {
         match value {
             RawCategory::Unknown(0) => None,
-            RawCategory::Unknown(category) => Some(Category::Unknown(category)),
             RawCategory::Games => Some(Category::Games),
             RawCategory::Anime => Some(Category::Anime),
             RawCategory::Movies => Some(Category::Movies),
@@ -53,6 +59,7 @@ impl From<RawCategory> for Option<Category> {
             RawCategory::Art => Some(Category::Art),
             RawCategory::Roleplay => Some(Category::Roleplay),
             RawCategory::Other => Some(Category::Other),
+            RawCategory::Unknown(category) => Some(Category::Unknown(category)),
         }
     }
 }

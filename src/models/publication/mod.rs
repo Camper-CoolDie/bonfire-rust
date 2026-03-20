@@ -30,13 +30,14 @@ pub struct Publication<T: Publishable = AnyPublication> {
     pub fandom: Fandom,
     /// The account that authored this publication
     pub author: Account,
-    /// The specific category of the fandom in which this publication was posted
+    /// The specific category of the fandom in which this publication was posted, or `None` if
+    /// unspecified
     pub category: Option<Category>,
     /// The date and time when this publication was created (or published, for posts/quests)
     pub created_at: DateTime<Utc>,
     /// The identifier of the parent publication, if this is a reply, sticker or tag category
     pub parent_id: Option<u64>,
-    /// The type of the parent publication
+    /// The type of the parent publication, if applicable
     pub parent_kind: Option<PublicationKind>,
     /// The total karma received by this publication (can be positive or negative)
     pub karma: f64,

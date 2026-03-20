@@ -30,19 +30,19 @@ pub(crate) struct RawPublication<T: RawPublishable = AnyRawPublication> {
     fandom: RawFandom,
     #[serde(rename = "creator")]
     author: RawAccount,
-    category: i64,
+    category: RawCategory,
     #[serde(rename = "dateCreate")]
     created_at: i64,
     #[serde(rename = "unitType")]
-    kind: i64,
+    kind: RawPublicationKind,
     #[serde(rename = "parentUnitId")]
     parent_id: u64,
     #[serde(rename = "parentUnitType")]
-    parent_kind: i64,
+    parent_kind: RawPublicationKind,
     #[serde(rename = "karmaCount")]
     karma: f64,
     my_karma: f64,
-    status: i64,
+    status: RawPublicationStatus,
     #[serde(rename = "closed")]
     is_closed: bool,
     #[serde(rename = "subUnitsCount")]
@@ -69,15 +69,13 @@ where
     type Error = Error;
 
     fn try_from(value: RawPublication<T>) -> Result<Self> {
-        let kind = RawPublicationKind::from(value.kind);
-
         // For some mysterious reason .try_into() doesn't work here for non-T types
         Ok(Self {
-            kind: T::new(value.additional_data, kind)?.try_into()?,
+            kind: T::new(value.additional_data, value.kind)?.try_into()?,
             id: value.id,
             fandom: Fandom::try_from(value.fandom)?,
             author: Account::try_from(value.author)?,
-            category: RawCategory::from(value.category).into(),
+            category: value.category.into(),
             created_at: DateTime::from_timestamp_millis(value.created_at).ok_or_else(|| {
                 serde_json::Error::custom(format!("timestamp {} is out of range", value.created_at))
             })?,
@@ -85,15 +83,13 @@ where
                 0 => None,
                 id => Some(id),
             },
-            parent_kind: RawPublicationKind::from(value.parent_kind).into(),
+            parent_kind: value.parent_kind.into(),
             karma: value.karma / 100.0,
             my_karma: match value.my_karma {
                 0.0 => None,
                 karma => Some(karma / 100.0),
             },
-            status: Option::<PublicationStatus>::try_from(RawPublicationStatus::from(
-                value.status,
-            ))?,
+            status: Option::<PublicationStatus>::try_from(value.status)?,
             is_closed: value.is_closed,
             comments_count: value.comments_count,
             is_important: matches!(value.importance, -1),
