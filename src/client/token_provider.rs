@@ -24,10 +24,13 @@ impl TryFrom<Option<Auth>> for InnerState {
     type Error = JwtError;
 
     fn try_from(value: Option<Auth>) -> JwtResult<Self> {
-        value.map_or(Ok(InnerState::Unauthenticated), |auth| {
-            let claims = decode_token(&auth.access_token)?;
-            Ok(InnerState::Authenticated(auth, claims))
-        })
+        match value {
+            Some(auth) => {
+                let claims = decode_token(&auth.access_token)?;
+                Ok(InnerState::Authenticated(auth, claims))
+            }
+            None => Ok(InnerState::Unauthenticated),
+        }
     }
 }
 

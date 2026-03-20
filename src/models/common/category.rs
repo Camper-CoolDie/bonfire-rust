@@ -1,9 +1,8 @@
 /// Represents a category that a fandom can belong to.
-#[derive(Default, Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Category {
-    /// The fandom has an unknown or unspecified category
-    #[default]
-    Unknown,
+    /// The fandom has an unknown category
+    Unknown(i64),
     /// The fandom represents a game
     Games,
     /// The fandom represents an anime

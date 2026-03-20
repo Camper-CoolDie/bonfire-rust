@@ -1,5 +1,6 @@
 mod badge;
 mod blocklist;
+mod customization;
 mod effect;
 mod error;
 mod info;
@@ -9,6 +10,7 @@ mod stat;
 
 pub use badge::Badge;
 use chrono::{DateTime, Duration, Utc};
+pub use customization::AccountCustomization;
 pub use effect::{Effect, EffectKind, EffectReasonKind};
 pub use error::*;
 use futures::Stream;
@@ -26,15 +28,6 @@ use crate::{Client, Result};
 
 /// The maximum duration an account can be offline while still considered "online".
 pub const ONLINE_DURATION: Duration = Duration::minutes(15);
-
-/// Represents customizable aspects of an account's appearance.
-#[derive(Default, Clone, Debug)]
-pub struct AccountCustomization {
-    /// The hexadecimal color code for this account's name (e.g., `0xFFFFFF`).
-    pub name_color: Option<u32>,
-    /// The badge currently selected and displayed for this account.
-    pub active_badge: Option<Badge>,
-}
 
 /// Represents a Bonfire user account.
 #[derive(Default, Clone, Debug)]
@@ -136,17 +129,21 @@ impl Account {
     /// This method returns a [`Stream`] that yields individual [`Account`] instances as they are
     /// retrieved. The stream handles pagination automatically, fetching new pages of results as
     /// needed. The `offset` parameter can be used to skip a number of accounts from the beginning
-    /// of the list. If an [`Error`][crate::Error] occurs during the retrieval of any page, the
-    /// stream will yield that single error and then terminate.
+    /// of the list.
+    ///
+    /// If `query` is `None`, this method returns a list of accounts the currently logged-in user is
+    /// following. If the user is not following any accounts, it will return a list of online users.
+    ///
+    /// If an [`Error`][crate::Error] occurs during the retrieval of any page, the stream
+    /// will yield that single error and then terminate.
     pub fn search<'a>(
         client: &'a Client,
         query: Option<&'a str>,
-        follows_only: bool,
         offset: u64,
     ) -> impl Stream<Item = Result<Self>> + 'a {
         auto_paginated_stream(
             move |offset| async move {
-                SearchAccountsRequest::new(query, offset, follows_only)
+                SearchAccountsRequest::new(query, offset)
                     .send_request(client)
                     .await?
                     .try_into()

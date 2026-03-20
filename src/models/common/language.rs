@@ -1,5 +1,5 @@
 /// Represents a supported language.
-#[derive(Default, Clone, Debug)]
+#[derive(Default, Clone, Debug, PartialEq, Eq)]
 pub enum Language {
     /// The English language
     #[default]

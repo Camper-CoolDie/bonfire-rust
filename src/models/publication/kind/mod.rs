@@ -7,11 +7,10 @@ pub use post::Post;
 pub use post_tag::PostTag;
 
 /// Represents the specific type of a publication.
-#[derive(Default, Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum PublicationKind {
-    /// The publication has an unknown or unspecified type
-    #[default]
-    Unknown,
+    /// The publication has an unknown type
+    Unknown(i64),
     /// The publication is a comment
     Comment,
     /// The publication is a chat message

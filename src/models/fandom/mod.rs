@@ -1,4 +1,7 @@
+mod status;
+
 use chrono::{DateTime, Utc};
+pub use status::FandomStatus;
 
 use crate::client::Request as _;
 use crate::models::{Category, ImageRef, Language};
@@ -7,18 +10,6 @@ use crate::requests::fandom::blocklist::{
 };
 use crate::requests::fandom::{GetFandomRequest, GetFandomsRequest};
 use crate::{Client, Result};
-
-/// Represents the current status of a fandom.
-#[derive(Default, Clone, Debug)]
-pub enum FandomStatus {
-    /// The fandom's status is unspecified
-    #[default]
-    Unspecified,
-    /// The fandom has been suggested and is awaiting approval
-    Suggested,
-    /// The fandom has been accepted
-    Accepted,
-}
 
 /// Represents a fandom, which is a community centered around a specific topic.
 #[derive(Default, Clone, Debug)]
@@ -45,10 +36,10 @@ pub struct Fandom {
     pub suggested_at: Option<DateTime<Utc>>,
     /// The number of users currently subscribed to this fandom
     pub subscribers_count: u64,
-    /// The current status of this fandom
-    pub status: FandomStatus,
-    /// The category that this fandom belongs to
-    pub category: Category,
+    /// The current status of this fandom, or `None` if unspecified
+    pub status: Option<FandomStatus>,
+    /// The category that this fandom belongs to, or `None` if unspecified
+    pub category: Option<Category>,
 }
 impl Fandom {
     /// Creates a new `Fandom` instance with only its identifier and language set.

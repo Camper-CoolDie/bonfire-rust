@@ -23,17 +23,14 @@ pub(crate) struct SearchAccountsRequest<'a> {
     #[serde(rename = "username", skip_serializing_if = "str::is_empty")]
     query: &'a str,
     offset: u64,
-    #[serde(rename = "isSubscriptionsOnly")]
-    follows_only: bool,
 }
 impl<'a> SearchAccountsRequest<'a> {
     pub(crate) const PAGE_SIZE: usize = 20;
 
-    pub(crate) fn new(query: Option<&'a str>, offset: u64, follows_only: bool) -> Self {
+    pub(crate) fn new(query: Option<&'a str>, offset: u64) -> Self {
         Self {
             query: query.unwrap_or(""),
             offset,
-            follows_only,
         }
     }
 }

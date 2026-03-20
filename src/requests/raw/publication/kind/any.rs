@@ -6,7 +6,7 @@ use crate::requests::raw::{RawPost, RawPostTag};
 use crate::{Error, Result};
 
 pub(crate) enum AnyRawPublication {
-    Unknown,
+    Unknown(i64),
     Comment,
     ChatMessage,
     Post(RawPost),
@@ -26,7 +26,7 @@ impl RawPublishable for AnyRawPublication {
 
     fn new(data: Value, kind: RawPublicationKind) -> Result<Self> {
         Ok(match kind {
-            RawPublicationKind::Unknown => AnyRawPublication::Unknown,
+            RawPublicationKind::Unknown(kind) => AnyRawPublication::Unknown(kind),
             RawPublicationKind::Comment => AnyRawPublication::Comment,
             RawPublicationKind::ChatMessage => AnyRawPublication::ChatMessage,
             RawPublicationKind::Post => AnyRawPublication::Post(RawPost::new(data, kind)?),
@@ -48,7 +48,7 @@ impl TryFrom<AnyRawPublication> for AnyPublication {
 
     fn try_from(value: AnyRawPublication) -> Result<Self> {
         Ok(match value {
-            AnyRawPublication::Unknown => AnyPublication::Unknown,
+            AnyRawPublication::Unknown(kind) => AnyPublication::Unknown(kind),
             AnyRawPublication::Comment => AnyPublication::Comment,
             AnyRawPublication::ChatMessage => AnyPublication::ChatMessage,
             AnyRawPublication::Post(post) => AnyPublication::Post(post.try_into()?),

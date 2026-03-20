@@ -6,11 +6,10 @@ use crate::sealed::Sealed;
 ///
 /// This enum acts as a catch-all for various publication kinds when the specific type is not
 /// known or needed, storing additional data relevant to that type.
-#[derive(Default, Clone, Debug)]
+#[derive(Clone, Debug)]
 pub enum AnyPublication {
-    /// The publication has an unknown or unspecified type, thus no specific data can be parsed
-    #[default]
-    Unknown,
+    /// The publication has an unknown type, thus no specific data can be parsed
+    Unknown(i64),
     /// The publication contains additional comment data
     Comment,
     /// The publication contains additional chat message data
@@ -40,7 +39,7 @@ pub enum AnyPublication {
 impl Publishable for AnyPublication {
     fn kind(&self) -> PublicationKind {
         match self {
-            AnyPublication::Unknown => PublicationKind::Unknown,
+            AnyPublication::Unknown(kind) => PublicationKind::Unknown(*kind),
             AnyPublication::Comment => PublicationKind::Comment,
             AnyPublication::ChatMessage => PublicationKind::ChatMessage,
             AnyPublication::Post(_) => PublicationKind::Post,

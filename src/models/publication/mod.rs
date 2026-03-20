@@ -1,9 +1,11 @@
 mod kind;
 mod reaction;
+mod status;
 
 use chrono::{DateTime, Utc};
 pub use kind::*;
 pub use reaction::Reaction;
+pub use status::PublicationStatus;
 
 use crate::models::{Account, Category, Fandom};
 use crate::sealed::Sealed;
@@ -15,24 +17,6 @@ use crate::sealed::Sealed;
 pub trait Publishable: Sealed {
     /// Returns the specific kind of this publication.
     fn kind(&self) -> PublicationKind;
-}
-
-/// Represents the current status of a publication.
-#[derive(Default, Clone, Debug)]
-pub enum PublicationStatus {
-    /// The publication status is unspecified
-    #[default]
-    Unspecified,
-    /// The publication is a draft, not yet published
-    Draft,
-    /// The publication has been published
-    Published,
-    /// The publication has been blocked
-    Blocked,
-    /// The publication has been deep-blocked (cannot be reverted without protoadmin privileges)
-    DeepBlocked,
-    /// The publication is scheduled to be published at a future date by the author
-    Pending,
 }
 
 /// Represents a generic Bonfire publication.
@@ -47,19 +31,19 @@ pub struct Publication<T: Publishable = AnyPublication> {
     /// The account that authored this publication
     pub author: Account,
     /// The specific category of the fandom in which this publication was posted
-    pub category: Category,
+    pub category: Option<Category>,
     /// The date and time when this publication was created (or published, for posts/quests)
     pub created_at: DateTime<Utc>,
     /// The identifier of the parent publication, if this is a reply, sticker or tag category
     pub parent_id: Option<u64>,
-    /// The type of the parent publication, if applicable
+    /// The type of the parent publication
     pub parent_kind: Option<PublicationKind>,
     /// The total karma received by this publication (can be positive or negative)
     pub karma: f64,
     /// The karma you personally placed on this publication, if any
     pub my_karma: Option<f64>,
-    /// The current status of this publication
-    pub status: PublicationStatus,
+    /// The current status of this publication, or `None` if unspecified
+    pub status: Option<PublicationStatus>,
     /// Indicates if this publication will appear in the main feed
     pub is_closed: bool,
     /// The total number of comments associated with this publication

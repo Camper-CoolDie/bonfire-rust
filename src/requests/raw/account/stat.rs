@@ -45,7 +45,7 @@ impl From<RawStat> for Stat {
                 18 => PublicationKind::AdminEvent,
                 19 => PublicationKind::FandomEvent,
                 21 => PublicationKind::Quest,
-                _ => PublicationKind::Unknown,
+                other => PublicationKind::Unknown(other),
             });
 
         Self {

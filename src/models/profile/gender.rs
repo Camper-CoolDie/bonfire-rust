@@ -4,7 +4,7 @@ use crate::requests::account::profile::SetGenderRequest;
 use crate::{Client, Result};
 
 /// Represents the declared gender of an account.
-#[derive(Default, Clone, Debug)]
+#[derive(Default, Clone, Debug, PartialEq, Eq)]
 pub enum Gender {
     /// Male gender
     #[default]

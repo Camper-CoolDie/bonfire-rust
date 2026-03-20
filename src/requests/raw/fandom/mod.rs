@@ -1,30 +1,13 @@
+mod status;
+
 use chrono::DateTime;
 use serde::Deserialize;
 use serde::de::Error as _;
-use serde_repr::Deserialize_repr;
+pub(crate) use status::RawFandomStatus;
 
-use crate::models::fandom::FandomStatus;
-use crate::models::{Fandom, Language};
-use crate::requests::raw::{RawCategory, RawImageRef};
+use crate::models::Fandom;
+use crate::requests::raw::{RawCategory, RawImageRef, RawLanguage};
 use crate::{Error, Result};
-
-#[derive(Deserialize_repr)]
-#[repr(i64)]
-pub(crate) enum RawFandomStatus {
-    Unspecified = 0,
-    Suggested = 1,
-    Accepted = 2,
-}
-
-impl From<RawFandomStatus> for FandomStatus {
-    fn from(value: RawFandomStatus) -> Self {
-        match value {
-            RawFandomStatus::Unspecified => FandomStatus::Unspecified,
-            RawFandomStatus::Suggested => FandomStatus::Suggested,
-            RawFandomStatus::Accepted => FandomStatus::Accepted,
-        }
-    }
-}
 
 #[derive(Deserialize)]
 pub(crate) struct RawFandom {
@@ -47,38 +30,17 @@ pub(crate) struct RawFandom {
     suggested_at: i64,
     #[serde(rename = "subscribesCount")]
     subscribers_count: u64,
-    status: RawFandomStatus,
-    category: RawCategory,
+    status: i64,
+    category: i64,
 }
 
 impl TryFrom<RawFandom> for Fandom {
     type Error = Error;
 
     fn try_from(value: RawFandom) -> Result<Self> {
-        let language = match value.language {
-            // 0 is rarely used and means an unspecified language, rather than a multilingual fandom
-            -1 | 0 => None,
-            1 => Some(Language::English),
-            2 => Some(Language::Russian),
-            3 => Some(Language::Portuguese),
-            4 => Some(Language::Ukrainian),
-            5 => Some(Language::German),
-            6 => Some(Language::Italian),
-            7 => Some(Language::Polish),
-            8 => Some(Language::French),
-            language => Err(serde_json::Error::custom(format!(
-                "invalid value: {}, expected one of: {}",
-                language,
-                (-1..=8)
-                    .map(|n| n.to_string())
-                    .collect::<Vec<String>>()
-                    .join(", ")
-            )))?,
-        };
-
         Ok(Self {
             id: value.id,
-            language,
+            language: RawLanguage::from(value.language).try_into()?,
             icon: match value.icon.id {
                 0 => None,
                 _ => Some(value.icon.into()),
@@ -106,8 +68,8 @@ impl TryFrom<RawFandom> for Fandom {
                 ),
             },
             subscribers_count: value.subscribers_count,
-            status: value.status.into(),
-            category: value.category.into(),
+            status: RawFandomStatus::from(value.status).try_into()?,
+            category: RawCategory::from(value.category).into(),
         })
     }
 }

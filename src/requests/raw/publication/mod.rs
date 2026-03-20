@@ -1,5 +1,6 @@
 mod kind;
 mod reaction;
+mod status;
 
 use std::marker::PhantomData;
 
@@ -9,9 +10,9 @@ pub(crate) use reaction::RawReaction;
 use serde::Deserialize;
 use serde::de::Error as _;
 use serde_json::Value;
-use serde_repr::Deserialize_repr;
+pub(crate) use status::RawPublicationStatus;
 
-use crate::models::publication::{PublicationKind, PublicationStatus, Publishable};
+use crate::models::publication::{PublicationStatus, Publishable};
 use crate::models::{Account, Fandom, Publication};
 use crate::requests::raw::{RawAccount, RawCategory, RawFandom};
 use crate::{Error, Result};
@@ -22,30 +23,6 @@ pub(crate) trait RawPublishable: Sized {
     fn new(data: Value, kind: RawPublicationKind) -> Result<Self>;
 }
 
-#[derive(Deserialize_repr)]
-#[repr(i64)]
-pub(crate) enum RawPublicationStatus {
-    Unspecified = 0,
-    Draft = 1,
-    Published = 2,
-    Blocked = 3,
-    DeepBlocked = 4,
-    Pending = 5,
-}
-
-impl From<RawPublicationStatus> for PublicationStatus {
-    fn from(value: RawPublicationStatus) -> Self {
-        match value {
-            RawPublicationStatus::Unspecified => PublicationStatus::Unspecified,
-            RawPublicationStatus::Draft => PublicationStatus::Draft,
-            RawPublicationStatus::Published => PublicationStatus::Published,
-            RawPublicationStatus::Blocked => PublicationStatus::Blocked,
-            RawPublicationStatus::DeepBlocked => PublicationStatus::DeepBlocked,
-            RawPublicationStatus::Pending => PublicationStatus::Pending,
-        }
-    }
-}
-
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct RawPublication<T: RawPublishable = AnyRawPublication> {
@@ -53,11 +30,11 @@ pub(crate) struct RawPublication<T: RawPublishable = AnyRawPublication> {
     fandom: RawFandom,
     #[serde(rename = "creator")]
     author: RawAccount,
-    category: RawCategory,
+    category: i64,
     #[serde(rename = "dateCreate")]
     created_at: i64,
     #[serde(rename = "unitType")]
-    kind: RawPublicationKind,
+    kind: i64,
     #[serde(rename = "parentUnitId")]
     parent_id: u64,
     #[serde(rename = "parentUnitType")]
@@ -65,7 +42,7 @@ pub(crate) struct RawPublication<T: RawPublishable = AnyRawPublication> {
     #[serde(rename = "karmaCount")]
     karma: f64,
     my_karma: f64,
-    status: RawPublicationStatus,
+    status: i64,
     #[serde(rename = "closed")]
     is_closed: bool,
     #[serde(rename = "subUnitsCount")]
@@ -92,30 +69,15 @@ where
     type Error = Error;
 
     fn try_from(value: RawPublication<T>) -> Result<Self> {
-        let parent_kind = match value.parent_kind {
-            0 => None,
-            1 => Some(PublicationKind::Comment),
-            8 => Some(PublicationKind::ChatMessage),
-            9 => Some(PublicationKind::Post),
-            10 => Some(PublicationKind::PostTag),
-            11 => Some(PublicationKind::Moderation),
-            12 => Some(PublicationKind::UserEvent),
-            15 => Some(PublicationKind::StickerPack),
-            16 => Some(PublicationKind::Sticker),
-            17 => Some(PublicationKind::ModerationEvent),
-            18 => Some(PublicationKind::AdminEvent),
-            19 => Some(PublicationKind::FandomEvent),
-            21 => Some(PublicationKind::Quest),
-            _ => Some(PublicationKind::Unknown),
-        };
+        let kind = RawPublicationKind::from(value.kind);
 
+        // For some mysterious reason .try_into() doesn't work here for non-T types
         Ok(Self {
-            kind: T::new(value.additional_data, value.kind)?.try_into()?,
+            kind: T::new(value.additional_data, kind)?.try_into()?,
             id: value.id,
-            // For some mysterious reason .try_into() doesn't work here
             fandom: Fandom::try_from(value.fandom)?,
             author: Account::try_from(value.author)?,
-            category: value.category.into(),
+            category: RawCategory::from(value.category).into(),
             created_at: DateTime::from_timestamp_millis(value.created_at).ok_or_else(|| {
                 serde_json::Error::custom(format!("timestamp {} is out of range", value.created_at))
             })?,
@@ -123,13 +85,15 @@ where
                 0 => None,
                 id => Some(id),
             },
-            parent_kind,
+            parent_kind: RawPublicationKind::from(value.parent_kind).into(),
             karma: value.karma / 100.0,
             my_karma: match value.my_karma {
                 0.0 => None,
                 karma => Some(karma / 100.0),
             },
-            status: value.status.into(),
+            status: Option::<PublicationStatus>::try_from(RawPublicationStatus::from(
+                value.status,
+            ))?,
             is_closed: value.is_closed,
             comments_count: value.comments_count,
             is_important: matches!(value.importance, -1),

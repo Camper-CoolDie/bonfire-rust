@@ -18,6 +18,7 @@ pub type Result<T> = StdResult<T, Error>;
 ///
 /// An `Error` can be the result of operations such as constructing a request or parsing a
 /// response.
+#[non_exhaustive]
 #[derive(Error, Debug)]
 pub enum Error {
     /// The client is already authenticated

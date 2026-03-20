@@ -1,4 +1,5 @@
 mod badge;
+mod customization;
 mod effect;
 mod info;
 mod prison;
@@ -6,6 +7,7 @@ mod stat;
 
 pub(crate) use badge::RawBadge;
 use chrono::DateTime;
+pub(crate) use customization::RawAccountCustomization;
 pub(crate) use effect::{RawEffect, RawEffectKind, RawEffectReasonKind};
 pub(crate) use info::RawInfo;
 pub(crate) use prison::RawPrisonEntry;
@@ -14,26 +16,8 @@ use serde::de::Error as _;
 pub(crate) use stat::RawStat;
 
 use crate::models::Account;
-use crate::models::account::AccountCustomization;
 use crate::requests::raw::{RawGender, RawImageRef};
 use crate::{Error, Result};
-
-#[derive(Deserialize)]
-pub(crate) struct RawAccountCustomization {
-    #[serde(rename = "nc")]
-    name_color: Option<i32>,
-    #[serde(rename = "ab")]
-    active_badge: Option<RawBadge>,
-}
-
-impl From<RawAccountCustomization> for AccountCustomization {
-    fn from(value: RawAccountCustomization) -> Self {
-        Self {
-            name_color: value.name_color.map(i32::cast_unsigned),
-            active_badge: value.active_badge.map(Into::into),
-        }
-    }
-}
 
 #[derive(Deserialize)]
 pub(crate) struct RawAccount {
@@ -47,7 +31,7 @@ pub(crate) struct RawAccount {
     name: String,
     avatar: RawImageRef,
     #[serde(rename = "sex")]
-    gender: RawGender,
+    gender: i64,
     karma30: f64,
     #[serde(rename = "sponsor")]
     sponsor_amount: u64,
@@ -79,7 +63,7 @@ impl TryFrom<RawAccount> for Account {
                 0 => None,
                 _ => Some(value.avatar.into()),
             },
-            gender: value.gender.into(),
+            gender: RawGender::from(value.gender).try_into()?,
             karma30: value.karma30 / 100.0,
             sponsor_amount: value.sponsor_amount,
             sponsor_count: value.sponsor_count,
