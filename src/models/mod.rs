@@ -17,4 +17,4 @@ pub use auth::Auth;
 pub use common::{Category, ImageRef, Language};
 pub use fandom::Fandom;
 pub use profile::{Gender, Link, Profile};
-pub use publication::{AnyPublication, Post, PostTag, Publication, Reaction};
+pub use publication::{AnyPublication, Comment, Post, PostTag, Publication, Reaction};

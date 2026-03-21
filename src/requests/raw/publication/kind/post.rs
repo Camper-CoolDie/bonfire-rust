@@ -2,18 +2,20 @@ use serde::Deserialize;
 
 use crate::models::Post;
 use crate::requests::raw::publication::{RawKind, RawPublishable};
+use crate::requests::raw::{RawComment, RawPublication};
 use crate::{Error, Result};
 
 #[derive(Deserialize)]
 pub(crate) struct InnerData {
     // #[serde(rename = "J_PAGES")]
     // pub pages: Vec<RawPage>,
-    // pub best_comment: Option<RawPublication<Comment>>,
+    // pub title: Option<String>,
 }
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct RawPost {
+    pub best_comment: Option<RawPublication<RawComment>>,
     pub rubric_id: u64,
     pub rubric_name: String,
     #[serde(rename = "rubricKarmaCof")]
@@ -37,8 +39,7 @@ impl TryFrom<RawPost> for Post {
 
     fn try_from(value: RawPost) -> Result<Self> {
         Ok(Self {
-            // pages: value.inner.pages.map(TryInto::try_into).collect()?,
-            // best_comment: value.inner.best_comment.map(TryInto::try_into).transpose()?,
+            best_comment: value.best_comment.map(TryInto::try_into).transpose()?,
             rubric_id: match value.rubric_id {
                 0 => None,
                 id => Some(id),
@@ -51,7 +52,6 @@ impl TryFrom<RawPost> for Post {
                 0 => None,
                 _ => Some(value.rubric_karma_coef / 100.0),
             },
-            // relay_race: value.relay_race.map(TryInto::try_into).transpose()?,
         })
     }
 }

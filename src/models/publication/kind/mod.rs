@@ -1,8 +1,10 @@
 mod any;
+mod comment;
 mod post;
 mod post_tag;
 
 pub use any::AnyPublication;
+pub use comment::{Comment, Content as CommentContent, Reference as CommentReference};
 pub use post::Post;
 pub use post_tag::PostTag;
 

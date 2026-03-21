@@ -41,18 +41,9 @@ impl TryFrom<RawFandom> for Fandom {
         Ok(Self {
             id: value.id,
             language: value.language.try_into()?,
-            icon: match value.icon.id {
-                0 => None,
-                _ => Some(value.icon.into()),
-            },
-            background: match value.background.id {
-                0 => None,
-                _ => Some(value.background.into()),
-            },
-            background_gif: match value.background_gif.id {
-                0 => None,
-                _ => Some(value.background_gif.into()),
-            },
+            icon: value.icon.into(),
+            background: value.background.into(),
+            background_gif: value.background_gif.into(),
             is_closed: value.is_closed,
             karma_coef: value.karma_coef / 100.0,
             suggester_id: match value.suggester_id {

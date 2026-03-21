@@ -61,10 +61,7 @@ impl TryFrom<RawAccount> for Account {
                 },
             )?,
             name: value.name,
-            avatar: match value.avatar.id {
-                0 => None,
-                _ => Some(value.avatar.into()),
-            },
+            avatar: value.avatar.into(),
             gender: value.gender.try_into()?,
             karma30: value.karma30 / 100.0,
             sponsor_amount: value.sponsor_amount,

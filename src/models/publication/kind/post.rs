@@ -1,6 +1,6 @@
 use crate::client::Request as _;
-use crate::models::Publication;
 use crate::models::publication::{Kind, PostTag, Publishable};
+use crate::models::{Comment, Publication};
 use crate::requests::publication::post::GetPostRequest;
 use crate::sealed::Sealed;
 use crate::{Client, Result};
@@ -10,8 +10,8 @@ use crate::{Client, Result};
 pub struct Post {
     // /// The content of this post
     // pub pages: Vec<Page>,
-    // /// A comment which earned the highest amount of karma
-    // pub best_comment: Option<Publication<Comment>>,
+    /// A comment which earned the highest amount of karma
+    pub best_comment: Option<Publication<Comment>>,
     /// The identifier of the rubric this post is linked to
     pub rubric_id: Option<u64>,
     /// The name of the rubric this post is linked to

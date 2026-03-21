@@ -33,10 +33,7 @@ impl TryFrom<RawPostTag> for PostTag {
     fn try_from(value: RawPostTag) -> Result<Self> {
         Ok(Self {
             name: value.inner.name,
-            icon: match value.inner.icon.id {
-                0 => None,
-                _ => Some(value.inner.icon.into()),
-            },
+            icon: value.inner.icon.into(),
         })
     }
 }

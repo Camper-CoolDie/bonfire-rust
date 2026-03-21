@@ -73,14 +73,8 @@ impl TryFrom<RawInfo> for Info {
                 })?),
             }
             .filter(|date| *date > Utc::now()),
-            background: match value.background.id {
-                0 => None,
-                _ => Some(value.background.into()),
-            },
-            background_gif: match value.background_gif.id {
-                0 => None,
-                _ => Some(value.background_gif.into()),
-            },
+            background: value.background.into(),
+            background_gif: value.background_gif.into(),
             is_following: value.is_following,
             follows_me: value.follows_me,
             follows_count: value.follows_count,
