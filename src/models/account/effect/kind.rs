@@ -1,6 +1,6 @@
 /// Represents the type of an effect applied to an account.
 #[derive(Default, Clone, Debug, PartialEq, Eq)]
-pub enum EffectKind {
+pub enum Kind {
     /// This user cannot place negative rates
     #[default]
     Hater,

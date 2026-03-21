@@ -10,8 +10,8 @@ mod stat;
 
 pub use badge::Badge;
 use chrono::{DateTime, Duration, Utc};
-pub use customization::AccountCustomization;
-pub use effect::{Effect, EffectKind, EffectReasonKind};
+pub use customization::Customization;
+pub use effect::{Effect, Kind as EffectKind, ReasonKind as EffectReasonKind};
 pub use error::*;
 use futures::Stream;
 pub use info::Info;
@@ -53,7 +53,7 @@ pub struct Account {
     /// A list of effects currently applied to this account
     pub effects: Vec<Effect>,
     /// Customization settings applied to this account's appearance
-    pub customization: AccountCustomization,
+    pub customization: Customization,
 }
 impl Account {
     /// Creates a new `Account` instance with only its identifier set.
@@ -131,15 +131,16 @@ impl Account {
     /// needed. The `offset` parameter can be used to skip a number of accounts from the beginning
     /// of the list.
     ///
-    /// If `query` is `None`, this method returns a list of accounts the currently logged-in user is
-    /// following. If the user is not following any accounts, it will return a list of online users.
+    /// If `query` is `None` or empty, this method returns a list of accounts the currently
+    /// logged-in user is following. If the user is not following any accounts, it will return a
+    /// list of online users.
     ///
     /// If an [`Error`][crate::Error] occurs during the retrieval of any page, the stream
     /// will yield that single error and then terminate.
     pub fn search<'a>(
         client: &'a Client,
         query: Option<&'a str>,
-        offset: u64,
+        offset: usize,
     ) -> impl Stream<Item = Result<Self>> + 'a {
         auto_paginated_stream(
             move |offset| async move {
@@ -201,7 +202,7 @@ impl Account {
     /// page, the stream will yield that single error and then terminate.
     pub fn get_prison(
         client: &Client,
-        offset: u64,
+        offset: usize,
     ) -> impl Stream<Item = Result<PrisonEntry>> + '_ {
         auto_paginated_stream(
             move |offset| async move {

@@ -2,8 +2,8 @@ mod kind;
 mod reason_kind;
 
 use chrono::DateTime;
-pub(crate) use kind::RawEffectKind;
-pub(crate) use reason_kind::RawEffectReasonKind;
+pub(crate) use kind::RawKind;
+pub(crate) use reason_kind::RawReasonKind;
 use serde::Deserialize;
 use serde::de::Error as _;
 
@@ -14,20 +14,20 @@ use crate::{Error, Result};
 #[serde(rename_all = "camelCase")]
 pub(crate) struct RawEffect {
     pub id: u64,
-    account_id: u64,
+    pub account_id: u64,
     #[serde(rename = "dateCreate")]
-    applied_at: i64,
+    pub applied_at: i64,
     #[serde(rename = "dateEnd")]
-    ends_at: i64,
+    pub ends_at: i64,
     #[serde(rename = "comment")]
-    reason: String,
+    pub reason: String,
     #[serde(rename = "effectIndex")]
-    kind: RawEffectKind,
+    pub kind: RawKind,
     #[serde(rename = "tag")]
-    is_system: i64,
+    pub is_system: i64,
     #[serde(rename = "commentTag")]
-    reason_kind: RawEffectReasonKind,
-    from_account_name: String,
+    pub reason_kind: RawReasonKind,
+    pub from_account_name: String,
 }
 
 impl TryFrom<RawEffect> for Effect {

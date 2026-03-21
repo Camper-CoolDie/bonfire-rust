@@ -1,18 +1,18 @@
 use serde::Deserialize;
 
-use crate::models::account::AccountCustomization;
+use crate::models::account::Customization;
 use crate::requests::raw::RawBadge;
 
 #[derive(Deserialize)]
-pub(crate) struct RawAccountCustomization {
+pub(crate) struct RawCustomization {
     #[serde(rename = "nc")]
-    name_color: Option<i32>,
+    pub name_color: Option<i32>,
     #[serde(rename = "ab")]
-    active_badge: Option<RawBadge>,
+    pub active_badge: Option<RawBadge>,
 }
 
-impl From<RawAccountCustomization> for AccountCustomization {
-    fn from(value: RawAccountCustomization) -> Self {
+impl From<RawCustomization> for Customization {
+    fn from(value: RawCustomization) -> Self {
         Self {
             name_color: value.name_color.map(i32::cast_unsigned),
             active_badge: value.active_badge.map(Into::into),

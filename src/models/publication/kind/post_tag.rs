@@ -1,5 +1,5 @@
 use crate::models::ImageRef;
-use crate::models::publication::{PublicationKind, Publishable};
+use crate::models::publication::{Kind, Publishable};
 use crate::sealed::Sealed;
 
 /// Represents a simple tag that can be attached to a post.
@@ -12,9 +12,9 @@ pub struct PostTag {
 }
 
 impl Publishable for PostTag {
-    /// Returns the publication kind as [`PublicationKind::PostTag`].
-    fn kind(&self) -> PublicationKind {
-        PublicationKind::PostTag
+    /// Returns the publication kind as [`Kind::PostTag`].
+    fn kind(&self) -> Kind {
+        Kind::PostTag
     }
 }
 

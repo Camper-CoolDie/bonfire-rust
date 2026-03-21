@@ -7,11 +7,11 @@ pub(crate) struct RawImageRef {
     #[serde(rename = "i")]
     pub id: u64,
     #[serde(rename = "u")]
-    uri: String,
+    pub uri: String,
     #[serde(rename = "w")]
-    width: usize,
+    pub width: usize,
     #[serde(rename = "h")]
-    height: usize,
+    pub height: usize,
 }
 
 impl From<RawImageRef> for ImageRef {

@@ -8,7 +8,7 @@ pub use post_tag::PostTag;
 
 /// Represents the specific type of a publication.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub enum PublicationKind {
+pub enum Kind {
     /// The publication is a comment
     Comment,
     /// The publication is a chat message

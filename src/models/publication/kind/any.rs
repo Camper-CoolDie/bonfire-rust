@@ -1,4 +1,4 @@
-use crate::models::publication::{PublicationKind, Publishable};
+use crate::models::publication::{Kind, Publishable};
 use crate::models::{Post, PostTag};
 use crate::sealed::Sealed;
 
@@ -37,21 +37,21 @@ pub enum AnyPublication {
 }
 
 impl Publishable for AnyPublication {
-    fn kind(&self) -> PublicationKind {
+    fn kind(&self) -> Kind {
         match self {
-            AnyPublication::Comment => PublicationKind::Comment,
-            AnyPublication::ChatMessage => PublicationKind::ChatMessage,
-            AnyPublication::Post(_) => PublicationKind::Post,
-            AnyPublication::PostTag(_) => PublicationKind::PostTag,
-            AnyPublication::Moderation => PublicationKind::Moderation,
-            AnyPublication::UserEvent => PublicationKind::UserEvent,
-            AnyPublication::StickerPack => PublicationKind::StickerPack,
-            AnyPublication::Sticker => PublicationKind::Sticker,
-            AnyPublication::ModerationEvent => PublicationKind::ModerationEvent,
-            AnyPublication::AdminEvent => PublicationKind::AdminEvent,
-            AnyPublication::FandomEvent => PublicationKind::FandomEvent,
-            AnyPublication::Quest => PublicationKind::Quest,
-            AnyPublication::Unknown(kind) => PublicationKind::Unknown(*kind),
+            AnyPublication::Comment => Kind::Comment,
+            AnyPublication::ChatMessage => Kind::ChatMessage,
+            AnyPublication::Post(_) => Kind::Post,
+            AnyPublication::PostTag(_) => Kind::PostTag,
+            AnyPublication::Moderation => Kind::Moderation,
+            AnyPublication::UserEvent => Kind::UserEvent,
+            AnyPublication::StickerPack => Kind::StickerPack,
+            AnyPublication::Sticker => Kind::Sticker,
+            AnyPublication::ModerationEvent => Kind::ModerationEvent,
+            AnyPublication::AdminEvent => Kind::AdminEvent,
+            AnyPublication::FandomEvent => Kind::FandomEvent,
+            AnyPublication::Quest => Kind::Quest,
+            AnyPublication::Unknown(kind) => Kind::Unknown(*kind),
         }
     }
 }

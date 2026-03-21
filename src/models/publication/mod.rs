@@ -5,7 +5,7 @@ mod status;
 use chrono::{DateTime, Utc};
 pub use kind::*;
 pub use reaction::Reaction;
-pub use status::PublicationStatus;
+pub use status::Status;
 
 use crate::models::{Account, Category, Fandom};
 use crate::sealed::Sealed;
@@ -16,7 +16,7 @@ use crate::sealed::Sealed;
 /// [`AnyPublication`] serves as a catch-all for publications with unspecified specific types.
 pub trait Publishable: Sealed {
     /// Returns the specific kind of this publication.
-    fn kind(&self) -> PublicationKind;
+    fn kind(&self) -> Kind;
 }
 
 /// Represents a generic Bonfire publication.
@@ -38,13 +38,13 @@ pub struct Publication<T: Publishable = AnyPublication> {
     /// The identifier of the parent publication, if this is a reply, sticker or tag category
     pub parent_id: Option<u64>,
     /// The type of the parent publication, if applicable
-    pub parent_kind: Option<PublicationKind>,
+    pub parent_kind: Option<Kind>,
     /// The total karma received by this publication (can be positive or negative)
     pub karma: f64,
     /// The karma you personally placed on this publication, if any
     pub my_karma: Option<f64>,
     /// The current status of this publication, or `None` if unspecified
-    pub status: Option<PublicationStatus>,
+    pub status: Option<Status>,
     /// Indicates if this publication will appear in the main feed
     pub is_closed: bool,
     /// The total number of comments associated with this publication

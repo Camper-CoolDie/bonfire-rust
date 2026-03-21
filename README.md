@@ -87,7 +87,7 @@ async fn main() -> Result<()> {
     };
 
     // Fetch accounts that have "Sus" in their name
-    Account::search(client, Some("Sus"), false, 0)
+    Account::search(client, Some("Sus"), 0)
         .try_for_each(|account| async move {
             println!("User {} (ID: {})", account.name, account.id);
             Ok(())

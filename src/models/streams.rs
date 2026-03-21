@@ -46,16 +46,16 @@ where
 
 pub(super) fn auto_paginated_stream<'a, T, R, Fut>(
     request_fn: R,
-    offset: u64,
+    offset: usize,
     page_size: usize,
 ) -> impl Stream<Item = Result<T>>
 where
     T: Send + Sync + 'a,
-    R: Fn(u64) -> Fut + Clone + Send + Sync + 'a,
+    R: Fn(usize) -> Fut + Clone + Send + Sync + 'a,
     Fut: Future<Output = Result<Vec<T>>> + Send + Sync + 'a,
 {
     paginated_stream(request_fn, offset, move |items, offset| {
         let length = items.len();
-        (length >= page_size).then_some(offset + length as u64)
+        (length >= page_size).then_some(offset + length)
     })
 }

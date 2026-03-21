@@ -1,6 +1,6 @@
 use crate::client::Request as _;
 use crate::models::Account;
-use crate::models::publication::PublicationKind;
+use crate::models::publication::Kind;
 use crate::requests::account::GetStatRequest;
 use crate::{Client, Result};
 
@@ -28,7 +28,7 @@ pub struct Stat {
     /// The ID of the parent publication of this account's highest-rated comment
     pub best_comment_parent_id: Option<u64>,
     /// The type of the parent publication of this account's highest-rated comment
-    pub best_comment_parent_kind: Option<PublicationKind>,
+    pub best_comment_parent_kind: Option<Kind>,
 }
 impl Stat {
     /// Retrieves an account's statistics by its unique identifier. If no account with the provided

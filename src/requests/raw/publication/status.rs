@@ -2,10 +2,10 @@ use std::result::Result as StdResult;
 
 use serde::Deserialize;
 
-use crate::models::publication::PublicationStatus;
+use crate::models::publication::Status;
 use crate::{Error, Result};
 
-pub(crate) enum RawPublicationStatus {
+pub(crate) enum RawStatus {
     Draft,
     Published,
     Blocked,
@@ -14,34 +14,34 @@ pub(crate) enum RawPublicationStatus {
     Unknown(i64),
 }
 
-impl<'de> Deserialize<'de> for RawPublicationStatus {
+impl<'de> Deserialize<'de> for RawStatus {
     fn deserialize<D>(deserializer: D) -> StdResult<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
     {
         Ok(match i64::deserialize(deserializer)? {
-            1 => RawPublicationStatus::Draft,
-            2 => RawPublicationStatus::Published,
-            3 => RawPublicationStatus::Blocked,
-            4 => RawPublicationStatus::DeepBlocked,
-            5 => RawPublicationStatus::Pending,
-            other => RawPublicationStatus::Unknown(other),
+            1 => RawStatus::Draft,
+            2 => RawStatus::Published,
+            3 => RawStatus::Blocked,
+            4 => RawStatus::DeepBlocked,
+            5 => RawStatus::Pending,
+            other => RawStatus::Unknown(other),
         })
     }
 }
 
-impl TryFrom<RawPublicationStatus> for Option<PublicationStatus> {
+impl TryFrom<RawStatus> for Option<Status> {
     type Error = Error;
 
-    fn try_from(value: RawPublicationStatus) -> Result<Self> {
+    fn try_from(value: RawStatus) -> Result<Self> {
         Ok(match value {
-            RawPublicationStatus::Unknown(0) => None,
-            RawPublicationStatus::Draft => Some(PublicationStatus::Draft),
-            RawPublicationStatus::Published => Some(PublicationStatus::Published),
-            RawPublicationStatus::Blocked => Some(PublicationStatus::Blocked),
-            RawPublicationStatus::DeepBlocked => Some(PublicationStatus::DeepBlocked),
-            RawPublicationStatus::Pending => Some(PublicationStatus::Pending),
-            RawPublicationStatus::Unknown(unknown) => Err(Error::UnknownVariant(unknown))?,
+            RawStatus::Unknown(0) => None,
+            RawStatus::Draft => Some(Status::Draft),
+            RawStatus::Published => Some(Status::Published),
+            RawStatus::Blocked => Some(Status::Blocked),
+            RawStatus::DeepBlocked => Some(Status::DeepBlocked),
+            RawStatus::Pending => Some(Status::Pending),
+            RawStatus::Unknown(unknown) => return Err(Error::UnknownVariant(unknown)),
         })
     }
 }

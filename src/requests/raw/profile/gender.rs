@@ -50,7 +50,7 @@ impl TryFrom<RawGender> for Gender {
             RawGender::Male => Gender::Male,
             RawGender::Female => Gender::Female,
             RawGender::Other => Gender::Other,
-            RawGender::Unknown(unknown) => Err(Error::UnknownVariant(unknown))?,
+            RawGender::Unknown(unknown) => return Err(Error::UnknownVariant(unknown)),
         })
     }
 }

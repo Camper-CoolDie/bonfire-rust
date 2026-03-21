@@ -1,33 +1,33 @@
 use serde::Deserialize;
 
 use crate::models::Post;
-use crate::requests::raw::publication::{RawPublicationKind, RawPublishable};
+use crate::requests::raw::publication::{RawKind, RawPublishable};
 use crate::{Error, Result};
 
 #[derive(Deserialize)]
-struct InnerData {
+pub(crate) struct InnerData {
     // #[serde(rename = "J_PAGES")]
-    // pages: Vec<RawPage>,
-    // best_comment: Option<RawPublication<Comment>>,
+    // pub pages: Vec<RawPage>,
+    // pub best_comment: Option<RawPublication<Comment>>,
 }
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct RawPost {
-    rubric_id: u64,
-    rubric_name: String,
+    pub rubric_id: u64,
+    pub rubric_name: String,
     #[serde(rename = "rubricKarmaCof")]
-    rubric_karma_coef: f64,
+    pub rubric_karma_coef: f64,
     // #[serde(rename = "userActivity")]
-    // relay_race: Option<RawRelayRace>,
+    // pub relay_race: Option<RawRelayRace>,
     #[serde(rename = "jsonDB")]
-    inner: InnerData,
+    pub inner: InnerData,
 }
 
 impl RawPublishable for RawPost {
     type Target = Post;
 
-    fn new(data: serde_json::Value, _kind: RawPublicationKind) -> Result<Self> {
+    fn new(data: serde_json::Value, _kind: RawKind) -> Result<Self> {
         Ok(serde_json::from_value::<RawPost>(data)?)
     }
 }

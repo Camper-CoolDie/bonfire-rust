@@ -84,7 +84,7 @@
 //!     };
 //!
 //!     // Fetch accounts that have "Sus" in their name
-//!     Account::search(client, Some("Sus"), false, 0)
+//!     Account::search(client, Some("Sus"), 0)
 //!         .try_for_each(|account| async move {
 //!             println!("User {} (ID: {})", account.name, account.id);
 //!             Ok(())
@@ -102,8 +102,17 @@
 #![warn(missing_docs)]
 #![warn(unreachable_pub)]
 // Clippy lints
-#![warn(clippy::all)]
-#![warn(clippy::pedantic)]
+#![warn(
+    clippy::all,
+    clippy::pedantic,
+    clippy::allow_attributes,
+    clippy::clone_on_ref_ptr,
+    clippy::deref_by_slicing,
+    clippy::module_name_repetitions,
+    clippy::partial_pub_fields,
+    clippy::self_named_module_files,
+    clippy::try_err
+)]
 #![allow(clippy::struct_excessive_bools)]
 
 /// Provides the core HTTP client implementation used for making requests across the library.
@@ -116,7 +125,7 @@ pub mod prelude;
 mod queries;
 mod requests;
 
-pub use client::{Client, ClientBuilder, Error, Result};
+pub use client::{Builder as ClientBuilder, Client, Error, Result};
 pub use queries::{MeliorError, QueryLocation, QueryPath};
 pub(crate) use queries::{MeliorQuery, MeliorResponse};
 pub use requests::{RootError, UnavailableError};

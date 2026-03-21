@@ -8,54 +8,54 @@ use crate::requests::raw::{RawImageRef, RawLink, RawPost, RawPublication};
 use crate::{Error, Result};
 
 #[derive(Deserialize)]
-struct Links {
+pub(crate) struct Links {
     #[serde(rename = "links")]
-    inner: Vec<RawLink>,
+    pub inner: Vec<RawLink>,
 }
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct RawInfo {
     #[serde(rename = "dateCreate")]
-    created_at: i64,
+    pub created_at: i64,
     #[serde(rename = "banDate")]
-    banned_until: i64,
+    pub banned_until: i64,
     #[serde(rename = "titleImage")]
-    background: RawImageRef,
+    pub background: RawImageRef,
     #[serde(rename = "titleImageGif")]
-    background_gif: RawImageRef,
+    pub background_gif: RawImageRef,
     #[serde(rename = "isFollow")]
-    is_following: bool,
+    pub is_following: bool,
     #[serde(rename = "followsYou")]
-    follows_me: bool,
-    follows_count: u64,
-    followers_count: u64,
-    status: String,
-    age: i64,
-    description: String,
-    links: Links,
-    note: String,
-    pinned_post: Option<RawPublication<RawPost>>,
-    bans_count: u64,
-    warns_count: u64,
-    karma_total: f64,
+    pub follows_me: bool,
+    pub follows_count: u64,
+    pub followers_count: u64,
+    pub status: String,
+    pub age: i64,
+    pub description: String,
+    pub links: Links,
+    pub note: String,
+    pub pinned_post: Option<RawPublication<RawPost>>,
+    pub bans_count: u64,
+    pub warns_count: u64,
+    pub karma_total: f64,
     #[serde(rename = "rates")]
-    rates_count: u64,
+    pub rates_count: u64,
     #[serde(rename = "ratesPositive")]
-    positive_rates_sum: i64,
+    pub positive_rates_sum: i64,
     #[serde(rename = "ratesNegative")]
-    negative_rates_sum: i64,
+    pub negative_rates_sum: i64,
     #[serde(rename = "moderationFandomsCount")]
-    moderated_fandoms_count: u64,
+    pub moderated_fandoms_count: u64,
     #[serde(rename = "viceroyFandomsCount")]
-    curated_fandoms_count: u64,
+    pub curated_fandoms_count: u64,
     #[serde(rename = "subscribedFandomsCount")]
-    subscriptions_count: u64,
-    stickers_count: u64,
+    pub subscriptions_count: u64,
+    pub stickers_count: u64,
     #[serde(rename = "blackAccountsCount")]
-    blocked_accounts_count: u64,
+    pub blocked_accounts_count: u64,
     #[serde(rename = "blackFandomsCount")]
-    blocked_fandoms_count: u64,
+    pub blocked_fandoms_count: u64,
 }
 
 impl TryFrom<RawInfo> for Info {
@@ -104,7 +104,7 @@ impl TryFrom<RawInfo> for Info {
                 .enumerate()
                 .filter_map(
                     // There cannot be more than LINKS_MAX_COUNT links
-                    #[allow(clippy::cast_possible_truncation)]
+                    #[expect(clippy::cast_possible_truncation)]
                     |(index, raw_link)| {
                         (!raw_link.title.is_empty() && !raw_link.uri.is_empty()).then(|| {
                             let mut link = Link::from(raw_link);

@@ -1,6 +1,6 @@
 use crate::client::Request as _;
 use crate::models::Publication;
-use crate::models::publication::{PostTag, PublicationKind, Publishable};
+use crate::models::publication::{Kind, PostTag, Publishable};
 use crate::requests::publication::post::GetPostRequest;
 use crate::sealed::Sealed;
 use crate::{Client, Result};
@@ -23,9 +23,9 @@ pub struct Post {
 }
 
 impl Publishable for Post {
-    /// Returns the publication kind as [`PublicationKind::Post`].
-    fn kind(&self) -> PublicationKind {
-        PublicationKind::Post
+    /// Returns the publication kind as [`Kind::Post`].
+    fn kind(&self) -> Kind {
+        Kind::Post
     }
 }
 

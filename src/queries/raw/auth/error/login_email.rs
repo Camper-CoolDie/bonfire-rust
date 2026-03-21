@@ -21,9 +21,9 @@ impl From<RawTfaKind> for TfaKind {
 #[derive(Deserialize)]
 pub(crate) struct RawTfaRequired {
     #[serde(rename = "tfaType")]
-    kind: RawTfaKind,
+    pub kind: RawTfaKind,
     #[serde(rename = "tfaWaitToken")]
-    wait_token: String,
+    pub wait_token: String,
 }
 
 impl From<RawTfaRequired> for TfaRequired {

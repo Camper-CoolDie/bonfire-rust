@@ -5,7 +5,7 @@ use serde::Deserialize;
 use crate::models::account::EffectKind;
 use crate::{Error, Result};
 
-pub(crate) enum RawEffectKind {
+pub(crate) enum RawKind {
     Hater,
     Pig,
     Watchman,
@@ -17,39 +17,39 @@ pub(crate) enum RawEffectKind {
     Unknown(i64),
 }
 
-impl<'de> Deserialize<'de> for RawEffectKind {
+impl<'de> Deserialize<'de> for RawKind {
     fn deserialize<D>(deserializer: D) -> StdResult<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
     {
         Ok(match i64::deserialize(deserializer)? {
-            1 => RawEffectKind::Hater,
-            2 => RawEffectKind::Pig,
-            3 => RawEffectKind::Watchman,
-            4 => RawEffectKind::Goose,
-            5 => RawEffectKind::EternalWinter,
-            6 => RawEffectKind::Punished,
-            7 => RawEffectKind::Translator,
-            8 => RawEffectKind::MentionLock,
-            other => RawEffectKind::Unknown(other),
+            1 => RawKind::Hater,
+            2 => RawKind::Pig,
+            3 => RawKind::Watchman,
+            4 => RawKind::Goose,
+            5 => RawKind::EternalWinter,
+            6 => RawKind::Punished,
+            7 => RawKind::Translator,
+            8 => RawKind::MentionLock,
+            other => RawKind::Unknown(other),
         })
     }
 }
 
-impl TryFrom<RawEffectKind> for EffectKind {
+impl TryFrom<RawKind> for EffectKind {
     type Error = Error;
 
-    fn try_from(value: RawEffectKind) -> Result<Self> {
+    fn try_from(value: RawKind) -> Result<Self> {
         Ok(match value {
-            RawEffectKind::Hater => EffectKind::Hater,
-            RawEffectKind::Pig => EffectKind::Pig,
-            RawEffectKind::Watchman => EffectKind::Watchman,
-            RawEffectKind::Goose => EffectKind::Goose,
-            RawEffectKind::EternalWinter => EffectKind::EternalWinter,
-            RawEffectKind::Punished => EffectKind::Punished,
-            RawEffectKind::Translator => EffectKind::Translator,
-            RawEffectKind::MentionLock => EffectKind::MentionLock,
-            RawEffectKind::Unknown(unknown) => Err(Error::UnknownVariant(unknown))?,
+            RawKind::Hater => EffectKind::Hater,
+            RawKind::Pig => EffectKind::Pig,
+            RawKind::Watchman => EffectKind::Watchman,
+            RawKind::Goose => EffectKind::Goose,
+            RawKind::EternalWinter => EffectKind::EternalWinter,
+            RawKind::Punished => EffectKind::Punished,
+            RawKind::Translator => EffectKind::Translator,
+            RawKind::MentionLock => EffectKind::MentionLock,
+            RawKind::Unknown(unknown) => return Err(Error::UnknownVariant(unknown)),
         })
     }
 }

@@ -8,8 +8,8 @@ use crate::models::Auth;
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct RawAuth {
-    access_token: String,
-    refresh_token: String,
+    pub access_token: String,
+    pub refresh_token: String,
 }
 
 impl From<RawAuth> for Auth {

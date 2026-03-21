@@ -21,12 +21,12 @@ impl TryFrom<Response> for Vec<PrisonEntry> {
 
 #[derive(Serialize)]
 pub(crate) struct GetPrisonRequest {
-    offset: u64,
+    offset: usize,
 }
 impl GetPrisonRequest {
     pub(crate) const PAGE_SIZE: usize = 20;
 
-    pub(crate) fn new(offset: u64) -> Self {
+    pub(crate) fn new(offset: usize) -> Self {
         Self { offset }
     }
 }

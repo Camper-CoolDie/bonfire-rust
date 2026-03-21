@@ -22,12 +22,12 @@ impl TryFrom<Response> for Vec<Account> {
 pub(crate) struct SearchAccountsRequest<'a> {
     #[serde(rename = "username", skip_serializing_if = "str::is_empty")]
     query: &'a str,
-    offset: u64,
+    offset: usize,
 }
 impl<'a> SearchAccountsRequest<'a> {
     pub(crate) const PAGE_SIZE: usize = 20;
 
-    pub(crate) fn new(query: Option<&'a str>, offset: u64) -> Self {
+    pub(crate) fn new(query: Option<&'a str>, offset: usize) -> Self {
         Self {
             query: query.unwrap_or(""),
             offset,

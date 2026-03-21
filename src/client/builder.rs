@@ -20,14 +20,14 @@ static MELIOR_SERVER_URI: LazyLock<Uri> =
 const DEFAULT_QUOTA: Quota = Quota::per_minute(nonzero!(30u32)).allow_burst(nonzero!(15u32));
 
 /// A builder-like pattern for constructing and configuring a [`Client`] instance.
-pub struct ClientBuilder {
+pub struct Builder {
     root_uri: Uri,
     melior_uri: Uri,
     auth: Option<Auth>,
     quota: Quota,
 }
-impl ClientBuilder {
-    /// Creates a new `ClientBuilder` with default API endpoint URIs and no authentication
+impl Builder {
+    /// Creates a new `Builder` with default API endpoint URIs and no authentication
     /// credentials.
     #[must_use]
     pub fn new() -> Self {
@@ -39,7 +39,7 @@ impl ClientBuilder {
         }
     }
 
-    /// Consumes the `ClientBuilder` and creates a [`Client`] instance.
+    /// Consumes the `Builder` and creates a [`Client`] instance.
     pub fn build(self) -> Client {
         Client::new(&self.root_uri, &self.melior_uri, self.auth, self.quota)
     }
@@ -147,7 +147,7 @@ impl ClientBuilder {
     }
 }
 
-impl Default for ClientBuilder {
+impl Default for Builder {
     fn default() -> Self {
         Self::new()
     }

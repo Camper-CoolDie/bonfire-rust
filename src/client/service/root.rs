@@ -46,12 +46,12 @@ impl RootService {
         let attachments_length = attachments.iter().map(|slice| slice.len()).sum::<usize>();
         let payload_length = 4 + json_body.len() + attachments_length;
         if payload_length > PAYLOAD_MAX_SIZE {
-            Err(Error::RequestTooLarge)?;
+            return Err(Error::RequestTooLarge);
         }
 
         let mut payload = BytesMut::with_capacity(payload_length);
         // JSON length is already checked to not exceed PAYLOAD_MAX_SIZE
-        #[allow(clippy::cast_possible_truncation)]
+        #[expect(clippy::cast_possible_truncation)]
         payload.put_u32(json_body.len() as u32);
 
         payload.put_slice(&json_body);

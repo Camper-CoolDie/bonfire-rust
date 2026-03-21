@@ -47,7 +47,7 @@ impl Account {
     pub fn get_follows<'a>(
         &'a self,
         client: &'a Client,
-        offset: u64,
+        offset: usize,
     ) -> impl Stream<Item = Result<Self>> + 'a {
         auto_paginated_stream(
             move |offset| async move {
@@ -71,7 +71,7 @@ impl Account {
     pub fn get_followers<'a>(
         &'a self,
         client: &'a Client,
-        offset: u64,
+        offset: usize,
     ) -> impl Stream<Item = Result<Self>> + 'a {
         auto_paginated_stream(
             move |offset| async move {
@@ -95,7 +95,7 @@ impl Account {
     pub fn get_subscriptions<'a>(
         &'a self,
         client: &'a Client,
-        offset: u64,
+        offset: usize,
     ) -> impl Stream<Item = Result<Fandom>> + 'a {
         auto_paginated_stream(
             move |offset| async move {
@@ -119,7 +119,7 @@ impl Account {
     pub fn get_moderated_fandoms<'a>(
         &'a self,
         client: &'a Client,
-        offset: u64,
+        offset: usize,
     ) -> impl Stream<Item = Result<Fandom>> + 'a {
         auto_paginated_stream(
             move |offset| async move {
@@ -143,7 +143,7 @@ impl Account {
     pub fn get_curated_fandoms<'a>(
         &'a self,
         client: &'a Client,
-        offset: u64,
+        offset: usize,
     ) -> impl Stream<Item = Result<Fandom>> + 'a {
         auto_paginated_stream(
             move |offset| async move {

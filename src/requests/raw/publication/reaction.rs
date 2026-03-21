@@ -5,9 +5,9 @@ use crate::models::Reaction;
 #[derive(Deserialize)]
 pub(crate) struct RawReaction {
     #[serde(rename = "reactionIndex")]
-    index: i64,
+    pub index: i64,
     #[serde(rename = "accountId")]
-    from_account_id: u64,
+    pub from_account_id: u64,
 }
 
 impl From<RawReaction> for Reaction {

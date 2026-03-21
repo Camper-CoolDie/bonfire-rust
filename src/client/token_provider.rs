@@ -57,7 +57,7 @@ impl TokenProvider {
             }
             InnerState::Authenticated(auth, _) => Ok(Some(auth.clone())),
             InnerState::Unauthenticated => Ok(None),
-            InnerState::InvalidToken(error) => Err(error.clone().into()),
+            InnerState::InvalidToken(error) => Err(Arc::clone(error).into()),
         }
     }
 
@@ -80,7 +80,7 @@ impl TokenProvider {
             }
             InnerState::Authenticated(auth, _) => return Ok(Some(auth.clone())),
             InnerState::Unauthenticated => return Ok(None),
-            InnerState::InvalidToken(error) => Err(error.clone())?,
+            InnerState::InvalidToken(error) => return Err(Arc::clone(error).into()),
         };
 
         *guard = option
@@ -88,7 +88,7 @@ impl TokenProvider {
             .try_into()
             .unwrap_or_else(|error| InnerState::InvalidToken(Arc::new(error)));
         match &*guard {
-            InnerState::InvalidToken(error) => Err(error.clone().into()),
+            InnerState::InvalidToken(error) => Err(Arc::clone(error).into()),
             _ => Ok(option),
         }
     }

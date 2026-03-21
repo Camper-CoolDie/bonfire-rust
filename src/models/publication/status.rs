@@ -1,6 +1,6 @@
 /// Represents the current status of a publication.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub enum PublicationStatus {
+pub enum Status {
     /// The publication is a draft, not yet published
     Draft,
     /// The publication has been published

@@ -3,7 +3,7 @@ mod status;
 use chrono::DateTime;
 use serde::Deserialize;
 use serde::de::Error as _;
-pub(crate) use status::RawFandomStatus;
+pub(crate) use status::RawStatus;
 
 use crate::models::Fandom;
 use crate::requests::raw::{RawCategory, RawImageRef, RawLanguage};
@@ -13,25 +13,25 @@ use crate::{Error, Result};
 pub(crate) struct RawFandom {
     pub id: u64,
     #[serde(rename = "languageId")]
-    language: RawLanguage,
+    pub language: RawLanguage,
     #[serde(rename = "image")]
-    icon: RawImageRef,
+    pub icon: RawImageRef,
     #[serde(rename = "imageTitle")]
-    background: RawImageRef,
+    pub background: RawImageRef,
     #[serde(rename = "imageTitleGif")]
-    background_gif: RawImageRef,
+    pub background_gif: RawImageRef,
     #[serde(rename = "closed")]
-    is_closed: bool,
+    pub is_closed: bool,
     #[serde(rename = "karmaCof")]
-    karma_coef: f64,
+    pub karma_coef: f64,
     #[serde(rename = "creatorId")]
-    suggester_id: u64,
+    pub suggester_id: u64,
     #[serde(rename = "dateCreate")]
-    suggested_at: i64,
+    pub suggested_at: i64,
     #[serde(rename = "subscribesCount")]
-    subscribers_count: u64,
-    status: RawFandomStatus,
-    category: RawCategory,
+    pub subscribers_count: u64,
+    pub status: RawStatus,
+    pub category: RawCategory,
 }
 
 impl TryFrom<RawFandom> for Fandom {

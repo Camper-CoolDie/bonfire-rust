@@ -10,9 +10,9 @@ pub(crate) use reaction::RawReaction;
 use serde::Deserialize;
 use serde::de::Error as _;
 use serde_json::Value;
-pub(crate) use status::RawPublicationStatus;
+pub(crate) use status::RawStatus;
 
-use crate::models::publication::{PublicationStatus, Publishable};
+use crate::models::publication::{Publishable, Status};
 use crate::models::{Account, Fandom, Publication};
 use crate::requests::raw::{RawAccount, RawCategory, RawFandom};
 use crate::{Error, Result};
@@ -20,44 +20,44 @@ use crate::{Error, Result};
 pub(crate) trait RawPublishable: Sized {
     type Target: Publishable;
 
-    fn new(data: Value, kind: RawPublicationKind) -> Result<Self>;
+    fn new(data: Value, kind: RawKind) -> Result<Self>;
 }
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct RawPublication<T: RawPublishable = AnyRawPublication> {
     pub id: u64,
-    fandom: RawFandom,
+    pub fandom: RawFandom,
     #[serde(rename = "creator")]
-    author: RawAccount,
-    category: RawCategory,
+    pub author: RawAccount,
+    pub category: RawCategory,
     #[serde(rename = "dateCreate")]
-    created_at: i64,
+    pub created_at: i64,
     #[serde(rename = "unitType")]
-    kind: RawPublicationKind,
+    pub kind: RawKind,
     #[serde(rename = "parentUnitId")]
-    parent_id: u64,
+    pub parent_id: u64,
     #[serde(rename = "parentUnitType")]
-    parent_kind: RawPublicationKind,
+    pub parent_kind: RawKind,
     #[serde(rename = "karmaCount")]
-    karma: f64,
-    my_karma: f64,
-    status: RawPublicationStatus,
+    pub karma: f64,
+    pub my_karma: f64,
+    pub status: RawStatus,
     #[serde(rename = "closed")]
-    is_closed: bool,
+    pub is_closed: bool,
     #[serde(rename = "subUnitsCount")]
-    comments_count: u64,
+    pub comments_count: u64,
     #[serde(rename = "important")]
-    importance: i64,
+    pub importance: i64,
     #[serde(rename = "blacklisted")]
-    is_hidden: bool,
+    pub is_hidden: bool,
     #[serde(rename = "nsfw")]
-    is_nsfw: bool,
-    hotness: f32,
+    pub is_nsfw: bool,
+    pub hotness: f32,
     #[serde(flatten)]
-    additional_data: Value,
+    pub additional_data: Value,
     #[serde(skip)]
-    _marker: PhantomData<T>,
+    pub _marker: PhantomData<T>,
     // TODO: tag_1, tag_2, tag_s_1, etc.
 }
 
@@ -89,7 +89,7 @@ where
                 0.0 => None,
                 karma => Some(karma / 100.0),
             },
-            status: Option::<PublicationStatus>::try_from(value.status)?,
+            status: Option::<Status>::try_from(value.status)?,
             is_closed: value.is_closed,
             comments_count: value.comments_count,
             is_important: matches!(value.importance, -1),

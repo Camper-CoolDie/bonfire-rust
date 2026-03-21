@@ -22,13 +22,13 @@ impl TryFrom<Response> for Vec<Account> {
 pub(crate) struct GetFollowsRequest {
     #[serde(rename = "followsOfaAccountId")]
     id: u64,
-    offset: u64,
+    offset: usize,
     followers: bool,
 }
 impl GetFollowsRequest {
     pub(crate) const PAGE_SIZE: usize = 20;
 
-    pub(crate) fn new_follows(id: u64, offset: u64) -> Self {
+    pub(crate) fn new_follows(id: u64, offset: usize) -> Self {
         Self {
             id,
             offset,
@@ -36,7 +36,7 @@ impl GetFollowsRequest {
         }
     }
 
-    pub(crate) fn new_followers(id: u64, offset: u64) -> Self {
+    pub(crate) fn new_followers(id: u64, offset: usize) -> Self {
         Self {
             id,
             offset,

@@ -5,7 +5,7 @@ use serde::Deserialize;
 use crate::models::account::EffectReasonKind;
 use crate::{Error, Result};
 
-pub(crate) enum RawEffectReasonKind {
+pub(crate) enum RawReasonKind {
     Gods,
     RejectedBlocks,
     TooManyBlocks,
@@ -15,36 +15,36 @@ pub(crate) enum RawEffectReasonKind {
     Unknown(i64),
 }
 
-impl<'de> Deserialize<'de> for RawEffectReasonKind {
+impl<'de> Deserialize<'de> for RawReasonKind {
     fn deserialize<D>(deserializer: D) -> StdResult<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
     {
         Ok(match i64::deserialize(deserializer)? {
-            1 => RawEffectReasonKind::Gods,
-            2 => RawEffectReasonKind::RejectedBlocks,
-            3 => RawEffectReasonKind::TooManyBlocks,
-            4 => RawEffectReasonKind::Swearing,
-            5 => RawEffectReasonKind::Hater,
-            6 => RawEffectReasonKind::Uncultured,
-            other => RawEffectReasonKind::Unknown(other),
+            1 => RawReasonKind::Gods,
+            2 => RawReasonKind::RejectedBlocks,
+            3 => RawReasonKind::TooManyBlocks,
+            4 => RawReasonKind::Swearing,
+            5 => RawReasonKind::Hater,
+            6 => RawReasonKind::Uncultured,
+            other => RawReasonKind::Unknown(other),
         })
     }
 }
 
-impl TryFrom<RawEffectReasonKind> for Option<EffectReasonKind> {
+impl TryFrom<RawReasonKind> for Option<EffectReasonKind> {
     type Error = Error;
 
-    fn try_from(value: RawEffectReasonKind) -> Result<Self> {
+    fn try_from(value: RawReasonKind) -> Result<Self> {
         Ok(match value {
-            RawEffectReasonKind::Unknown(0) => None,
-            RawEffectReasonKind::Gods => Some(EffectReasonKind::Gods),
-            RawEffectReasonKind::RejectedBlocks => Some(EffectReasonKind::RejectedBlocks),
-            RawEffectReasonKind::TooManyBlocks => Some(EffectReasonKind::TooManyBlocks),
-            RawEffectReasonKind::Swearing => Some(EffectReasonKind::Swearing),
-            RawEffectReasonKind::Hater => Some(EffectReasonKind::Hater),
-            RawEffectReasonKind::Uncultured => Some(EffectReasonKind::Uncultured),
-            RawEffectReasonKind::Unknown(unknown) => Err(Error::UnknownVariant(unknown))?,
+            RawReasonKind::Unknown(0) => None,
+            RawReasonKind::Gods => Some(EffectReasonKind::Gods),
+            RawReasonKind::RejectedBlocks => Some(EffectReasonKind::RejectedBlocks),
+            RawReasonKind::TooManyBlocks => Some(EffectReasonKind::TooManyBlocks),
+            RawReasonKind::Swearing => Some(EffectReasonKind::Swearing),
+            RawReasonKind::Hater => Some(EffectReasonKind::Hater),
+            RawReasonKind::Uncultured => Some(EffectReasonKind::Uncultured),
+            RawReasonKind::Unknown(unknown) => return Err(Error::UnknownVariant(unknown)),
         })
     }
 }

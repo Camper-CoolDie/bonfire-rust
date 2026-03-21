@@ -22,12 +22,12 @@ impl TryFrom<Response> for Vec<Fandom> {
 pub(crate) struct GetCuratedFandomsRequest {
     #[serde(rename = "accountId")]
     id: u64,
-    offset: u64,
+    offset: usize,
 }
 impl GetCuratedFandomsRequest {
     pub(crate) const PAGE_SIZE: usize = 20;
 
-    pub(crate) fn new(id: u64, offset: u64) -> Self {
+    pub(crate) fn new(id: u64, offset: usize) -> Self {
         Self { id, offset }
     }
 }

@@ -4,9 +4,9 @@ use crate::{MeliorError, QueryLocation, QueryPath};
 
 #[derive(Deserialize)]
 pub(crate) struct RawMeliorError {
-    message: String,
-    locations: Option<Vec<RawQueryLocation>>,
-    path: Option<Vec<RawQueryPath>>,
+    pub message: String,
+    pub locations: Option<Vec<RawQueryLocation>>,
+    pub path: Option<Vec<RawQueryPath>>,
 }
 
 impl From<RawMeliorError> for MeliorError {
@@ -25,8 +25,8 @@ impl From<RawMeliorError> for MeliorError {
 
 #[derive(Deserialize)]
 pub(crate) struct RawQueryLocation {
-    line: i32,
-    column: i32,
+    pub line: i32,
+    pub column: i32,
 }
 
 impl From<RawQueryLocation> for QueryLocation {

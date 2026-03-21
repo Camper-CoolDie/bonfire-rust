@@ -7,7 +7,7 @@ mod token_provider;
 
 use std::sync::Arc;
 
-pub use builder::ClientBuilder;
+pub use builder::Builder;
 pub use error::{Error, Result};
 use governor::clock::DefaultClock;
 use governor::state::{InMemoryState, NotKeyed};
@@ -70,7 +70,7 @@ impl Client {
             inner: Arc::new(Inner {
                 root_service: RootService::new(root_uri),
                 melior_service: MeliorService::new(melior_uri),
-                // This error was previously caught in ClientBuilder::auth()
+                // This error was previously caught in Builder::auth()
                 token_provider: TokenProvider::new(auth).expect("failed to create TokenProvider"),
                 rate_limiter: RateLimiter::direct(quota),
             }),
@@ -139,7 +139,7 @@ impl Client {
     /// ```
     pub async fn login(&self, email: &str, password: &str) -> Result<&Self> {
         if self.inner.token_provider.is_auth().await {
-            Err(Error::AlreadyAuthenticated)?;
+            return Err(Error::AlreadyAuthenticated);
         }
 
         let auth = Auth::try_from(
@@ -181,7 +181,7 @@ impl Client {
     /// ```
     pub async fn logout(&self) -> Result<&Self> {
         if !self.inner.token_provider.is_auth().await {
-            Err(Error::Unauthenticated)?;
+            return Err(Error::Unauthenticated);
         }
 
         LogoutQuery::new().send_request(self).await?;
@@ -195,7 +195,7 @@ impl Client {
     /// they are expired.
     ///
     /// This method is typically called at the end of a program's execution to save the valid
-    /// credentials securely for use in [`ClientBuilder::auth()`] when the program restarts.
+    /// credentials securely for use in [`Builder::auth()`] when the program restarts.
     ///
     /// # Errors
     ///
@@ -263,8 +263,7 @@ impl Client {
                     .then(|| {
                         let length = slice.len();
 
-                        #[allow(clippy::cast_possible_truncation)]
-                        #[allow(clippy::cast_possible_wrap)]
+                        #[expect(clippy::cast_possible_truncation, clippy::cast_possible_wrap)]
                         if length > ATTACHMENT_MAX_SIZE {
                             Err(Error::AttachmentTooLarge)
                         } else {
@@ -342,10 +341,10 @@ impl Client {
             .inspect_err(|error| tracing::error!(?error, "failed to send an authless query"))
     }
 
-    /// Create a new `ClientBuilder` with default values.
+    /// Create a new `Builder` with default values.
     #[must_use]
-    pub fn builder() -> ClientBuilder {
-        ClientBuilder::new()
+    pub fn builder() -> Builder {
+        Builder::new()
     }
 }
 

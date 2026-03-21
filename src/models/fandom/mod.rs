@@ -1,7 +1,7 @@
 mod status;
 
 use chrono::{DateTime, Utc};
-pub use status::FandomStatus;
+pub use status::Status;
 
 use crate::client::Request as _;
 use crate::models::{Category, ImageRef, Language};
@@ -37,7 +37,7 @@ pub struct Fandom {
     /// The number of users currently subscribed to this fandom
     pub subscribers_count: u64,
     /// The current status of this fandom, or `None` if unspecified
-    pub status: Option<FandomStatus>,
+    pub status: Option<Status>,
     /// The category that this fandom belongs to, or `None` if unspecified
     pub category: Option<Category>,
 }

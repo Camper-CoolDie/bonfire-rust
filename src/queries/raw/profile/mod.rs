@@ -10,11 +10,11 @@ use crate::{Error, Result};
 pub(crate) struct RawProfile {
     pub id: String,
     #[serde(rename = "username")]
-    name: String,
-    email: String,
-    cached_level: f64,
-    birthday: Option<NaiveDate>,
-    is_nsfw_allowed: Option<bool>,
+    pub name: String,
+    pub email: String,
+    pub cached_level: f64,
+    pub birthday: Option<NaiveDate>,
+    pub is_nsfw_allowed: Option<bool>,
 }
 
 impl TryFrom<RawProfile> for Profile {

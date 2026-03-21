@@ -7,8 +7,10 @@ mod stat;
 
 pub(crate) use badge::RawBadge;
 use chrono::DateTime;
-pub(crate) use customization::RawAccountCustomization;
-pub(crate) use effect::{RawEffect, RawEffectKind, RawEffectReasonKind};
+pub(crate) use customization::RawCustomization;
+pub(crate) use effect::{
+    RawEffect, RawKind as RawEffectKind, RawReasonKind as RawEffectReasonKind,
+};
 pub(crate) use info::RawInfo;
 pub(crate) use prison::RawPrisonEntry;
 use serde::Deserialize;
@@ -24,23 +26,23 @@ pub(crate) struct RawAccount {
     #[serde(rename = "J_ID")]
     pub id: u64,
     #[serde(rename = "J_LVL")]
-    level: f64,
+    pub level: f64,
     #[serde(rename = "J_LAST_ONLINE_DATE")]
-    pub(crate) last_online_at: i64,
+    pub last_online_at: i64,
     #[serde(rename = "J_NAME")]
-    name: String,
-    avatar: RawImageRef,
+    pub name: String,
+    pub avatar: RawImageRef,
     #[serde(rename = "sex")]
-    gender: RawGender,
-    karma30: f64,
+    pub gender: RawGender,
+    pub karma30: f64,
     #[serde(rename = "sponsor")]
-    sponsor_amount: u64,
+    pub sponsor_amount: u64,
     #[serde(rename = "sponsorTimes")]
-    sponsor_count: u64,
+    pub sponsor_count: u64,
     #[serde(rename = "accountEffects")]
-    effects: Vec<RawEffect>,
+    pub effects: Vec<RawEffect>,
     #[serde(rename = "czt")]
-    customization: RawAccountCustomization,
+    pub customization: RawCustomization,
 }
 
 impl TryFrom<RawAccount> for Account {

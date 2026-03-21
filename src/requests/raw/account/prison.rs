@@ -8,9 +8,9 @@ use crate::{Error, Result};
 
 #[derive(Deserialize)]
 pub(crate) struct RawPrisonEntry {
-    account: RawAccount,
+    pub account: RawAccount,
     #[serde(rename = "banDate")]
-    banned_until: i64,
+    pub banned_until: i64,
 }
 
 impl TryFrom<RawPrisonEntry> for PrisonEntry {

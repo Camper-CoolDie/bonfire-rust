@@ -1,7 +1,7 @@
 use serde_json::Value;
 
 use crate::models::AnyPublication;
-use crate::requests::raw::publication::{RawPublicationKind, RawPublishable};
+use crate::requests::raw::publication::{RawKind, RawPublishable};
 use crate::requests::raw::{RawPost, RawPostTag};
 use crate::{Error, Result};
 
@@ -24,21 +24,21 @@ pub(crate) enum AnyRawPublication {
 impl RawPublishable for AnyRawPublication {
     type Target = AnyPublication;
 
-    fn new(data: Value, kind: RawPublicationKind) -> Result<Self> {
+    fn new(data: Value, kind: RawKind) -> Result<Self> {
         Ok(match kind {
-            RawPublicationKind::Comment => AnyRawPublication::Comment,
-            RawPublicationKind::ChatMessage => AnyRawPublication::ChatMessage,
-            RawPublicationKind::Post => AnyRawPublication::Post(RawPost::new(data, kind)?),
-            RawPublicationKind::PostTag => AnyRawPublication::PostTag(RawPostTag::new(data, kind)?),
-            RawPublicationKind::Moderation => AnyRawPublication::Moderation,
-            RawPublicationKind::UserEvent => AnyRawPublication::UserEvent,
-            RawPublicationKind::StickerPack => AnyRawPublication::StickerPack,
-            RawPublicationKind::Sticker => AnyRawPublication::Sticker,
-            RawPublicationKind::ModerationEvent => AnyRawPublication::ModerationEvent,
-            RawPublicationKind::AdminEvent => AnyRawPublication::AdminEvent,
-            RawPublicationKind::FandomEvent => AnyRawPublication::FandomEvent,
-            RawPublicationKind::Quest => AnyRawPublication::Quest,
-            RawPublicationKind::Unknown(kind) => AnyRawPublication::Unknown(kind),
+            RawKind::Comment => AnyRawPublication::Comment,
+            RawKind::ChatMessage => AnyRawPublication::ChatMessage,
+            RawKind::Post => AnyRawPublication::Post(RawPost::new(data, kind)?),
+            RawKind::PostTag => AnyRawPublication::PostTag(RawPostTag::new(data, kind)?),
+            RawKind::Moderation => AnyRawPublication::Moderation,
+            RawKind::UserEvent => AnyRawPublication::UserEvent,
+            RawKind::StickerPack => AnyRawPublication::StickerPack,
+            RawKind::Sticker => AnyRawPublication::Sticker,
+            RawKind::ModerationEvent => AnyRawPublication::ModerationEvent,
+            RawKind::AdminEvent => AnyRawPublication::AdminEvent,
+            RawKind::FandomEvent => AnyRawPublication::FandomEvent,
+            RawKind::Quest => AnyRawPublication::Quest,
+            RawKind::Unknown(kind) => AnyRawPublication::Unknown(kind),
         })
     }
 }

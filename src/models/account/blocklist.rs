@@ -61,7 +61,7 @@ impl Account {
     pub fn get_blocked_accounts<'a>(
         &'a self,
         client: &'a Client,
-        offset: u64,
+        offset: usize,
     ) -> impl Stream<Item = Result<Self>> + 'a {
         auto_paginated_stream(
             move |offset| async move {

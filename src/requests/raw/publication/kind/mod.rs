@@ -9,9 +9,9 @@ pub(crate) use post::RawPost;
 pub(crate) use post_tag::RawPostTag;
 use serde::{Deserialize, Serialize};
 
-use crate::models::publication::PublicationKind;
+use crate::models::publication::Kind;
 
-pub(crate) enum RawPublicationKind {
+pub(crate) enum RawKind {
     Comment,
     ChatMessage,
     Post,
@@ -27,111 +27,111 @@ pub(crate) enum RawPublicationKind {
     Unknown(i64),
 }
 
-impl Serialize for RawPublicationKind {
+impl Serialize for RawKind {
     fn serialize<S>(&self, serializer: S) -> StdResult<S::Ok, S::Error>
     where
         S: serde::Serializer,
     {
         let kind = match self {
-            RawPublicationKind::Comment => 1,
-            RawPublicationKind::ChatMessage => 8,
-            RawPublicationKind::Post => 9,
-            RawPublicationKind::PostTag => 10,
-            RawPublicationKind::Moderation => 11,
-            RawPublicationKind::UserEvent => 12,
-            RawPublicationKind::StickerPack => 15,
-            RawPublicationKind::Sticker => 16,
-            RawPublicationKind::ModerationEvent => 17,
-            RawPublicationKind::AdminEvent => 18,
-            RawPublicationKind::FandomEvent => 19,
-            RawPublicationKind::Quest => 21,
-            RawPublicationKind::Unknown(unknown) => *unknown,
+            RawKind::Comment => 1,
+            RawKind::ChatMessage => 8,
+            RawKind::Post => 9,
+            RawKind::PostTag => 10,
+            RawKind::Moderation => 11,
+            RawKind::UserEvent => 12,
+            RawKind::StickerPack => 15,
+            RawKind::Sticker => 16,
+            RawKind::ModerationEvent => 17,
+            RawKind::AdminEvent => 18,
+            RawKind::FandomEvent => 19,
+            RawKind::Quest => 21,
+            RawKind::Unknown(unknown) => *unknown,
         };
 
         serializer.serialize_i64(kind)
     }
 }
 
-impl<'de> Deserialize<'de> for RawPublicationKind {
+impl<'de> Deserialize<'de> for RawKind {
     fn deserialize<D>(deserializer: D) -> StdResult<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
     {
         Ok(match i64::deserialize(deserializer)? {
-            1 => RawPublicationKind::Comment,
-            8 => RawPublicationKind::ChatMessage,
-            9 => RawPublicationKind::Post,
-            10 => RawPublicationKind::PostTag,
-            11 => RawPublicationKind::Moderation,
-            12 => RawPublicationKind::UserEvent,
-            15 => RawPublicationKind::StickerPack,
-            16 => RawPublicationKind::Sticker,
-            17 => RawPublicationKind::ModerationEvent,
-            18 => RawPublicationKind::AdminEvent,
-            19 => RawPublicationKind::FandomEvent,
-            21 => RawPublicationKind::Quest,
-            other => RawPublicationKind::Unknown(other),
+            1 => RawKind::Comment,
+            8 => RawKind::ChatMessage,
+            9 => RawKind::Post,
+            10 => RawKind::PostTag,
+            11 => RawKind::Moderation,
+            12 => RawKind::UserEvent,
+            15 => RawKind::StickerPack,
+            16 => RawKind::Sticker,
+            17 => RawKind::ModerationEvent,
+            18 => RawKind::AdminEvent,
+            19 => RawKind::FandomEvent,
+            21 => RawKind::Quest,
+            other => RawKind::Unknown(other),
         })
     }
 }
 
-impl From<RawPublicationKind> for PublicationKind {
-    fn from(value: RawPublicationKind) -> Self {
+impl From<RawKind> for Kind {
+    fn from(value: RawKind) -> Self {
         match value {
-            RawPublicationKind::Comment => PublicationKind::Comment,
-            RawPublicationKind::ChatMessage => PublicationKind::ChatMessage,
-            RawPublicationKind::Post => PublicationKind::Post,
-            RawPublicationKind::PostTag => PublicationKind::PostTag,
-            RawPublicationKind::Moderation => PublicationKind::Moderation,
-            RawPublicationKind::UserEvent => PublicationKind::UserEvent,
-            RawPublicationKind::StickerPack => PublicationKind::StickerPack,
-            RawPublicationKind::Sticker => PublicationKind::Sticker,
-            RawPublicationKind::ModerationEvent => PublicationKind::ModerationEvent,
-            RawPublicationKind::AdminEvent => PublicationKind::AdminEvent,
-            RawPublicationKind::FandomEvent => PublicationKind::FandomEvent,
-            RawPublicationKind::Quest => PublicationKind::Quest,
-            RawPublicationKind::Unknown(unknown) => PublicationKind::Unknown(unknown),
+            RawKind::Comment => Kind::Comment,
+            RawKind::ChatMessage => Kind::ChatMessage,
+            RawKind::Post => Kind::Post,
+            RawKind::PostTag => Kind::PostTag,
+            RawKind::Moderation => Kind::Moderation,
+            RawKind::UserEvent => Kind::UserEvent,
+            RawKind::StickerPack => Kind::StickerPack,
+            RawKind::Sticker => Kind::Sticker,
+            RawKind::ModerationEvent => Kind::ModerationEvent,
+            RawKind::AdminEvent => Kind::AdminEvent,
+            RawKind::FandomEvent => Kind::FandomEvent,
+            RawKind::Quest => Kind::Quest,
+            RawKind::Unknown(unknown) => Kind::Unknown(unknown),
         }
     }
 }
 
-impl From<RawPublicationKind> for Option<PublicationKind> {
-    fn from(value: RawPublicationKind) -> Self {
+impl From<RawKind> for Option<Kind> {
+    fn from(value: RawKind) -> Self {
         match value {
-            RawPublicationKind::Unknown(0) => None,
-            RawPublicationKind::Comment => Some(PublicationKind::Comment),
-            RawPublicationKind::ChatMessage => Some(PublicationKind::ChatMessage),
-            RawPublicationKind::Post => Some(PublicationKind::Post),
-            RawPublicationKind::PostTag => Some(PublicationKind::PostTag),
-            RawPublicationKind::Moderation => Some(PublicationKind::Moderation),
-            RawPublicationKind::UserEvent => Some(PublicationKind::UserEvent),
-            RawPublicationKind::StickerPack => Some(PublicationKind::StickerPack),
-            RawPublicationKind::Sticker => Some(PublicationKind::Sticker),
-            RawPublicationKind::ModerationEvent => Some(PublicationKind::ModerationEvent),
-            RawPublicationKind::AdminEvent => Some(PublicationKind::AdminEvent),
-            RawPublicationKind::FandomEvent => Some(PublicationKind::FandomEvent),
-            RawPublicationKind::Quest => Some(PublicationKind::Quest),
-            RawPublicationKind::Unknown(unknown) => Some(PublicationKind::Unknown(unknown)),
+            RawKind::Unknown(0) => None,
+            RawKind::Comment => Some(Kind::Comment),
+            RawKind::ChatMessage => Some(Kind::ChatMessage),
+            RawKind::Post => Some(Kind::Post),
+            RawKind::PostTag => Some(Kind::PostTag),
+            RawKind::Moderation => Some(Kind::Moderation),
+            RawKind::UserEvent => Some(Kind::UserEvent),
+            RawKind::StickerPack => Some(Kind::StickerPack),
+            RawKind::Sticker => Some(Kind::Sticker),
+            RawKind::ModerationEvent => Some(Kind::ModerationEvent),
+            RawKind::AdminEvent => Some(Kind::AdminEvent),
+            RawKind::FandomEvent => Some(Kind::FandomEvent),
+            RawKind::Quest => Some(Kind::Quest),
+            RawKind::Unknown(unknown) => Some(Kind::Unknown(unknown)),
         }
     }
 }
 
-impl From<PublicationKind> for RawPublicationKind {
-    fn from(value: PublicationKind) -> Self {
+impl From<Kind> for RawKind {
+    fn from(value: Kind) -> Self {
         match value {
-            PublicationKind::Comment => RawPublicationKind::Comment,
-            PublicationKind::ChatMessage => RawPublicationKind::ChatMessage,
-            PublicationKind::Post => RawPublicationKind::Post,
-            PublicationKind::PostTag => RawPublicationKind::PostTag,
-            PublicationKind::Moderation => RawPublicationKind::Moderation,
-            PublicationKind::UserEvent => RawPublicationKind::UserEvent,
-            PublicationKind::StickerPack => RawPublicationKind::StickerPack,
-            PublicationKind::Sticker => RawPublicationKind::Sticker,
-            PublicationKind::ModerationEvent => RawPublicationKind::ModerationEvent,
-            PublicationKind::AdminEvent => RawPublicationKind::AdminEvent,
-            PublicationKind::FandomEvent => RawPublicationKind::FandomEvent,
-            PublicationKind::Quest => RawPublicationKind::Quest,
-            PublicationKind::Unknown(unknown) => RawPublicationKind::Unknown(unknown),
+            Kind::Comment => RawKind::Comment,
+            Kind::ChatMessage => RawKind::ChatMessage,
+            Kind::Post => RawKind::Post,
+            Kind::PostTag => RawKind::PostTag,
+            Kind::Moderation => RawKind::Moderation,
+            Kind::UserEvent => RawKind::UserEvent,
+            Kind::StickerPack => RawKind::StickerPack,
+            Kind::Sticker => RawKind::Sticker,
+            Kind::ModerationEvent => RawKind::ModerationEvent,
+            Kind::AdminEvent => RawKind::AdminEvent,
+            Kind::FandomEvent => RawKind::FandomEvent,
+            Kind::Quest => RawKind::Quest,
+            Kind::Unknown(unknown) => RawKind::Unknown(unknown),
         }
     }
 }
