@@ -43,7 +43,7 @@ impl From<RawCategory> for Category {
             RawCategory::Art => Category::Art,
             RawCategory::Roleplay => Category::Roleplay,
             RawCategory::Other => Category::Other,
-            RawCategory::Unknown(category) => Category::Unknown(category),
+            RawCategory::Unknown(unknown) => Category::Unknown(unknown),
         }
     }
 }

@@ -1,13 +1,13 @@
 use serde_json::Value;
 
 use crate::models::AnyPublication;
-use crate::requests::raw::publication::{RawComment, RawKind, RawPublishable};
+use crate::requests::raw::publication::{RawChatMessage, RawComment, RawKind, RawPublishable};
 use crate::requests::raw::{RawPost, RawPostTag};
 use crate::{Error, Result};
 
 pub(crate) enum AnyRawPublication {
     Comment(Box<RawComment>),
-    ChatMessage,
+    ChatMessage(Box<RawChatMessage>),
     Post(Box<RawPost>),
     PostTag(Box<RawPostTag>),
     Moderation,
@@ -27,7 +27,9 @@ impl RawPublishable for AnyRawPublication {
     fn new(data: Value, kind: RawKind) -> Result<Self> {
         Ok(match kind {
             RawKind::Comment => AnyRawPublication::Comment(Box::new(RawComment::new(data, kind)?)),
-            RawKind::ChatMessage => AnyRawPublication::ChatMessage,
+            RawKind::ChatMessage => {
+                AnyRawPublication::ChatMessage(Box::new(RawChatMessage::new(data, kind)?))
+            }
             RawKind::Post => AnyRawPublication::Post(Box::new(RawPost::new(data, kind)?)),
             RawKind::PostTag => AnyRawPublication::PostTag(Box::new(RawPostTag::new(data, kind)?)),
             RawKind::Moderation => AnyRawPublication::Moderation,
@@ -51,10 +53,12 @@ impl TryFrom<AnyRawPublication> for AnyPublication {
             AnyRawPublication::Comment(comment) => {
                 AnyPublication::Comment(Box::new((*comment).try_into()?))
             }
-            AnyRawPublication::ChatMessage => AnyPublication::ChatMessage,
+            AnyRawPublication::ChatMessage(message) => {
+                AnyPublication::ChatMessage(Box::new((*message).try_into()?))
+            }
             AnyRawPublication::Post(post) => AnyPublication::Post(Box::new((*post).try_into()?)),
-            AnyRawPublication::PostTag(post_tag) => {
-                AnyPublication::PostTag(Box::new((*post_tag).try_into()?))
+            AnyRawPublication::PostTag(tag) => {
+                AnyPublication::PostTag(Box::new((*tag).try_into()?))
             }
             AnyRawPublication::Moderation => AnyPublication::Moderation,
             AnyRawPublication::UserEvent => AnyPublication::UserEvent,

@@ -5,7 +5,9 @@ use serde::{Deserialize, Serialize};
 use crate::models::Language;
 use crate::{Error, Result};
 
+#[derive(Default)]
 pub(crate) enum RawLanguage {
+    #[default]
     English,
     Russian,
     Portuguese,
@@ -22,19 +24,7 @@ impl Serialize for RawLanguage {
     where
         S: serde::Serializer,
     {
-        let kind = match self {
-            RawLanguage::English => 1,
-            RawLanguage::Russian => 2,
-            RawLanguage::Portuguese => 3,
-            RawLanguage::Ukrainian => 4,
-            RawLanguage::German => 5,
-            RawLanguage::Italian => 6,
-            RawLanguage::Polish => 7,
-            RawLanguage::French => 8,
-            RawLanguage::Unknown(unknown) => *unknown,
-        };
-
-        serializer.serialize_i64(kind)
+        serializer.serialize_i64(self.into())
     }
 }
 
@@ -43,7 +33,13 @@ impl<'de> Deserialize<'de> for RawLanguage {
     where
         D: serde::Deserializer<'de>,
     {
-        Ok(match i64::deserialize(deserializer)? {
+        Ok(i64::deserialize(deserializer)?.into())
+    }
+}
+
+impl From<i64> for RawLanguage {
+    fn from(value: i64) -> Self {
+        match value {
             1 => RawLanguage::English,
             2 => RawLanguage::Russian,
             3 => RawLanguage::Portuguese,
@@ -53,7 +49,23 @@ impl<'de> Deserialize<'de> for RawLanguage {
             7 => RawLanguage::Polish,
             8 => RawLanguage::French,
             other => RawLanguage::Unknown(other),
-        })
+        }
+    }
+}
+
+impl From<&RawLanguage> for i64 {
+    fn from(value: &RawLanguage) -> Self {
+        match value {
+            RawLanguage::English => 1,
+            RawLanguage::Russian => 2,
+            RawLanguage::Portuguese => 3,
+            RawLanguage::Ukrainian => 4,
+            RawLanguage::German => 5,
+            RawLanguage::Italian => 6,
+            RawLanguage::Polish => 7,
+            RawLanguage::French => 8,
+            RawLanguage::Unknown(unknown) => *unknown,
+        }
     }
 }
 

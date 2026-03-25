@@ -1,4 +1,4 @@
-use super::Content;
+use super::RefContent;
 
 /// Represents a reference within a comment to another comment.
 ///
@@ -8,7 +8,7 @@ pub struct Reference {
     /// The unique identifier of the referenced comment
     pub id: u64,
     /// The content of the referenced comment
-    pub content: Content,
+    pub content: RefContent,
     /// A snippet of the text from the referenced comment, if applicable
     pub text: Option<String>,
     /// The name of the author of the referenced comment

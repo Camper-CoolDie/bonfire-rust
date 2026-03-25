@@ -1,4 +1,5 @@
 mod any;
+mod chat_message;
 mod comment;
 mod post;
 mod post_tag;
@@ -6,6 +7,10 @@ mod post_tag;
 use std::result::Result as StdResult;
 
 pub(crate) use any::AnyRawPublication;
+pub(crate) use chat_message::{
+    RawChatMessage, RawContentKind as RawChatMessageContentKind,
+    RawEventKind as RawChatMessageEventKind,
+};
 pub(crate) use comment::{RawComment, RawContentKind as RawCommentContentKind};
 pub(crate) use post::RawPost;
 pub(crate) use post_tag::RawPostTag;

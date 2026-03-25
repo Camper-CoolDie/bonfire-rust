@@ -1,10 +1,11 @@
 mod content_kind;
 
 pub(crate) use content_kind::RawContentKind;
+use content_kind::{IntoContentOptions, IntoRefContentOptions};
 use serde::Deserialize;
 
 use crate::models::Comment;
-use crate::models::publication::{CommentContent, CommentReference};
+use crate::models::publication::CommentRef;
 use crate::requests::raw::RawImageRef;
 use crate::requests::raw::publication::{RawKind, RawPublishable};
 use crate::{Error, Result};
@@ -34,6 +35,8 @@ pub(crate) struct InnerData {
     pub reference_sticker_image: RawImageRef,
     #[serde(rename = "quoteCreatorName")]
     pub reference_author_name: String,
+    #[serde(rename = "answerName")]
+    pub answering_name: String,
     #[serde(rename = "changed")]
     pub is_edited: bool,
     #[serde(rename = "newFormatting")]
@@ -59,59 +62,25 @@ impl TryFrom<RawComment> for Comment {
     type Error = Error;
 
     fn try_from(value: RawComment) -> Result<Self> {
-        let content = match value.inner.content_kind {
-            RawContentKind::Text => CommentContent::Text,
-            RawContentKind::Image => CommentContent::Image(value.inner.image.into()),
-            RawContentKind::Gif => CommentContent::Gif {
-                first_frame: value.inner.image.into(),
-                animated: value.inner.gif.into(),
-            },
-            RawContentKind::Images => {
-                CommentContent::Images(value.inner.images.into_iter().map(Into::into).collect())
-            }
-            RawContentKind::Sticker => CommentContent::Sticker {
-                id: value.inner.sticker_id,
-                image: value.inner.sticker_image.into(),
-                gif: value.inner.sticker_gif.into(),
-            },
-            RawContentKind::Unknown(unknown) => CommentContent::Unknown(unknown),
-        };
-
-        let reference = if value.inner.reference_id != 0 {
-            let content = if value.inner.reference_images.len() > 1 {
-                CommentContent::Images(
-                    value
-                        .inner
-                        .reference_images
-                        .into_iter()
-                        .map(Into::into)
-                        .collect(),
-                )
-            } else if let Some(image) = value.inner.reference_images.first() {
-                CommentContent::Image(image.clone().into())
-            } else if value.inner.reference_sticker_id != 0 {
-                CommentContent::Sticker {
-                    id: value.inner.reference_sticker_id,
-                    image: value.inner.reference_sticker_image.into(),
-                    gif: None,
-                }
-            } else {
-                CommentContent::Text
-            };
-
-            // The returned reference text will most likely have the following format:
+        let reply_to = if value.inner.reference_id != 0 {
+            // The returned reference text will always have the following format:
             // "Author: Text"
-            let text = match value.inner.reference_text.split_once(": ") {
-                Some((_, text)) => text,
+            let text_without_author = match value.inner.reference_text.split_once(": ") {
+                Some((_, without_author)) => without_author,
                 None => &value.inner.reference_text,
             };
 
-            Some(CommentReference {
+            Some(CommentRef {
                 id: value.inner.reference_id,
-                content,
-                text: match text {
+                content: IntoRefContentOptions {
+                    images: value.inner.reference_images,
+                    sticker_id: value.inner.reference_sticker_id,
+                    sticker_image: value.inner.reference_sticker_image,
+                }
+                .into(),
+                text: match text_without_author {
                     "" => None,
-                    _ => Some(text.to_owned()),
+                    _ => Some(text_without_author.to_owned()),
                 },
                 author_name: value.inner.reference_author_name,
             })
@@ -120,12 +89,25 @@ impl TryFrom<RawComment> for Comment {
         };
 
         Ok(Self {
-            content,
+            content: IntoContentOptions {
+                content_kind: value.inner.content_kind,
+                image: value.inner.image,
+                gif: value.inner.gif,
+                images: value.inner.images,
+                sticker_id: value.inner.sticker_id,
+                sticker_image: value.inner.sticker_image,
+                sticker_gif: value.inner.sticker_gif,
+            }
+            .into(),
             text: match value.inner.text.as_str() {
                 "" => None,
                 _ => Some(value.inner.text),
             },
-            reference,
+            reply_to,
+            answering_name: match value.inner.answering_name.as_str() {
+                "" => None,
+                _ => Some(value.inner.answering_name),
+            },
             is_edited: value.inner.is_edited,
             has_new_formatting: value.inner.has_new_formatting,
         })

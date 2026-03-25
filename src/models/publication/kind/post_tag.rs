@@ -2,7 +2,7 @@ use crate::models::ImageRef;
 use crate::models::publication::{Kind, Publishable};
 use crate::sealed::Sealed;
 
-/// Represents a simple tag that can be attached to a post.
+/// Represents the specific data for a simple tag that can be attached to a post.
 #[derive(Default, Clone, Debug)]
 pub struct PostTag {
     /// The name of the tag

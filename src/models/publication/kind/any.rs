@@ -1,5 +1,5 @@
 use crate::models::publication::{Kind, Publishable};
-use crate::models::{Comment, Post, PostTag};
+use crate::models::{ChatMessage, Comment, Post, PostTag};
 use crate::sealed::Sealed;
 
 /// Represents a union of all possible additional data types for a publication.
@@ -12,7 +12,7 @@ pub enum AnyPublication {
     /// The publication contains additional comment data
     Comment(Box<Comment>),
     /// The publication contains additional chat message data
-    ChatMessage,
+    ChatMessage(Box<ChatMessage>),
     /// The publication contains additional post data
     Post(Box<Post>),
     /// The publication contains additional post tag data
@@ -41,7 +41,7 @@ impl Publishable for AnyPublication {
     fn kind(&self) -> Kind {
         match self {
             AnyPublication::Comment(_) => Kind::Comment,
-            AnyPublication::ChatMessage => Kind::ChatMessage,
+            AnyPublication::ChatMessage(_) => Kind::ChatMessage,
             AnyPublication::Post(_) => Kind::Post,
             AnyPublication::PostTag(_) => Kind::PostTag,
             AnyPublication::Moderation => Kind::Moderation,

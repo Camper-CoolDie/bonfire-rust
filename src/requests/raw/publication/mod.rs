@@ -99,3 +99,18 @@ where
         })
     }
 }
+
+impl<T: RawPublishable> TryFrom<RawPublication<T>> for Option<Publication<T::Target>>
+where
+    T::Target: TryFrom<T>,
+    Error: From<<T::Target as TryFrom<T>>::Error>,
+{
+    type Error = Error;
+
+    fn try_from(value: RawPublication<T>) -> Result<Self> {
+        Ok(match value.id {
+            0 => None,
+            _ => Some(Publication::<_>::try_from(value)?),
+        })
+    }
+}

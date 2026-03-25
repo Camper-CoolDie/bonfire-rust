@@ -17,14 +17,14 @@ impl Serialize for RawGender {
     where
         S: serde::Serializer,
     {
-        let kind = match self {
+        let gender = match self {
             RawGender::Male => 0,
             RawGender::Female => 1,
             RawGender::Other => 2,
             RawGender::Unknown(unknown) => *unknown,
         };
 
-        serializer.serialize_i64(kind)
+        serializer.serialize_i64(gender)
     }
 }
 
