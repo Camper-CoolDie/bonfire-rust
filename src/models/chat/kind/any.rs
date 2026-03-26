@@ -17,6 +17,27 @@ pub enum AnyChat {
     /// A direct message chat
     Direct(Direct),
 }
+impl AnyChat {
+    /// Creates a new `AnyChat` instance from a given [`Tag`].
+    ///
+    /// This method allows constructing an `AnyChat` enum variant based on the provided chat tag,
+    /// providing a convenient way to instantiate a generic chat wrapper.
+    #[must_use]
+    pub fn new(tag: Tag) -> Self {
+        match tag {
+            Tag::FandomRoot {
+                fandom_id,
+                language,
+            } => Self::FandomRoot(FandomRoot::new(fandom_id, language)),
+            Tag::FandomSub { id } => Self::FandomSub(FandomSub::new(id)),
+            Tag::Group { id } => Self::Group(Group::new(id)),
+            Tag::Direct {
+                my_id,
+                recipient_id,
+            } => Self::Direct(Direct::new(my_id, recipient_id)),
+        }
+    }
+}
 
 impl Messageable for AnyChat {
     fn tag(&self) -> Tag {
@@ -30,3 +51,9 @@ impl Messageable for AnyChat {
 }
 
 impl Sealed for AnyChat {}
+
+impl Default for AnyChat {
+    fn default() -> Self {
+        Self::FandomRoot(FandomRoot::default())
+    }
+}

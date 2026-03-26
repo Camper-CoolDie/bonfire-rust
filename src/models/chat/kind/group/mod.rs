@@ -35,6 +35,16 @@ pub struct Group {
     /// Indicates if only admins can change chat parameters
     pub allow_changes: bool,
 }
+impl Group {
+    /// Creates a new `Group` instance with the given `id`.
+    #[must_use]
+    pub fn new(id: u64) -> Self {
+        Self {
+            id,
+            ..Self::default()
+        }
+    }
+}
 
 impl Messageable for Group {
     /// Returns the chat's tag as [`ChatTag::Group`][Tag::Group].

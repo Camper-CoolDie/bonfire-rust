@@ -65,8 +65,10 @@ where
     type Error = Error;
 
     fn try_from(value: RawPublication<T>) -> Result<Self> {
-        Ok(match value.id {
-            0 => None,
+        // Sometimes, the publication ID is non-zero, but its status is (which will cause an
+        // UnknownVariant error later on)
+        Ok(match value.status {
+            RawStatus::Unknown(0) => None,
             _ => Some(Publication::<_>::try_from(value)?),
         })
     }

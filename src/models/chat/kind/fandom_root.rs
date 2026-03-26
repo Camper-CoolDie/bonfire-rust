@@ -18,6 +18,17 @@ pub struct FandomRoot {
     /// The number of subscribers to this chat
     pub subscribers_count: u64,
 }
+impl FandomRoot {
+    /// Creates a new `FandomRoot` instance with the given `fandom_id` and `language`.
+    #[must_use]
+    pub fn new(fandom_id: u64, language: Language) -> Self {
+        Self {
+            fandom_id,
+            language,
+            ..Self::default()
+        }
+    }
+}
 
 impl Messageable for FandomRoot {
     /// Returns the chat's tag as [`ChatTag::FandomRoot`][Tag::FandomRoot].

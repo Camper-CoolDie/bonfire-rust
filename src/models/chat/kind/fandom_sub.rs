@@ -16,6 +16,16 @@ pub struct FandomSub {
     /// The introductory message or description of the sub-chat, if set
     pub intro: Option<String>,
 }
+impl FandomSub {
+    /// Creates a new `FandomSub` instance with the given `id`.
+    #[must_use]
+    pub fn new(id: u64) -> Self {
+        Self {
+            id,
+            ..Self::default()
+        }
+    }
+}
 
 impl Messageable for FandomSub {
     /// Returns the chat's tag as [`ChatTag::FandomSub`][Tag::FandomSub].

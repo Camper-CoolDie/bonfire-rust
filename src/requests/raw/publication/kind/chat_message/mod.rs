@@ -14,7 +14,7 @@ use crate::requests::raw::{RawAccount, RawChatTag, RawFandom, RawGender, RawImag
 use crate::{Error, Result};
 
 // A reference text is allowed to be 300 characters long (including "Author: "), otherwise it's
-// truncated to 299 characters
+// truncated
 const REFERENCE_TEXT_MAX_CHARS: usize = 300;
 
 #[derive(Deserialize)]

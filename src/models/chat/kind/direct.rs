@@ -14,6 +14,17 @@ pub struct Direct {
     /// The timestamp when the other account last read the messages in this chat, if available
     pub recipient_read_at: Option<DateTime<Utc>>,
 }
+impl Direct {
+    /// Creates a new `Direct` instance with the authenticated user's ID and the recipient's ID.
+    #[must_use]
+    pub fn new(my_id: u64, recipient_id: u64) -> Self {
+        Self {
+            my_id,
+            recipient: Account::new(recipient_id),
+            ..Self::default()
+        }
+    }
+}
 
 impl Messageable for Direct {
     /// Returns the chat's tag as [`ChatTag::Direct`][Tag::Direct].

@@ -1,5 +1,6 @@
 use std::result::Result as StdResult;
 
+use serde::ser::SerializeStruct;
 use serde::{Deserialize, Serialize};
 
 use crate::models::ChatTag;
@@ -48,32 +49,13 @@ impl Serialize for RawTag {
     where
         S: serde::Serializer,
     {
-        let (kind, first_id, second_id) = match self {
-            RawTag::FandomRoot {
-                fandom_id,
-                language,
-            } => (RawKind::FandomRoot, *fandom_id, u64::from(language)),
-            RawTag::FandomSub { id } => (RawKind::FandomSub, *id, 0),
-            RawTag::Group { id } => (RawKind::Group, *id, 0),
-            RawTag::Direct {
-                my_id,
-                recipient_id,
-            } => (RawKind::Direct, *my_id, *recipient_id),
-            RawTag::Unknown {
-                kind,
-                first_id,
-                second_id,
-            } => (RawKind::Unknown(*kind), *first_id, *second_id),
-        };
+        let (kind, first_id, second_id) = self.into();
 
-        serializer.serialize_str(
-            &[
-                i64::from(kind).to_string(),
-                first_id.to_string(),
-                second_id.to_string(),
-            ]
-            .join("-"),
-        )
+        let mut tag = serializer.serialize_struct("RawChatTag", 3)?;
+        tag.serialize_field("chatType", &i64::from(kind))?;
+        tag.serialize_field("targetId", &first_id)?;
+        tag.serialize_field("targetSubId", &second_id)?;
+        tag.end()
     }
 }
 
@@ -118,24 +100,24 @@ impl<'de> Deserialize<'de> for RawTag {
     }
 }
 
-impl From<(RawKind, u64, u64)> for RawTag {
-    fn from(value: (RawKind, u64, u64)) -> Self {
-        match value.0 {
-            RawKind::FandomRoot => RawTag::FandomRoot {
-                fandom_id: value.1,
-                language: value.2.into(),
-            },
-            RawKind::FandomSub => RawTag::FandomSub { id: value.1 },
-            RawKind::Group => RawTag::Group { id: value.1 },
-            RawKind::Direct => RawTag::Direct {
-                my_id: value.1,
-                recipient_id: value.2,
-            },
-            RawKind::Unknown(unknown) => RawTag::Unknown {
-                kind: unknown,
-                first_id: value.1,
-                second_id: value.2,
-            },
+impl From<&RawTag> for (RawKind, u64, u64) {
+    fn from(value: &RawTag) -> Self {
+        match value {
+            RawTag::FandomRoot {
+                fandom_id,
+                language,
+            } => (RawKind::FandomRoot, *fandom_id, u64::from(language)),
+            RawTag::FandomSub { id } => (RawKind::FandomSub, *id, 0),
+            RawTag::Group { id } => (RawKind::Group, *id, 0),
+            RawTag::Direct {
+                my_id,
+                recipient_id,
+            } => (RawKind::Direct, *my_id, *recipient_id),
+            RawTag::Unknown {
+                kind,
+                first_id,
+                second_id,
+            } => (RawKind::Unknown(*kind), *first_id, *second_id),
         }
     }
 }
@@ -174,6 +156,28 @@ impl From<RawTag> for RawKind {
             RawTag::Group { .. } => RawKind::Group,
             RawTag::Direct { .. } => RawKind::Direct,
             RawTag::Unknown { kind: unknown, .. } => RawKind::Unknown(unknown),
+        }
+    }
+}
+
+impl From<(RawKind, u64, u64)> for RawTag {
+    fn from(value: (RawKind, u64, u64)) -> Self {
+        match value.0 {
+            RawKind::FandomRoot => RawTag::FandomRoot {
+                fandom_id: value.1,
+                language: value.2.into(),
+            },
+            RawKind::FandomSub => RawTag::FandomSub { id: value.1 },
+            RawKind::Group => RawTag::Group { id: value.1 },
+            RawKind::Direct => RawTag::Direct {
+                my_id: value.1,
+                recipient_id: value.2,
+            },
+            RawKind::Unknown(unknown) => RawTag::Unknown {
+                kind: unknown,
+                first_id: value.1,
+                second_id: value.2,
+            },
         }
     }
 }
