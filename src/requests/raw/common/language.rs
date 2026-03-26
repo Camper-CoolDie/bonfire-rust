@@ -53,6 +53,12 @@ impl From<i64> for RawLanguage {
     }
 }
 
+impl From<u64> for RawLanguage {
+    fn from(value: u64) -> Self {
+        value.cast_signed().into()
+    }
+}
+
 impl From<&RawLanguage> for i64 {
     fn from(value: &RawLanguage) -> Self {
         match value {
@@ -66,6 +72,12 @@ impl From<&RawLanguage> for i64 {
             RawLanguage::French => 8,
             RawLanguage::Unknown(unknown) => *unknown,
         }
+    }
+}
+
+impl From<&RawLanguage> for u64 {
+    fn from(value: &RawLanguage) -> Self {
+        i64::from(value).cast_unsigned()
     }
 }
 

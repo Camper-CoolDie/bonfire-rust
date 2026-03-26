@@ -9,6 +9,7 @@ pub use ref_content::RefContent;
 pub use reference::Reference;
 
 use crate::models::publication::{Kind, Publishable};
+use crate::models::{Account, Fandom};
 use crate::sealed::Sealed;
 
 /// The allowed range for a comment's text length.
@@ -20,6 +21,18 @@ pub const COMMENT_TEXT_LENGTH_RANGE: RangeInclusive<usize> = 1..=4000;
 pub struct Comment {
     /// The content associated with this comment
     pub content: Content,
+    /// The fandom in which this comment was posted
+    pub fandom: Fandom,
+    /// The account that authored this comment
+    pub author: Account,
+    /// The unique identifier of the parent publication this comment belongs to
+    pub parent_id: u64,
+    /// The type of the parent publication this comment belongs to
+    pub parent_kind: Kind,
+    /// The total karma received by this publication (can be positive or negative)
+    pub karma: f64,
+    /// The karma you personally placed on this publication, if any
+    pub my_karma: Option<f64>,
     /// The text content of the comment, if any
     pub text: Option<String>,
     /// A reference to the publication this comment is replying to, if any

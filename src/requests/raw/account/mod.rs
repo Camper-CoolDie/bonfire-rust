@@ -75,3 +75,14 @@ impl TryFrom<RawAccount> for Account {
         })
     }
 }
+
+impl TryFrom<RawAccount> for Option<Account> {
+    type Error = Error;
+
+    fn try_from(value: RawAccount) -> Result<Self> {
+        Ok(match value.id {
+            0 => None,
+            _ => Some(value.try_into()?),
+        })
+    }
+}

@@ -9,14 +9,14 @@ use crate::sealed::Sealed;
 /// [`Box`]-ed to prevent the enum from becoming catastrophically large.
 #[derive(Clone, Debug)]
 pub enum AnyPublication {
-    /// The publication contains additional comment data
-    Comment(Box<Comment>),
-    /// The publication contains additional chat message data
-    ChatMessage(Box<ChatMessage>),
     /// The publication contains additional post data
     Post(Box<Post>),
     /// The publication contains additional post tag data
     PostTag(Box<PostTag>),
+    /// The publication contains additional comment data
+    Comment(Box<Comment>),
+    /// The publication contains additional chat message data
+    ChatMessage(Box<ChatMessage>),
     /// The publication contains additional moderation data
     Moderation,
     /// The publication contains additional user event data
@@ -40,10 +40,10 @@ pub enum AnyPublication {
 impl Publishable for AnyPublication {
     fn kind(&self) -> Kind {
         match self {
-            AnyPublication::Comment(_) => Kind::Comment,
-            AnyPublication::ChatMessage(_) => Kind::ChatMessage,
             AnyPublication::Post(_) => Kind::Post,
             AnyPublication::PostTag(_) => Kind::PostTag,
+            AnyPublication::Comment(_) => Kind::Comment,
+            AnyPublication::ChatMessage(_) => Kind::ChatMessage,
             AnyPublication::Moderation => Kind::Moderation,
             AnyPublication::UserEvent => Kind::UserEvent,
             AnyPublication::StickerPack => Kind::StickerPack,

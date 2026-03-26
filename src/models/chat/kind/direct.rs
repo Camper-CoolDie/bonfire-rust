@@ -9,10 +9,10 @@ use crate::sealed::Sealed;
 pub struct Direct {
     /// The unique identifier of the authenticated user
     pub my_id: u64,
-    /// The partner account in this direct message chat
-    pub partner: Account,
-    /// The timestamp when the partner last read the messages in this chat, if available
-    pub partner_read_at: Option<DateTime<Utc>>,
+    /// The other account in this direct message chat
+    pub recipient: Account,
+    /// The timestamp when the other account last read the messages in this chat, if available
+    pub recipient_read_at: Option<DateTime<Utc>>,
 }
 
 impl Messageable for Direct {
@@ -20,7 +20,7 @@ impl Messageable for Direct {
     fn tag(&self) -> Tag {
         Tag::Direct {
             my_id: self.my_id,
-            partner_id: self.partner.id,
+            recipient_id: self.recipient.id,
         }
     }
 }

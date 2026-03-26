@@ -8,14 +8,14 @@ use serde::Deserialize;
 
 use crate::models::ChatMessage;
 use crate::models::publication::ChatMessageRef;
-use crate::requests::raw::chat::RawMemberRole;
+use crate::requests::raw::chat::{RawKind as RawChatKind, RawMemberRole};
 use crate::requests::raw::publication::{RawKind, RawPublishable};
-use crate::requests::raw::{RawGender, RawImageRef};
+use crate::requests::raw::{RawAccount, RawChatTag, RawFandom, RawGender, RawImageRef};
 use crate::{Error, Result};
 
-// The reference text is allowed to be 300 characters long (including "Author: "), otherwise it is
+// A reference text is allowed to be 300 characters long (including "Author: "), otherwise it's
 // truncated to 299 characters
-const REFERENCE_TEXT_MAX_LENGTH: usize = 300;
+const REFERENCE_TEXT_MAX_CHARS: usize = 300;
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -62,7 +62,7 @@ pub(crate) struct InnerData {
     #[serde(rename = "quoteText")]
     pub reference_text: String,
     #[serde(rename = "quoteImageRefs")]
-    pub reference_resources: Vec<RawImageRef>,
+    pub reference_images: Vec<RawImageRef>,
     #[serde(rename = "quoteStickerId")]
     pub reference_sticker_id: u64,
     #[serde(rename = "quoteStickerImage")]
@@ -78,8 +78,16 @@ pub(crate) struct InnerData {
 }
 
 #[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
 pub(crate) struct RawChatMessage {
+    pub fandom: RawFandom,
+    #[serde(rename = "creator")]
+    pub author: RawAccount,
+    #[serde(rename = "tag_1")]
+    pub chat_kind: RawChatKind,
+    #[serde(rename = "tag_2")]
+    pub chat_first_id: u64,
+    #[serde(rename = "tag_3")]
+    pub chat_second_id: u64,
     #[serde(rename = "jsonDB")]
     pub inner: InnerData,
 }
@@ -97,14 +105,16 @@ impl TryFrom<RawChatMessage> for ChatMessage {
 
     fn try_from(value: RawChatMessage) -> Result<Self> {
         let reply_to = if value.inner.reference_id != 0 {
-            // +3 for "..."
-            let is_text_truncated =
-                value.inner.reference_text.len() == REFERENCE_TEXT_MAX_LENGTH + 3;
+            // .chars().count() instead of .len() to account for unicode chars
+            let chars_count = value.inner.reference_text.chars().count();
 
-            // When the reference text is truncated, the server adds "..." to the end, so we remove
-            // these dots
+            // +3 for "..."
+            let is_text_truncated = chars_count == REFERENCE_TEXT_MAX_CHARS + 3;
+
+            // When a reference text is truncated, the server adds "..." to the end, so we remove it
             let text = if is_text_truncated {
-                &value.inner.reference_text[0..REFERENCE_TEXT_MAX_LENGTH]
+                let text_length = value.inner.reference_text.len();
+                &value.inner.reference_text[0..text_length - 3]
             } else {
                 &value.inner.reference_text
             };
@@ -119,14 +129,15 @@ impl TryFrom<RawChatMessage> for ChatMessage {
             Some(ChatMessageRef {
                 id: value.inner.reference_id,
                 content: IntoRefContentOptions {
-                    resources: value.inner.reference_resources,
+                    text: text_without_author,
+                    images: value.inner.reference_images,
                     sticker_id: value.inner.reference_sticker_id,
                     sticker_image: value.inner.reference_sticker_image,
                 }
                 .into(),
                 text: match text_without_author {
                     "" => None,
-                    _ => Some(text.to_owned()),
+                    text => Some(text.to_owned()),
                 },
                 is_text_truncated,
                 author_name: value.inner.reference_author_name,
@@ -159,14 +170,26 @@ impl TryFrom<RawChatMessage> for ChatMessage {
                 voice_waveform: value.inner.voice_waveform,
             }
             .try_into()?,
-            text: match value.inner.text.as_str() {
-                "" => None,
-                _ => Some(value.inner.text),
+            fandom: match value.chat_kind {
+                RawChatKind::FandomRoot | RawChatKind::FandomSub => Some(value.fandom.try_into()?),
+                _ => None,
             },
+            author: value.author.try_into()?,
+            chat_tag: RawChatTag::from((
+                value.chat_kind,
+                value.chat_first_id,
+                value.chat_second_id,
+            ))
+            .try_into()?,
             reply_to,
             answering_name: match value.inner.answering_name.as_str() {
                 "" => None,
-                _ => Some(value.inner.answering_name),
+                _ => Some(value.inner.answering_name)
+                    .filter(|name| value.inner.text.starts_with(name)),
+            },
+            text: match value.inner.text.as_str() {
+                "" => None,
+                _ => Some(value.inner.text),
             },
             is_edited: value.inner.is_edited,
             has_new_formatting: value.inner.has_new_formatting,

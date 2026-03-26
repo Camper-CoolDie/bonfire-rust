@@ -27,7 +27,7 @@ pub enum Tag {
         /// The unique identifier of the authenticated user
         my_id: u64,
         /// The unique identifier of the other user in the conversation
-        partner_id: u64,
+        recipient_id: u64,
     },
 }
 

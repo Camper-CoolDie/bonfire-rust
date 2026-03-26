@@ -60,7 +60,7 @@ impl Account {
     ///
     /// This is useful when you only need to reference an account by its ID for sending associated
     /// requests. However, obtaining a fully populated `Account` struct from methods like
-    /// [`Account::get_by_id()`] or [`Account::get_by_name()`] is generally preferred.
+    /// [`Account::by_id()`] or [`Account::by_name()`] is generally preferred.
     ///
     /// # Examples
     ///
@@ -72,7 +72,7 @@ impl Account {
     /// # async fn main() -> Result<()> {
     /// # let client = &Client::default();
     /// let account = Account::new(1234);
-    /// println!("{:#?}", account.get_info(client).await?);
+    /// println!("{:#?}", account.info(client).await?);
     /// #    Ok(())
     /// # }
     /// ```
@@ -101,7 +101,7 @@ impl Account {
     /// Returns [`UnavailableError::NotFound`][crate::UnavailableError::NotFound] if no account with
     /// the provided identifier exists, or [`Error`][crate::Error] if any other error occurs during
     /// the request.
-    pub async fn get_by_id(client: &Client, id: u64) -> Result<Self> {
+    pub async fn by_id(client: &Client, id: u64) -> Result<Self> {
         GetAccountRequest::new_by_id(id)
             .send_request(client)
             .await?
@@ -117,7 +117,7 @@ impl Account {
     /// Returns [`UnavailableError::NotFound`][crate::UnavailableError::NotFound] if no account with
     /// the provided name exists, or [`Error`][crate::Error] if any other error occurs during the
     /// request.
-    pub async fn get_by_name(client: &Client, name: &str) -> Result<Self> {
+    pub async fn by_name(client: &Client, name: &str) -> Result<Self> {
         GetAccountRequest::new_by_name(name)
             .send_request(client)
             .await?
@@ -169,7 +169,7 @@ impl Account {
     ///
     /// If an [`Error`][crate::Error] occurs during the retrieval of any page, the stream will yield
     /// that single error and then terminate.
-    pub fn get_online(
+    pub fn online(
         client: &Client,
         offset_date: Option<DateTime<Utc>>,
     ) -> impl Stream<Item = Result<Self>> + '_ {
@@ -200,10 +200,7 @@ impl Account {
     /// needed. The `offset` parameter can be used to skip a number of banned accounts from the
     /// beginning of the list. If an [`Error`][crate::Error] occurs during the retrieval of any
     /// page, the stream will yield that single error and then terminate.
-    pub fn get_prison(
-        client: &Client,
-        offset: usize,
-    ) -> impl Stream<Item = Result<PrisonEntry>> + '_ {
+    pub fn prison(client: &Client, offset: usize) -> impl Stream<Item = Result<PrisonEntry>> + '_ {
         auto_paginated_stream(
             move |offset| async move {
                 GetPrisonRequest::new(offset)

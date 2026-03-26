@@ -7,7 +7,6 @@ pub use kind::*;
 pub use reaction::Reaction;
 pub use status::Status;
 
-use crate::models::{Account, Category, Fandom};
 use crate::sealed::Sealed;
 
 /// A trait for publication types that extend the core [`Publication`] struct.
@@ -26,35 +25,10 @@ pub struct Publication<T: Publishable = AnyPublication> {
     pub id: u64,
     /// Additional, type-specific data for this publication
     pub kind: T,
-    /// The fandom in which this publication was posted
-    pub fandom: Fandom,
-    /// The account that authored this publication
-    pub author: Account,
-    /// The specific category of the fandom in which this publication was posted, or `None` if
-    /// unspecified
-    pub category: Option<Category>,
     /// The date and time when this publication was created (or published, for posts/quests)
     pub created_at: DateTime<Utc>,
-    /// The identifier of the parent publication, if this is a reply, sticker or tag category
-    pub parent_id: Option<u64>,
-    /// The type of the parent publication, if applicable
-    pub parent_kind: Option<Kind>,
-    /// The total karma received by this publication (can be positive or negative)
-    pub karma: f64,
-    /// The karma you personally placed on this publication, if any
-    pub my_karma: Option<f64>,
     /// The current status of this publication, or `None` if unspecified
     pub status: Option<Status>,
-    /// Indicates if this publication will appear in the main feed
-    pub is_closed: bool,
-    /// The total number of comments associated with this publication
-    pub comments_count: u64,
-    /// Indicates if this publication has been marked as important
-    pub is_important: bool,
-    /// Indicates if this publication originates from a blocked fandom or account
-    pub is_hidden: bool,
-    /// Indicates if this publication has been marked as NSFW
-    pub is_nsfw: bool,
     /// A value indicating the "hotness" or popularity of this publication
     pub hotness: f32,
 }

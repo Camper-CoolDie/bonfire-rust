@@ -22,7 +22,7 @@ pub(crate) trait RawMessageable: Sized {
 }
 
 #[derive(Deserialize)]
-#[serde(rename = "camelCase")]
+#[serde(rename_all = "camelCase")]
 pub(crate) struct RawChat<T: RawMessageable = AnyRawChat> {
     pub tag: RawTag,
     #[serde(rename = "unitChatMessage")]

@@ -6,9 +6,8 @@
 //! - **Modern asynchronous design**: Built on [`tokio`](https://crates.io/crates/tokio) and [`hyper`](https://crates.io/crates/hyper)
 //!   for non-blocking, high-performance network requests.
 //! - **Ergonomic and fluent API**: Interact with API models like [`Account`][models::Account] and
-//!   [`Fandom`][models::Fandom] directly (e.g.,
-//!   [`account.get_follows()`][models::Account::get_follows()]) rather than managing request
-//!   structs manually.
+//!   [`Fandom`][models::Fandom] directly (e.g., [`account.follows()`][models::Account::follows()])
+//!   rather than managing request structs manually.
 //! - **Automatic session management**: Handles authentication token refreshing transparently. Log
 //!   in once and the client manages the rest.
 //!

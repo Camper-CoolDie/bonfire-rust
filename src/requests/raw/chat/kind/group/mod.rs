@@ -16,7 +16,9 @@ use crate::requests::raw::{RawChatTag, RawImageRef};
 use crate::{Error, Result};
 
 #[derive(Deserialize)]
-pub(crate) struct InnerData {
+pub(crate) struct RawGroup {
+    #[serde(skip)]
+    pub id: u64,
     #[serde(rename = "customName")]
     pub name: String,
     #[serde(rename = "customImage")]
@@ -34,14 +36,6 @@ pub(crate) struct InnerData {
     pub params: RawParams,
 }
 
-#[derive(Deserialize)]
-pub(crate) struct RawGroup {
-    #[serde(skip)]
-    pub id: u64,
-    #[serde(rename = "jsonDB")]
-    pub inner: InnerData,
-}
-
 impl RawMessageable for RawGroup {
     type Target = Group;
 
@@ -51,7 +45,7 @@ impl RawMessageable for RawGroup {
             fandom_sub.id = id;
             Ok(fandom_sub)
         } else {
-            let kind: i64 = RawKind::from(&tag).into();
+            let kind: i64 = RawKind::from(tag).into();
             Err(Error::UnknownVariant(kind))
         }
     }
@@ -63,21 +57,21 @@ impl TryFrom<RawGroup> for Group {
     fn try_from(value: RawGroup) -> Result<Self> {
         Ok(Self {
             id: value.id,
-            name: value.inner.name,
-            icon: value.inner.icon.into(),
-            background: value.inner.background.into(),
-            my_status: value.inner.my_status.try_into()?,
-            is_subscribed: value.inner.is_subscribed,
-            subscribers_count: value.inner.subscribers_count,
-            left_at: match value.inner.left_at {
+            name: value.name,
+            icon: value.icon.into(),
+            background: value.background.into(),
+            my_status: value.my_status.try_into()?,
+            is_subscribed: value.is_subscribed,
+            subscribers_count: value.subscribers_count,
+            left_at: match value.left_at {
                 0 => None,
                 timestamp => Some(DateTime::from_timestamp_millis(timestamp).ok_or_else(|| {
                     serde_json::Error::custom(format!("timestamp {timestamp} is out of range"))
                 })?),
             },
-            is_public: value.inner.params.is_public,
-            allow_invites: value.inner.params.allow_invites,
-            allow_changes: value.inner.params.allow_changes,
+            is_public: value.params.is_public,
+            allow_invites: value.params.allow_invites,
+            allow_changes: value.params.allow_changes,
         })
     }
 }

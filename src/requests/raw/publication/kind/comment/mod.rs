@@ -6,8 +6,8 @@ use serde::Deserialize;
 
 use crate::models::Comment;
 use crate::models::publication::CommentRef;
-use crate::requests::raw::RawImageRef;
 use crate::requests::raw::publication::{RawKind, RawPublishable};
+use crate::requests::raw::{RawAccount, RawFandom, RawImageRef};
 use crate::{Error, Result};
 
 #[derive(Deserialize)]
@@ -46,6 +46,16 @@ pub(crate) struct InnerData {
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct RawComment {
+    pub fandom: RawFandom,
+    #[serde(rename = "creator")]
+    pub author: RawAccount,
+    #[serde(rename = "parentUnitId")]
+    pub parent_id: u64,
+    #[serde(rename = "parentUnitType")]
+    pub parent_kind: RawKind,
+    #[serde(rename = "karmaCount")]
+    pub karma: f64,
+    pub my_karma: f64,
     #[serde(rename = "jsonDB")]
     pub inner: InnerData,
 }
@@ -80,7 +90,7 @@ impl TryFrom<RawComment> for Comment {
                 .into(),
                 text: match text_without_author {
                     "" => None,
-                    _ => Some(text_without_author.to_owned()),
+                    text => Some(text.to_owned()),
                 },
                 author_name: value.inner.reference_author_name,
             })
@@ -99,14 +109,24 @@ impl TryFrom<RawComment> for Comment {
                 sticker_gif: value.inner.sticker_gif,
             }
             .into(),
-            text: match value.inner.text.as_str() {
-                "" => None,
-                _ => Some(value.inner.text),
+            fandom: value.fandom.try_into()?,
+            author: value.author.try_into()?,
+            parent_id: value.parent_id,
+            parent_kind: value.parent_kind.into(),
+            karma: value.karma / 100.0,
+            my_karma: match value.my_karma {
+                0.0 => None,
+                karma => Some(karma / 100.0),
             },
             reply_to,
             answering_name: match value.inner.answering_name.as_str() {
                 "" => None,
-                _ => Some(value.inner.answering_name),
+                _ => Some(value.inner.answering_name)
+                    .filter(|name| value.inner.text.starts_with(name)),
+            },
+            text: match value.inner.text.as_str() {
+                "" => None,
+                _ => Some(value.inner.text),
             },
             is_edited: value.inner.is_edited,
             has_new_formatting: value.inner.has_new_formatting,

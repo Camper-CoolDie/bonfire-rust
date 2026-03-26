@@ -70,7 +70,7 @@ impl Info {
     /// Returns [`UnavailableError::NotFound`][crate::UnavailableError::NotFound] if no account with
     /// the provided identifier exists, or [`Error`][crate::Error] if any other error occurs during
     /// the request.
-    pub async fn get_by_id(client: &Client, id: u64) -> Result<Self> {
+    pub async fn by_id(client: &Client, id: u64) -> Result<Self> {
         GetInfoRequest::new_by_id(id)
             .send_request(client)
             .await?
@@ -84,7 +84,7 @@ impl Info {
     /// Returns [`UnavailableError::NotFound`][crate::UnavailableError::NotFound] if no account with
     /// the provided name exists, or [`Error`][crate::Error] if any other error occurs during the
     /// request.
-    pub async fn get_by_name(client: &Client, name: &str) -> Result<Self> {
+    pub async fn by_name(client: &Client, name: &str) -> Result<Self> {
         GetInfoRequest::new_by_name(name)
             .send_request(client)
             .await?
@@ -100,7 +100,7 @@ impl Account {
     /// Returns [`UnavailableError::NotFound`][crate::UnavailableError::NotFound] if no account with
     /// the contained identifier exists, or [`Error`][crate::Error] if any other error occurs during
     /// the request.
-    pub async fn get_info(&self, client: &Client) -> Result<Info> {
+    pub async fn info(&self, client: &Client) -> Result<Info> {
         GetInfoRequest::new_by_id(self.id)
             .send_request(client)
             .await?

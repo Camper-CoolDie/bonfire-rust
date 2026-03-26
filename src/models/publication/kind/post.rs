@@ -1,6 +1,6 @@
 use crate::client::Request as _;
 use crate::models::publication::{Kind, PostTag, Publishable};
-use crate::models::{Comment, Publication};
+use crate::models::{Account, Category, Comment, Fandom, Publication};
 use crate::requests::publication::post::GetPostRequest;
 use crate::sealed::Sealed;
 use crate::{Client, Result};
@@ -8,10 +8,24 @@ use crate::{Client, Result};
 /// Represents the specific data for a post publication.
 #[derive(Default, Clone, Debug)]
 pub struct Post {
+    /// The fandom in which this publication was posted
+    pub fandom: Fandom,
+    /// The account that authored this publication
+    pub author: Account,
+    /// The specific category of the fandom in which this publication was posted
+    pub category: Category,
     // /// The content of this post
     // pub pages: Vec<Page>,
     /// A comment which earned the highest amount of karma
     pub best_comment: Option<Publication<Comment>>,
+    /// The total karma received by this publication (can be positive or negative)
+    pub karma: f64,
+    /// The karma you personally placed on this publication, if any
+    pub my_karma: Option<f64>,
+    /// Indicates if this publication will appear in the main feed
+    pub is_closed: bool,
+    /// The total number of comments associated with this publication
+    pub comments_count: u64,
     /// The identifier of the rubric this post is linked to
     pub rubric_id: Option<u64>,
     /// The name of the rubric this post is linked to
@@ -20,6 +34,12 @@ pub struct Post {
     pub rubric_karma_coef: Option<f64>,
     // /// A relay race this post is linked to
     // pub relay_race: Option<RelayRace>,
+    /// Indicates if this publication has been marked as important
+    pub is_important: bool,
+    /// Indicates if this publication originates from a blocked fandom or account
+    pub is_hidden: bool,
+    /// Indicates if this publication has been marked as NSFW
+    pub is_nsfw: bool,
 }
 
 impl Publishable for Post {

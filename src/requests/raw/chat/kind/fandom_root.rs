@@ -7,7 +7,11 @@ use crate::requests::raw::{RawChatTag, RawImageRef, RawLanguage};
 use crate::{Error, Result};
 
 #[derive(Deserialize)]
-pub(crate) struct InnerData {
+pub(crate) struct RawFandomRoot {
+    #[serde(skip)]
+    pub fandom_id: u64,
+    #[serde(skip)]
+    pub language: RawLanguage,
     #[serde(rename = "customName")]
     pub name: String,
     #[serde(rename = "customImage")]
@@ -16,16 +20,6 @@ pub(crate) struct InnerData {
     pub is_subscribed: bool,
     #[serde(rename = "membersCount")]
     pub subscribers_count: u64,
-}
-
-#[derive(Deserialize)]
-pub(crate) struct RawFandomRoot {
-    #[serde(skip)]
-    pub fandom_id: u64,
-    #[serde(skip)]
-    pub language: RawLanguage,
-    #[serde(rename = "jsonDB")]
-    pub inner: InnerData,
 }
 
 impl RawMessageable for RawFandomRoot {
@@ -42,7 +36,7 @@ impl RawMessageable for RawFandomRoot {
             fandom_root.language = language;
             Ok(fandom_root)
         } else {
-            let kind: i64 = RawKind::from(&tag).into();
+            let kind: i64 = RawKind::from(tag).into();
             Err(Error::UnknownVariant(kind))
         }
     }
@@ -55,10 +49,10 @@ impl TryFrom<RawFandomRoot> for FandomRoot {
         Ok(Self {
             fandom_id: value.fandom_id,
             language: value.language.try_into()?,
-            name: value.inner.name,
-            icon: value.inner.icon.into(),
-            is_subscribed: value.inner.is_subscribed,
-            subscribers_count: value.inner.subscribers_count,
+            name: value.name,
+            icon: value.icon.into(),
+            is_subscribed: value.is_subscribed,
+            subscribers_count: value.subscribers_count,
         })
     }
 }

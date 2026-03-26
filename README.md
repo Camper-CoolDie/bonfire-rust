@@ -12,7 +12,7 @@ A modern, well-documented asynchronous Rust client library for the
 - **Modern asynchronous design**: Built on [`tokio`](https://crates.io/crates/tokio) and
   [`hyper`](https://crates.io/crates/hyper) for non-blocking, high-performance network requests.
 - **Ergonomic and fluent API**: Interact with API models like `Account` and `Fandom` directly (e.g.,
-  `account.get_follows()`) rather than managing request structs manually.
+  `account.follows()`) rather than managing request structs manually.
 - **Automatic session management**: Handles authentication token refreshing transparently. Log in
   once and the client manages the rest.
 

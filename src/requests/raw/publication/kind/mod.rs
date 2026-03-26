@@ -19,10 +19,10 @@ use serde::{Deserialize, Serialize};
 use crate::models::publication::Kind;
 
 pub(crate) enum RawKind {
-    Comment,
-    ChatMessage,
     Post,
     PostTag,
+    Comment,
+    ChatMessage,
     Moderation,
     UserEvent,
     StickerPack,
@@ -85,10 +85,10 @@ impl<'de> Deserialize<'de> for RawKind {
 impl From<RawKind> for Kind {
     fn from(value: RawKind) -> Self {
         match value {
-            RawKind::Comment => Kind::Comment,
-            RawKind::ChatMessage => Kind::ChatMessage,
             RawKind::Post => Kind::Post,
             RawKind::PostTag => Kind::PostTag,
+            RawKind::Comment => Kind::Comment,
+            RawKind::ChatMessage => Kind::ChatMessage,
             RawKind::Moderation => Kind::Moderation,
             RawKind::UserEvent => Kind::UserEvent,
             RawKind::StickerPack => Kind::StickerPack,
@@ -106,10 +106,10 @@ impl From<RawKind> for Option<Kind> {
     fn from(value: RawKind) -> Self {
         match value {
             RawKind::Unknown(0) => None,
-            RawKind::Comment => Some(Kind::Comment),
-            RawKind::ChatMessage => Some(Kind::ChatMessage),
             RawKind::Post => Some(Kind::Post),
             RawKind::PostTag => Some(Kind::PostTag),
+            RawKind::Comment => Some(Kind::Comment),
+            RawKind::ChatMessage => Some(Kind::ChatMessage),
             RawKind::Moderation => Some(Kind::Moderation),
             RawKind::UserEvent => Some(Kind::UserEvent),
             RawKind::StickerPack => Some(Kind::StickerPack),
@@ -126,10 +126,10 @@ impl From<RawKind> for Option<Kind> {
 impl From<Kind> for RawKind {
     fn from(value: Kind) -> Self {
         match value {
-            Kind::Comment => RawKind::Comment,
-            Kind::ChatMessage => RawKind::ChatMessage,
             Kind::Post => RawKind::Post,
             Kind::PostTag => RawKind::PostTag,
+            Kind::Comment => RawKind::Comment,
+            Kind::ChatMessage => RawKind::ChatMessage,
             Kind::Moderation => RawKind::Moderation,
             Kind::UserEvent => RawKind::UserEvent,
             Kind::StickerPack => RawKind::StickerPack,

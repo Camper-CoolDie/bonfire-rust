@@ -24,7 +24,7 @@ impl RawMessageable for AnyRawChat {
             RawChatTag::FandomSub { .. } => AnyRawChat::FandomSub(RawFandomSub::new(data, tag)?),
             RawChatTag::Group { .. } => AnyRawChat::Group(RawGroup::new(data, tag)?),
             RawChatTag::Direct { .. } => AnyRawChat::Direct(RawDirect::new(data, tag)?),
-            RawChatTag::Unknown((kind, _, _)) => AnyRawChat::Unknown(kind),
+            RawChatTag::Unknown { kind, .. } => AnyRawChat::Unknown(kind),
         })
     }
 }

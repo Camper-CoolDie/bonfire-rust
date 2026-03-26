@@ -1,7 +1,7 @@
 use serde::Deserialize;
 
 #[derive(Deserialize)]
-#[serde(rename = "camelCase")]
+#[serde(rename_all = "camelCase")]
 pub(crate) struct RawParams {
     pub is_public: bool,
     #[serde(rename = "allowUserInvite")]

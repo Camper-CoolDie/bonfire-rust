@@ -7,9 +7,6 @@ use crate::requests::raw::RawLanguage;
 use crate::requests::raw::chat::RawKind;
 use crate::{Error, Result};
 
-// The server always accepts and returns tags in the "<kind>-<first_id>-<second_id>" format. Since
-// second_id may be either an account's ID (u64) or a language ID (i64), our serialization logic is
-// a bit complex
 pub(crate) enum RawTag {
     FandomRoot {
         fandom_id: u64,
@@ -23,9 +20,27 @@ pub(crate) enum RawTag {
     },
     Direct {
         my_id: u64,
-        partner_id: u64,
+        recipient_id: u64,
     },
-    Unknown((i64, u64, u64)),
+    Unknown {
+        kind: i64,
+        first_id: u64,
+        second_id: u64,
+    },
+}
+
+#[derive(Deserialize)]
+#[serde(untagged)]
+enum RawTagInput {
+    Map {
+        #[serde(rename = "chatType")]
+        kind: RawKind,
+        #[serde(rename = "targetId")]
+        first_id: u64,
+        #[serde(rename = "targetSubId")]
+        second_id: u64,
+    },
+    String(String),
 }
 
 impl Serialize for RawTag {
@@ -33,21 +48,32 @@ impl Serialize for RawTag {
     where
         S: serde::Serializer,
     {
-        let kind: &str = &i64::from(RawKind::from(self)).to_string();
-
-        let (first_id, second_id): (&str, &str) = match self {
+        let (kind, first_id, second_id) = match self {
             RawTag::FandomRoot {
                 fandom_id,
                 language,
-            } => (&fandom_id.to_string(), &i64::from(language).to_string()),
-            RawTag::FandomSub { id } | RawTag::Group { id } => (&id.to_string(), &0.to_string()),
-            RawTag::Direct { my_id, partner_id } => (&my_id.to_string(), &partner_id.to_string()),
-            RawTag::Unknown((_, first_id, second_id)) => {
-                (&first_id.to_string(), &second_id.to_string())
-            }
+            } => (RawKind::FandomRoot, *fandom_id, u64::from(language)),
+            RawTag::FandomSub { id } => (RawKind::FandomSub, *id, 0),
+            RawTag::Group { id } => (RawKind::Group, *id, 0),
+            RawTag::Direct {
+                my_id,
+                recipient_id,
+            } => (RawKind::Direct, *my_id, *recipient_id),
+            RawTag::Unknown {
+                kind,
+                first_id,
+                second_id,
+            } => (RawKind::Unknown(*kind), *first_id, *second_id),
         };
 
-        serializer.serialize_str(&[kind, first_id, second_id].join("-"))
+        serializer.serialize_str(
+            &[
+                i64::from(kind).to_string(),
+                first_id.to_string(),
+                second_id.to_string(),
+            ]
+            .join("-"),
+        )
     }
 }
 
@@ -56,51 +82,61 @@ impl<'de> Deserialize<'de> for RawTag {
     where
         D: serde::Deserializer<'de>,
     {
-        let tag = String::deserialize(deserializer)?;
-        let parts = tag.split('-').collect::<Vec<_>>();
-        let [kind, first_id, second_id] = parts
-            .get(0..3)
-            .ok_or(serde::de::Error::custom("invalid chat tag format"))?
-        else {
-            return Err(serde::de::Error::custom("chat tag has extra parts"));
+        let parts = match RawTagInput::deserialize(deserializer)? {
+            RawTagInput::Map {
+                kind,
+                first_id,
+                second_id,
+            } => (kind, first_id, second_id),
+            RawTagInput::String(tag) => {
+                let parts = tag.split('-').collect::<Vec<_>>();
+                if parts.len() != 3 {
+                    return Err(serde::de::Error::custom("invalid chat tag format"));
+                }
+
+                let kind = parts[0].parse::<i64>().map_err(|error| {
+                    serde::de::Error::custom(format!(
+                        "failed to convert tag kind into i64: {error}"
+                    ))
+                })?;
+                let first_id = parts[1].parse::<u64>().map_err(|error| {
+                    serde::de::Error::custom(format!(
+                        "failed to convert tag first_id into u64: {error}"
+                    ))
+                })?;
+                let second_id = parts[2].parse::<u64>().map_err(|error| {
+                    serde::de::Error::custom(format!(
+                        "failed to convert tag second_id into u64: {error}"
+                    ))
+                })?;
+
+                (RawKind::from(kind), first_id, second_id)
+            }
         };
 
-        let kind = RawKind::from(kind.parse::<i64>().map_err(|error| {
-            serde::de::Error::custom(format!("failed to convert tag kind into i64 ({error})"))
-        })?);
+        Ok(parts.into())
+    }
+}
 
-        let first_id = first_id.parse::<u64>().map_err(|error| {
-            serde::de::Error::custom(format!("failed to convert tag first_id into u64 ({error})"))
-        })?;
-        let (second_id, language) = if matches!(kind, RawKind::FandomRoot) {
-            let language = RawLanguage::from(second_id.parse::<i64>().map_err(|error| {
-                serde::de::Error::custom(format!(
-                    "failed to convert tag second_id into i64 ({error})"
-                ))
-            })?);
-            (0, language)
-        } else {
-            let second_id = second_id.parse::<u64>().map_err(|error| {
-                serde::de::Error::custom(format!(
-                    "failed to convert tag second_id into u64 ({error})"
-                ))
-            })?;
-            (second_id, RawLanguage::Unknown(0))
-        };
-
-        Ok(match kind {
+impl From<(RawKind, u64, u64)> for RawTag {
+    fn from(value: (RawKind, u64, u64)) -> Self {
+        match value.0 {
             RawKind::FandomRoot => RawTag::FandomRoot {
-                fandom_id: first_id,
-                language,
+                fandom_id: value.1,
+                language: value.2.into(),
             },
-            RawKind::FandomSub => RawTag::FandomSub { id: first_id },
-            RawKind::Group => RawTag::Group { id: first_id },
+            RawKind::FandomSub => RawTag::FandomSub { id: value.1 },
+            RawKind::Group => RawTag::Group { id: value.1 },
             RawKind::Direct => RawTag::Direct {
-                my_id: first_id,
-                partner_id: second_id,
+                my_id: value.1,
+                recipient_id: value.2,
             },
-            RawKind::Unknown(unknown) => RawTag::Unknown((unknown, first_id, second_id)),
-        })
+            RawKind::Unknown(unknown) => RawTag::Unknown {
+                kind: unknown,
+                first_id: value.1,
+                second_id: value.2,
+            },
+        }
     }
 }
 
@@ -118,20 +154,26 @@ impl TryFrom<RawTag> for ChatTag {
             },
             RawTag::FandomSub { id } => ChatTag::FandomSub { id },
             RawTag::Group { id } => ChatTag::Group { id },
-            RawTag::Direct { my_id, partner_id } => ChatTag::Direct { my_id, partner_id },
-            RawTag::Unknown((unknown, _, _)) => return Err(Error::UnknownVariant(unknown)),
+            RawTag::Direct {
+                my_id,
+                recipient_id,
+            } => ChatTag::Direct {
+                my_id,
+                recipient_id,
+            },
+            RawTag::Unknown { kind: unknown, .. } => return Err(Error::UnknownVariant(unknown)),
         })
     }
 }
 
-impl From<&RawTag> for RawKind {
-    fn from(value: &RawTag) -> Self {
+impl From<RawTag> for RawKind {
+    fn from(value: RawTag) -> Self {
         match value {
             RawTag::FandomRoot { .. } => RawKind::FandomRoot,
             RawTag::FandomSub { .. } => RawKind::FandomSub,
             RawTag::Group { .. } => RawKind::Group,
             RawTag::Direct { .. } => RawKind::Direct,
-            RawTag::Unknown((unknown, _, _)) => RawKind::Unknown(*unknown),
+            RawTag::Unknown { kind: unknown, .. } => RawKind::Unknown(unknown),
         }
     }
 }
@@ -148,7 +190,13 @@ impl From<ChatTag> for RawTag {
             },
             ChatTag::FandomSub { id } => RawTag::FandomSub { id },
             ChatTag::Group { id } => RawTag::Group { id },
-            ChatTag::Direct { my_id, partner_id } => RawTag::Direct { my_id, partner_id },
+            ChatTag::Direct {
+                my_id,
+                recipient_id,
+            } => RawTag::Direct {
+                my_id,
+                recipient_id,
+            },
         }
     }
 }

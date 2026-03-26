@@ -105,31 +105,26 @@ impl TryFrom<IntoContentOptions> for ChatMessageContent {
     }
 }
 
-pub(super) struct IntoRefContentOptions {
-    pub resources: Vec<RawImageRef>,
+pub(super) struct IntoRefContentOptions<'a> {
+    pub text: &'a str,
+    pub images: Vec<RawImageRef>,
     pub sticker_id: u64,
     pub sticker_image: RawImageRef,
 }
 
-impl From<IntoRefContentOptions> for ChatMessageRefContent {
+impl From<IntoRefContentOptions<'_>> for ChatMessageRefContent {
     fn from(value: IntoRefContentOptions) -> Self {
-        if value.resources.len() > 1 {
-            ChatMessageRefContent::Images(value.resources.into_iter().map(Into::into).collect())
-        } else if let Some(resource) = value.resources.first() {
-            // We know it's a voice message when the dimensions aren't given
-            if resource.width == 0 && resource.height == 0 {
-                ChatMessageRefContent::Voice {
-                    id: resource.id,
-                    uri: resource.uri.clone(),
-                }
-            } else {
-                ChatMessageRefContent::Image(resource.clone().into())
-            }
+        if value.images.len() > 1 {
+            ChatMessageRefContent::Images(value.images.into_iter().map(Into::into).collect())
+        } else if let Some(image) = value.images.first() {
+            ChatMessageRefContent::Image(image.clone().into())
         } else if value.sticker_id != 0 {
             ChatMessageRefContent::Sticker {
                 id: value.sticker_id,
                 image: value.sticker_image.into(),
             }
+        } else if value.text.is_empty() {
+            ChatMessageRefContent::Voice
         } else {
             ChatMessageRefContent::Text
         }

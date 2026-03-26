@@ -44,7 +44,7 @@ impl Account {
     /// Returns [`RootError::AccessDenied`][crate::RootError::AccessDenied] if you attempt to check
     /// the block status of your own account, or [`Error`][crate::Error] if any other error occurs
     /// during the request.
-    pub async fn check_blocked(&self, client: &Client) -> Result<bool> {
+    pub async fn is_blocked(&self, client: &Client) -> Result<bool> {
         Ok(CheckAccountBlockedRequest::new(self.id)
             .send_request(client)
             .await?
@@ -58,7 +58,7 @@ impl Account {
     /// needed. The `offset` parameter can be used to skip a number of accounts from the beginning
     /// of the list. If an [`Error`][crate::Error] occurs during the retrieval of any page, the
     /// stream will yield that single error and then terminate.
-    pub fn get_blocked_accounts<'a>(
+    pub fn blocked_accounts<'a>(
         &'a self,
         client: &'a Client,
         offset: usize,
@@ -80,7 +80,7 @@ impl Account {
     /// # Errors
     ///
     /// Returns [`Error`][crate::Error] if an error occurs while sending the request.
-    pub async fn get_blocked_fandom_ids(&self, client: &Client) -> Result<Vec<u64>> {
+    pub async fn blocked_fandom_ids(&self, client: &Client) -> Result<Vec<u64>> {
         Ok(GetBlockedFandomIdsRequest::new(self.id)
             .send_request(client)
             .await?

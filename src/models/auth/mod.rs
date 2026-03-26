@@ -32,12 +32,12 @@ impl Auth {
     /// # #[tokio::main]
     /// # async fn main() -> Result<()> {
     /// # let client = &Client::default();
-    /// let profile = Auth::get_profile(client).await?;
+    /// let profile = Auth::profile(client).await?;
     /// println!("Logged in as {} (ID: {})", profile.name, profile.id);
     /// #    Ok(())
     /// # }
     /// ```
-    pub async fn get_profile(client: &Client) -> Result<Profile> {
+    pub async fn profile(client: &Client) -> Result<Profile> {
         GetProfileQuery::new()
             .send_request(client)
             .await?

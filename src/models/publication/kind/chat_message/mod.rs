@@ -9,6 +9,7 @@ pub use ref_content::RefContent;
 pub use reference::Reference;
 
 use crate::models::publication::{Kind, Publishable};
+use crate::models::{Account, ChatTag, Fandom};
 use crate::sealed::Sealed;
 
 /// The allowed range for a chat message's text length.
@@ -20,6 +21,14 @@ pub const CHAT_MESSAGE_TEXT_LENGTH_RANGE: RangeInclusive<usize> = 1..=2000;
 pub struct ChatMessage {
     /// The content associated with this chat message
     pub content: Content,
+    /// The fandom in which this chat message was posted, if applicable. Direct messages may not
+    /// have an associated fandom
+    pub fandom: Option<Fandom>,
+    /// The account that authored this chat message, if applicable. System messages may not have an
+    /// author
+    pub author: Option<Account>,
+    /// The tag identifying the chat this message belongs to
+    pub chat_tag: ChatTag,
     /// The text content of the chat message, if any
     pub text: Option<String>,
     /// A reference to the publication this chat message is replying to, if any

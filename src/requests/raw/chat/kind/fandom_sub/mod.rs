@@ -10,7 +10,9 @@ use crate::requests::raw::{RawChatTag, RawImageRef};
 use crate::{Error, Result};
 
 #[derive(Deserialize)]
-pub(crate) struct InnerData {
+pub(crate) struct RawFandomSub {
+    #[serde(skip)]
+    pub id: u64,
     #[serde(rename = "customName")]
     pub name: String,
     #[serde(rename = "customImage")]
@@ -18,14 +20,6 @@ pub(crate) struct InnerData {
     #[serde(rename = "backgroundImage")]
     pub background: RawImageRef,
     pub params: RawParams,
-}
-
-#[derive(Deserialize)]
-pub(crate) struct RawFandomSub {
-    #[serde(skip)]
-    pub id: u64,
-    #[serde(rename = "jsonDB")]
-    pub inner: InnerData,
 }
 
 impl RawMessageable for RawFandomSub {
@@ -37,7 +31,7 @@ impl RawMessageable for RawFandomSub {
             fandom_sub.id = id;
             Ok(fandom_sub)
         } else {
-            let kind: i64 = RawKind::from(&tag).into();
+            let kind: i64 = RawKind::from(tag).into();
             Err(Error::UnknownVariant(kind))
         }
     }
@@ -49,12 +43,12 @@ impl TryFrom<RawFandomSub> for FandomSub {
     fn try_from(value: RawFandomSub) -> Result<Self> {
         Ok(Self {
             id: value.id,
-            name: value.inner.name,
-            icon: value.inner.icon.into(),
-            background: value.inner.background.into(),
-            intro: match value.inner.params.intro.as_str() {
+            name: value.name,
+            icon: value.icon.into(),
+            background: value.background.into(),
+            intro: match value.params.intro.as_str() {
                 "" => None,
-                _ => Some(value.inner.params.intro),
+                _ => Some(value.params.intro),
             },
         })
     }

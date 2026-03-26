@@ -44,7 +44,7 @@ impl Account {
     /// needed. The `offset` parameter can be used to skip a number of accounts from the beginning
     /// of the list. If an [`Error`][crate::Error] occurs during the retrieval of any page, the
     /// stream will yield that single error and then terminate.
-    pub fn get_follows<'a>(
+    pub fn follows<'a>(
         &'a self,
         client: &'a Client,
         offset: usize,
@@ -68,7 +68,7 @@ impl Account {
     /// needed. The `offset` parameter can be used to skip a number of accounts from the beginning
     /// of the list. If an [`Error`][crate::Error] occurs during the retrieval of any page, the
     /// stream will yield that single error and then terminate.
-    pub fn get_followers<'a>(
+    pub fn followers<'a>(
         &'a self,
         client: &'a Client,
         offset: usize,
@@ -92,7 +92,7 @@ impl Account {
     /// needed. The `offset` parameter can be used to skip a number of fandoms from the beginning of
     /// the list. If an [`Error`][crate::Error] occurs during the retrieval of any page, the stream
     /// will yield that single error and then terminate.
-    pub fn get_subscriptions<'a>(
+    pub fn subscriptions<'a>(
         &'a self,
         client: &'a Client,
         offset: usize,
@@ -116,7 +116,7 @@ impl Account {
     /// needed. The `offset` parameter can be used to skip a number of fandoms from the beginning of
     /// the list. If an [`Error`][crate::Error] occurs during the retrieval of any page, the stream
     /// will yield that single error and then terminate.
-    pub fn get_moderated_fandoms<'a>(
+    pub fn moderated_fandoms<'a>(
         &'a self,
         client: &'a Client,
         offset: usize,
@@ -140,7 +140,7 @@ impl Account {
     /// needed. The `offset` parameter can be used to skip a number of fandoms from the beginning of
     /// the list. If an [`Error`][crate::Error] occurs during the retrieval of any page, the stream
     /// will yield that single error and then terminate.
-    pub fn get_curated_fandoms<'a>(
+    pub fn curated_fandoms<'a>(
         &'a self,
         client: &'a Client,
         offset: usize,

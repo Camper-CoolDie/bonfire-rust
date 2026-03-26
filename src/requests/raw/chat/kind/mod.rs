@@ -4,11 +4,14 @@ mod fandom_root;
 mod fandom_sub;
 mod group;
 
+use std::result::Result as StdResult;
+
 pub(crate) use any::AnyRawChat;
 pub(crate) use direct::RawDirect;
 pub(crate) use fandom_root::RawFandomRoot;
 pub(crate) use fandom_sub::{RawFandomSub, RawParams as RawFandomSubParams};
 pub(crate) use group::{RawGroup, RawMemberRole, RawMemberStatus, RawParams as RawGroupParams};
+use serde::Deserialize;
 
 pub(crate) enum RawKind {
     FandomRoot,
@@ -16,6 +19,15 @@ pub(crate) enum RawKind {
     Group,
     Direct,
     Unknown(i64),
+}
+
+impl<'de> Deserialize<'de> for RawKind {
+    fn deserialize<D>(deserializer: D) -> StdResult<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        Ok(i64::deserialize(deserializer)?.into())
+    }
 }
 
 impl From<RawKind> for i64 {

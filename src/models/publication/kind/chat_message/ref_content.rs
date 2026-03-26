@@ -18,10 +18,5 @@ pub enum RefContent {
         image: ImageRef,
     },
     /// A voice message
-    Voice {
-        /// The unique identifier of the voice message
-        id: u64,
-        /// The URI from which this voice message can be downloaded
-        uri: String,
-    },
+    Voice,
 }

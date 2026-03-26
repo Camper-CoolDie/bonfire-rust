@@ -20,16 +20,17 @@ pub use post::Post;
 pub use post_tag::PostTag;
 
 /// Represents the specific type of a publication.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Default, Clone, Debug, PartialEq, Eq)]
 pub enum Kind {
+    /// The publication is a post
+    #[default]
+    Post,
+    /// The publication is a post tag
+    PostTag,
     /// The publication is a comment
     Comment,
     /// The publication is a chat message
     ChatMessage,
-    /// The publication is a post
-    Post,
-    /// The publication is a post tag
-    PostTag,
     /// The publication is a moderation action
     Moderation,
     /// The publication is a user event
