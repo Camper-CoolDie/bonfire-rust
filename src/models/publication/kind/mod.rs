@@ -18,9 +18,12 @@ pub use comment::{
 };
 pub use post::Post;
 pub use post_tag::PostTag;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 
 /// Represents the specific type of a publication.
 #[derive(Default, Clone, Debug, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub enum Kind {
     /// The publication is a post
     #[default]

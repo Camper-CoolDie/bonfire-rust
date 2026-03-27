@@ -1,3 +1,6 @@
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
 use crate::models::chat::{Messageable, Tag};
 use crate::models::{Direct, FandomRoot, FandomSub, Group};
 use crate::sealed::Sealed;
@@ -7,6 +10,7 @@ use crate::sealed::Sealed;
 /// This enum acts as a catch-all for various chat kinds when the specific type is not known
 /// or needed, storing the specific data relevant to that type.
 #[derive(Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub enum AnyChat {
     /// A fandom root chat
     FandomRoot(FandomRoot),

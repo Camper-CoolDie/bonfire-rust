@@ -13,8 +13,10 @@ pub(crate) struct RawCustomization {
 
 impl From<RawCustomization> for Customization {
     fn from(value: RawCustomization) -> Self {
+        // The server uses i32 to represent colors
+        #[expect(clippy::cast_sign_loss)]
         Self {
-            name_color: value.name_color.map(i32::cast_unsigned),
+            name_color: value.name_color.map(|color| color as u32),
             active_badge: value.active_badge.map(Into::into),
         }
     }

@@ -1,7 +1,12 @@
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
 /// Represents a preselected reason for an effect being applied.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Default, Clone, Debug, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub enum ReasonKind {
     /// Punished for inappropriate behavior towards the gods
+    #[default]
     Gods,
     /// Punished for unreasonable blocks
     RejectedBlocks,

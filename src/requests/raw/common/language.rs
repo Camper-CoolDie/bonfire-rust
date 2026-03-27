@@ -54,8 +54,9 @@ impl From<i64> for RawLanguage {
 }
 
 impl From<u64> for RawLanguage {
+    #[expect(clippy::cast_possible_wrap)]
     fn from(value: u64) -> Self {
-        value.cast_signed().into()
+        (value as i64).into()
     }
 }
 
@@ -76,8 +77,9 @@ impl From<&RawLanguage> for i64 {
 }
 
 impl From<&RawLanguage> for u64 {
+    #[expect(clippy::cast_sign_loss)]
     fn from(value: &RawLanguage) -> Self {
-        i64::from(value).cast_unsigned()
+        i64::from(value) as u64
     }
 }
 

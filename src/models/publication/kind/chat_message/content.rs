@@ -1,6 +1,8 @@
 use std::time::Duration;
 
 use chrono::{DateTime, Utc};
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 
 use crate::models::chat::MemberRole;
 use crate::models::{Gender, ImageRef};
@@ -20,6 +22,7 @@ pub const CHAT_MESSAGE_VOICE_MAX_DURATION: Duration = Duration::from_secs(20);
 
 /// Represents the content of a chat message.
 #[derive(Default, Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub enum Content {
     /// No specific content
     #[default]

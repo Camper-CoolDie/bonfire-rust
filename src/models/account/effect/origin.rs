@@ -1,7 +1,11 @@
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
 use super::ReasonKind;
 
 /// Represents the origin or source of an [`Effect`][super::Effect].
 #[derive(Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub enum Origin {
     /// The effect was applied by another account
     Account {

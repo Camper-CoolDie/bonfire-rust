@@ -7,6 +7,8 @@ use std::ops::RangeInclusive;
 pub use content::*;
 pub use ref_content::RefContent;
 pub use reference::Reference;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 
 use crate::models::publication::{Kind, Publishable};
 use crate::models::{Account, ChatTag, Fandom};
@@ -18,6 +20,7 @@ pub const CHAT_MESSAGE_TEXT_LENGTH_RANGE: RangeInclusive<usize> = 1..=2000;
 /// Represents the specific data for a chat message publication, containing text, and optionally a
 /// media [`Content`][content::Content] or a [`ChatMessageRef`][Reference] to another publication.
 #[derive(Default, Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct ChatMessage {
     /// The content associated with this chat message
     pub content: Content,

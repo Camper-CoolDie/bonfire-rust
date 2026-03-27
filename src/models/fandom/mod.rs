@@ -1,6 +1,8 @@
 mod status;
 
 use chrono::{DateTime, Utc};
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 pub use status::Status;
 
 use crate::client::Request as _;
@@ -13,6 +15,7 @@ use crate::{Client, Result};
 
 /// Represents a fandom, which is a community centered around a specific topic.
 #[derive(Default, Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct Fandom {
     /// The unique identifier of this fandom
     pub id: u64,

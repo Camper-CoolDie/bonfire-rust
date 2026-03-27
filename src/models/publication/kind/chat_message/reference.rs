@@ -1,9 +1,13 @@
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
 use super::RefContent;
 
 /// Represents a reference within a chat message to another publication.
 ///
 /// This structure links a chat message to the content it is replying to, providing context.
 #[derive(Default, Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct Reference {
     /// The unique identifier of the referenced chat message
     pub id: u64,

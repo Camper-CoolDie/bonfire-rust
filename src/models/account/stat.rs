@@ -1,3 +1,6 @@
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
 use crate::client::Request as _;
 use crate::models::Account;
 use crate::models::publication::Kind;
@@ -6,6 +9,7 @@ use crate::{Client, Result};
 
 /// Represents an account's overall statistics.
 #[derive(Default, Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct Stat {
     /// The sum of all positive rates placed by this account
     pub positive_rates_sum: f64,

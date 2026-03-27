@@ -1,3 +1,6 @@
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
 use crate::client::Request;
 use crate::models::Profile;
 use crate::requests::account::profile::SetLinkRequest;
@@ -12,6 +15,7 @@ pub const LINK_URI_MAX_LENGTH: usize = 500;
 
 /// Represents an external link displayed within an account's profile.
 #[derive(Default, Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct Link {
     /// The 0-based index of this link
     pub index: u32,

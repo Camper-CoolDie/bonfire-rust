@@ -1,3 +1,6 @@
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
 use crate::client::Request as _;
 use crate::models::publication::{Kind, PostTag, Publishable};
 use crate::models::{Account, Category, Comment, Fandom, Publication};
@@ -7,6 +10,7 @@ use crate::{Client, Result};
 
 /// Represents the specific data for a post publication.
 #[derive(Default, Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct Post {
     /// The fandom in which this publication was posted
     pub fandom: Fandom,

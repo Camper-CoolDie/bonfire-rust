@@ -47,6 +47,8 @@
 //! the same session:
 //!
 //! ```no_run
+//! # #[cfg(feature = "serde")]
+//! # mod wrapper {
 //! use std::fs;
 //! use std::fs::File;
 //! use std::io::Write;
@@ -94,6 +96,7 @@
 //!     save_credentials(client).await?;
 //!     Ok(())
 //! }
+//! # }
 //! ```
 
 // General lints

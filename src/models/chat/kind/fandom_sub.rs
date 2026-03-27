@@ -1,9 +1,13 @@
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
 use crate::models::ImageRef;
 use crate::models::chat::{Messageable, Tag};
 use crate::sealed::Sealed;
 
 /// Represents a fandom sub-chat.
 #[derive(Default, Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct FandomSub {
     /// The unique identifier of the sub-chat
     pub id: u64,

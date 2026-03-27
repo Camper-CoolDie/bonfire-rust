@@ -3,6 +3,8 @@ mod status;
 
 use chrono::{DateTime, Utc};
 pub use role::MemberRole;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 pub use status::MemberStatus;
 
 use crate::models::ImageRef;
@@ -11,6 +13,7 @@ use crate::sealed::Sealed;
 
 /// Represents a group chat.
 #[derive(Default, Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct Group {
     /// The unique identifier of the group chat
     pub id: u64,

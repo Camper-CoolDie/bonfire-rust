@@ -1,4 +1,6 @@
 use chrono::{DateTime, Utc};
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 
 use crate::client::Request as _;
 use crate::models::{Account, ImageRef, Link, Post, Publication};
@@ -7,6 +9,7 @@ use crate::{Client, Result};
 
 /// Represents detailed information about an account's profile.
 #[derive(Default, Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct Info {
     /// The date when this account was registered
     pub created_at: DateTime<Utc>,

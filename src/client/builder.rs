@@ -104,17 +104,22 @@ impl Builder {
     /// # Examples
     ///
     /// ```no_run
-    /// # use bonfire::ClientBuilder;
+    /// # #[cfg(feature = "serde")]
+    /// # mod wrapper {
+    /// #     use bonfire::ClientBuilder;
     /// use std::fs;
     ///
     /// use bonfire::models::Auth;
     ///
+    /// #     fn main() {
     /// let auth_data = fs::read("credentials.json").expect("failed to read from 'credentials.json'");
     /// let auth = serde_json::from_slice::<Auth>(&auth_data).expect("failed to parse auth");
     /// let client = &ClientBuilder::new()
     ///     .auth(auth)
     ///     .expect("invalid auth")
     ///     .build();
+    /// #     }
+    /// # }
     /// ```
     pub fn auth(mut self, auth: Auth) -> JwtResult<Self> {
         decode_token(&auth.access_token)?;

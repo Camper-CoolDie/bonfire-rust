@@ -6,9 +6,12 @@ use chrono::{DateTime, Utc};
 pub use kind::Kind;
 pub use origin::Origin;
 pub use reason_kind::ReasonKind;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 
 /// Represents an effect applied to an account.
 #[derive(Default, Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct Effect {
     /// The unique identifier of this effect
     pub id: u64,

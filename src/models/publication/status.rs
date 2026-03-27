@@ -1,7 +1,12 @@
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
 /// Represents the current status of a publication.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Default, Clone, Debug, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub enum Status {
     /// The publication is a draft, not yet published
+    #[default]
     Draft,
     /// The publication has been published
     Published,

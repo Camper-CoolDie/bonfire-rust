@@ -1,9 +1,13 @@
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
 use crate::models::publication::{Kind, Publishable};
 use crate::models::{Account, Fandom, ImageRef};
 use crate::sealed::Sealed;
 
 /// Represents the specific data for a simple tag that can be attached to a post.
 #[derive(Default, Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct PostTag {
     /// The fandom this tag belongs to
     pub fandom: Fandom,

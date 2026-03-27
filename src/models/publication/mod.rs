@@ -5,6 +5,8 @@ mod status;
 use chrono::{DateTime, Utc};
 pub use kind::*;
 pub use reaction::Reaction;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 pub use status::Status;
 
 use crate::sealed::Sealed;
@@ -20,6 +22,7 @@ pub trait Publishable: Sealed {
 
 /// Represents a generic Bonfire publication.
 #[derive(Default, Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct Publication<T: Publishable = AnyPublication> {
     /// The unique identifier of this publication
     pub id: u64,

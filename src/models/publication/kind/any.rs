@@ -1,3 +1,6 @@
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
 use crate::models::publication::{Kind, Publishable};
 use crate::models::{ChatMessage, Comment, Post, PostTag};
 use crate::sealed::Sealed;
@@ -8,6 +11,7 @@ use crate::sealed::Sealed;
 /// known or needed, storing additional data relevant to that type. Large variants are
 /// [`Box`]-ed to prevent the enum from becoming catastrophically large.
 #[derive(Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub enum AnyPublication {
     /// The publication contains additional post data
     Post(Box<Post>),
@@ -58,3 +62,9 @@ impl Publishable for AnyPublication {
 }
 
 impl Sealed for AnyPublication {}
+
+impl Default for AnyPublication {
+    fn default() -> Self {
+        Self::Post(Box::default())
+    }
+}

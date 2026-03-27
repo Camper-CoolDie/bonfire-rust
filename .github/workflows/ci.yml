@@ -24,7 +24,7 @@ jobs:
           profile: minimal
           override: true
 
-      - name: Run rustfmt
+      - name: Check rustfmt
         run: cargo fmt --check
 
   clippy:
@@ -40,8 +40,25 @@ jobs:
           profile: minimal
       - uses: Swatinem/rust-cache@v2
 
-      - name: Run clippy
-        run: cargo clippy --all-targets -- -D warnings
+      - name: Check clippy
+        run: cargo clippy --all-targets --all-features -- -D warnings
+
+  docs:
+    name: Check docs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Build docs
+        run: cargo doc --no-deps --all-features
+        env:
+          RUSTDOCFLAGS: -D warnings
 
   test:
     name: Test on ${{ matrix.os }}
@@ -62,7 +79,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
 
       - name: Run tests
-        run: cargo test --verbose
+        run: cargo test --all-features --verbose
 
   udeps:
     name: Check cargo-udeps
@@ -79,5 +96,26 @@ jobs:
       - name: Install cargo-udeps
         uses: taiki-e/install-action@cargo-udeps
 
-      - name: Run cargo-udeps
-        run: cargo udeps --all-targets
+      - name: Check cargo-udeps
+        run: cargo udeps --all-targets --all-features
+
+  msrv:
+    name: Check MSRV
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Get MSRV from package metadata
+        id: msrv
+        run: echo "version=$(yq '.package.rust-version' Cargo.toml)" >> $GITHUB_OUTPUT
+      - name: Set up Rust ${{ steps.msrv.outputs.version }} toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ steps.msrv.outputs.version }}
+          profile: minimal
+          override: true
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Check MSRV
+        run: cargo check --all-features
+        env:
+          RUSTFLAGS: -D warnings

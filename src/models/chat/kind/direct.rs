@@ -1,4 +1,6 @@
 use chrono::{DateTime, Utc};
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 
 use crate::models::Account;
 use crate::models::chat::{Messageable, Tag};
@@ -6,6 +8,7 @@ use crate::sealed::Sealed;
 
 /// Represents a direct message chat.
 #[derive(Default, Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct Direct {
     /// The unique identifier of the authenticated user
     pub my_id: u64,

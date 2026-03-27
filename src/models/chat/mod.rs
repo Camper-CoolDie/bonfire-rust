@@ -5,6 +5,8 @@ mod typing;
 use chrono::{DateTime, Utc};
 use futures::Stream;
 pub use kind::*;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 pub use tag::Tag;
 pub use typing::Handler as TypingHandler;
 
@@ -30,6 +32,7 @@ pub trait Messageable: Sealed {
 /// This module provides structures and traits for handling different chat contexts, such as
 /// fandom chats, group chats, and direct messages.
 #[derive(Default, Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct Chat<T: Messageable = AnyChat> {
     /// The specific kind of chat, holding its unique data
     pub kind: T,

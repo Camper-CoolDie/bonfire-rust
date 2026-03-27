@@ -209,7 +209,9 @@ impl Client {
     /// # Examples
     ///
     /// ```no_run
-    /// # use bonfire::Client;
+    /// # #[cfg(feature = "serde")]
+    /// # mod wrapper {
+    /// #     use bonfire::Client;
     /// use std::fs::File;
     /// use std::io::Write;
     ///
@@ -222,14 +224,14 @@ impl Client {
     ///     Ok(())
     /// }
     ///
-    /// #
-    /// # #[tokio::main]
-    /// # async fn main() -> Result<()> {
+    /// #     #[tokio::main]
+    /// #     async fn main() -> Result<()> {
     /// let client = &Client::default();
     /// client.login("email", "password").await?;
     /// // ...
     /// save_credentials(client).await?;
-    /// #    Ok(())
+    /// #         Ok(())
+    /// #     }
     /// # }
     /// ```
     pub async fn auth(&self) -> Result<Auth> {

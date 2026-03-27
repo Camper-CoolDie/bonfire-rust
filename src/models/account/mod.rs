@@ -18,6 +18,8 @@ pub use error::*;
 use futures::Stream;
 pub use info::Info;
 pub use prison::PrisonEntry;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 pub use stat::Stat;
 
 use crate::client::Request as _;
@@ -33,6 +35,7 @@ pub const ONLINE_DURATION: Duration = Duration::minutes(15);
 
 /// Represents a Bonfire user account.
 #[derive(Default, Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct Account {
     /// The unique identifier of this account
     pub id: u64,

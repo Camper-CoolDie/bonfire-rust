@@ -1,3 +1,6 @@
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
 use crate::models::ImageRef;
 
 /// The maximum allowed size in bytes for a static comment image.
@@ -13,6 +16,7 @@ pub const COMMENT_IMAGES_MAX_COUNT: usize = 5;
 
 /// Represents the rich media content of a comment.
 #[derive(Default, Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub enum Content {
     /// No specific content
     #[default]

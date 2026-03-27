@@ -8,6 +8,8 @@ use chrono::NaiveDate;
 pub use error::*;
 pub use gender::Gender;
 pub use link::*;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 
 use crate::client::Request as _;
 use crate::models::ImageRef;
@@ -58,6 +60,7 @@ pub const UNSET_NAME_REGEX: &str = r"^(?=[a-zA-Z0-9]*#)[a-zA-Z0-9#]+$";
 
 /// Represents detailed information about the currently authenticated user's profile.
 #[derive(Default, Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct Profile {
     /// The unique identifier of your account
     pub id: u64,
