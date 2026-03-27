@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 use crate::models::Gender;
 use crate::{Error, Result};
 
+#[derive(Debug)]
 pub(crate) enum RawGender {
     Male,
     Female,
@@ -50,7 +51,7 @@ impl TryFrom<RawGender> for Gender {
             RawGender::Male => Gender::Male,
             RawGender::Female => Gender::Female,
             RawGender::Other => Gender::Other,
-            RawGender::Unknown(unknown) => return Err(Error::UnknownVariant(unknown)),
+            RawGender::Unknown(_) => return Err(Error::UnknownVariant(Box::new(value))),
         })
     }
 }

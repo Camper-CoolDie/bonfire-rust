@@ -143,7 +143,9 @@ impl TryFrom<RawTag> for ChatTag {
                 my_id,
                 recipient_id,
             },
-            RawTag::Unknown { kind: unknown, .. } => return Err(Error::UnknownVariant(unknown)),
+            RawTag::Unknown { kind: unknown, .. } => {
+                return Err(Error::UnknownVariant(Box::new(unknown)));
+            }
         })
     }
 }

@@ -5,6 +5,7 @@ use serde::Deserialize;
 use crate::models::account::EffectReasonKind;
 use crate::{Error, Result};
 
+#[derive(Debug)]
 pub(crate) enum RawReasonKind {
     Gods,
     RejectedBlocks,
@@ -12,6 +13,7 @@ pub(crate) enum RawReasonKind {
     Swearing,
     Hater,
     Uncultured,
+    #[expect(dead_code)]
     Unknown(i64),
 }
 
@@ -32,19 +34,18 @@ impl<'de> Deserialize<'de> for RawReasonKind {
     }
 }
 
-impl TryFrom<RawReasonKind> for Option<EffectReasonKind> {
+impl TryFrom<RawReasonKind> for EffectReasonKind {
     type Error = Error;
 
     fn try_from(value: RawReasonKind) -> Result<Self> {
         Ok(match value {
-            RawReasonKind::Unknown(0) => None,
-            RawReasonKind::Gods => Some(EffectReasonKind::Gods),
-            RawReasonKind::RejectedBlocks => Some(EffectReasonKind::RejectedBlocks),
-            RawReasonKind::TooManyBlocks => Some(EffectReasonKind::TooManyBlocks),
-            RawReasonKind::Swearing => Some(EffectReasonKind::Swearing),
-            RawReasonKind::Hater => Some(EffectReasonKind::Hater),
-            RawReasonKind::Uncultured => Some(EffectReasonKind::Uncultured),
-            RawReasonKind::Unknown(unknown) => return Err(Error::UnknownVariant(unknown)),
+            RawReasonKind::Gods => EffectReasonKind::Gods,
+            RawReasonKind::RejectedBlocks => EffectReasonKind::RejectedBlocks,
+            RawReasonKind::TooManyBlocks => EffectReasonKind::TooManyBlocks,
+            RawReasonKind::Swearing => EffectReasonKind::Swearing,
+            RawReasonKind::Hater => EffectReasonKind::Hater,
+            RawReasonKind::Uncultured => EffectReasonKind::Uncultured,
+            RawReasonKind::Unknown(_) => return Err(Error::UnknownVariant(Box::new(value))),
         })
     }
 }

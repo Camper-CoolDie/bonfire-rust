@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 use crate::models::chat::MemberStatus;
 use crate::{Error, Result};
 
+#[derive(Debug)]
 pub(crate) enum RawMemberStatus {
     Active,
     Left,
@@ -54,7 +55,7 @@ impl TryFrom<RawMemberStatus> for MemberStatus {
             RawMemberStatus::Active => MemberStatus::Left,
             RawMemberStatus::Removed => MemberStatus::Removed,
             RawMemberStatus::LeftAndRemoved => MemberStatus::LeftAndRemoved,
-            RawMemberStatus::Unknown(unknown) => return Err(Error::UnknownVariant(unknown)),
+            RawMemberStatus::Unknown(_) => return Err(Error::UnknownVariant(Box::new(value))),
         })
     }
 }

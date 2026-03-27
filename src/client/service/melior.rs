@@ -16,7 +16,7 @@ pub(crate) struct MeliorService {
     uri: Uri,
 }
 impl MeliorService {
-    pub(crate) fn new(uri: &Uri) -> Self {
+    pub(crate) fn new(uri: Uri) -> Self {
         let connector = HttpsConnectorBuilder::new()
             .with_webpki_roots()
             .https_or_http()
@@ -25,7 +25,7 @@ impl MeliorService {
 
         Self {
             hyper_client: HyperClient::builder(TokioExecutor::new()).build(connector),
-            uri: uri.clone(),
+            uri,
         }
     }
 

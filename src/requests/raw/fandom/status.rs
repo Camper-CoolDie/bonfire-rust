@@ -5,6 +5,7 @@ use serde::Deserialize;
 use crate::models::fandom::Status;
 use crate::{Error, Result};
 
+#[derive(Debug)]
 pub(crate) enum RawStatus {
     Suggested,
     Accepted,
@@ -32,7 +33,7 @@ impl TryFrom<RawStatus> for Option<Status> {
             RawStatus::Unknown(0) => None,
             RawStatus::Suggested => Some(Status::Suggested),
             RawStatus::Accepted => Some(Status::Accepted),
-            RawStatus::Unknown(unknown) => return Err(Error::UnknownVariant(unknown)),
+            RawStatus::Unknown(_) => return Err(Error::UnknownVariant(Box::new(value))),
         })
     }
 }

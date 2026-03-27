@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 use crate::models::chat::MemberRole;
 use crate::{Error, Result};
 
+#[derive(Debug)]
 pub(crate) enum RawMemberRole {
     User,
     Moderator,
@@ -50,7 +51,7 @@ impl TryFrom<RawMemberRole> for MemberRole {
             RawMemberRole::User => MemberRole::User,
             RawMemberRole::Moderator => MemberRole::Moderator,
             RawMemberRole::Admin => MemberRole::Admin,
-            RawMemberRole::Unknown(unknown) => return Err(Error::UnknownVariant(unknown)),
+            RawMemberRole::Unknown(_) => return Err(Error::UnknownVariant(Box::new(value))),
         })
     }
 }

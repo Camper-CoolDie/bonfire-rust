@@ -13,6 +13,7 @@ pub(crate) use fandom_sub::{RawFandomSub, RawParams as RawFandomSubParams};
 pub(crate) use group::{RawGroup, RawMemberRole, RawMemberStatus, RawParams as RawGroupParams};
 use serde::Deserialize;
 
+#[derive(Debug)]
 pub(crate) enum RawKind {
     FandomRoot,
     FandomSub,

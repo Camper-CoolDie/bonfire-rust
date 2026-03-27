@@ -9,7 +9,7 @@ use crate::Client;
 use crate::client::jwt::{JwtResult, decode_token};
 use crate::models::Auth;
 
-// It's great when we can test our requests against a test server, hence the ability to specify
+// It's great when we can test our requests against a mock server, hence the ability to specify
 // custom URIs
 static ROOT_SERVER_URI: LazyLock<Uri> =
     LazyLock::new(|| Uri::from_static("https://cf2.bonfire.moe"));
@@ -41,7 +41,7 @@ impl Builder {
 
     /// Consumes the `Builder` and creates a [`Client`] instance.
     pub fn build(self) -> Client {
-        Client::new(&self.root_uri, &self.melior_uri, self.auth, self.quota)
+        Client::new(self.root_uri, self.melior_uri, self.auth, self.quota)
     }
 
     /// Sets the URI for the Root API server.

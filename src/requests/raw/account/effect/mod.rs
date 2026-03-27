@@ -1,8 +1,10 @@
 mod kind;
+mod origin;
 mod reason_kind;
 
 use chrono::DateTime;
 pub(crate) use kind::RawKind;
+use origin::IntoOriginOptions;
 pub(crate) use reason_kind::RawReasonKind;
 use serde::Deserialize;
 use serde::de::Error as _;
@@ -19,12 +21,12 @@ pub(crate) struct RawEffect {
     pub applied_at: i64,
     #[serde(rename = "dateEnd")]
     pub ends_at: i64,
-    #[serde(rename = "comment")]
-    pub reason: String,
     #[serde(rename = "effectIndex")]
     pub kind: RawKind,
     #[serde(rename = "tag")]
     pub is_system: i64,
+    #[serde(rename = "comment")]
+    pub reason: String,
     #[serde(rename = "commentTag")]
     pub reason_kind: RawReasonKind,
     pub from_account_name: String,
@@ -45,11 +47,14 @@ impl TryFrom<RawEffect> for Effect {
             ends_at: DateTime::from_timestamp_millis(value.ends_at).ok_or_else(|| {
                 serde_json::Error::custom(format!("timestamp {} is out of range", value.ends_at))
             })?,
-            reason: (!is_system).then_some(value.reason),
             kind: value.kind.try_into()?,
-            is_system,
-            reason_kind: value.reason_kind.try_into()?,
-            from_account_name: (!is_system).then_some(value.from_account_name),
+            origin: IntoOriginOptions {
+                is_system,
+                reason: value.reason,
+                reason_kind: value.reason_kind,
+                from_account_name: value.from_account_name,
+            }
+            .try_into()?,
         })
     }
 }

@@ -67,9 +67,11 @@ pub enum Error {
     Unauthenticated,
     /// An unknown variant ID was received from the server for an enum type.
     ///
-    /// The inner `i64` is the unrecognized ID.
-    #[error("unknown variant ID: {0}")]
-    UnknownVariant(i64),
+    /// The inner `Box` contains the faulty enum variant that caused the error. This allows for
+    /// logging or debugging the specific variant value and context that led to the `UnknownVariant`
+    /// error
+    #[error("unknown variant: {0:?}")]
+    UnknownVariant(Box<dyn Debug + Send + Sync + 'static>),
     /// The server returned an unsuccessful HTTP status code. Some common codes include:
     ///
     /// * `429`: Too many requests in a short period of time

@@ -5,6 +5,7 @@ use serde::Deserialize;
 use crate::models::account::EffectKind;
 use crate::{Error, Result};
 
+#[derive(Debug)]
 pub(crate) enum RawKind {
     Hater,
     Pig,
@@ -14,6 +15,7 @@ pub(crate) enum RawKind {
     Punished,
     Translator,
     MentionLock,
+    #[expect(dead_code)]
     Unknown(i64),
 }
 
@@ -49,7 +51,7 @@ impl TryFrom<RawKind> for EffectKind {
             RawKind::Punished => EffectKind::Punished,
             RawKind::Translator => EffectKind::Translator,
             RawKind::MentionLock => EffectKind::MentionLock,
-            RawKind::Unknown(unknown) => return Err(Error::UnknownVariant(unknown)),
+            RawKind::Unknown(_) => return Err(Error::UnknownVariant(Box::new(value))),
         })
     }
 }

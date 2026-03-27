@@ -36,8 +36,8 @@ impl RawMessageable for RawFandomRoot {
             fandom_root.language = language;
             Ok(fandom_root)
         } else {
-            let kind: i64 = RawKind::from(tag).into();
-            Err(Error::UnknownVariant(kind))
+            let kind = RawKind::from(tag);
+            Err(Error::UnknownVariant(Box::new(kind)))
         }
     }
 }

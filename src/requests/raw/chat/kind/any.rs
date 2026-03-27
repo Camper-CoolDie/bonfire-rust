@@ -38,7 +38,7 @@ impl TryFrom<AnyRawChat> for AnyChat {
             AnyRawChat::FandomSub(chat) => AnyChat::FandomSub(chat.try_into()?),
             AnyRawChat::Group(chat) => AnyChat::Group(chat.try_into()?),
             AnyRawChat::Direct(chat) => AnyChat::Direct(chat.try_into()?),
-            AnyRawChat::Unknown(kind) => return Err(Error::UnknownVariant(kind)),
+            AnyRawChat::Unknown(unknown) => return Err(Error::UnknownVariant(Box::new(unknown))),
         })
     }
 }

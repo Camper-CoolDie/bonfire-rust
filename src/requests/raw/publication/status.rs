@@ -5,6 +5,7 @@ use serde::Deserialize;
 use crate::models::publication::Status;
 use crate::{Error, Result};
 
+#[derive(Debug)]
 pub(crate) enum RawStatus {
     Draft,
     Published,
@@ -41,7 +42,7 @@ impl TryFrom<RawStatus> for Option<Status> {
             RawStatus::Blocked => Some(Status::Blocked),
             RawStatus::DeepBlocked => Some(Status::DeepBlocked),
             RawStatus::Pending => Some(Status::Pending),
-            RawStatus::Unknown(unknown) => return Err(Error::UnknownVariant(unknown)),
+            RawStatus::Unknown(_) => return Err(Error::UnknownVariant(Box::new(value))),
         })
     }
 }

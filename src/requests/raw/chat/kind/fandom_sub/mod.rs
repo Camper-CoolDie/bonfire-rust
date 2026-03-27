@@ -31,8 +31,8 @@ impl RawMessageable for RawFandomSub {
             fandom_sub.id = id;
             Ok(fandom_sub)
         } else {
-            let kind: i64 = RawKind::from(tag).into();
-            Err(Error::UnknownVariant(kind))
+            let kind = RawKind::from(tag);
+            Err(Error::UnknownVariant(Box::new(kind)))
         }
     }
 }

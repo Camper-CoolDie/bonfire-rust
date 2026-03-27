@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use crate::models::Language;
 use crate::{Error, Result};
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub(crate) enum RawLanguage {
     #[default]
     English,
@@ -94,7 +94,7 @@ impl TryFrom<RawLanguage> for Language {
             RawLanguage::Italian => Language::Italian,
             RawLanguage::Polish => Language::Polish,
             RawLanguage::French => Language::French,
-            RawLanguage::Unknown(unknown) => return Err(Error::UnknownVariant(unknown)),
+            RawLanguage::Unknown(_) => return Err(Error::UnknownVariant(Box::new(value))),
         })
     }
 }
@@ -115,7 +115,7 @@ impl TryFrom<RawLanguage> for Option<Language> {
             RawLanguage::Italian => Some(Language::Italian),
             RawLanguage::Polish => Some(Language::Polish),
             RawLanguage::French => Some(Language::French),
-            RawLanguage::Unknown(unknown) => return Err(Error::UnknownVariant(unknown)),
+            RawLanguage::Unknown(_) => return Err(Error::UnknownVariant(Box::new(value))),
         })
     }
 }

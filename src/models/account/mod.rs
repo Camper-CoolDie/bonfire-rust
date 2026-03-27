@@ -11,7 +11,9 @@ mod stat;
 pub use badge::Badge;
 use chrono::{DateTime, Duration, Utc};
 pub use customization::Customization;
-pub use effect::{Effect, Kind as EffectKind, ReasonKind as EffectReasonKind};
+pub use effect::{
+    Effect, Kind as EffectKind, Origin as EffectOrigin, ReasonKind as EffectReasonKind,
+};
 pub use error::*;
 use futures::Stream;
 pub use info::Info;

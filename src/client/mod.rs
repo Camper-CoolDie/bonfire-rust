@@ -65,7 +65,7 @@ pub struct Client {
     inner: Arc<Inner>,
 }
 impl Client {
-    fn new(root_uri: &Uri, melior_uri: &Uri, auth: Option<Auth>, quota: Quota) -> Self {
+    fn new(root_uri: Uri, melior_uri: Uri, auth: Option<Auth>, quota: Quota) -> Self {
         Self {
             inner: Arc::new(Inner {
                 root_service: RootService::new(root_uri),

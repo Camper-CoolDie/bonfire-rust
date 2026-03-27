@@ -27,8 +27,8 @@ impl RawMessageable for RawDirect {
             direct.my_id = my_id;
             Ok(direct)
         } else {
-            let kind: i64 = RawKind::from(tag).into();
-            Err(Error::UnknownVariant(kind))
+            let kind = RawKind::from(tag);
+            Err(Error::UnknownVariant(Box::new(kind)))
         }
     }
 }
