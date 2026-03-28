@@ -4,6 +4,7 @@ use std::sync::LazyLock;
 use bonfire::Client;
 use httpmock::{Mock, MockServer};
 use nanoid::nanoid;
+#[cfg(feature = "serde")]
 use serde::Deserialize;
 
 pub static MOCK_SERVER: LazyLock<MockServer> = LazyLock::new(|| {

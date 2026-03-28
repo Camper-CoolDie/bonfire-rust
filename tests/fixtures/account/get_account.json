@@ -1,0 +1,51 @@
+{
+  "J_STATUS": "J_STATUS_OK",
+  "J_RESPONSE": {
+    "account": {
+      "sponsor": 7151,
+      "J_LAST_ONLINE_DATE": 1774695616642,
+      "sponsorTimes": 5,
+      "J_NAME": "TestUser",
+      "J_DATE_CREATE": 0,
+      "sex": 2,
+      "avatar": {
+        "u": "https://data.example.com/bonfire/res/289130",
+        "w": 0,
+        "h": 0,
+        "i": 289130
+      },
+      "accountEffects": [
+        {
+          "accountId": 207506,
+          "fromAccountName": "TestUser941",
+          "comment": "Descriptive effect reason",
+          "effectIndex": 5,
+          "id": 333159,
+          "dateEnd": 1896708464350,
+          "tag": 0,
+          "dateCreate": 1770478064350,
+          "commentTag": 0
+        },
+        {
+          "accountId": 207506,
+          "fromAccountName": "",
+          "comment": "",
+          "effectIndex": 3,
+          "id": 895474,
+          "dateEnd": 1774755173721,
+          "tag": 1,
+          "dateCreate": 1774668773721,
+          "commentTag": 2
+        }
+      ],
+      "J_LVL": 359,
+      "J_ID": 207506,
+      "karma30": 40588,
+      "czt": {
+        "ab": null,
+        "nc": null
+      },
+      "J_IMAGE_ID": 289130
+    }
+  }
+}

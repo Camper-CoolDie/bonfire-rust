@@ -1,0 +1,8 @@
+{
+  "J_STATUS": "J_STATUS_ERROR",
+  "J_RESPONSE": {
+    "code": "ERROR_GONE",
+    "messageError": "",
+    "params": []
+  }
+}
