@@ -9,6 +9,7 @@ use crate::models::Auth;
 use crate::queries::auth::RefreshQuery;
 use crate::{Client, Result};
 
+#[derive(Debug)]
 enum InnerState {
     Authenticated(Auth, JwtClaims),
     Unauthenticated,
@@ -34,6 +35,7 @@ impl TryFrom<Option<Auth>> for InnerState {
     }
 }
 
+#[derive(Debug)]
 pub(super) struct TokenProvider {
     inner: RwLock<InnerState>,
 }
@@ -48,7 +50,7 @@ impl TokenProvider {
         self.inner.read().await.is_auth()
     }
 
-    pub(super) async fn get_auth(&self, client: &Client) -> Result<Option<Auth>> {
+    pub(super) async fn auth(&self, client: &Client) -> Result<Option<Auth>> {
         let guard = self.inner.read().await;
         match &*guard {
             InnerState::Authenticated(_, claims) if claims.expires_at < Utc::now() => {
@@ -61,8 +63,8 @@ impl TokenProvider {
         }
     }
 
-    pub(super) async fn get_token(&self, client: &Client) -> Result<Option<String>> {
-        Ok(self.get_auth(client).await?.map(|auth| auth.access_token))
+    pub(super) async fn token(&self, client: &Client) -> Result<Option<String>> {
+        Ok(self.auth(client).await?.map(|auth| auth.access_token))
     }
 
     pub(super) async fn set_auth(&self, auth: Option<Auth>) -> JwtResult<()> {

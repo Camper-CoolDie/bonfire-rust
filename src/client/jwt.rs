@@ -31,7 +31,7 @@ pub enum JwtError {
     JsonError(#[from] serde_json::Error),
 }
 
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
 pub(super) struct JwtClaims {
     #[serde(rename = "sub")]
     pub subject: String,

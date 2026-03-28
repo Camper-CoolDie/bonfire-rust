@@ -1,0 +1,17 @@
+{
+  "data": null,
+  "errors": [
+    {
+      "message": "WrongEmail: Wrong email or username",
+      "locations": [
+        {
+          "line": 1,
+          "column": 57
+        }
+      ],
+      "path": [
+        "loginEmail"
+      ]
+    }
+  ]
+}

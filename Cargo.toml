@@ -36,6 +36,9 @@ tracing = "0.1"
 [dev-dependencies]
 anyhow = "1.0"
 futures-util = "0.3"
+httpmock = "0.8"
+nanoid = "0.4"
+ron = "0.12"
 tokio = { version = "1.50", features = ["rt-multi-thread"] }
 
 [package.metadata.docs.rs]

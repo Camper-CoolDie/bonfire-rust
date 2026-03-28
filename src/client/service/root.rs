@@ -14,6 +14,7 @@ use crate::{Error, Result, RootError, RootRequest, RootResponse};
 // The maximum allowed size for a request (10 MiB)
 const PAYLOAD_MAX_SIZE: usize = 10 * 1024 * 1024;
 
+#[derive(Debug)]
 pub(crate) struct RootService {
     hyper_client: HyperClient<HttpsConnector<HttpConnector>, Full<Bytes>>,
     uri: Uri,

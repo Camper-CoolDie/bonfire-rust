@@ -1,0 +1,17 @@
+{
+  "data": null,
+  "errors": [
+    {
+      "message": "HardBanned: This account is hard-banned",
+      "locations": [
+        {
+          "line": 1,
+          "column": 57
+        }
+      ],
+      "path": [
+        "loginEmail"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "data": null,
+  "errors": [
+    {
+      "message": "InvalidEmail: Invalid email address",
+      "locations": [
+        {
+          "line": 1,
+          "column": 57
+        }
+      ],
+      "path": [
+        "loginEmail"
+      ]
+    }
+  ]
+}

@@ -11,6 +11,7 @@ pub(crate) use crate::queries::raw::RawMeliorError;
 
 #[derive(Serialize)]
 pub(crate) struct MeliorQuery<'a, R: Request> {
+    pub operation_name: &'static str,
     pub variables: &'a R,
     pub query: &'static str,
 }

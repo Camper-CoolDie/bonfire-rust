@@ -11,6 +11,7 @@ use crate::client::{Request, RequestError};
 use crate::queries::RawMeliorError;
 use crate::{Error, MeliorError, MeliorQuery, MeliorResponse, Result};
 
+#[derive(Debug)]
 pub(crate) struct MeliorService {
     hyper_client: HyperClient<HttpsConnector<HttpConnector>, Full<Bytes>>,
     uri: Uri,

@@ -31,6 +31,7 @@ const API_VERSION: &str = "3.1.0";
 // The maximum allowed size for any type of attachment (6 MiB)
 const ATTACHMENT_MAX_SIZE: usize = 6 * 1024 * 1024;
 
+#[derive(Debug)]
 struct Inner {
     root_service: RootService,
     melior_service: MeliorService,
@@ -60,7 +61,7 @@ struct Inner {
 ///     Ok(())
 /// }
 /// ```
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Client {
     inner: Arc<Inner>,
 }
@@ -237,9 +238,24 @@ impl Client {
     pub async fn auth(&self) -> Result<Auth> {
         self.inner
             .token_provider
-            .get_auth(self)
+            .auth(self)
             .await?
             .ok_or(Error::Unauthenticated)
+    }
+
+    /// Sets the authentication credentials for the client.
+    ///
+    /// This method allows manually setting or clearing the authentication state of the client. It
+    /// can also be used to establish a new, valid session if the client is in an invalid token
+    /// state. It does not perform any immediate validation or token refreshing; these operations
+    /// occur lazily when subsequent authenticated requests are sent.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`JwtError`] if an error occurs while parsing the provided credentials.
+    pub async fn set_auth(&self, auth: Option<Auth>) -> Result<&Self> {
+        self.inner.token_provider.set_auth(auth).await?;
+        Ok(self)
     }
 
     #[instrument(skip(self, content, attachments))]
@@ -255,7 +271,7 @@ impl Client {
         self.inner.rate_limiter.until_ready().await;
 
         tracing::debug!("obtaining auth token");
-        let token = self.inner.token_provider.get_token(self).await?;
+        let token = self.inner.token_provider.token(self).await?;
 
         // Contains the length of each attachment
         let data_output = attachments
@@ -305,7 +321,7 @@ impl Client {
         self.inner.rate_limiter.until_ready().await;
 
         tracing::debug!("obtaining auth token");
-        let token = self.inner.token_provider.get_token(self).await?;
+        let token = self.inner.token_provider.token(self).await?;
 
         let mut headers = HeaderMap::new();
         if let Some(token) = token {
@@ -318,7 +334,14 @@ impl Client {
         tracing::info!("sending query");
         self.inner
             .melior_service
-            .send_query(MeliorQuery { variables, query }, headers)
+            .send_query(
+                MeliorQuery {
+                    operation_name,
+                    variables,
+                    query,
+                },
+                headers,
+            )
             .await
             .inspect_err(|error| tracing::error!(?error, "failed to send query"))
     }
@@ -338,7 +361,14 @@ impl Client {
         tracing::info!("sending query without auth");
         self.inner
             .melior_service
-            .send_query(MeliorQuery { variables, query }, HeaderMap::new())
+            .send_query(
+                MeliorQuery {
+                    operation_name,
+                    variables,
+                    query,
+                },
+                HeaderMap::new(),
+            )
             .await
             .inspect_err(|error| tracing::error!(?error, "failed to send an authless query"))
     }
