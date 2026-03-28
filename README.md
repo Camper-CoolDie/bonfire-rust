@@ -2,7 +2,7 @@
 
 [![Crate](https://img.shields.io/crates/v/bonfire)](https://crates.io/crates/bonfire)
 [![Documentation](https://img.shields.io/docsrs/bonfire)](https://docs.rs/bonfire)
-[![Continuous Integration](https://github.com/Camper-CoolDie/bonfire-rust/workflows/Continuous%20Integration/badge.svg)](https://github.com/Camper-CoolDie/bonfire-rust/actions/workflows/ci.yml)
+[![Continuous Integration](https://github.com/Camper-CoolDie/bonfire-rust/workflows/CI/badge.svg)](https://github.com/Camper-CoolDie/bonfire-rust/actions/workflows/ci.yml)
 
 A modern, well-documented asynchronous Rust client library for the
 [Bonfire API](https://github.com/timas130/bonfire).

@@ -1,4 +1,4 @@
-name: Continuous Integration
+name: CI
 
 on:
   pull_request:
@@ -16,10 +16,32 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Rust
-        run: rustup toolchain install nightly --component rustfmt
+      - name: Set up Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          components: rustfmt
+          profile: minimal
+          override: true
+
       - name: Run rustfmt
-        run: cargo +nightly fmt --check
+        run: cargo fmt --check
+
+  clippy:
+    name: Check clippy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          components: clippy
+          profile: minimal
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Run clippy
+        run: cargo clippy --all-targets -- -D warnings
 
   test:
     name: Test on ${{ matrix.os }}
@@ -32,24 +54,30 @@ jobs:
           - macOS-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Rust
-        run: rustup toolchain install stable --component clippy
-      - name: Cache cargo dependencies
-        uses: actions/cache@v4
+      - name: Set up Rust toolchain
+        uses: actions-rs/toolchain@v1
         with:
-          path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            target/
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-      - name: Check clippy
-        run: cargo clippy -- -D warnings
+          toolchain: stable
+          profile: minimal
+      - uses: Swatinem/rust-cache@v2
+
       - name: Run tests
         run: cargo test --verbose
-      - name: Security audit
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          cargo install cargo-audit
-          cargo audit
+
+  udeps:
+    name: Check cargo-udeps
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          profile: minimal
+          override: true
+      - uses: Swatinem/rust-cache@v2
+      - name: Install cargo-udeps
+        uses: taiki-e/install-action@cargo-udeps
+
+      - name: Run cargo-udeps
+        run: cargo udeps --all-targets
