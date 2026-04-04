@@ -9,7 +9,8 @@ readme = "README.md"
 repository = "https://github.com/Camper-CoolDie/bonfire-rust"
 license = "MIT OR Apache-2.0"
 keywords = ["bonfire", "api", "bot"]
-include = ["/src/queries/*/graphql"]
+categories = ["api-bindings", "web-programming::http-client"]
+include = ["/src/**/*.rs", "/src/queries/graphql", "/build.rs"]
 
 [features]
 serde = []
@@ -25,6 +26,7 @@ http-body-util = "0.1"
 hyper = "1.8"
 hyper-rustls = { version = "0.27", features = ["http2", "webpki-roots"] }
 hyper-util = { version = "0.1", features = ["tokio"] }
+include_dir = "0.7"
 nonzero_ext = "0.3"
 os_info = "3.14"
 serde = { version = "1.0", features = ["derive"] }
@@ -41,6 +43,9 @@ httpmock = "0.8"
 nanoid = "0.4"
 ron = "0.12"
 tokio = { version = "1.50", features = ["rt-multi-thread"] }
+
+[build-dependencies]
+graphql-minify = "0.1"
 
 [package.metadata.docs.rs]
 features = ["serde"]

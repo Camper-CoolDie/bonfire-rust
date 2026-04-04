@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::client::{InfallibleRequest, Request};
 use crate::models::Profile;
+use crate::queries::GRAPHQL_DIR;
 use crate::queries::raw::RawProfile;
 use crate::{Client, Error, MeliorError, Result};
 
@@ -35,12 +36,13 @@ impl Request for SetBirthdayQuery {
     type Error = InfallibleRequest<MeliorError>;
 
     async fn send_request(&self, client: &Client) -> Result<Response> {
+        let graphql = GRAPHQL_DIR
+            .get_file("profile/SetBirthdayMutation.graphql")
+            .and_then(|file| file.contents_utf8())
+            .expect("failed to retrieve graphql query");
+
         client
-            .send_query(
-                "SetBirthdayMutation",
-                include_str!("graphql/SetBirthdayMutation.graphql"),
-                self,
-            )
+            .send_query("SetBirthdayMutation", graphql, self)
             .await
     }
 }

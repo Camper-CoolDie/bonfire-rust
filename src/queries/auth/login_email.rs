@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use crate::client::Request;
 use crate::models::Auth;
 use crate::models::auth::LoginError;
+use crate::queries::GRAPHQL_DIR;
 use crate::queries::raw::RawAuth;
 use crate::queries::raw::auth::RawTfaRequired;
 use crate::{Client, Error, Result};
@@ -58,12 +59,13 @@ impl Request for LoginEmailQuery<'_> {
     type Error = LoginError;
 
     async fn send_request(&self, client: &Client) -> Result<Response> {
+        let graphql = GRAPHQL_DIR
+            .get_file("auth/LoginEmailMutation.graphql")
+            .and_then(|file| file.contents_utf8())
+            .expect("failed to retrieve graphql query");
+
         client
-            .send_query_authless(
-                "LoginEmailMutation",
-                include_str!("graphql/LoginEmailMutation.graphql"),
-                self,
-            )
+            .send_query_authless("LoginEmailMutation", graphql, self)
             .await
     }
 }

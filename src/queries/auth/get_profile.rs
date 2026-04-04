@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::client::{InfallibleRequest, Request};
 use crate::models::Profile;
+use crate::queries::GRAPHQL_DIR;
 use crate::queries::raw::RawProfile;
 use crate::{Client, Error, MeliorError, Result};
 
@@ -31,8 +32,11 @@ impl Request for GetProfileQuery {
     type Error = InfallibleRequest<MeliorError>;
 
     async fn send_request(&self, client: &Client) -> Result<Response> {
-        client
-            .send_query("MeQuery", include_str!("graphql/MeQuery.graphql"), self)
-            .await
+        let graphql = GRAPHQL_DIR
+            .get_file("auth/MeQuery.graphql")
+            .and_then(|file| file.contents_utf8())
+            .expect("failed to retrieve graphql query");
+
+        client.send_query("MeQuery", graphql, self).await
     }
 }
