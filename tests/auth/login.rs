@@ -27,7 +27,7 @@ async fn assert_error(result: Result<&Client>, login_error: LoginError) {
 #[cfg(feature = "serde")]
 #[tokio::test]
 async fn test_success() {
-    let expected = common::load_ron_fixture::<Auth>("auth/expected.ron");
+    let expected = common::load_ron_fixture::<Auth>("expected/auth.ron");
     let (mock, client) = common::setup_single("auth/login_email/success.json");
     let result = client.login(EMAIL, PASSWORD).await;
 
@@ -77,7 +77,7 @@ async fn test_hard_banned() {
 #[cfg(feature = "serde")]
 #[tokio::test]
 async fn test_already_authenticated() {
-    let expected = common::load_ron_fixture::<Auth>("auth/expected.ron");
+    let expected = common::load_ron_fixture::<Auth>("expected/auth.ron");
     let (mock, client) = common::setup_none();
     client.set_auth(Some(expected)).await.unwrap();
     let result = client.login(EMAIL, PASSWORD).await;

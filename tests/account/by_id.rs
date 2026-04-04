@@ -9,7 +9,7 @@ const ID: u64 = 207506;
 #[cfg(feature = "serde")]
 #[tokio::test]
 async fn test_success() {
-    let expected = common::load_ron_fixture::<Account>("account/expected.ron");
+    let expected = common::load_ron_fixture::<Account>("expected/account.ron");
     let (mock, client) = common::setup_single("account/get_account.json");
     let result = Account::by_id(&client, ID).await;
 

@@ -9,7 +9,7 @@ use serde::Deserialize;
 
 pub static MOCK_SERVER: LazyLock<MockServer> = LazyLock::new(|| {
     let server = MockServer::start();
-    tracing::info!(address = %server.address(), "mock server started");
+    println!("mock server started at {}", server.address());
     server
 });
 
