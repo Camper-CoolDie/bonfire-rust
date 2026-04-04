@@ -102,4 +102,9 @@ async fn main() -> Result<()> {
 
 ## License
 
-bonfire-rust is provided under the MIT License. See [LICENSE](LICENSE).
+bonfire-rust is licensed under either of
+
+- [Apache License, Version 2.0](LICENSE-APACHE.txt) at https://apache.org/licenses/LICENSE-2.0
+- [MIT License](LICENSE-MIT.txt) at https://opensource.org/licenses/MIT
+
+at your option.
