@@ -1,27 +1,50 @@
+use std::error::Error;
 use std::path::PathBuf;
 use std::{env, fs};
 
 use graphql_minify::minify;
+use walkdir::WalkDir;
 
-const GRAPHQL_DIR: &str = "src/queries/graphql";
+fn main() -> Result<(), Box<dyn Error>> {
+    minify_graphql()?;
+    Ok(())
+}
 
-fn main() {
-    println!("cargo::rerun-if-changed={GRAPHQL_DIR}");
-    let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
+fn minify_graphql() -> Result<(), Box<dyn Error>> {
+    let source_dir = PathBuf::from("src/graphql");
+    let out_dir = PathBuf::from(env::var("OUT_DIR")?).join("graphql");
+    println!("cargo::rerun-if-changed={}", source_dir.display());
 
-    for entry in fs::read_dir(GRAPHQL_DIR).unwrap() {
-        let dir = entry.unwrap().path();
-        let relative = dir.strip_prefix("src").unwrap();
-        fs::create_dir_all(out_dir.join(relative)).unwrap();
+    for entry in WalkDir::new(&source_dir)
+        .into_iter()
+        .filter_map(|result| result.ok())
+        .filter(|entry| entry.file_type().is_file())
+        .filter(|entry| {
+            entry
+                .path()
+                .extension()
+                .is_some_and(|extension| extension == "graphql")
+        })
+    {
+        let source = entry.path();
+        let out = out_dir.join(source.strip_prefix(&source_dir)?);
 
-        for entry in fs::read_dir(dir).unwrap() {
-            let src = entry.unwrap().path();
-            let relative = src.strip_prefix("src").unwrap();
-            let out = out_dir.join(relative);
-
-            let content = fs::read_to_string(src).unwrap();
-            let minified = minify(content).unwrap();
-            fs::write(out, minified).unwrap();
+        if let Some(parent) = out.parent() {
+            fs::create_dir_all(parent).map_err(|error| {
+                format!(
+                    "failed to create parent directories for {:?}: {}",
+                    out, error
+                )
+            })?;
         }
+
+        let query = fs::read_to_string(source)
+            .map_err(|error| format!("failed to read GraphQL file {:?}: {}", source, error))?;
+        let minified = minify(query)
+            .map_err(|error| format!("failed to minify GraphQL file {:?}: {:?}", source, error))?;
+        fs::write(&out, minified)
+            .map_err(|error| format!("failed to write minified GraphQL to {:?}: {}", out, error))?;
     }
+
+    Ok(())
 }

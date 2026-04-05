@@ -1,5 +1,6 @@
 mod builder;
 mod error;
+mod graphql;
 mod jwt;
 mod request;
 mod service;
@@ -308,11 +309,11 @@ impl Client {
             .inspect_err(|error| tracing::error!(?error, "failed to send request"))
     }
 
-    #[instrument(skip(self, query, variables))]
+    #[instrument(skip(self, graphql_path, variables))]
     pub(crate) async fn send_query<R: Request>(
         &self,
         operation_name: &'static str,
-        query: &'static str,
+        graphql_path: &'static str,
         variables: &R,
     ) -> Result<R::Response>
     where
@@ -338,7 +339,7 @@ impl Client {
                 MeliorQuery {
                     operation_name,
                     variables,
-                    query,
+                    query: graphql::contents(graphql_path),
                 },
                 headers,
             )
@@ -346,11 +347,11 @@ impl Client {
             .inspect_err(|error| tracing::error!(?error, "failed to send query"))
     }
 
-    #[instrument(skip(self, query, variables))]
+    #[instrument(skip(self, graphql_path, variables))]
     pub(crate) async fn send_query_authless<R: Request>(
         &self,
         operation_name: &'static str,
-        query: &'static str,
+        graphql_path: &'static str,
         variables: &R,
     ) -> Result<R::Response>
     where
@@ -365,7 +366,7 @@ impl Client {
                 MeliorQuery {
                     operation_name,
                     variables,
-                    query,
+                    query: graphql::contents(graphql_path),
                 },
                 HeaderMap::new(),
             )

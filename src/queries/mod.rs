@@ -4,13 +4,10 @@ pub(crate) mod profile;
 mod raw;
 
 pub use error::{MeliorError, QueryLocation, QueryPath};
-use include_dir::{Dir, include_dir};
 use serde::{Deserialize, Serialize};
 
 use crate::client::Request;
 pub(crate) use crate::queries::raw::RawMeliorError;
-
-static GRAPHQL_DIR: Dir = include_dir!("$OUT_DIR/queries/graphql");
 
 #[derive(Serialize)]
 pub(crate) struct MeliorQuery<'a, R: Request> {

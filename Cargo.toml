@@ -10,7 +10,7 @@ repository = "https://github.com/Camper-CoolDie/bonfire-rust"
 license = "MIT OR Apache-2.0"
 keywords = ["bonfire", "api", "bot"]
 categories = ["api-bindings", "web-programming::http-client"]
-include = ["/src/**/*.rs", "/src/queries/graphql", "/build.rs"]
+include = ["/src/**/*.rs", "/src/graphql/**/*.graphql", "/build.rs"]
 
 [features]
 serde = []
@@ -46,6 +46,7 @@ tokio = { version = "1.50", features = ["rt-multi-thread"] }
 
 [build-dependencies]
 graphql-minify = "0.1"
+walkdir = "2.3"
 
 [package.metadata.docs.rs]
 features = ["serde"]
