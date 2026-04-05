@@ -2,7 +2,8 @@
 
 [![Crate](https://img.shields.io/crates/v/bonfire)](https://crates.io/crates/bonfire)
 [![Documentation](https://img.shields.io/docsrs/bonfire)](https://docs.rs/bonfire)
-[![Continuous Integration](https://github.com/Camper-CoolDie/bonfire-rust/workflows/CI/badge.svg)](https://github.com/Camper-CoolDie/bonfire-rust/actions/workflows/ci.yml)
+[![CI Status](https://github.com/Camper-CoolDie/bonfire-rust/workflows/CI/badge.svg)](https://github.com/Camper-CoolDie/bonfire-rust/actions/workflows/ci.yml)
+![License](https://img.shields.io/crates/l/bonfire.svg)
 
 A modern, well-documented asynchronous Rust client library for the
 [Bonfire API](https://github.com/timas130/bonfire).
@@ -102,9 +103,14 @@ async fn main() -> Result<()> {
 
 ## License
 
-bonfire-rust is licensed under either of
+This project is licensed under either of
 
-- [Apache License, Version 2.0](LICENSE-APACHE.txt) at https://apache.org/licenses/LICENSE-2.0
-- [MIT License](LICENSE-MIT.txt) at https://opensource.org/licenses/MIT
+- [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0)
+  ([LICENSE-APACHE.txt](LICENSE-APACHE.txt))
+- [MIT License](https://opensource.org/licenses/MIT) ([LICENSE-MIT.txt](LICENSE-MIT.txt))
 
 at your option.
+
+Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in
+`bonfire-rust` by you, as defined in the Apache-2.0 license, shall be dual licensed as above,
+without any additional terms or conditions.

@@ -49,7 +49,7 @@ graphql-minify = "0.1"
 walkdir = "2.3"
 
 [package.metadata.docs.rs]
-features = ["serde"]
+all-features = true
 
 [package.metadata.cargo-udeps.ignore]
 development = ["anyhow"]

@@ -6,7 +6,7 @@ mod prison;
 mod stat;
 
 pub(crate) use badge::RawBadge;
-use chrono::DateTime;
+use chrono::{DateTime, Utc};
 pub(crate) use customization::RawCustomization;
 pub(crate) use effect::{
     RawEffect, RawKind as RawEffectKind, RawReasonKind as RawEffectReasonKind,
@@ -69,9 +69,15 @@ impl TryFrom<RawAccount> for Account {
             effects: value
                 .effects
                 .into_iter()
+                .filter(|effect| effect.ends_at > Utc::now().timestamp_millis())
                 .map(TryInto::try_into)
                 .collect::<Result<_>>()?,
-            customization: value.customization.into(),
+            name_color: value.customization.name_color.map(
+                // The server uses i32 to represent colors
+                #[expect(clippy::cast_sign_loss)]
+                |color| color as u32,
+            ),
+            active_badge: value.customization.active_badge.map(Into::into),
         })
     }
 }

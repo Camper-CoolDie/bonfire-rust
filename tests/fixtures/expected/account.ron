@@ -15,13 +15,13 @@ Account(
     karma30: 405.88,
     sponsor_amount: 7151,
     sponsor_count: 5,
-    // Effects are sorted from oldest to newest
+    // Effects are sorted from oldest to newest. Ones that have already ended are discarded
     effects: [
         Effect(
             id: 333159,
             account_id: 207506,
             applied_at: "2026-02-07T15:27:44.350Z",
-            ends_at: "2030-02-07T15:27:44.350Z",
+            ends_at: "2126-02-07T15:27:44.350Z",
             kind: EternalWinter,
             origin: Account(
                 name: "TestUser941",
@@ -32,15 +32,13 @@ Account(
             id: 895474,
             account_id: 207506,
             applied_at: "2026-03-28T03:32:53.721Z",
-            ends_at: "2026-03-29T03:32:53.721Z",
+            ends_at: "2126-03-28T03:32:53.721Z",
             kind: Watchman,
             origin: System(
                 reason_kind: RejectedBlocks,
             ),
         ),
     ],
-    customization: Customization(
-        name_color: None,
-        active_badge: None,
-    ),
+    name_color: None,
+    active_badge: None,
 )

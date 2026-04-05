@@ -1,11 +1,9 @@
-use std::future::Future;
-
 use futures::future::OptionFuture;
 use futures::{Stream, StreamExt as _, stream};
 
 use crate::Result;
 
-pub(super) fn paginated_stream<'a, O, T, R, N, Fut>(
+pub(super) fn paginated_stream<'a, O, T, R, N>(
     request_fn: R,
     offset: O,
     next_offset_fn: N,
@@ -13,9 +11,8 @@ pub(super) fn paginated_stream<'a, O, T, R, N, Fut>(
 where
     O: Clone + Send + Sync + 'a,
     T: Send + Sync + 'a,
-    R: Fn(O) -> Fut + Clone + Send + Sync + 'a,
+    R: AsyncFn(O) -> Result<Vec<T>> + Clone + Send + Sync + 'a,
     N: Fn(&Vec<T>, O) -> Option<O> + Clone + Send + Sync + 'a,
-    Fut: Future<Output = Result<Vec<T>>> + Send + Sync + 'a,
 {
     stream::unfold(Some(offset), move |offset_option| {
         let request_fn = request_fn.clone();
@@ -44,15 +41,14 @@ where
     .flatten()
 }
 
-pub(super) fn auto_paginated_stream<'a, T, R, Fut>(
+pub(super) fn auto_paginated_stream<'a, T, R>(
     request_fn: R,
     offset: usize,
     page_size: usize,
 ) -> impl Stream<Item = Result<T>>
 where
     T: Send + Sync + 'a,
-    R: Fn(usize) -> Fut + Clone + Send + Sync + 'a,
-    Fut: Future<Output = Result<Vec<T>>> + Send + Sync + 'a,
+    R: AsyncFn(usize) -> Result<Vec<T>> + Clone + Send + Sync + 'a,
 {
     paginated_stream(request_fn, offset, move |items, offset| {
         let length = items.len();

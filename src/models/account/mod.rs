@@ -1,6 +1,5 @@
 mod badge;
 mod blocklist;
-mod customization;
 mod effect;
 mod error;
 mod info;
@@ -10,7 +9,6 @@ mod stat;
 
 pub use badge::Badge;
 use chrono::{DateTime, Duration, Utc};
-pub use customization::Customization;
 pub use effect::{
     Effect, Kind as EffectKind, Origin as EffectOrigin, ReasonKind as EffectReasonKind,
 };
@@ -57,8 +55,10 @@ pub struct Account {
     pub sponsor_count: u64,
     /// A list of effects currently applied to this account
     pub effects: Vec<Effect>,
-    /// Customization settings applied to this account's appearance
-    pub customization: Customization,
+    /// The hexadecimal color code for this account's name (`0xAARRGGBB`)
+    pub name_color: Option<u32>,
+    /// The badge currently selected and displayed for this account
+    pub active_badge: Option<Badge>,
 }
 impl Account {
     /// Creates a new `Account` instance with only its identifier set.
@@ -140,8 +140,8 @@ impl Account {
     /// logged-in user is following. If the user is not following any accounts, it will return a
     /// list of online users.
     ///
-    /// If an [`Error`][crate::Error] occurs during the retrieval of any page, the stream
-    /// will yield that single error and then terminate.
+    /// If an [`Error`][crate::Error] occurs during the retrieval of any page, the stream will yield
+    /// that single error and then terminate.
     pub fn search<'a>(
         client: &'a Client,
         query: Option<&'a str>,
