@@ -19,7 +19,7 @@ A modern, well-documented asynchronous Rust client library for the
 
 ## Usage
 
-### Quick Start: Logging in and printing user's email and ID
+### Quick start: Logging in and printing user's email and ID
 
 This simple example shows how to create a client, log in and fetch the profile of the currently
 authenticated user:
@@ -110,6 +110,10 @@ This project is licensed under either of
 - [MIT License](https://opensource.org/licenses/MIT) ([LICENSE-MIT.txt](LICENSE-MIT.txt))
 
 at your option.
+
+## Contribution
+
+To get involved, take a look at [CONTRIBUTING.md](CONTRIBUTING.md).
 
 Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in
 `bonfire-rust` by you, as defined in the Apache-2.0 license, shall be dual licensed as above,

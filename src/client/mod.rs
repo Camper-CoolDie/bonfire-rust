@@ -97,7 +97,6 @@ impl Client {
     ///
     /// client.logout().await?;
     /// assert!(!client.is_auth().await); // is_auth() is false
-    ///
     /// #     Ok(())
     /// # }
     /// ```

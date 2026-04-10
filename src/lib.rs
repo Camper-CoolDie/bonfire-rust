@@ -13,7 +13,7 @@
 //!
 //! ## Usage
 //!
-//! ### Quick Start: Logging in and printing user's email and ID
+//! ### Quick start: Logging in and printing user's email and ID
 //!
 //! This simple example shows how to create a client, log in and fetch the profile of the currently
 //! authenticated user:
