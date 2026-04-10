@@ -17,7 +17,7 @@ use crate::sealed::Sealed;
 /// [`AnyPublication`] serves as a catch-all for publications with unspecified specific types.
 pub trait Publishable: Sealed {
     /// Returns the specific kind of this publication.
-    fn kind(&self) -> Kind;
+    fn to_kind(&self) -> Kind;
 }
 
 /// Represents a generic Bonfire publication.

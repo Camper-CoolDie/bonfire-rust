@@ -4,8 +4,8 @@ use crate::client::Request;
 use crate::models::streams::auto_paginated_stream;
 use crate::models::{Account, Fandom};
 use crate::requests::account::profile::{
-    ChangeFollowRequest, GetCuratedFandomsRequest, GetFollowsRequest, GetModeratedFandomsRequest,
-    GetSubscriptionsRequest,
+    ChangeFollowRequest, ListCuratedFandomsRequest, ListFollowsRequest,
+    ListModeratedFandomsRequest, ListSubscriptionsRequest,
 };
 use crate::{Client, Result};
 
@@ -44,20 +44,20 @@ impl Account {
     /// needed. The `offset` parameter can be used to skip a number of accounts from the beginning
     /// of the list. If an [`Error`][crate::Error] occurs during the retrieval of any page, the
     /// stream will yield that single error and then terminate.
-    pub fn follows<'a>(
+    pub fn list_follows<'a>(
         &'a self,
         client: &'a Client,
         offset: usize,
     ) -> impl Stream<Item = Result<Self>> + 'a {
         auto_paginated_stream(
             move |offset| async move {
-                GetFollowsRequest::new_follows(self.id, offset)
+                ListFollowsRequest::new_follows(self.id, offset)
                     .send_request(client)
                     .await?
                     .try_into()
             },
             offset,
-            GetFollowsRequest::PAGE_SIZE,
+            ListFollowsRequest::PAGE_SIZE,
         )
     }
 
@@ -68,20 +68,20 @@ impl Account {
     /// needed. The `offset` parameter can be used to skip a number of accounts from the beginning
     /// of the list. If an [`Error`][crate::Error] occurs during the retrieval of any page, the
     /// stream will yield that single error and then terminate.
-    pub fn followers<'a>(
+    pub fn list_followers<'a>(
         &'a self,
         client: &'a Client,
         offset: usize,
     ) -> impl Stream<Item = Result<Self>> + 'a {
         auto_paginated_stream(
             move |offset| async move {
-                GetFollowsRequest::new_followers(self.id, offset)
+                ListFollowsRequest::new_followers(self.id, offset)
                     .send_request(client)
                     .await?
                     .try_into()
             },
             offset,
-            GetFollowsRequest::PAGE_SIZE,
+            ListFollowsRequest::PAGE_SIZE,
         )
     }
 
@@ -99,13 +99,13 @@ impl Account {
     ) -> impl Stream<Item = Result<Fandom>> + 'a {
         auto_paginated_stream(
             move |offset| async move {
-                GetSubscriptionsRequest::new(self.id, offset)
+                ListSubscriptionsRequest::new(self.id, offset)
                     .send_request(client)
                     .await?
                     .try_into()
             },
             offset,
-            GetSubscriptionsRequest::PAGE_SIZE,
+            ListSubscriptionsRequest::PAGE_SIZE,
         )
     }
 
@@ -116,20 +116,20 @@ impl Account {
     /// needed. The `offset` parameter can be used to skip a number of fandoms from the beginning of
     /// the list. If an [`Error`][crate::Error] occurs during the retrieval of any page, the stream
     /// will yield that single error and then terminate.
-    pub fn moderated_fandoms<'a>(
+    pub fn list_moderated_fandoms<'a>(
         &'a self,
         client: &'a Client,
         offset: usize,
     ) -> impl Stream<Item = Result<Fandom>> + 'a {
         auto_paginated_stream(
             move |offset| async move {
-                GetModeratedFandomsRequest::new(self.id, offset)
+                ListModeratedFandomsRequest::new(self.id, offset)
                     .send_request(client)
                     .await?
                     .try_into()
             },
             offset,
-            GetModeratedFandomsRequest::PAGE_SIZE,
+            ListModeratedFandomsRequest::PAGE_SIZE,
         )
     }
 
@@ -140,20 +140,20 @@ impl Account {
     /// needed. The `offset` parameter can be used to skip a number of fandoms from the beginning of
     /// the list. If an [`Error`][crate::Error] occurs during the retrieval of any page, the stream
     /// will yield that single error and then terminate.
-    pub fn curated_fandoms<'a>(
+    pub fn list_curated_fandoms<'a>(
         &'a self,
         client: &'a Client,
         offset: usize,
     ) -> impl Stream<Item = Result<Fandom>> + 'a {
         auto_paginated_stream(
             move |offset| async move {
-                GetCuratedFandomsRequest::new(self.id, offset)
+                ListCuratedFandomsRequest::new(self.id, offset)
                     .send_request(client)
                     .await?
                     .try_into()
             },
             offset,
-            GetCuratedFandomsRequest::PAGE_SIZE,
+            ListCuratedFandomsRequest::PAGE_SIZE,
         )
     }
 }

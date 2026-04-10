@@ -1,13 +1,14 @@
 mod badge;
+mod ban_entry;
 mod blocklist;
 mod effect;
 mod error;
 mod info;
-mod prison;
 mod profile;
 mod stat;
 
 pub use badge::Badge;
+pub use ban_entry::BanEntry;
 use chrono::{DateTime, Duration, Utc};
 pub use effect::{
     Effect, Kind as EffectKind, Origin as EffectOrigin, ReasonKind as EffectReasonKind,
@@ -15,7 +16,6 @@ pub use effect::{
 pub use error::*;
 use futures::Stream;
 pub use info::Info;
-pub use prison::PrisonEntry;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 pub use stat::Stat;
@@ -24,7 +24,7 @@ use crate::client::Request as _;
 use crate::models::streams::{auto_paginated_stream, paginated_stream};
 use crate::models::{Gender, ImageRef};
 use crate::requests::account::{
-    GetAccountRequest, GetOnlineRequest, GetPrisonRequest, ReportRequest, SearchAccountsRequest,
+    GetAccountRequest, ListBannedRequest, ListOnlineRequest, ReportRequest, SearchAccountsRequest,
 };
 use crate::{Client, Result};
 
@@ -65,7 +65,7 @@ impl Account {
     ///
     /// This is useful when you only need to reference an account by its ID for sending associated
     /// requests. However, obtaining a fully populated `Account` struct from methods like
-    /// [`Account::by_id()`] or [`Account::by_name()`] is generally preferred.
+    /// [`Account::get_by_id()`] or [`Account::get_by_name()`] is generally preferred.
     ///
     /// # Examples
     ///
@@ -77,7 +77,7 @@ impl Account {
     /// # async fn main() -> Result<()> {
     /// # let client = &Client::default();
     /// let account = Account::new(1234);
-    /// println!("{:#?}", account.info(client).await?);
+    /// println!("{:#?}", account.get_info(client).await?);
     /// #    Ok(())
     /// # }
     /// ```
@@ -106,7 +106,7 @@ impl Account {
     /// Returns [`UnavailableError::NotFound`][crate::UnavailableError::NotFound] if no account with
     /// the provided identifier exists, or [`Error`][crate::Error] if any other error occurs during
     /// the request.
-    pub async fn by_id(client: &Client, id: u64) -> Result<Self> {
+    pub async fn get_by_id(client: &Client, id: u64) -> Result<Self> {
         GetAccountRequest::new_by_id(id)
             .send_request(client)
             .await?
@@ -122,7 +122,7 @@ impl Account {
     /// Returns [`UnavailableError::NotFound`][crate::UnavailableError::NotFound] if no account with
     /// the provided name exists, or [`Error`][crate::Error] if any other error occurs during the
     /// request.
-    pub async fn by_name(client: &Client, name: &str) -> Result<Self> {
+    pub async fn get_by_name(client: &Client, name: &str) -> Result<Self> {
         GetAccountRequest::new_by_name(name)
             .send_request(client)
             .await?
@@ -174,7 +174,7 @@ impl Account {
     ///
     /// If an [`Error`][crate::Error] occurs during the retrieval of any page, the stream will yield
     /// that single error and then terminate.
-    pub fn online(
+    pub fn list_online(
         client: &Client,
         offset_date: Option<DateTime<Utc>>,
     ) -> impl Stream<Item = Result<Self>> + '_ {
@@ -182,7 +182,7 @@ impl Account {
 
         paginated_stream(
             move |offset_date| async move {
-                GetOnlineRequest::new(offset_date, limit_date)
+                ListOnlineRequest::new(offset_date, limit_date)
                     .send_request(client)
                     .await?
                     .try_into()
@@ -190,7 +190,7 @@ impl Account {
             offset_date,
             |accounts, _| {
                 let length = accounts.len();
-                (length >= GetOnlineRequest::PAGE_SIZE)
+                (length >= ListOnlineRequest::PAGE_SIZE)
                     .then(|| accounts.last())
                     .flatten()
                     .map(|account| Some(account.last_online_at))
@@ -200,21 +200,24 @@ impl Account {
 
     /// Retrieves a [`Stream`] of all currently banned accounts.
     ///
-    /// This method returns a [`Stream`] that yields individual [`PrisonEntry`] instances as they
-    /// are retrieved. The stream handles pagination automatically, fetching new pages of results as
+    /// This method returns a [`Stream`] that yields individual [`BanEntry`] instances as they are
+    /// retrieved. The stream handles pagination automatically, fetching new pages of results as
     /// needed. The `offset` parameter can be used to skip a number of banned accounts from the
     /// beginning of the list. If an [`Error`][crate::Error] occurs during the retrieval of any
     /// page, the stream will yield that single error and then terminate.
-    pub fn prison(client: &Client, offset: usize) -> impl Stream<Item = Result<PrisonEntry>> + '_ {
+    pub fn list_banned(
+        client: &Client,
+        offset: usize,
+    ) -> impl Stream<Item = Result<BanEntry>> + '_ {
         auto_paginated_stream(
             move |offset| async move {
-                GetPrisonRequest::new(offset)
+                ListBannedRequest::new(offset)
                     .send_request(client)
                     .await?
                     .try_into()
             },
             offset,
-            GetPrisonRequest::PAGE_SIZE,
+            ListBannedRequest::PAGE_SIZE,
         )
     }
 

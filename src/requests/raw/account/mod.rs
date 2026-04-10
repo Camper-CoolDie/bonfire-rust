@@ -1,18 +1,18 @@
 mod badge;
+mod ban_entry;
 mod customization;
 mod effect;
 mod info;
-mod prison;
 mod stat;
 
 pub(crate) use badge::RawBadge;
+pub(crate) use ban_entry::RawBanEntry;
 use chrono::{DateTime, Utc};
 pub(crate) use customization::RawCustomization;
 pub(crate) use effect::{
     RawEffect, RawKind as RawEffectKind, RawReasonKind as RawEffectReasonKind,
 };
 pub(crate) use info::RawInfo;
-pub(crate) use prison::RawPrisonEntry;
 use serde::Deserialize;
 use serde::de::Error as _;
 pub(crate) use stat::RawStat;

@@ -44,12 +44,12 @@ impl AnyChat {
 }
 
 impl Messageable for AnyChat {
-    fn tag(&self) -> Tag {
+    fn to_tag(&self) -> Tag {
         match self {
-            AnyChat::FandomRoot(chat) => chat.tag(),
-            AnyChat::FandomSub(chat) => chat.tag(),
-            AnyChat::Group(chat) => chat.tag(),
-            AnyChat::Direct(chat) => chat.tag(),
+            AnyChat::FandomRoot(chat) => chat.to_tag(),
+            AnyChat::FandomSub(chat) => chat.to_tag(),
+            AnyChat::Group(chat) => chat.to_tag(),
+            AnyChat::Direct(chat) => chat.to_tag(),
         }
     }
 }

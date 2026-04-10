@@ -23,7 +23,7 @@ pub struct PostTag {
 
 impl Publishable for PostTag {
     /// Returns the publication kind as [`Kind::PostTag`].
-    fn kind(&self) -> Kind {
+    fn to_kind(&self) -> Kind {
         Kind::PostTag
     }
 }

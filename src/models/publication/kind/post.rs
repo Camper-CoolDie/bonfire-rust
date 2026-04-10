@@ -48,7 +48,7 @@ pub struct Post {
 
 impl Publishable for Post {
     /// Returns the publication kind as [`Kind::Post`].
-    fn kind(&self) -> Kind {
+    fn to_kind(&self) -> Kind {
         Kind::Post
     }
 }
@@ -75,7 +75,7 @@ impl Publication<Post> {
     /// * Returns [`UnavailableError::Blocked`][crate::UnavailableError::Blocked] if the post is
     ///   blocked.
     /// * Returns [`Error`][crate::Error] if any other error occurs during the request.
-    pub async fn get(client: &Client, id: u64) -> Result<(Self, Vec<Publication<PostTag>>)> {
+    pub async fn get_by_id(client: &Client, id: u64) -> Result<(Self, Vec<Publication<PostTag>>)> {
         GetPostRequest::new(id)
             .send_request(client)
             .await?

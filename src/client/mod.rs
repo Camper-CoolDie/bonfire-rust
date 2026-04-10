@@ -57,7 +57,7 @@ struct Inner {
 ///     client.login("user@example.com", "password").await?;
 ///
 ///     // Get brief information about the account with id `1`
-///     println!("{:#?}", Account::by_id(client, 1).await?);
+///     println!("{:#?}", Account::get_by_id(client, 1).await?);
 ///
 ///     Ok(())
 /// }
@@ -91,12 +91,14 @@ impl Client {
     /// #
     /// # #[tokio::main]
     /// # async fn main() -> Result<()> {
-    /// # let client = &Client::default();
+    /// #     let client = &Client::default();
     /// client.login("email", "password").await?;
-    /// assert!(client.is_auth().await); // is_auth() is true
+    /// // is_auth() is true
+    /// assert!(client.is_auth().await);
     ///
     /// client.logout().await?;
-    /// assert!(!client.is_auth().await); // is_auth() is false
+    /// // is_auth() is false
+    /// assert!(!client.is_auth().await);
     /// #     Ok(())
     /// # }
     /// ```

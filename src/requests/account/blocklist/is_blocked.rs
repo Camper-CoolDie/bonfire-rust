@@ -5,36 +5,34 @@ use crate::{Client, Result, RootError};
 
 #[derive(Deserialize)]
 pub(crate) struct Response {
-    #[serde(rename = "fandomsIds")]
-    fandom_ids: Vec<u64>,
+    #[serde(rename = "isInBlackList")]
+    is_blocked: bool,
 }
 
-impl From<Response> for Vec<u64> {
-    fn from(mut value: Response) -> Self {
-        // The server returns an unsorted list of IDs
-        value.fandom_ids.sort_unstable();
-        value.fandom_ids
+impl From<Response> for bool {
+    fn from(value: Response) -> Self {
+        value.is_blocked
     }
 }
 
 #[derive(Serialize)]
-pub(crate) struct GetBlockedFandomIdsRequest {
+pub(crate) struct IsAccountBlockedRequest {
     #[serde(rename = "accountId")]
     id: u64,
 }
-impl GetBlockedFandomIdsRequest {
+impl IsAccountBlockedRequest {
     pub(crate) fn new(id: u64) -> Self {
         Self { id }
     }
 }
 
-impl Request for GetBlockedFandomIdsRequest {
+impl Request for IsAccountBlockedRequest {
     type Response = Response;
     type Error = InfallibleRequest<RootError>;
 
     async fn send_request(&self, client: &Client) -> Result<Response> {
         client
-            .send_request("RAccountsGetIgnoredFandoms", self, Vec::new())
+            .send_request("RAccountsBlackListCheck", self, Vec::new())
             .await
     }
 }

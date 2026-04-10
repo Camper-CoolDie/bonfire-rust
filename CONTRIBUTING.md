@@ -70,8 +70,8 @@ Clear and consistent documentation is vital. Please follow these rules:
    /// that single error and then terminate.
    ```
 
-4. Always use backticks and full paths for cross-references to code items (e.g.,
-   `` `[`Client::login`][crate::Client::login]` ``).
+4. Always use backticks for cross-references to code items (e.g.,
+   ``[`Client::login`][crate::Client::login]``).
 
 5. Before writing any new documentation, please review existing documentation strings in similar
    contexts. Maintaining a consistent style greatly improves readability.

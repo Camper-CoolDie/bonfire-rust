@@ -13,7 +13,7 @@ A modern, well-documented asynchronous Rust client library for the
 - **Modern asynchronous design**: Built on [`tokio`](https://crates.io/crates/tokio) and
   [`hyper`](https://crates.io/crates/hyper) for non-blocking, high-performance network requests.
 - **Ergonomic and fluent API**: Interact with API models like `Account` and `Fandom` directly (e.g.,
-  `account.follows()`) rather than managing request structs manually.
+  `account.list_follows()`) rather than managing request structs manually.
 - **Automatic session management**: Handles authentication token refreshing transparently. Log in
   once and the client manages the rest.
 
@@ -53,8 +53,6 @@ authentication tokens to reuse the same session:
 
 ```rust
 use std::fs;
-use std::fs::File;
-use std::io::Write;
 
 use anyhow::Result;
 use bonfire::prelude::*;
@@ -65,8 +63,7 @@ const PASSWORD: &str = "password";
 
 async fn save_credentials(client: &Client) -> Result<()> {
     let data = serde_json::to_string(&client.auth().await?)?;
-    let mut file = File::create("credentials.json")?;
-    file.write_all(data.as_bytes())?;
+    fs::write("credentials.json", data)?;
     Ok(())
 }
 

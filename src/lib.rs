@@ -6,8 +6,9 @@
 //! - **Modern asynchronous design**: Built on [`tokio`](https://crates.io/crates/tokio) and [`hyper`](https://crates.io/crates/hyper)
 //!   for non-blocking, high-performance network requests.
 //! - **Ergonomic and fluent API**: Interact with API models like [`Account`][models::Account] and
-//!   [`Fandom`][models::Fandom] directly (e.g., [`account.follows()`][models::Account::follows()])
-//!   rather than managing request structs manually.
+//!   [`Fandom`][models::Fandom] directly (e.g.,
+//!   [`account.list_follows()`][models::Account::list_follows()]) rather than managing request
+//!   structs manually.
 //! - **Automatic session management**: Handles authentication token refreshing transparently. Log
 //!   in once and the client manages the rest.
 //!
@@ -50,8 +51,6 @@
 //! # #[cfg(feature = "serde")]
 //! # mod wrapper {
 //! use std::fs;
-//! use std::fs::File;
-//! use std::io::Write;
 //!
 //! use anyhow::Result;
 //! use bonfire::prelude::*;
@@ -62,8 +61,7 @@
 //!
 //! async fn save_credentials(client: &Client) -> Result<()> {
 //!     let data = serde_json::to_string(&client.auth().await?)?;
-//!     let mut file = File::create("credentials.json")?;
-//!     file.write_all(data.as_bytes())?;
+//!     fs::write("credentials.json", data)?;
 //!     Ok(())
 //! }
 //!

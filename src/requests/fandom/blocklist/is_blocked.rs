@@ -16,17 +16,17 @@ impl From<Response> for bool {
 }
 
 #[derive(Serialize)]
-pub(crate) struct CheckFandomBlockedRequest {
+pub(crate) struct IsFandomBlockedRequest {
     #[serde(rename = "fandomId")]
     id: u64,
 }
-impl CheckFandomBlockedRequest {
+impl IsFandomBlockedRequest {
     pub(crate) fn new(id: u64) -> Self {
         Self { id }
     }
 }
 
-impl Request for CheckFandomBlockedRequest {
+impl Request for IsFandomBlockedRequest {
     type Response = Response;
     type Error = InfallibleRequest<RootError>;
 

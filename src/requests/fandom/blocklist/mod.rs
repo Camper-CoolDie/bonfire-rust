@@ -1,9 +1,9 @@
 mod block;
-mod check_blocked;
-mod get_blocked_fandom_ids;
+mod is_blocked;
+mod list_blocked_fandom_ids;
 mod unblock;
 
 pub(crate) use block::BlockFandomRequest;
-pub(crate) use check_blocked::CheckFandomBlockedRequest;
-pub(crate) use get_blocked_fandom_ids::GetBlockedFandomIdsRequest;
+pub(crate) use is_blocked::IsFandomBlockedRequest;
+pub(crate) use list_blocked_fandom_ids::ListBlockedFandomIdsRequest;
 pub(crate) use unblock::UnblockFandomRequest;

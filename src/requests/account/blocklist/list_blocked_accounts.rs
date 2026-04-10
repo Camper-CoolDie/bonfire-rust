@@ -19,39 +19,26 @@ impl TryFrom<Response> for Vec<Account> {
 }
 
 #[derive(Serialize)]
-pub(crate) struct GetFollowsRequest {
-    #[serde(rename = "followsOfaAccountId")]
+pub(crate) struct ListBlockedAccountsRequest {
+    #[serde(rename = "accountId")]
     id: u64,
     offset: usize,
-    followers: bool,
 }
-impl GetFollowsRequest {
+impl ListBlockedAccountsRequest {
     pub(crate) const PAGE_SIZE: usize = 20;
 
-    pub(crate) fn new_follows(id: u64, offset: usize) -> Self {
-        Self {
-            id,
-            offset,
-            followers: false,
-        }
-    }
-
-    pub(crate) fn new_followers(id: u64, offset: usize) -> Self {
-        Self {
-            id,
-            offset,
-            followers: true,
-        }
+    pub(crate) fn new(id: u64, offset: usize) -> Self {
+        Self { id, offset }
     }
 }
 
-impl Request for GetFollowsRequest {
+impl Request for ListBlockedAccountsRequest {
     type Response = Response;
     type Error = InfallibleRequest<RootError>;
 
     async fn send_request(&self, client: &Client) -> Result<Response> {
         client
-            .send_request("RAccountsFollowsGetAll", self, Vec::new())
+            .send_request("RAccountsBlackListGetAll", self, Vec::new())
             .await
     }
 }

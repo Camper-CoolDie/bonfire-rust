@@ -35,11 +35,11 @@ impl TryFrom<Response> for Vec<Account> {
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
-pub(crate) struct GetOnlineRequest {
+pub(crate) struct ListOnlineRequest {
     offset_date: i64,
     limit_date: i64,
 }
-impl GetOnlineRequest {
+impl ListOnlineRequest {
     pub(crate) const PAGE_SIZE: usize = 50;
 
     pub(crate) fn new(offset_date: Option<DateTime<Utc>>, limit_date: DateTime<Utc>) -> Self {
@@ -50,7 +50,7 @@ impl GetOnlineRequest {
     }
 }
 
-impl Request for GetOnlineRequest {
+impl Request for ListOnlineRequest {
     type Response = Response;
     type Error = InfallibleRequest<RootError>;
 

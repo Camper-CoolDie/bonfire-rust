@@ -2,21 +2,21 @@ use chrono::DateTime;
 use serde::Deserialize;
 use serde::de::Error as _;
 
-use crate::models::account::PrisonEntry;
+use crate::models::account::BanEntry;
 use crate::requests::raw::RawAccount;
 use crate::{Error, Result};
 
 #[derive(Deserialize)]
-pub(crate) struct RawPrisonEntry {
+pub(crate) struct RawBanEntry {
     pub account: RawAccount,
     #[serde(rename = "banDate")]
     pub banned_until: i64,
 }
 
-impl TryFrom<RawPrisonEntry> for PrisonEntry {
+impl TryFrom<RawBanEntry> for BanEntry {
     type Error = Error;
 
-    fn try_from(value: RawPrisonEntry) -> Result<Self> {
+    fn try_from(value: RawBanEntry) -> Result<Self> {
         Ok(Self {
             account: value.account.try_into()?,
             banned_until: DateTime::from_timestamp_millis(value.banned_until).ok_or_else(|| {

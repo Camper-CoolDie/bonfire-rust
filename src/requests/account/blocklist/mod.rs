@@ -1,9 +1,9 @@
 mod block;
-mod check_blocked;
-mod get_blocked_accounts;
+mod is_blocked;
+mod list_blocked_accounts;
 mod unblock;
 
 pub(crate) use block::BlockAccountRequest;
-pub(crate) use check_blocked::CheckAccountBlockedRequest;
-pub(crate) use get_blocked_accounts::GetBlockedAccountsRequest;
+pub(crate) use is_blocked::IsAccountBlockedRequest;
+pub(crate) use list_blocked_accounts::ListBlockedAccountsRequest;
 pub(crate) use unblock::UnblockAccountRequest;

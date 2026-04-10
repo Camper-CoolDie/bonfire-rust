@@ -13,7 +13,7 @@ pub use typing::Handler as TypingHandler;
 use crate::client::Request as _;
 use crate::models::streams::auto_paginated_stream;
 use crate::models::{ChatMessage, Publication};
-use crate::requests::chat::{GetChatRequest, GetChatsRequest};
+use crate::requests::chat::{GetChatRequest, ListChatsRequest};
 use crate::sealed::Sealed;
 use crate::{Client, Result};
 
@@ -24,7 +24,7 @@ use crate::{Client, Result};
 /// unspecified specific types.
 pub trait Messageable: Sealed {
     /// Returns the specific tag that identifies this type of chat.
-    fn tag(&self) -> Tag;
+    fn to_tag(&self) -> Tag;
 }
 
 /// Represents various types of chat entities and their associated data.
@@ -48,7 +48,7 @@ impl Chat {
     ///
     /// This is useful when you only need to reference a chat by its tag for sending associated
     /// requests. However, obtaining a fully populated `Chat` struct from methods like
-    /// [`Chat::by_tag()`] or [`Chat::stream()`] is generally preferred.
+    /// [`Chat::get_by_tag()`] or [`Chat::list()`] is generally preferred.
     #[must_use]
     pub fn new(tag: Tag) -> Self {
         Self {
@@ -70,7 +70,7 @@ impl Chat {
     /// * Returns [`RootError::AccessDenied`][crate::RootError::AccessDenied] if the chat is a group
     ///   and is private, or if the user has been removed from it.
     /// * Returns [`Error`][crate::Error] if any other error occurs during the request.
-    pub async fn by_tag(client: &Client, tag: Tag) -> Result<Self> {
+    pub async fn get_by_tag(client: &Client, tag: Tag) -> Result<Self> {
         GetChatRequest::new_by_tag(tag)
             .send_request(client)
             .await?
@@ -89,7 +89,7 @@ impl Chat {
     ///   referenced by the given ID is not a chat message, or if the chat is a group and is
     ///   private, or if the user has been removed from it.
     /// * Returns [`Error`][crate::Error] if any other error occurs during the request.
-    pub async fn by_message_id(client: &Client, id: u64) -> Result<Self> {
+    pub async fn get_by_message_id(client: &Client, id: u64) -> Result<Self> {
         GetChatRequest::new_by_message_id(id)
             .send_request(client)
             .await?
@@ -104,16 +104,16 @@ impl Chat {
     /// to skip a number of chats from the beginning of the list. If an [`Error`][crate::Error]
     /// occurs during the retrieval of any page, the stream will yield that single error and then
     /// terminate.
-    pub fn stream(client: &Client, offset: usize) -> impl Stream<Item = Result<Self>> + '_ {
+    pub fn list(client: &Client, offset: usize) -> impl Stream<Item = Result<Self>> + '_ {
         auto_paginated_stream(
             move |offset| async move {
-                GetChatsRequest::new(offset)
+                ListChatsRequest::new(offset)
                     .send_request(client)
                     .await?
                     .try_into()
             },
             offset,
-            GetChatsRequest::PAGE_SIZE,
+            ListChatsRequest::PAGE_SIZE,
         )
     }
 }

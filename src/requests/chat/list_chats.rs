@@ -20,10 +20,10 @@ impl TryFrom<Response> for Vec<Chat> {
 }
 
 #[derive(Serialize)]
-pub(crate) struct GetChatsRequest {
+pub(crate) struct ListChatsRequest {
     offset: usize,
 }
-impl GetChatsRequest {
+impl ListChatsRequest {
     pub(crate) const PAGE_SIZE: usize = 10;
 
     pub(crate) fn new(offset: usize) -> Self {
@@ -31,7 +31,7 @@ impl GetChatsRequest {
     }
 }
 
-impl Request for GetChatsRequest {
+impl Request for ListChatsRequest {
     type Response = Response;
     type Error = InfallibleRequest<RootError>;
 

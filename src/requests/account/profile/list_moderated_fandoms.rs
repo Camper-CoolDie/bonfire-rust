@@ -19,12 +19,12 @@ impl TryFrom<Response> for Vec<Fandom> {
 }
 
 #[derive(Serialize)]
-pub(crate) struct GetCuratedFandomsRequest {
+pub(crate) struct ListModeratedFandomsRequest {
     #[serde(rename = "accountId")]
     id: u64,
     offset: usize,
 }
-impl GetCuratedFandomsRequest {
+impl ListModeratedFandomsRequest {
     pub(crate) const PAGE_SIZE: usize = 20;
 
     pub(crate) fn new(id: u64, offset: usize) -> Self {
@@ -32,13 +32,13 @@ impl GetCuratedFandomsRequest {
     }
 }
 
-impl Request for GetCuratedFandomsRequest {
+impl Request for ListModeratedFandomsRequest {
     type Response = Response;
     type Error = InfallibleRequest<RootError>;
 
     async fn send_request(&self, client: &Client) -> Result<Response> {
         client
-            .send_request("RFandomsGetAllViceroy", self, Vec::new())
+            .send_request("RFandomsGetAllModerated", self, Vec::new())
             .await
     }
 }

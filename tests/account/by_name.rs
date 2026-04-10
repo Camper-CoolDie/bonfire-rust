@@ -11,7 +11,7 @@ const NAME: &str = "TestUser";
 async fn test_success() {
     let expected = common::load_ron_fixture::<Account>("expected/account.ron");
     let (mock, client) = common::setup_single("account/get_account.json");
-    let result = Account::by_name(&client, NAME).await;
+    let result = Account::get_by_name(&client, NAME).await;
 
     let account = result.unwrap();
     compare_structs!(account, expected);
@@ -21,7 +21,7 @@ async fn test_success() {
 #[tokio::test]
 async fn test_not_found() {
     let (mock, client) = common::setup_single("error/not_found.json");
-    let result = Account::by_name(&client, "InexistentUser").await;
+    let result = Account::get_by_name(&client, "InexistentUser").await;
 
     assert!(matches!(
         result.unwrap_err(),

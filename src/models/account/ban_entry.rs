@@ -7,7 +7,7 @@ use crate::models::Account;
 /// Represents an account that is currently banned.
 #[derive(Default, Clone, Debug)]
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
-pub struct PrisonEntry {
+pub struct BanEntry {
     /// The account that is banned
     pub account: Account,
     /// The date when this account's ban is scheduled to end

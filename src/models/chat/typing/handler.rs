@@ -7,7 +7,7 @@ use crate::Client;
 use crate::client::Request as _;
 use crate::models::chat::Tag;
 use crate::models::chat::typing::Command;
-use crate::requests::chat::TypingRequest;
+use crate::requests::chat::NotifyTypingRequest;
 
 /// Manages a background task that sends periodic typing notifications to a chat.
 ///
@@ -24,8 +24,8 @@ impl Handler {
         let span = tracing::info_span!("typing_task", ?tag);
 
         let task = async move {
-            let request = TypingRequest::new(tag);
-            let mut interval = interval_at(Instant::now(), TypingRequest::PERIOD);
+            let request = NotifyTypingRequest::new(tag);
+            let mut interval = interval_at(Instant::now(), NotifyTypingRequest::PERIOD);
             interval.set_missed_tick_behavior(MissedTickBehavior::Delay);
 
             Self::task_loop(&client, &request, interval, receiver).await;
@@ -40,7 +40,7 @@ impl Handler {
 
     async fn task_loop(
         client: &Client,
-        request: &TypingRequest,
+        request: &NotifyTypingRequest,
         mut interval: Interval,
         mut receiver: mpsc::Receiver<Command>,
     ) {

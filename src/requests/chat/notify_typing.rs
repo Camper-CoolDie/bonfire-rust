@@ -8,10 +8,10 @@ use crate::requests::raw::RawChatTag;
 use crate::{Client, Result, RootError};
 
 #[derive(Serialize)]
-pub(crate) struct TypingRequest {
+pub(crate) struct NotifyTypingRequest {
     tag: RawChatTag,
 }
-impl TypingRequest {
+impl NotifyTypingRequest {
     pub(crate) const PERIOD: Duration = Duration::from_secs(5);
 
     pub(crate) fn new(tag: ChatTag) -> Self {
@@ -19,7 +19,7 @@ impl TypingRequest {
     }
 }
 
-impl Request for TypingRequest {
+impl Request for NotifyTypingRequest {
     type Response = EmptyResponse;
     type Error = InfallibleRequest<RootError>;
 

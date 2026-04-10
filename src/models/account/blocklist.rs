@@ -4,10 +4,9 @@ use crate::client::Request;
 use crate::models::Account;
 use crate::models::streams::auto_paginated_stream;
 use crate::requests::account::blocklist::{
-    BlockAccountRequest, CheckAccountBlockedRequest, GetBlockedAccountsRequest,
-    UnblockAccountRequest,
+    BlockAccountRequest, IsAccountBlockedRequest, ListBlockedAccountsRequest, UnblockAccountRequest,
 };
-use crate::requests::fandom::blocklist::GetBlockedFandomIdsRequest;
+use crate::requests::fandom::blocklist::ListBlockedFandomIdsRequest;
 use crate::{Client, Result};
 
 impl Account {
@@ -45,7 +44,7 @@ impl Account {
     /// the block status of your own account, or [`Error`][crate::Error] if any other error occurs
     /// during the request.
     pub async fn is_blocked(&self, client: &Client) -> Result<bool> {
-        Ok(CheckAccountBlockedRequest::new(self.id)
+        Ok(IsAccountBlockedRequest::new(self.id)
             .send_request(client)
             .await?
             .into())
@@ -58,20 +57,20 @@ impl Account {
     /// needed. The `offset` parameter can be used to skip a number of accounts from the beginning
     /// of the list. If an [`Error`][crate::Error] occurs during the retrieval of any page, the
     /// stream will yield that single error and then terminate.
-    pub fn blocked_accounts<'a>(
+    pub fn list_blocked_accounts<'a>(
         &'a self,
         client: &'a Client,
         offset: usize,
     ) -> impl Stream<Item = Result<Self>> + 'a {
         auto_paginated_stream(
             move |offset| async move {
-                GetBlockedAccountsRequest::new(self.id, offset)
+                ListBlockedAccountsRequest::new(self.id, offset)
                     .send_request(client)
                     .await?
                     .try_into()
             },
             offset,
-            GetBlockedAccountsRequest::PAGE_SIZE,
+            ListBlockedAccountsRequest::PAGE_SIZE,
         )
     }
 
@@ -80,8 +79,8 @@ impl Account {
     /// # Errors
     ///
     /// Returns [`Error`][crate::Error] if an error occurs while sending the request.
-    pub async fn blocked_fandom_ids(&self, client: &Client) -> Result<Vec<u64>> {
-        Ok(GetBlockedFandomIdsRequest::new(self.id)
+    pub async fn list_blocked_fandom_ids(&self, client: &Client) -> Result<Vec<u64>> {
+        Ok(ListBlockedFandomIdsRequest::new(self.id)
             .send_request(client)
             .await?
             .into())

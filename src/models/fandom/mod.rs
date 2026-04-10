@@ -8,9 +8,9 @@ pub use status::Status;
 use crate::client::Request as _;
 use crate::models::{Category, ImageRef, Language};
 use crate::requests::fandom::blocklist::{
-    BlockFandomRequest, CheckFandomBlockedRequest, UnblockFandomRequest,
+    BlockFandomRequest, IsFandomBlockedRequest, UnblockFandomRequest,
 };
-use crate::requests::fandom::{GetFandomRequest, GetFandomsRequest};
+use crate::requests::fandom::{GetFandomRequest, ListFandomsRequest};
 use crate::{Client, Result};
 
 /// Represents a fandom, which is a community centered around a specific topic.
@@ -49,25 +49,12 @@ impl Fandom {
     ///
     /// This is useful when you only need to reference a fandom by its ID and language for sending
     /// associated requests. However, obtaining a fully populated `Fandom` struct from methods like
-    /// [`Fandom::get()`] or [`Fandom::by_id()`] is generally preferred.
+    /// [`Fandom::get_by_id_and_language()`] or [`Fandom::get_by_id()`] is generally preferred.
     #[must_use]
     pub fn new(id: u64, language: Language) -> Self {
         Self {
             id,
             language: Some(language),
-            ..Self::default()
-        }
-    }
-
-    /// Creates a new `Fandom` instance with only its identifier set.
-    ///
-    /// This is useful when you only need to reference a fandom by its ID for sending associated
-    /// requests. However, obtaining a fully populated `Fandom` struct from methods like
-    /// [`Fandom::get()`] or [`Fandom::by_id()`] is generally preferred.
-    #[must_use]
-    pub fn new_by_id(id: u64) -> Self {
-        Self {
-            id,
             ..Self::default()
         }
     }
@@ -82,7 +69,7 @@ impl Fandom {
     /// Returns [`UnavailableError::NotFound`][crate::UnavailableError::NotFound] if no fandom with
     /// the provided identifier exists, or [`Error`][crate::Error] if any other error occurs during
     /// the request.
-    pub async fn get(
+    pub async fn get_by_id_and_language(
         client: &Client,
         id: u64,
         language: Option<Language>,
@@ -101,8 +88,8 @@ impl Fandom {
     /// Returns [`UnavailableError::NotFound`][crate::UnavailableError::NotFound] if no fandom with
     /// the provided identifier exists, or [`Error`][crate::Error] if any other error occurs during
     /// the request.
-    pub async fn by_id(client: &Client, id: u64) -> Result<Self> {
-        GetFandomsRequest::new(&[id])
+    pub async fn get_by_id(client: &Client, id: u64) -> Result<Self> {
+        ListFandomsRequest::new(&[id])
             .send_request(client)
             .await?
             .try_into()
@@ -116,8 +103,8 @@ impl Fandom {
     /// # Errors
     ///
     /// Returns [`Error`][crate::Error] if an error occurs during the request.
-    pub async fn by_ids(client: &Client, ids: &[u64]) -> Result<Vec<Option<Self>>> {
-        GetFandomsRequest::new(ids)
+    pub async fn list_by_ids(client: &Client, ids: &[u64]) -> Result<Vec<Option<Self>>> {
+        ListFandomsRequest::new(ids)
             .send_request(client)
             .await?
             .try_into()
@@ -133,8 +120,8 @@ impl Fandom {
     /// Returns [`UnavailableError::NotFound`][crate::UnavailableError::NotFound] if at least one
     /// fandom for a given ID is not found, or [`Error`][crate::Error] if any other error occurs
     /// during the request.
-    pub async fn by_ids_strict(client: &Client, ids: &[u64]) -> Result<Vec<Self>> {
-        GetFandomsRequest::new(ids)
+    pub async fn list_by_ids_strict(client: &Client, ids: &[u64]) -> Result<Vec<Self>> {
+        ListFandomsRequest::new(ids)
             .send_request(client)
             .await?
             .try_into()
@@ -170,7 +157,7 @@ impl Fandom {
     ///
     /// Returns [`Error`][crate::Error] if an error occurs while sending the request.
     pub async fn is_blocked(&self, client: &Client) -> Result<bool> {
-        Ok(CheckFandomBlockedRequest::new(self.id)
+        Ok(IsFandomBlockedRequest::new(self.id)
             .send_request(client)
             .await?
             .into())

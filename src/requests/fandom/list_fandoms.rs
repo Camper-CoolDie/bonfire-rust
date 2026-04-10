@@ -76,17 +76,17 @@ impl TryFrom<Response> for Vec<Option<Fandom>> {
 }
 
 #[derive(Serialize)]
-pub(crate) struct GetFandomsRequest<'a> {
+pub(crate) struct ListFandomsRequest<'a> {
     #[serde(rename = "fandomsIds")]
     ids: &'a [u64],
 }
-impl<'a> GetFandomsRequest<'a> {
+impl<'a> ListFandomsRequest<'a> {
     pub(crate) fn new(ids: &'a [u64]) -> Self {
         Self { ids }
     }
 }
 
-impl Request for GetFandomsRequest<'_> {
+impl Request for ListFandomsRequest<'_> {
     type Response = Response;
     type Error = InfallibleRequest<RootError>;
 

@@ -1,6 +1,6 @@
 pub(crate) mod blocklist;
 mod get_fandom;
-mod get_fandoms;
+mod list_fandoms;
 
 pub(crate) use get_fandom::GetFandomRequest;
-pub(crate) use get_fandoms::GetFandomsRequest;
+pub(crate) use list_fandoms::ListFandomsRequest;

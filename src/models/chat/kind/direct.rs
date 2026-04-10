@@ -31,7 +31,7 @@ impl Direct {
 
 impl Messageable for Direct {
     /// Returns the chat's tag as [`ChatTag::Direct`][Tag::Direct].
-    fn tag(&self) -> Tag {
+    fn to_tag(&self) -> Tag {
         Tag::Direct {
             my_id: self.my_id,
             recipient_id: self.recipient.id,

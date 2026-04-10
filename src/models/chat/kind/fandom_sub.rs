@@ -33,7 +33,7 @@ impl FandomSub {
 
 impl Messageable for FandomSub {
     /// Returns the chat's tag as [`ChatTag::FandomSub`][Tag::FandomSub].
-    fn tag(&self) -> Tag {
+    fn to_tag(&self) -> Tag {
         Tag::FandomSub { id: self.id }
     }
 }

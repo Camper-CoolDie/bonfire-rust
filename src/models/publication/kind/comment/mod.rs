@@ -51,7 +51,7 @@ pub struct Comment {
 
 impl Publishable for Comment {
     /// Returns the publication kind as [`Kind::Comment`].
-    fn kind(&self) -> Kind {
+    fn to_kind(&self) -> Kind {
         Kind::Comment
     }
 }

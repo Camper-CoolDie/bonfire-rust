@@ -1,43 +1,44 @@
 use serde::{Deserialize, Serialize};
 
 use crate::client::{InfallibleRequest, Request};
-use crate::models::account::PrisonEntry;
-use crate::requests::raw::account::RawPrisonEntry;
+use crate::models::Fandom;
+use crate::requests::raw::RawFandom;
 use crate::{Client, Error, Result, RootError};
 
 #[derive(Deserialize)]
 pub(crate) struct Response {
-    #[serde(rename = "accounts")]
-    entries: Vec<RawPrisonEntry>,
+    fandoms: Vec<RawFandom>,
 }
 
-impl TryFrom<Response> for Vec<PrisonEntry> {
+impl TryFrom<Response> for Vec<Fandom> {
     type Error = Error;
 
     fn try_from(value: Response) -> Result<Self> {
-        value.entries.into_iter().map(TryInto::try_into).collect()
+        value.fandoms.into_iter().map(TryInto::try_into).collect()
     }
 }
 
 #[derive(Serialize)]
-pub(crate) struct GetPrisonRequest {
+pub(crate) struct ListSubscriptionsRequest {
+    #[serde(rename = "accountId")]
+    id: u64,
     offset: usize,
 }
-impl GetPrisonRequest {
+impl ListSubscriptionsRequest {
     pub(crate) const PAGE_SIZE: usize = 20;
 
-    pub(crate) fn new(offset: usize) -> Self {
-        Self { offset }
+    pub(crate) fn new(id: u64, offset: usize) -> Self {
+        Self { id, offset }
     }
 }
 
-impl Request for GetPrisonRequest {
+impl Request for ListSubscriptionsRequest {
     type Response = Response;
     type Error = InfallibleRequest<RootError>;
 
     async fn send_request(&self, client: &Client) -> Result<Response> {
         client
-            .send_request("RAccountsPrisonGetAll", self, Vec::new())
+            .send_request("RFandomsGetAllSubscribed", self, Vec::new())
             .await
     }
 }
