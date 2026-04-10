@@ -2,17 +2,15 @@ mod params;
 mod role;
 mod status;
 
-use chrono::DateTime;
 pub(crate) use params::RawParams;
 pub(crate) use role::RawMemberRole;
 use serde::Deserialize;
-use serde::de::Error as _;
 use serde_json::Value;
 pub(crate) use status::RawMemberStatus;
 
 use crate::models::Group;
 use crate::requests::raw::chat::{RawKind, RawMessageable};
-use crate::requests::raw::{RawChatTag, RawImageRef};
+use crate::requests::raw::{RawChatTag, RawImageRef, timestamp_from_millis};
 use crate::{Error, Result};
 
 #[derive(Deserialize)]
@@ -65,9 +63,7 @@ impl TryFrom<RawGroup> for Group {
             subscribers_count: value.subscribers_count,
             left_at: match value.left_at {
                 0 => None,
-                timestamp => Some(DateTime::from_timestamp_millis(timestamp).ok_or_else(|| {
-                    serde_json::Error::custom(format!("timestamp {timestamp} is out of range"))
-                })?),
+                timestamp => Some(timestamp_from_millis(timestamp)?),
             },
             is_public: value.params.is_public,
             allow_invites: value.params.allow_invites,

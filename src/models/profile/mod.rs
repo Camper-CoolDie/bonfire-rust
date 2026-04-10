@@ -147,13 +147,14 @@ impl Profile {
 
     /// Sets the account's status message.
     ///
-    /// The status must not exceed [`STATUS_MAX_LENGTH`]. An empty string or `None` clears the
-    /// status.
+    /// This operation requires an authenticated client with at least
+    /// [`AccessLevel::Trusted`][crate::models::AccessLevel::Trusted] permissions. The status must
+    /// not exceed [`STATUS_MAX_LENGTH`]. An empty string or `None` clears the status.
     ///
     /// # Errors
     ///
-    /// * Returns [`RootError::AccessDenied`][crate::RootError::AccessDenied] if the user is not yet
-    ///   permitted to change their status.
+    /// * Returns [`RootError::AccessDenied`][crate::RootError::AccessDenied] if the authenticated
+    ///   user's access level is below the requirement.
     /// * Returns [`SetProfileTextError::TooLong`] if the provided status exceeds the maximum
     ///   allowed length.
     /// * Returns [`Error`][crate::Error] if any other error occurs during the request.
@@ -183,14 +184,16 @@ impl Profile {
     /// This method accepts both static and GIF images. The server automatically determines the
     /// appropriate avatar type based on the provided image data.
     ///
-    /// Static avatars cannot exceed [`AVATAR_MAX_SIZE`] in size, and their dimensions must be no
-    /// larger than [`AVATAR_MAX_DIMENSION`]. GIF avatars cannot exceed [`AVATAR_GIF_MAX_SIZE`] in
-    /// size, and their dimensions must be no larger than [`AVATAR_GIF_MAX_DIMENSION`].
+    /// This operation requires an authenticated client with at least
+    /// [`AccessLevel::Trusted`][crate::models::AccessLevel::Trusted] permissions. Static avatars
+    /// cannot exceed [`AVATAR_MAX_SIZE`] in size, and their dimensions must be no larger than
+    /// [`AVATAR_MAX_DIMENSION`]. GIF avatars cannot exceed [`AVATAR_GIF_MAX_SIZE`] in size, and
+    /// their dimensions must be no larger than [`AVATAR_GIF_MAX_DIMENSION`].
     ///
     /// # Errors
     ///
-    /// * Returns [`RootError::AccessDenied`][crate::RootError::AccessDenied] if the user is not yet
-    ///   permitted to upload a GIF avatar.
+    /// * Returns [`RootError::AccessDenied`][crate::RootError::AccessDenied] if the authenticated
+    ///   user's access level is below the requirement.
     /// * Returns [`SetProfileImageError::SizeExceeded`] if the image file size is too large.
     /// * Returns [`SetProfileImageError::DimensionsTooHigh`] if the image dimensions are too large.
     /// * Returns [`Error::UnsuccessfulResponse`][crate::Error::UnsuccessfulResponse] with the
@@ -205,14 +208,15 @@ impl Profile {
 
     /// Sets the account's static profile background.
     ///
-    /// Static background images cannot exceed [`BACKGROUND_MAX_SIZE`] in size, and their dimensions
-    /// must be no larger than [`BACKGROUND_MAX_WIDTH`] in width and [`BACKGROUND_MAX_HEIGHT`] in
-    /// height.
+    /// This operation requires an authenticated client with at least
+    /// [`AccessLevel::Trusted`][crate::models::AccessLevel::Trusted] permissions. Static background
+    /// images cannot exceed [`BACKGROUND_MAX_SIZE`] in size, and their dimensions must be no larger
+    /// than [`BACKGROUND_MAX_WIDTH`] in width and [`BACKGROUND_MAX_HEIGHT`] in height.
     ///
     /// # Errors
     ///
-    /// * Returns [`RootError::AccessDenied`][crate::RootError::AccessDenied] if the user is not yet
-    ///   permitted to change the static background image.
+    /// * Returns [`RootError::AccessDenied`][crate::RootError::AccessDenied] if the authenticated
+    ///   user's access level is below the requirement.
     /// * Returns [`SetProfileImageError::SizeExceeded`] if the image file size is too large.
     /// * Returns [`SetProfileImageError::DimensionsTooHigh`] if the image dimensions are too large.
     /// * Returns [`Error::UnsuccessfulResponse`][crate::Error::UnsuccessfulResponse] with the
@@ -229,14 +233,16 @@ impl Profile {
     /// [`ImageRef`] is for the just uploaded `first_frame`, and the second one is for the GIF
     /// itself.
     ///
-    /// GIF background images cannot exceed [`BACKGROUND_GIF_MAX_SIZE`] in size, and their
-    /// dimensions must be no larger than [`BACKGROUND_GIF_MAX_WIDTH`] in width and
+    /// This operation requires an authenticated client with at least
+    /// [`AccessLevel::Experienced`][crate::models::AccessLevel::Experienced] permissions. GIF
+    /// background images cannot exceed [`BACKGROUND_GIF_MAX_SIZE`] in size, and their dimensions
+    /// must be no larger than [`BACKGROUND_GIF_MAX_WIDTH`] in width and
     /// [`BACKGROUND_GIF_MAX_HEIGHT`] in height.
     ///
     /// # Errors
     ///
-    /// * Returns [`RootError::AccessDenied`][crate::RootError::AccessDenied] if the user is not yet
-    ///   permitted to change the animated background image.
+    /// * Returns [`RootError::AccessDenied`][crate::RootError::AccessDenied] if the authenticated
+    ///   user's access level is below the requirement.
     /// * Returns [`SetProfileImageError::SizeExceeded`] if the image file size is too large.
     /// * Returns [`SetProfileImageError::DimensionsTooHigh`] if the image dimensions are too large.
     /// * Returns [`Error::UnsuccessfulResponse`][crate::Error::UnsuccessfulResponse] with the

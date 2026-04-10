@@ -4,16 +4,15 @@ mod status;
 
 use std::marker::PhantomData;
 
-use chrono::DateTime;
 pub(crate) use kind::*;
 pub(crate) use reaction::RawReaction;
 use serde::Deserialize;
-use serde::de::Error as _;
 use serde_json::Value;
 pub(crate) use status::RawStatus;
 
 use crate::models::Publication;
 use crate::models::publication::{Publishable, Status};
+use crate::requests::raw::timestamp_from_millis;
 use crate::{Error, Result};
 
 pub(crate) trait RawPublishable: Sized {
@@ -48,9 +47,7 @@ where
         Ok(Self {
             kind: T::new(value.additional_data, value.kind)?.try_into()?,
             id: value.id,
-            created_at: DateTime::from_timestamp_millis(value.created_at).ok_or_else(|| {
-                serde_json::Error::custom(format!("timestamp {} is out of range", value.created_at))
-            })?,
+            created_at: timestamp_from_millis(value.created_at)?,
             status: Option::<Status>::try_from(value.status)?,
             hotness: value.hotness,
         })

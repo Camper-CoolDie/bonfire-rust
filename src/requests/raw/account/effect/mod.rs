@@ -2,14 +2,13 @@ mod kind;
 mod origin;
 mod reason_kind;
 
-use chrono::DateTime;
 pub(crate) use kind::RawKind;
 use origin::IntoOriginOptions;
 pub(crate) use reason_kind::RawReasonKind;
 use serde::Deserialize;
-use serde::de::Error as _;
 
 use crate::models::Effect;
+use crate::requests::raw::timestamp_from_millis;
 use crate::{Error, Result};
 
 #[derive(Deserialize)]
@@ -41,12 +40,8 @@ impl TryFrom<RawEffect> for Effect {
         Ok(Self {
             id: value.id,
             account_id: value.account_id,
-            applied_at: DateTime::from_timestamp_millis(value.applied_at).ok_or_else(|| {
-                serde_json::Error::custom(format!("timestamp {} is out of range", value.applied_at))
-            })?,
-            ends_at: DateTime::from_timestamp_millis(value.ends_at).ok_or_else(|| {
-                serde_json::Error::custom(format!("timestamp {} is out of range", value.ends_at))
-            })?,
+            applied_at: timestamp_from_millis(value.applied_at)?,
+            ends_at: timestamp_from_millis(value.ends_at)?,
             kind: value.kind.try_into()?,
             origin: IntoOriginOptions {
                 is_system,

@@ -1,9 +1,7 @@
-use chrono::DateTime;
 use serde::Deserialize;
-use serde::de::Error as _;
 
 use crate::models::account::BanEntry;
-use crate::requests::raw::RawAccount;
+use crate::requests::raw::{RawAccount, timestamp_from_millis};
 use crate::{Error, Result};
 
 #[derive(Deserialize)]
@@ -19,12 +17,7 @@ impl TryFrom<RawBanEntry> for BanEntry {
     fn try_from(value: RawBanEntry) -> Result<Self> {
         Ok(Self {
             account: value.account.try_into()?,
-            banned_until: DateTime::from_timestamp_millis(value.banned_until).ok_or_else(|| {
-                serde_json::Error::custom(format!(
-                    "timestamp {} is out of range",
-                    value.banned_until
-                ))
-            })?,
+            banned_until: timestamp_from_millis(value.banned_until)?,
         })
     }
 }

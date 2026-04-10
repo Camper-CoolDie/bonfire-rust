@@ -14,7 +14,7 @@ pub mod profile;
 pub mod publication;
 mod streams;
 
-pub use account::{Account, Badge, Effect, Info as AccountInfo, Stat as AccountStat};
+pub use account::{AccessLevel, Account, Badge, Effect, Info as AccountInfo, Stat as AccountStat};
 pub use auth::Auth;
 pub use chat::{AnyChat, Chat, Direct, FandomRoot, FandomSub, Group, Tag as ChatTag};
 pub use common::{Category, ImageRef, Language};

@@ -1,12 +1,10 @@
 mod status;
 
-use chrono::DateTime;
 use serde::Deserialize;
-use serde::de::Error as _;
 pub(crate) use status::RawStatus;
 
 use crate::models::Fandom;
-use crate::requests::raw::{RawCategory, RawImageRef, RawLanguage};
+use crate::requests::raw::{RawCategory, RawImageRef, RawLanguage, timestamp_from_millis};
 use crate::{Error, Result};
 
 #[derive(Deserialize)]
@@ -52,11 +50,7 @@ impl TryFrom<RawFandom> for Fandom {
             },
             suggested_at: match value.suggested_at {
                 0 => None,
-                timestamp => Some(
-                    DateTime::from_timestamp_millis(value.suggested_at).ok_or_else(|| {
-                        serde_json::Error::custom(format!("timestamp {timestamp} is out of range"))
-                    })?,
-                ),
+                timestamp => Some(timestamp_from_millis(timestamp)?),
             },
             subscribers_count: value.subscribers_count,
             status: value.status.try_into()?,

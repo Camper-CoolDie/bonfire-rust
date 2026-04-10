@@ -36,7 +36,7 @@ impl FandomRoot {
 
 impl Messageable for FandomRoot {
     /// Returns the chat's tag as [`ChatTag::FandomRoot`][Tag::FandomRoot].
-    fn to_tag(&self) -> Tag {
+    fn tag(&self) -> Tag {
         Tag::FandomRoot {
             fandom_id: self.fandom_id,
             language: self.language.clone(),

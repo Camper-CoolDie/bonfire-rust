@@ -1,10 +1,9 @@
-use chrono::{DateTime, Utc};
+use chrono::Utc;
 use serde::Deserialize;
-use serde::de::Error as _;
 
 use crate::models::Link;
 use crate::models::account::Info;
-use crate::requests::raw::{RawImageRef, RawLink, RawPost, RawPublication};
+use crate::requests::raw::{RawImageRef, RawLink, RawPost, RawPublication, timestamp_from_millis};
 use crate::{Error, Result};
 
 #[derive(Deserialize)]
@@ -63,14 +62,10 @@ impl TryFrom<RawInfo> for Info {
 
     fn try_from(value: RawInfo) -> Result<Self> {
         Ok(Self {
-            created_at: DateTime::from_timestamp_millis(value.created_at).ok_or_else(|| {
-                serde_json::Error::custom(format!("timestamp {} is out of range", value.created_at))
-            })?,
+            created_at: timestamp_from_millis(value.created_at)?,
             banned_until: match value.banned_until {
                 0 => None,
-                timestamp => Some(DateTime::from_timestamp_millis(timestamp).ok_or_else(|| {
-                    serde_json::Error::custom(format!("timestamp {timestamp} is out of range"))
-                })?),
+                timestamp => Some(timestamp_from_millis(timestamp)?),
             }
             .filter(|date| *date > Utc::now()),
             background: value.background.into(),

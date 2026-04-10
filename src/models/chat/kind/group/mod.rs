@@ -51,7 +51,7 @@ impl Group {
 
 impl Messageable for Group {
     /// Returns the chat's tag as [`ChatTag::Group`][Tag::Group].
-    fn to_tag(&self) -> Tag {
+    fn tag(&self) -> Tag {
         Tag::Group { id: self.id }
     }
 }

@@ -1,12 +1,10 @@
 use std::result::Result as StdResult;
 
-use chrono::DateTime;
 use serde::Deserialize;
-use serde::de::Error as _;
 
 use crate::models::publication::ChatMessageContent;
-use crate::requests::raw::RawGender;
 use crate::requests::raw::chat::RawMemberRole;
+use crate::requests::raw::{RawGender, timestamp_from_millis};
 use crate::{Error, Result};
 
 pub(crate) enum RawEventKind {
@@ -75,13 +73,7 @@ impl TryFrom<IntoEventOptions> for ChatMessageContent {
                 banned_until: match value.banned_until {
                     // -1: warn, 0: do nothing
                     -1 | 0 => None,
-                    timestamp => {
-                        Some(DateTime::from_timestamp_millis(timestamp).ok_or_else(|| {
-                            serde_json::Error::custom(format!(
-                                "timestamp {timestamp} is out of range"
-                            ))
-                        })?)
-                    }
+                    timestamp => Some(timestamp_from_millis(timestamp)?),
                 },
             },
             RawEventKind::Create => ChatMessageContent::CreateEvent {

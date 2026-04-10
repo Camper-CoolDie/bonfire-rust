@@ -62,7 +62,19 @@ Clear and consistent documentation is vital. Please follow these rules:
      /// * Returns [`Error`][crate::Error] if any other error occurs during the request.
      ```
 
-3. Functions that return `impl Stream<Item = Result<...>>` should list all possible errors directly
+3. Clearly state the authentication and access level requirements for each method in its main
+   documentation block.
+
+   ```rust
+   /// This method does not require authentication.
+   ```
+
+   ```rust
+   /// This operation requires an authenticated client with at least
+   /// [`AccessLevel::Experienced`][crate::models::AccessLevel::Experienced] permissions.
+   ```
+
+4. Functions that return `impl Stream<Item = Result<...>>` should list all possible errors directly
    within the main documentation block, *without* a separate `# Errors` section.
 
    ```rust
@@ -70,10 +82,10 @@ Clear and consistent documentation is vital. Please follow these rules:
    /// that single error and then terminate.
    ```
 
-4. Always use backticks for cross-references to code items (e.g.,
+5. Always use backticks for cross-references to code items (e.g.,
    ``[`Client::login`][crate::Client::login]``).
 
-5. Before writing any new documentation, please review existing documentation strings in similar
+6. Before writing any new documentation, please review existing documentation strings in similar
    contexts. Maintaining a consistent style greatly improves readability.
 
 ---

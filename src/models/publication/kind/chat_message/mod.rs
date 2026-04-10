@@ -47,7 +47,7 @@ pub struct ChatMessage {
 
 impl Publishable for ChatMessage {
     /// Returns the publication kind as [`Kind::ChatMessage`].
-    fn to_kind(&self) -> Kind {
+    fn kind(&self) -> Kind {
         Kind::ChatMessage
     }
 }

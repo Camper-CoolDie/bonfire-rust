@@ -1,7 +1,7 @@
-use chrono::DateTime;
 use serde::Deserialize;
 use serde::de::Error as _;
 
+use crate::requests::raw::timestamp_from_millis;
 use crate::{Error, Result, RootError, UnavailableError};
 
 #[derive(Deserialize)]
@@ -49,11 +49,7 @@ impl TryFrom<RawRootError> for RootError {
                     ))
                 })?;
                 RootError::Banned {
-                    until: {
-                        DateTime::from_timestamp_millis(millis).ok_or_else(|| {
-                            serde_json::Error::custom(format!("timestamp {millis} is out of range"))
-                        })?
-                    },
+                    until: timestamp_from_millis(millis)?,
                 }
             }
             RawRootError::Unavailable(error) => RootError::Unavailable(error.try_into()?),

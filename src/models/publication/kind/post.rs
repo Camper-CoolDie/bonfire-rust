@@ -48,7 +48,7 @@ pub struct Post {
 
 impl Publishable for Post {
     /// Returns the publication kind as [`Kind::Post`].
-    fn to_kind(&self) -> Kind {
+    fn kind(&self) -> Kind {
         Kind::Post
     }
 }

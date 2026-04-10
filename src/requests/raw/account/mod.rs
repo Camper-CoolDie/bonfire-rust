@@ -7,18 +7,17 @@ mod stat;
 
 pub(crate) use badge::RawBadge;
 pub(crate) use ban_entry::RawBanEntry;
-use chrono::{DateTime, Utc};
+use chrono::Utc;
 pub(crate) use customization::RawCustomization;
 pub(crate) use effect::{
     RawEffect, RawKind as RawEffectKind, RawReasonKind as RawEffectReasonKind,
 };
 pub(crate) use info::RawInfo;
 use serde::Deserialize;
-use serde::de::Error as _;
 pub(crate) use stat::RawStat;
 
 use crate::models::Account;
-use crate::requests::raw::{RawGender, RawImageRef};
+use crate::requests::raw::{RawGender, RawImageRef, timestamp_from_millis};
 use crate::{Error, Result};
 
 #[derive(Deserialize)]
@@ -52,14 +51,7 @@ impl TryFrom<RawAccount> for Account {
         Ok(Self {
             id: value.id,
             level: value.level / 100.0,
-            last_online_at: DateTime::from_timestamp_millis(value.last_online_at).ok_or_else(
-                || {
-                    serde_json::Error::custom(format!(
-                        "timestamp {} is out of range",
-                        value.last_online_at
-                    ))
-                },
-            )?,
+            last_online_at: timestamp_from_millis(value.last_online_at)?,
             name: value.name,
             avatar: value.avatar.into(),
             gender: value.gender.try_into()?,

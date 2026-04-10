@@ -42,7 +42,7 @@ pub enum AnyPublication {
 }
 
 impl Publishable for AnyPublication {
-    fn to_kind(&self) -> Kind {
+    fn kind(&self) -> Kind {
         match self {
             AnyPublication::Post(_) => Kind::Post,
             AnyPublication::PostTag(_) => Kind::PostTag,

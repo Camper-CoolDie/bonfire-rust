@@ -3,16 +3,14 @@ mod tag;
 
 use std::marker::PhantomData;
 
-use chrono::DateTime;
 pub(crate) use kind::*;
 use serde::Deserialize;
-use serde::de::Error as _;
 use serde_json::Value;
 pub(crate) use tag::RawTag;
 
 use crate::models::chat::Messageable;
 use crate::models::{Chat, Publication};
-use crate::requests::raw::{RawChatMessage, RawPublication};
+use crate::requests::raw::{RawChatMessage, RawPublication, timestamp_from_millis};
 use crate::{Error, Result};
 
 pub(crate) trait RawMessageable: Sized {
@@ -50,9 +48,7 @@ where
             unread_count: value.unread_count,
             read_at: match value.read_at {
                 0 => None,
-                timestamp => Some(DateTime::from_timestamp_millis(timestamp).ok_or_else(|| {
-                    serde_json::Error::custom(format!("timestamp {timestamp} is out of range"))
-                })?),
+                timestamp => Some(timestamp_from_millis(timestamp)?),
             },
         })
     }

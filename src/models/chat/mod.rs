@@ -24,7 +24,7 @@ use crate::{Client, Result};
 /// unspecified specific types.
 pub trait Messageable: Sealed {
     /// Returns the specific tag that identifies this type of chat.
-    fn to_tag(&self) -> Tag;
+    fn tag(&self) -> Tag;
 }
 
 /// Represents various types of chat entities and their associated data.

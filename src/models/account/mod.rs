@@ -1,3 +1,4 @@
+mod access_level;
 mod badge;
 mod ban_entry;
 mod blocklist;
@@ -7,6 +8,7 @@ mod info;
 mod profile;
 mod stat;
 
+pub use access_level::{AccessLevel, PROTOADMIN_IDS};
 pub use badge::Badge;
 pub use ban_entry::BanEntry;
 use chrono::{DateTime, Duration, Utc};

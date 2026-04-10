@@ -1,11 +1,9 @@
-use chrono::DateTime;
 use serde::Deserialize;
-use serde::de::Error as _;
 use serde_json::Value;
 
 use crate::models::Direct;
 use crate::requests::raw::chat::{RawKind, RawMessageable};
-use crate::requests::raw::{RawAccount, RawChatTag};
+use crate::requests::raw::{RawAccount, RawChatTag, timestamp_from_millis};
 use crate::{Error, Result};
 
 #[derive(Deserialize)]
@@ -42,9 +40,7 @@ impl TryFrom<RawDirect> for Direct {
             recipient: value.recipient.try_into()?,
             recipient_read_at: match value.recipient_read_at {
                 0 => None,
-                timestamp => Some(DateTime::from_timestamp_millis(timestamp).ok_or_else(|| {
-                    serde_json::Error::custom(format!("timestamp {timestamp} is out of range"))
-                })?),
+                timestamp => Some(timestamp_from_millis(timestamp)?),
             },
         })
     }
