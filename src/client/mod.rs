@@ -38,6 +38,7 @@ struct Inner {
     melior_service: MeliorService,
     token_provider: TokenProvider,
     rate_limiter: RateLimiter<NotKeyed, InMemoryState, DefaultClock>,
+    protoadmin_ids: Vec<u64>,
 }
 
 /// An asynchronous, thread-safe HTTP client for the Bonfire API.
@@ -67,7 +68,13 @@ pub struct Client {
     inner: Arc<Inner>,
 }
 impl Client {
-    fn new(root_uri: Uri, melior_uri: Uri, auth: Option<Auth>, quota: Quota) -> Self {
+    fn new(
+        root_uri: Uri,
+        melior_uri: Uri,
+        auth: Option<Auth>,
+        quota: Quota,
+        protoadmin_ids: Vec<u64>,
+    ) -> Self {
         Self {
             inner: Arc::new(Inner {
                 root_service: RootService::new(root_uri),
@@ -75,6 +82,7 @@ impl Client {
                 // This error was previously caught in Builder::auth()
                 token_provider: TokenProvider::new(auth).expect("failed to create TokenProvider"),
                 rate_limiter: RateLimiter::direct(quota),
+                protoadmin_ids,
             }),
         }
     }
@@ -173,7 +181,7 @@ impl Client {
     /// #
     /// # #[tokio::main]
     /// # async fn main() -> Result<()> {
-    /// # let client = &Client::default();
+    /// #     let client = &Client::default();
     /// client.login("email", "password").await?;
     /// // ...
     /// client.logout().await?;
@@ -373,6 +381,11 @@ impl Client {
             )
             .await
             .inspect_err(|error| tracing::error!(?error, "failed to send an authless query"))
+    }
+
+    pub(crate) fn is_protoadmin(&self, account_id: u64) -> bool {
+        // NOTE: Linear `.contains()` search is preferred for small vectors, so there's no overhead
+        self.inner.protoadmin_ids.contains(&account_id)
     }
 
     /// Create a new `Builder` with default values.

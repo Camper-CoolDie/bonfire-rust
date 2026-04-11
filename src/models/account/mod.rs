@@ -8,7 +8,7 @@ mod info;
 mod profile;
 mod stat;
 
-pub use access_level::{AccessLevel, PROTOADMIN_IDS};
+pub use access_level::AccessLevel;
 pub use badge::Badge;
 pub use ban_entry::BanEntry;
 use chrono::{DateTime, Duration, Utc};
@@ -77,10 +77,10 @@ impl Account {
     /// #
     /// # #[tokio::main]
     /// # async fn main() -> Result<()> {
-    /// # let client = &Client::default();
+    /// #     let client = &Client::default();
     /// let account = Account::new(1234);
     /// println!("{:#?}", account.get_info(client).await?);
-    /// #    Ok(())
+    /// #     Ok(())
     /// # }
     /// ```
     #[must_use]

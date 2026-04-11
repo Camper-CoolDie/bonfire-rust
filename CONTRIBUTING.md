@@ -55,8 +55,8 @@ Clear and consistent documentation is vital. Please follow these rules:
      ```rust
      /// # Errors
      ///
-     /// * Returns [`RootError::AccessDenied`][crate::RootError::AccessDenied] if the user is not yet
-     ///   permitted to change their status.
+     /// * Returns [`RootError::AccessDenied`][crate::RootError::AccessDenied] if the authenticated
+     ///   user's access level is below the requirement.
      /// * Returns [`SetProfileTextError::TooLong`] if the provided status exceeds the maximum
      ///   allowed length.
      /// * Returns [`Error`][crate::Error] if any other error occurs during the request.

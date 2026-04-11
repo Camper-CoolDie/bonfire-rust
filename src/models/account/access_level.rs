@@ -1,12 +1,8 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
+use crate::Client;
 use crate::models::Account;
-
-/// Identifiers of accounts that inherently possess the [`AccessLevel::Protoadmin`] privilege.
-///
-/// This list may change in the future, but currently includes only the main developer.
-pub const PROTOADMIN_IDS: [u64; 1] = [1];
 
 /// Represents the various access levels an account can hold within the platform.
 ///
@@ -46,7 +42,8 @@ pub enum AccessLevel {
     ///
     /// Corresponds to level 12 and requires 1300 karma
     Expert,
-    /// Protoadministrator level, reserved for accounts explicitly listed in [`PROTOADMIN_IDS`]
+    /// Protoadministrator level, reserved for accounts explicitly listed in
+    /// [`ClientBuilder::protoadmin_ids()`][crate::ClientBuilder::protoadmin_ids()]
     Protoadmin,
 }
 
@@ -56,13 +53,14 @@ impl Account {
     /// Access levels are determined by the account's total `level` and the `karma30` (karma earned
     /// in the last 30 days). This means an account's access level can dynamically change
     /// (potentially decrease) based on recent activity, except for accounts listed in
-    /// [`PROTOADMIN_IDS`], which always retain [`AccessLevel::Protoadmin`] privileges.
+    /// [`ClientBuilder::protoadmin_ids()`][crate::ClientBuilder::protoadmin_ids()], which always
+    /// retain [`AccessLevel::Protoadmin`] privileges.
     ///
     /// This method relies on [`Account::id`], [`Account::level`] and [`Account::karma30`] fields
     /// being set.
     #[must_use]
-    pub fn access_level(&self) -> AccessLevel {
-        if PROTOADMIN_IDS.contains(&self.id) {
+    pub fn access_level(&self, client: &Client) -> AccessLevel {
+        if client.is_protoadmin(self.id) {
             AccessLevel::Protoadmin
         } else if self.level >= 12.0 && self.karma30 >= 1300.0 {
             AccessLevel::Expert

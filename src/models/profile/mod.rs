@@ -91,10 +91,10 @@ impl Profile {
     /// #
     /// # #[tokio::main]
     /// # async fn main() -> Result<()> {
-    /// # let client = &Client::default();
+    /// #     let client = &Client::default();
     /// let profile = Profile::get(client).await?;
     /// println!("Logged in as {} (ID: {})", profile.name, profile.id);
-    /// #    Ok(())
+    /// #     Ok(())
     /// # }
     /// ```
     pub async fn get(client: &Client) -> Result<Self> {
@@ -119,10 +119,10 @@ impl Profile {
     ///
     /// # #[tokio::main]
     /// # async fn main() -> Result<()> {
-    /// # let client = &Client::default();
+    /// #     let client = &Client::default();
     /// let birthday = NaiveDate::from_ymd_opt(2000, 1, 1).unwrap();
     /// Profile::set_birthday(client, birthday).await?;
-    /// #    Ok(())
+    /// #     Ok(())
     /// # }
     /// ```
     pub async fn set_birthday(client: &Client, birthday: NaiveDate) -> Result<Self> {
