@@ -5,7 +5,7 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 use crate::models::chat::MemberRole;
-use crate::models::{Gender, ImageRef};
+use crate::models::{Gender, ImageRef, VoiceRef};
 
 /// The maximum allowed size in bytes for a static chat message image.
 pub const CHAT_MESSAGE_IMAGE_MAX_SIZE: usize = 256 * 1024;
@@ -48,16 +48,7 @@ pub enum Content {
         gif: Option<ImageRef>,
     },
     /// A voice message
-    Voice {
-        /// The unique identifier of the voice message
-        id: u64,
-        /// The URI from which this voice message can be downloaded
-        uri: String,
-        /// The duration of the voice message
-        duration: Duration,
-        /// The waveform data of the voice message
-        waveform: Vec<u64>,
-    },
+    Voice(VoiceRef),
     /// An event indicating a message was blocked by moderators. Can appear only inside a fandom
     /// chat
     BlockEvent {

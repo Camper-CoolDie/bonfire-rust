@@ -5,6 +5,7 @@ use serde::Deserialize;
 
 use super::RawEventKind;
 use super::event_kind::IntoEventOptions;
+use crate::models::VoiceRef;
 use crate::models::publication::{ChatMessageContent, ChatMessageRefContent};
 use crate::requests::raw::chat::RawMemberRole;
 use crate::requests::raw::{RawGender, RawImageRef};
@@ -89,12 +90,12 @@ impl TryFrom<IntoContentOptions> for ChatMessageContent {
             RawContentKind::Images => {
                 ChatMessageContent::Images(value.images.into_iter().map(Into::into).collect())
             }
-            RawContentKind::Voice => ChatMessageContent::Voice {
+            RawContentKind::Voice => ChatMessageContent::Voice(VoiceRef {
                 id: value.voice_resource.id,
                 uri: value.voice_resource.uri,
                 duration: Duration::from_millis(value.voice_duration),
                 waveform: value.voice_waveform,
-            },
+            }),
             RawContentKind::Sticker => ChatMessageContent::Sticker {
                 id: value.sticker_id,
                 image: value.sticker_image.into(),
