@@ -13,14 +13,6 @@ pub(crate) struct Response {
     #[serde(skip)]
     ids: Vec<u64>,
 }
-impl Response {
-    fn enumerate_fandoms(fandoms: Vec<RawFandom>) -> HashMap<u64, RawFandom> {
-        fandoms
-            .into_iter()
-            .map(|fandom| (fandom.id, fandom))
-            .collect()
-    }
-}
 
 // Will return the last element of Response::fandoms or NotFound error if there's none
 impl TryFrom<Response> for Fandom {
@@ -41,21 +33,24 @@ impl TryFrom<Response> for Vec<Fandom> {
     type Error = Error;
 
     fn try_from(value: Response) -> Result<Self> {
-        let mut map = Response::enumerate_fandoms(value.fandoms);
-
-        // The server returns an unsorted list of fandoms, we sort it by `self.ids` and return the
-        // NotFound error if there's at least one missing fandom
-        value
-            .ids
+        let mut order: HashMap<u64, RawFandom> = value
+            .fandoms
             .into_iter()
-            .map(|id| {
-                map.remove(&id)
-                    .ok_or(Error::RootError(RootError::Unavailable(
-                        UnavailableError::NotFound,
-                    )))
-                    .and_then(Fandom::try_from)
-            })
-            .collect()
+            .map(|fandom| (fandom.id, fandom))
+            .collect();
+
+        // Look up each requested id, preserving order
+        let mut result = Vec::with_capacity(value.ids.len());
+        for &id in &value.ids {
+            let fandom = order
+                .remove(&id)
+                .ok_or(Error::RootError(RootError::Unavailable(
+                    UnavailableError::NotFound,
+                )))?;
+            result.push(Fandom::try_from(fandom)?);
+        }
+
+        Ok(result)
     }
 }
 
@@ -63,14 +58,17 @@ impl TryFrom<Response> for Vec<Option<Fandom>> {
     type Error = Error;
 
     fn try_from(value: Response) -> Result<Self> {
-        let mut map = Response::enumerate_fandoms(value.fandoms);
+        let mut order: HashMap<u64, RawFandom> = value
+            .fandoms
+            .into_iter()
+            .map(|fandom| (fandom.id, fandom))
+            .collect();
 
-        // The server returns an unsorted list of fandoms, we sort it by `self.ids` and return
-        // `None` for every missing fandom
+        // Look up each requested id, preserving order
         value
             .ids
-            .into_iter()
-            .map(|id| map.remove(&id).map(Fandom::try_from).transpose())
+            .iter()
+            .map(|&id| order.remove(&id).map(Fandom::try_from).transpose())
             .collect()
     }
 }

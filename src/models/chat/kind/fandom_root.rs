@@ -29,7 +29,7 @@ impl FandomRoot {
         Self {
             fandom_id,
             language,
-            ..Self::default()
+            ..Default::default()
         }
     }
 }

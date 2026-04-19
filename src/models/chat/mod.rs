@@ -53,7 +53,7 @@ impl Chat {
     pub fn new(tag: Tag) -> Self {
         Self {
             kind: AnyChat::new(tag),
-            ..Self::default()
+            ..Default::default()
         }
     }
 

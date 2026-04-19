@@ -19,14 +19,15 @@ pub struct Post {
     /// The specific category of the fandom in which this publication was posted
     pub category: Category,
     // /// The content of this post
-    // pub pages: Vec<Page>,
+    // pub items: Vec<Item>,
     /// A comment which earned the highest amount of karma
     pub best_comment: Option<Publication<Comment>>,
     /// The total karma received by this publication (can be positive or negative)
     pub karma: f64,
     /// The karma you personally placed on this publication, if any
     pub my_karma: Option<f64>,
-    /// Indicates if this publication will appear in the main feed
+    /// Indicates if this publication will appear in the main feed (may be overriden by
+    /// [`Feed::show_closed`][crate::models::settings::Feed::show_closed])
     pub is_closed: bool,
     /// The total number of comments associated with this publication
     pub comments_count: u64,
@@ -36,11 +37,10 @@ pub struct Post {
     pub rubric_name: Option<String>,
     /// The karma coefficient of the rubric this post is linked to
     pub rubric_karma_coef: Option<f64>,
-    // /// A relay race this post is linked to
-    // pub relay_race: Option<RelayRace>,
+    // pub post_relay: Option<PostRelay>,
     /// Indicates if this publication has been marked as important
     pub is_important: bool,
-    /// Indicates if this publication originates from a blocked fandom or account
+    /// Indicates if this publication originates from a blocked account
     pub is_hidden: bool,
     /// Indicates if this publication has been marked as NSFW
     pub is_nsfw: bool,

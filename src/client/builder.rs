@@ -19,16 +19,12 @@ static MELIOR_SERVER_URI: LazyLock<Uri> =
 // 30 requests per minute with a burst of 15 requests
 const DEFAULT_QUOTA: Quota = Quota::per_minute(nonzero!(30u32)).allow_burst(nonzero!(15u32));
 
-// Account IDs with AccessLevel::Protoadmin privileges, may change in the future
-const PROTOADMIN_IDS: [u64; 1] = [1];
-
 /// A builder-like pattern for constructing and configuring a [`Client`] instance.
 pub struct Builder {
     root_uri: Uri,
     melior_uri: Uri,
     auth: Option<Auth>,
     quota: Quota,
-    protoadmin_ids: Vec<u64>,
 }
 impl Builder {
     /// Creates a new `Builder` with default API endpoint URIs and no authentication
@@ -40,19 +36,12 @@ impl Builder {
             melior_uri: MELIOR_SERVER_URI.clone(),
             auth: None,
             quota: DEFAULT_QUOTA,
-            protoadmin_ids: PROTOADMIN_IDS.into(),
         }
     }
 
     /// Consumes the `Builder` and creates a [`Client`] instance.
     pub fn build(self) -> Client {
-        Client::new(
-            self.root_uri,
-            self.melior_uri,
-            self.auth,
-            self.quota,
-            self.protoadmin_ids,
-        )
+        Client::new(self.root_uri, self.melior_uri, self.auth, self.quota)
     }
 
     /// Sets the URI for the Root API server.
@@ -157,26 +146,6 @@ impl Builder {
     #[must_use]
     pub fn quota(mut self, quota: Quota) -> Self {
         self.quota = quota;
-        self
-    }
-
-    /// Sets a custom list of account IDs that this [`Client`] instance should consider
-    /// to have [`AccessLevel::Protoadmin`][crate::models::AccessLevel::Protoadmin] privileges.
-    ///
-    /// The default list of protoadmin IDs is kept up-to-date with the actual Bonfire server's
-    /// understanding of protoadmins.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use bonfire::ClientBuilder;
-    /// let client = &ClientBuilder::new()
-    ///     .protoadmin_ids(vec![1, 1337, 42])
-    ///     .build();
-    /// ```
-    #[must_use]
-    pub fn protoadmin_ids(mut self, ids: Vec<u64>) -> Self {
-        self.protoadmin_ids = ids;
         self
     }
 }

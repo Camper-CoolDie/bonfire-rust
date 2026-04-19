@@ -4,7 +4,7 @@ mod reference;
 
 use std::ops::RangeInclusive;
 
-pub use content::*;
+pub use content::Content;
 pub use ref_content::RefContent;
 pub use reference::Reference;
 #[cfg(feature = "serde")]
@@ -13,9 +13,6 @@ use serde::{Deserialize, Serialize};
 use crate::models::publication::{Kind, Publishable};
 use crate::models::{Account, ChatTag, Fandom};
 use crate::sealed::Sealed;
-
-/// The allowed range for a chat message's text length.
-pub const CHAT_MESSAGE_TEXT_LENGTH_RANGE: RangeInclusive<usize> = 1..=2000;
 
 /// Represents the specific data for a chat message publication, containing text, and optionally a
 /// media [`Content`][content::Content] or a [`ChatMessageRef`][Reference] to another publication.
@@ -43,6 +40,10 @@ pub struct ChatMessage {
     pub is_edited: bool,
     /// Indicates if the chat message uses new Markdown formatting
     pub has_new_formatting: bool,
+}
+impl ChatMessage {
+    /// The allowed range for a chat message's text length.
+    pub const TEXT_LENGTH_RANGE: RangeInclusive<usize> = 1..=2000;
 }
 
 impl Publishable for ChatMessage {

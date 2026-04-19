@@ -13,6 +13,7 @@ use crate::{Client, Result};
 enum InnerState {
     Authenticated(Auth, JwtClaims),
     Unauthenticated,
+    // A "poisoned" state, for cases when the server sends an invalid token
     InvalidToken(Arc<JwtError>),
 }
 impl InnerState {
@@ -75,23 +76,28 @@ impl TokenProvider {
 
     async fn check_and_refresh(&self, client: &Client) -> Result<Option<Auth>> {
         let mut guard = self.inner.write().await;
-        let option = match &*guard {
+
+        // If `refresh_now()` fails, the error is returned immediately without poisoning, so the
+        // same request can be sent again later
+        let auth = match &*guard {
             InnerState::Authenticated(auth, claims) if claims.expires_at < Utc::now() => {
                 tracing::debug!(expires_at = ?claims.expires_at, "auth has expired, refreshing");
-                Some(Self::refresh_now(client, auth).await?)
+                Self::refresh_now(client, auth).await?
             }
             InnerState::Authenticated(auth, _) => return Ok(Some(auth.clone())),
             InnerState::Unauthenticated => return Ok(None),
             InnerState::InvalidToken(error) => return Err(Arc::clone(error).into()),
         };
 
-        *guard = option
-            .clone()
+        // If `try_into()` fails, the server has sent an invalid token, so `Auth` enters a poisoned
+        // state
+        *guard = Some(auth)
             .try_into()
             .unwrap_or_else(|error| InnerState::InvalidToken(Arc::new(error)));
         match &*guard {
+            InnerState::Authenticated(auth, _) => Ok(Some(auth.clone())),
+            InnerState::Unauthenticated => unreachable!("unauthenticated auth state"),
             InnerState::InvalidToken(error) => Err(Arc::clone(error).into()),
-            _ => Ok(option),
         }
     }
 

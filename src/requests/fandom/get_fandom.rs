@@ -31,7 +31,7 @@ impl GetFandomRequest {
     pub(crate) fn new(id: u64, language: Option<Language>, my_language: Language) -> Self {
         Self {
             id,
-            language: language.map_or(RawLanguage::Unknown(-1), Into::into),
+            language: language.map_or(RawLanguage::UnknownInteger(-1), Into::into),
             my_language: my_language.into(),
         }
     }

@@ -6,15 +6,11 @@ mod post_tag;
 
 pub use any::AnyPublication;
 pub use chat_message::{
-    CHAT_MESSAGE_GIF_MAX_DIMENSION, CHAT_MESSAGE_GIF_MAX_SIZE, CHAT_MESSAGE_IMAGE_MAX_DIMENSION,
-    CHAT_MESSAGE_IMAGE_MAX_SIZE, CHAT_MESSAGE_IMAGES_MAX_COUNT, CHAT_MESSAGE_TEXT_LENGTH_RANGE,
-    CHAT_MESSAGE_VOICE_MAX_DURATION, ChatMessage, Content as ChatMessageContent,
-    RefContent as ChatMessageRefContent, Reference as ChatMessageRef,
+    ChatMessage, Content as ChatMessageContent, RefContent as ChatMessageRefContent,
+    Reference as ChatMessageRef,
 };
 pub use comment::{
-    COMMENT_GIF_MAX_DIMENSION, COMMENT_GIF_MAX_SIZE, COMMENT_IMAGE_MAX_DIMENSION,
-    COMMENT_IMAGE_MAX_SIZE, COMMENT_IMAGES_MAX_COUNT, COMMENT_TEXT_LENGTH_RANGE, Comment,
-    Content as CommentContent, RefContent as CommentRefContent, Reference as CommentRef,
+    Comment, Content as CommentContent, RefContent as CommentRefContent, Reference as CommentRef,
 };
 pub use post::Post;
 pub use post_tag::PostTag;

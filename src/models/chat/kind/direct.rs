@@ -24,7 +24,7 @@ impl Direct {
         Self {
             my_id,
             recipient: Account::new(recipient_id),
-            ..Self::default()
+            ..Default::default()
         }
     }
 }

@@ -44,7 +44,7 @@ impl Group {
     pub fn new(id: u64) -> Self {
         Self {
             id,
-            ..Self::default()
+            ..Default::default()
         }
     }
 }

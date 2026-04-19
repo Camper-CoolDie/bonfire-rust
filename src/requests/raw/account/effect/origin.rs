@@ -1,6 +1,5 @@
 use super::RawReasonKind;
 use crate::models::account::EffectOrigin;
-use crate::{Error, Result};
 
 pub(super) struct IntoOriginOptions {
     pub is_system: bool,
@@ -9,19 +8,17 @@ pub(super) struct IntoOriginOptions {
     pub from_account_name: String,
 }
 
-impl TryFrom<IntoOriginOptions> for EffectOrigin {
-    type Error = Error;
-
-    fn try_from(value: IntoOriginOptions) -> Result<Self> {
-        Ok(if value.is_system {
+impl From<IntoOriginOptions> for EffectOrigin {
+    fn from(value: IntoOriginOptions) -> Self {
+        if value.is_system {
             EffectOrigin::System {
-                reason_kind: value.reason_kind.try_into()?,
+                reason_kind: value.reason_kind.into(),
             }
         } else {
             EffectOrigin::Account {
                 name: value.from_account_name,
                 reason: value.reason,
             }
-        })
+        }
     }
 }

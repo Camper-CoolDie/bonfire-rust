@@ -3,7 +3,8 @@ use serde_json::Value;
 
 use crate::models::Direct;
 use crate::requests::raw::chat::{RawKind, RawMessageable};
-use crate::requests::raw::{RawAccount, RawChatTag, timestamp_from_millis};
+use crate::requests::raw::conversions::timestamp_from_millis;
+use crate::requests::raw::{RawAccount, RawChatTag};
 use crate::{Error, Result};
 
 #[derive(Deserialize)]

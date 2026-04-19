@@ -1,7 +1,8 @@
 use serde::Deserialize;
 
 use crate::models::account::BanEntry;
-use crate::requests::raw::{RawAccount, timestamp_from_millis};
+use crate::requests::raw::RawAccount;
+use crate::requests::raw::conversions::timestamp_from_millis;
 use crate::{Error, Result};
 
 #[derive(Deserialize)]

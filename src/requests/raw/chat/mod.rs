@@ -10,7 +10,8 @@ pub(crate) use tag::RawTag;
 
 use crate::models::chat::Messageable;
 use crate::models::{Chat, Publication};
-use crate::requests::raw::{RawChatMessage, RawPublication, timestamp_from_millis};
+use crate::requests::raw::conversions::timestamp_from_millis;
+use crate::requests::raw::{RawChatMessage, RawPublication};
 use crate::{Error, Result};
 
 pub(crate) trait RawMessageable: Sized {

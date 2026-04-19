@@ -10,7 +10,8 @@ pub(crate) use status::RawMemberStatus;
 
 use crate::models::Group;
 use crate::requests::raw::chat::{RawKind, RawMessageable};
-use crate::requests::raw::{RawChatTag, RawImageRef, timestamp_from_millis};
+use crate::requests::raw::conversions::timestamp_from_millis;
+use crate::requests::raw::{RawChatTag, RawImageRef};
 use crate::{Error, Result};
 
 #[derive(Deserialize)]

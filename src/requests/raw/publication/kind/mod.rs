@@ -12,7 +12,7 @@ pub(crate) use chat_message::{
     RawEventKind as RawChatMessageEventKind,
 };
 pub(crate) use comment::{RawComment, RawContentKind as RawCommentContentKind};
-pub(crate) use post::RawPost;
+pub(crate) use post::{RawFavoritesFolder, RawPost};
 pub(crate) use post_tag::RawPostTag;
 use serde::{Deserialize, Serialize};
 

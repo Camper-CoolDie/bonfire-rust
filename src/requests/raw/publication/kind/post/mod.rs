@@ -1,3 +1,6 @@
+mod favorites_folder;
+
+pub(crate) use favorites_folder::RawFavoritesFolder;
 use serde::Deserialize;
 
 use crate::models::Post;
@@ -8,7 +11,7 @@ use crate::{Error, Result};
 #[derive(Deserialize)]
 pub(crate) struct InnerData {
     // #[serde(rename = "J_PAGES")]
-    // pub pages: Vec<RawPage>,
+    // pub items: Vec<RawItem>,
     // pub title: Option<String>,
 }
 
@@ -32,7 +35,7 @@ pub(crate) struct RawPost {
     #[serde(rename = "rubricKarmaCof")]
     pub rubric_karma_coef: f64,
     // #[serde(rename = "userActivity")]
-    // pub relay_race: Option<RawRelayRace>,
+    // pub post_relay: Option<RawPostRelay>,
     #[serde(rename = "important")]
     pub importance: i64,
     #[serde(rename = "blacklisted")]

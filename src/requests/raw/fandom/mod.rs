@@ -4,7 +4,8 @@ use serde::Deserialize;
 pub(crate) use status::RawStatus;
 
 use crate::models::Fandom;
-use crate::requests::raw::{RawCategory, RawImageRef, RawLanguage, timestamp_from_millis};
+use crate::requests::raw::conversions::timestamp_from_millis;
+use crate::requests::raw::{RawCategory, RawImageRef, RawLanguage};
 use crate::{Error, Result};
 
 #[derive(Deserialize)]

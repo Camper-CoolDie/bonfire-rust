@@ -19,9 +19,11 @@ use crate::{Client, Result};
 pub struct Fandom {
     /// The unique identifier of this fandom
     pub id: u64,
-    /// The specific language for this fandom. A single fandom can exist in multiple languages,
-    /// with each `Language` representing a distinct community instance. `None` if this fandom
-    /// instance isn't linked to a specific language
+    /// The specific language for this fandom.
+    ///
+    /// A single fandom can exist in multiple languages, with each `Language` representing a
+    /// distinct community instance. `None` if this fandom instance isn't linked to a specific
+    /// language.
     pub language: Option<Language>,
     /// The icon image representing this fandom
     pub icon: Option<ImageRef>,
@@ -55,7 +57,7 @@ impl Fandom {
         Self {
             id,
             language: Some(language),
-            ..Self::default()
+            ..Default::default()
         }
     }
 

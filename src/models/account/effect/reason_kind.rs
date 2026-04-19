@@ -18,4 +18,6 @@ pub enum ReasonKind {
     Hater,
     /// Punished for being uncultured
     Uncultured,
+    /// An unknown reason
+    Unknown(i64),
 }

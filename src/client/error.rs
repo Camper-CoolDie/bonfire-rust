@@ -69,7 +69,7 @@ pub enum Error {
     ///
     /// The inner `Box` contains the faulty enum variant that caused the error. This allows for
     /// logging or debugging the specific variant value and context that led to the `UnknownVariant`
-    /// error
+    /// error.
     #[error("unknown variant: {0:?}")]
     UnknownVariant(Box<dyn Debug + Send + Sync + 'static>),
     /// The server returned an unsuccessful HTTP status code. Some common codes include:
