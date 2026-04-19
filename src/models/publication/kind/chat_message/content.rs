@@ -7,19 +7,6 @@ use serde::{Deserialize, Serialize};
 use crate::models::chat::MemberRole;
 use crate::models::{Gender, ImageRef, VoiceRef};
 
-/// The maximum allowed size in bytes for a static chat message image.
-pub const CHAT_MESSAGE_IMAGE_MAX_SIZE: usize = 256 * 1024;
-/// The maximum allowed dimension (width or height) for a static chat message image.
-pub const CHAT_MESSAGE_IMAGE_MAX_DIMENSION: usize = 1080;
-/// The maximum allowed size in bytes for a GIF chat message.
-pub const CHAT_MESSAGE_GIF_MAX_SIZE: usize = 1024 * 1024;
-/// The maximum allowed dimension (width or height) for a GIF chat message.
-pub const CHAT_MESSAGE_GIF_MAX_DIMENSION: usize = 400;
-/// The maximum number of static images that can be included in a single chat message.
-pub const CHAT_MESSAGE_IMAGES_MAX_COUNT: usize = 5;
-/// The maximum allowed duration for a voice message.
-pub const CHAT_MESSAGE_VOICE_MAX_DURATION: Duration = Duration::from_secs(20);
-
 /// Represents the content of a chat message.
 #[derive(Default, Clone, Debug)]
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
@@ -180,6 +167,19 @@ pub enum Content {
     UnknownEvent(i64),
 }
 impl Content {
+    /// The maximum allowed size in bytes for a static chat message image.
+    pub const IMAGE_MAX_SIZE: usize = 256 * 1024;
+    /// The maximum allowed dimension (width or height) for a static chat message image.
+    pub const IMAGE_MAX_DIMENSION: usize = 1080;
+    /// The maximum allowed size in bytes for a GIF chat message.
+    pub const GIF_MAX_SIZE: usize = 1024 * 1024;
+    /// The maximum allowed dimension (width or height) for a GIF chat message.
+    pub const GIF_MAX_DIMENSION: usize = 400;
+    /// The maximum number of static images that can be included in a single chat message.
+    pub const IMAGES_MAX_COUNT: usize = 5;
+    /// The maximum allowed duration for a voice message.
+    pub const VOICE_MAX_DURATION: Duration = Duration::from_secs(20);
+
     /// Returns `true` if this content represents a chat event (e.g.,
     /// [`BlockEvent`][Content::BlockEvent], [`CreateEvent`][Content::CreateEvent]).
     #[must_use]

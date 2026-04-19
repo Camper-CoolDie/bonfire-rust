@@ -30,9 +30,6 @@ use crate::requests::account::{
 };
 use crate::{Client, Result};
 
-/// The maximum duration an account can be offline while still considered "online".
-pub const ONLINE_DURATION: Duration = Duration::minutes(15);
-
 /// Represents a Bonfire user account.
 #[derive(Default, Clone, Debug)]
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
@@ -63,6 +60,9 @@ pub struct Account {
     pub active_badge: Option<Badge>,
 }
 impl Account {
+    /// The maximum duration an account can be offline while still considered "online".
+    pub const ONLINE_DURATION: Duration = Duration::minutes(15);
+
     /// Creates a new `Account` instance with only its identifier set.
     ///
     /// This is useful when you only need to reference an account by its ID for sending associated
@@ -87,7 +87,7 @@ impl Account {
     pub fn new(id: u64) -> Self {
         Self {
             id,
-            ..Self::default()
+            ..Default::default()
         }
     }
 
@@ -96,7 +96,7 @@ impl Account {
     /// This method relies on the [`Account::last_online_at`] field being set.
     #[must_use]
     pub fn is_online(&self) -> bool {
-        Utc::now() - self.last_online_at < ONLINE_DURATION
+        Utc::now() - self.last_online_at < Self::ONLINE_DURATION
     }
 
     /// Retrieves an account by its unique identifier.
@@ -163,11 +163,12 @@ impl Account {
 
     /// Retrieves a [`Stream`] of accounts that are currently online.
     ///
-    /// An account is considered online if it was active less than [`ONLINE_DURATION`] ago. The
-    /// `offset_date` parameter can be used to skip accounts online before a specific time. The
-    /// stream handles pagination automatically, fetching new pages of results as needed. The
-    /// resulting stream is sorted by [`Account::last_online_at`] in ascending order, meaning the
-    /// oldest online accounts are yielded first.
+    /// An account is considered online if it was active less than
+    /// [`ONLINE_DURATION`][Self::ONLINE_DURATION] ago. The `offset_date` parameter can be used to
+    /// skip accounts online before a specific time. The stream handles pagination automatically,
+    /// fetching new pages of results as needed. The resulting stream is sorted by
+    /// [`Account::last_online_at`] in ascending order, meaning the oldest online accounts are
+    /// yielded first.
     ///
     /// It is recommended to use [`try_collect`][futures::TryStreamExt::try_collect] to gather all
     /// results into a [`Vec`] if a complete and consistent list of online users is needed. Delaying

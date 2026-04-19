@@ -17,7 +17,8 @@ use serde::Deserialize;
 pub(crate) use stat::RawStat;
 
 use crate::models::Account;
-use crate::requests::raw::{RawGender, RawImageRef, timestamp_from_millis};
+use crate::requests::raw::conversions::timestamp_from_millis;
+use crate::requests::raw::{RawGender, RawImageRef};
 use crate::{Error, Result};
 
 #[derive(Deserialize)]

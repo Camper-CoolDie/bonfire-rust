@@ -12,7 +12,7 @@ pub(crate) use status::RawStatus;
 
 use crate::models::Publication;
 use crate::models::publication::{Publishable, Status};
-use crate::requests::raw::timestamp_from_millis;
+use crate::requests::raw::conversions::timestamp_from_millis;
 use crate::{Error, Result};
 
 pub(crate) trait RawPublishable: Sized {

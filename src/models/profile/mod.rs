@@ -7,7 +7,7 @@ use std::ops::RangeInclusive;
 use chrono::NaiveDate;
 pub use error::*;
 pub use gender::Gender;
-pub use link::*;
+pub use link::Link;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
@@ -21,42 +21,6 @@ use crate::requests::account::profile::{
     SetStatusRequest,
 };
 use crate::{Client, Result};
-
-/// The allowed range for an account's age.
-pub const AGE_RANGE: RangeInclusive<i64> = 0..=200;
-
-/// The maximum allowed length for an account's status message.
-pub const STATUS_MAX_LENGTH: usize = 100;
-
-/// The maximum allowed length for an account's description (bio).
-pub const DESCRIPTION_MAX_LENGTH: usize = 1000;
-
-/// The maximum allowed size in bytes for a static avatar image.
-pub const AVATAR_MAX_SIZE: usize = 32 * 1024;
-/// The maximum allowed dimension (width or height) for a static avatar image.
-pub const AVATAR_MAX_DIMENSION: usize = 384;
-/// The maximum allowed size in bytes for a GIF avatar image.
-pub const AVATAR_GIF_MAX_SIZE: usize = 256 * 1024;
-/// The maximum allowed dimension (width or height) for a GIF avatar image.
-pub const AVATAR_GIF_MAX_DIMENSION: usize = 92;
-
-/// The maximum allowed size in bytes for a static background image.
-pub const BACKGROUND_MAX_SIZE: usize = 256 * 1024;
-/// The maximum allowed width for a static background image.
-pub const BACKGROUND_MAX_WIDTH: usize = 1200;
-/// The maximum allowed height for a static background image.
-pub const BACKGROUND_MAX_HEIGHT: usize = 600;
-/// The maximum allowed size in bytes for a GIF background image.
-pub const BACKGROUND_GIF_MAX_SIZE: usize = 2 * 1024 * 1024;
-/// The maximum allowed width for a GIF background image.
-pub const BACKGROUND_GIF_MAX_WIDTH: usize = 400;
-/// The maximum allowed height for a GIF background image.
-pub const BACKGROUND_GIF_MAX_HEIGHT: usize = 200;
-
-/// A regular expression to validate a valid account name.
-pub const NAME_REGEX: &str = r"^(?=.*[a-zA-Z])[a-zA-Z0-9]{3,25}$";
-/// A regular expression to validate a name that has been unset (e.g., "User#1234").
-pub const UNSET_NAME_REGEX: &str = r"^(?=[a-zA-Z0-9]*#)[a-zA-Z0-9#]+$";
 
 /// Represents detailed information about the currently authenticated user's profile.
 #[derive(Default, Clone, Debug)]
@@ -72,11 +36,47 @@ pub struct Profile {
     pub cached_level: f64,
     /// Your date of birth, or `None` if not set
     pub birthday: Option<NaiveDate>,
-    /// Indicates whether you are allowed to view NSFW content, or `None` if `birthday` is also
-    /// `None`
+    /// Indicates whether you are allowed to view NSFW content, or `None` if
+    /// [`birthday`][Self::birthday] is also `None`
     pub is_nsfw_allowed: Option<bool>,
 }
 impl Profile {
+    /// The allowed range for an account's age.
+    pub const AGE_RANGE: RangeInclusive<i64> = 0..=200;
+
+    /// The maximum allowed length for an account's status message.
+    pub const STATUS_MAX_LENGTH: usize = 100;
+
+    /// The maximum allowed length for an account's description (bio).
+    pub const DESCRIPTION_MAX_LENGTH: usize = 1000;
+
+    /// The maximum allowed size in bytes for a static avatar image.
+    pub const AVATAR_MAX_SIZE: usize = 32 * 1024;
+    /// The maximum allowed dimension (width or height) for a static avatar image.
+    pub const AVATAR_MAX_DIMENSION: usize = 384;
+    /// The maximum allowed size in bytes for a GIF avatar image.
+    pub const AVATAR_GIF_MAX_SIZE: usize = 256 * 1024;
+    /// The maximum allowed dimension (width or height) for a GIF avatar image.
+    pub const AVATAR_GIF_MAX_DIMENSION: usize = 92;
+
+    /// The maximum allowed size in bytes for a static background image.
+    pub const BACKGROUND_MAX_SIZE: usize = 256 * 1024;
+    /// The maximum allowed width for a static background image.
+    pub const BACKGROUND_MAX_WIDTH: usize = 1200;
+    /// The maximum allowed height for a static background image.
+    pub const BACKGROUND_MAX_HEIGHT: usize = 600;
+    /// The maximum allowed size in bytes for a GIF background image.
+    pub const BACKGROUND_GIF_MAX_SIZE: usize = 2 * 1024 * 1024;
+    /// The maximum allowed width for a GIF background image.
+    pub const BACKGROUND_GIF_MAX_WIDTH: usize = 400;
+    /// The maximum allowed height for a GIF background image.
+    pub const BACKGROUND_GIF_MAX_HEIGHT: usize = 200;
+
+    /// A regular expression to validate a valid account name.
+    pub const NAME_REGEX: &str = r"^(?=.*[a-zA-Z])[a-zA-Z0-9]{3,25}$";
+    /// A regular expression to validate a name that has been unset (e.g., "User#1234").
+    pub const UNSET_NAME_REGEX: &str = r"^(?=[a-zA-Z0-9]*#)[a-zA-Z0-9#]+$";
+
     /// Retrieves information about the currently authenticated user.
     ///
     /// # Errors
@@ -134,7 +134,8 @@ impl Profile {
 
     /// Sets the account's age.
     ///
-    /// The age must be within the [`AGE_RANGE`]. A value of `0` or `None` indicates no age is set.
+    /// The age must be within the [`AGE_RANGE`][Self::AGE_RANGE]. A value of `0` or `None`
+    /// indicates no age is set.
     ///
     /// # Errors
     ///
@@ -149,7 +150,8 @@ impl Profile {
     ///
     /// This operation requires an authenticated client with at least
     /// [`AccessLevel::Trusted`][crate::models::AccessLevel::Trusted] permissions. The status must
-    /// not exceed [`STATUS_MAX_LENGTH`]. An empty string or `None` clears the status.
+    /// not exceed [`STATUS_MAX_LENGTH`][Self::STATUS_MAX_LENGTH]. An empty string or `None` clears
+    /// the status.
     ///
     /// # Errors
     ///
@@ -165,8 +167,8 @@ impl Profile {
 
     /// Sets the account's description (bio).
     ///
-    /// The description must not exceed [`DESCRIPTION_MAX_LENGTH`]. An empty string or `None` clears
-    /// the description.
+    /// The description must not exceed [`DESCRIPTION_MAX_LENGTH`][Self::DESCRIPTION_MAX_LENGTH]. An
+    /// empty string or `None` clears the description.
     ///
     /// # Errors
     ///
@@ -186,9 +188,10 @@ impl Profile {
     ///
     /// This operation requires an authenticated client with at least
     /// [`AccessLevel::Trusted`][crate::models::AccessLevel::Trusted] permissions. Static avatars
-    /// cannot exceed [`AVATAR_MAX_SIZE`] in size, and their dimensions must be no larger than
-    /// [`AVATAR_MAX_DIMENSION`]. GIF avatars cannot exceed [`AVATAR_GIF_MAX_SIZE`] in size, and
-    /// their dimensions must be no larger than [`AVATAR_GIF_MAX_DIMENSION`].
+    /// cannot exceed [`AVATAR_MAX_SIZE`][Self::AVATAR_MAX_SIZE] in size, and their dimensions must
+    /// be no larger than [`AVATAR_MAX_DIMENSION`][Self::AVATAR_MAX_DIMENSION]. GIF avatars cannot
+    /// exceed [`AVATAR_GIF_MAX_SIZE`][Self::AVATAR_GIF_MAX_SIZE] in size, and their dimensions must
+    /// be no larger than [`AVATAR_GIF_MAX_DIMENSION`][Self::AVATAR_GIF_MAX_DIMENSION].
     ///
     /// # Errors
     ///
@@ -210,8 +213,9 @@ impl Profile {
     ///
     /// This operation requires an authenticated client with at least
     /// [`AccessLevel::Trusted`][crate::models::AccessLevel::Trusted] permissions. Static background
-    /// images cannot exceed [`BACKGROUND_MAX_SIZE`] in size, and their dimensions must be no larger
-    /// than [`BACKGROUND_MAX_WIDTH`] in width and [`BACKGROUND_MAX_HEIGHT`] in height.
+    /// images cannot exceed [`BACKGROUND_MAX_SIZE`][Self::BACKGROUND_MAX_SIZE] in size, and their
+    /// dimensions must be no larger than [`BACKGROUND_MAX_WIDTH`][Self::BACKGROUND_MAX_WIDTH] in
+    /// width and [`BACKGROUND_MAX_HEIGHT`][Self::BACKGROUND_MAX_HEIGHT] in height.
     ///
     /// # Errors
     ///
@@ -235,9 +239,10 @@ impl Profile {
     ///
     /// This operation requires an authenticated client with at least
     /// [`AccessLevel::Experienced`][crate::models::AccessLevel::Experienced] permissions. GIF
-    /// background images cannot exceed [`BACKGROUND_GIF_MAX_SIZE`] in size, and their dimensions
-    /// must be no larger than [`BACKGROUND_GIF_MAX_WIDTH`] in width and
-    /// [`BACKGROUND_GIF_MAX_HEIGHT`] in height.
+    /// background images cannot exceed [`BACKGROUND_GIF_MAX_SIZE`][Self::BACKGROUND_GIF_MAX_SIZE]
+    /// in size, and their dimensions must be no larger than
+    /// [`BACKGROUND_GIF_MAX_WIDTH`][Self::BACKGROUND_GIF_MAX_WIDTH] in width and
+    /// [`BACKGROUND_GIF_MAX_HEIGHT`][Self::BACKGROUND_GIF_MAX_HEIGHT] in height.
     ///
     /// # Errors
     ///
@@ -273,14 +278,15 @@ impl Profile {
 
     /// Sets the authenticated user's display name.
     ///
-    /// The new name must adhere to the pattern defined by [`NAME_REGEX`]. If the name has been
-    /// cleared by administrators, it can be set again. To check if the current name can be changed,
-    /// use [`UNSET_NAME_REGEX`].
+    /// The new name must adhere to the pattern defined by [`NAME_REGEX`][Self::NAME_REGEX]. If the
+    /// name has been cleared by administrators, it can be set again. To check if the current name
+    /// can be changed, use [`UNSET_NAME_REGEX`][Self::UNSET_NAME_REGEX].
     ///
     /// # Errors
     ///
     /// * Returns [`SetNameError::AlreadySet`] if the name has already been set.
-    /// * Returns [`SetNameError::InvalidName`] if the provided name does not match [`NAME_REGEX`].
+    /// * Returns [`SetNameError::InvalidName`] if the provided name does not match
+    ///   [`NAME_REGEX`][Self::NAME_REGEX].
     /// * Returns [`SetNameError::Taken`] if the provided name is already in use by another account.
     /// * Returns [`Error`][crate::Error] if any other error occurs during the request.
     pub async fn set_name(client: &Client, name: &str) -> Result<()> {

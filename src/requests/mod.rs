@@ -2,6 +2,7 @@ pub(crate) mod account;
 pub(crate) mod chat;
 mod error;
 pub(crate) mod fandom;
+pub(crate) mod other;
 pub(crate) mod publication;
 mod raw;
 

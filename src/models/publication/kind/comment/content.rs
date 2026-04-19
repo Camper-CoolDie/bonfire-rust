@@ -3,17 +3,6 @@ use serde::{Deserialize, Serialize};
 
 use crate::models::ImageRef;
 
-/// The maximum allowed size in bytes for a static comment image.
-pub const COMMENT_IMAGE_MAX_SIZE: usize = 256 * 1024;
-/// The maximum allowed dimension (width or height) for a static comment image.
-pub const COMMENT_IMAGE_MAX_DIMENSION: usize = 1080;
-/// The maximum allowed size in bytes for a GIF comment.
-pub const COMMENT_GIF_MAX_SIZE: usize = 1024 * 1024;
-/// The maximum allowed dimension (width or height) for a GIF comment.
-pub const COMMENT_GIF_MAX_DIMENSION: usize = 400;
-/// The maximum number of static images that can be included in a single comment.
-pub const COMMENT_IMAGES_MAX_COUNT: usize = 5;
-
 /// Represents the rich media content of a comment.
 #[derive(Default, Clone, Debug)]
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
@@ -43,4 +32,16 @@ pub enum Content {
     },
     /// An unknown content type
     Unknown(i64),
+}
+impl Content {
+    /// The maximum allowed size in bytes for a static comment image.
+    pub const IMAGE_MAX_SIZE: usize = 256 * 1024;
+    /// The maximum allowed dimension (width or height) for a static comment image.
+    pub const IMAGE_MAX_DIMENSION: usize = 1080;
+    /// The maximum allowed size in bytes for a GIF comment.
+    pub const GIF_MAX_SIZE: usize = 1024 * 1024;
+    /// The maximum allowed dimension (width or height) for a GIF comment.
+    pub const GIF_MAX_DIMENSION: usize = 400;
+    /// The maximum number of static images that can be included in a single comment.
+    pub const IMAGES_MAX_COUNT: usize = 5;
 }

@@ -49,7 +49,7 @@ impl Serialize for RawTag {
     where
         S: serde::Serializer,
     {
-        let (kind, first_id, second_id) = self.into();
+        let (kind, first_id, second_id) = self.try_into().map_err(serde::ser::Error::custom)?;
 
         let mut tag = serializer.serialize_struct("RawChatTag", 3)?;
         tag.serialize_field("chatType", &i64::from(kind))?;
@@ -100,13 +100,15 @@ impl<'de> Deserialize<'de> for RawTag {
     }
 }
 
-impl From<&RawTag> for (RawKind, u64, u64) {
-    fn from(value: &RawTag) -> Self {
-        match value {
+impl TryFrom<&RawTag> for (RawKind, u64, u64) {
+    type Error = String;
+
+    fn try_from(value: &RawTag) -> StdResult<Self, String> {
+        Ok(match value {
             RawTag::FandomRoot {
                 fandom_id,
                 language,
-            } => (RawKind::FandomRoot, *fandom_id, u64::from(language)),
+            } => (RawKind::FandomRoot, *fandom_id, u64::try_from(language)?),
             RawTag::FandomSub { id } => (RawKind::FandomSub, *id, 0),
             RawTag::Group { id } => (RawKind::Group, *id, 0),
             RawTag::Direct {
@@ -118,7 +120,7 @@ impl From<&RawTag> for (RawKind, u64, u64) {
                 first_id,
                 second_id,
             } => (RawKind::Unknown(*kind), *first_id, *second_id),
-        }
+        })
     }
 }
 

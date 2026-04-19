@@ -1,8 +1,10 @@
+mod filter;
 mod kind;
 mod reaction;
 mod status;
 
 use chrono::{DateTime, Utc};
+pub use filter::{AccountFilter, FandomFilter};
 pub use kind::*;
 pub use reaction::Reaction;
 #[cfg(feature = "serde")]

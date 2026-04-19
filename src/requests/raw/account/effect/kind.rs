@@ -3,7 +3,6 @@ use std::result::Result as StdResult;
 use serde::Deserialize;
 
 use crate::models::account::EffectKind;
-use crate::{Error, Result};
 
 #[derive(Debug)]
 pub(crate) enum RawKind {
@@ -15,7 +14,6 @@ pub(crate) enum RawKind {
     Punished,
     Translator,
     MentionLock,
-    #[expect(dead_code)]
     Unknown(i64),
 }
 
@@ -38,11 +36,9 @@ impl<'de> Deserialize<'de> for RawKind {
     }
 }
 
-impl TryFrom<RawKind> for EffectKind {
-    type Error = Error;
-
-    fn try_from(value: RawKind) -> Result<Self> {
-        Ok(match value {
+impl From<RawKind> for EffectKind {
+    fn from(value: RawKind) -> Self {
+        match value {
             RawKind::Hater => EffectKind::Hater,
             RawKind::Pig => EffectKind::Pig,
             RawKind::Watchman => EffectKind::Watchman,
@@ -51,7 +47,7 @@ impl TryFrom<RawKind> for EffectKind {
             RawKind::Punished => EffectKind::Punished,
             RawKind::Translator => EffectKind::Translator,
             RawKind::MentionLock => EffectKind::MentionLock,
-            RawKind::Unknown(_) => return Err(Error::UnknownVariant(Box::new(value))),
-        })
+            RawKind::Unknown(kind) => EffectKind::Unknown(kind),
+        }
     }
 }

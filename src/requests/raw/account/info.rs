@@ -3,7 +3,8 @@ use serde::Deserialize;
 
 use crate::models::Link;
 use crate::models::account::Info;
-use crate::requests::raw::{RawImageRef, RawLink, RawPost, RawPublication, timestamp_from_millis};
+use crate::requests::raw::conversions::timestamp_from_millis;
+use crate::requests::raw::{RawImageRef, RawLink, RawPost, RawPublication};
 use crate::{Error, Result};
 
 #[derive(Deserialize)]

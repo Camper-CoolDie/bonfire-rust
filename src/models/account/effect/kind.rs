@@ -22,4 +22,6 @@ pub enum Kind {
     Translator,
     /// This user cannot mention others using the "@" symbol
     MentionLock,
+    /// An unknown effect type
+    Unknown(i64),
 }

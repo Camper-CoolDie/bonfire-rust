@@ -3,8 +3,9 @@ use std::result::Result as StdResult;
 use serde::Deserialize;
 
 use crate::models::publication::ChatMessageContent;
+use crate::requests::raw::RawGender;
 use crate::requests::raw::chat::RawMemberRole;
-use crate::requests::raw::{RawGender, timestamp_from_millis};
+use crate::requests::raw::conversions::timestamp_from_millis;
 use crate::{Error, Result};
 
 pub(crate) enum RawEventKind {

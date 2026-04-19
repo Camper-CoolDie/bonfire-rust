@@ -22,8 +22,9 @@ use service::{MeliorService, RootService};
 use token_provider::TokenProvider;
 use tracing::instrument;
 
-use crate::models::Auth;
+use crate::models::{Auth, InitialData};
 use crate::queries::auth::{LoginEmailQuery, LogoutQuery};
+use crate::requests::other::GetInitialDataRequest;
 use crate::{MeliorError, MeliorQuery, RootError, RootRequest};
 
 // Some requests require this value and return various responses depending on it
@@ -38,7 +39,6 @@ struct Inner {
     melior_service: MeliorService,
     token_provider: TokenProvider,
     rate_limiter: RateLimiter<NotKeyed, InMemoryState, DefaultClock>,
-    protoadmin_ids: Vec<u64>,
 }
 
 /// An asynchronous, thread-safe HTTP client for the Bonfire API.
@@ -68,13 +68,7 @@ pub struct Client {
     inner: Arc<Inner>,
 }
 impl Client {
-    fn new(
-        root_uri: Uri,
-        melior_uri: Uri,
-        auth: Option<Auth>,
-        quota: Quota,
-        protoadmin_ids: Vec<u64>,
-    ) -> Self {
+    fn new(root_uri: Uri, melior_uri: Uri, auth: Option<Auth>, quota: Quota) -> Self {
         Self {
             inner: Arc::new(Inner {
                 root_service: RootService::new(root_uri),
@@ -82,7 +76,6 @@ impl Client {
                 // This error was previously caught in Builder::auth()
                 token_provider: TokenProvider::new(auth).expect("failed to create TokenProvider"),
                 rate_limiter: RateLimiter::direct(quota),
-                protoadmin_ids,
             }),
         }
     }
@@ -268,6 +261,25 @@ impl Client {
         Ok(self)
     }
 
+    /// Fetches essential data from the server for app initialization.
+    ///
+    /// This method retrieves the authenticated user's account, settings, protoadmin list, server
+    /// time, and follows status. It should be called once at startup after authentication (via
+    /// [`login()`][Self::login()] or [`set_auth()`][Self::set_auth()]).
+    ///
+    /// This method can be called multiple times, but the best practice is to call it only on
+    /// startup or when the user changes their authentication credentials.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error`] if an error occurs while sending the request.
+    pub async fn get_initial_data(&self) -> Result<InitialData> {
+        GetInitialDataRequest::new()
+            .send_request(self)
+            .await?
+            .try_into()
+    }
+
     #[instrument(skip(self, content, attachments))]
     pub(crate) async fn send_request<R: Request>(
         &self,
@@ -381,11 +393,6 @@ impl Client {
             )
             .await
             .inspect_err(|error| tracing::error!(?error, "failed to send an authless query"))
-    }
-
-    pub(crate) fn is_protoadmin(&self, account_id: u64) -> bool {
-        // NOTE: Linear `.contains()` search is preferred for small vectors, so there's no overhead
-        self.inner.protoadmin_ids.contains(&account_id)
     }
 
     /// Create a new `Builder` with default values.
