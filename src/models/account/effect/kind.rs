@@ -3,7 +3,11 @@ use serde::{Deserialize, Serialize};
 
 /// Represents the type of an effect applied to an account.
 #[derive(Default, Clone, Debug, PartialEq, Eq)]
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
+#[cfg_attr(
+    feature = "serde",
+    derive(Deserialize, Serialize),
+    serde(rename_all = "snake_case")
+)]
 pub enum Kind {
     /// This user cannot place negative rates
     #[default]
@@ -23,5 +27,6 @@ pub enum Kind {
     /// This user cannot mention others using the "@" symbol
     MentionLock,
     /// An unknown effect type
+    #[cfg_attr(feature = "serde", serde(untagged))]
     Unknown(i64),
 }

@@ -8,7 +8,11 @@ use crate::{Client, Result};
 
 /// Represents the declared gender of an account.
 #[derive(Default, Clone, Debug, PartialEq, Eq)]
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
+#[cfg_attr(
+    feature = "serde",
+    derive(Deserialize, Serialize),
+    serde(rename_all = "snake_case")
+)]
 pub enum Gender {
     /// Male gender
     #[default]

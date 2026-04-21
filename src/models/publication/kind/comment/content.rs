@@ -5,7 +5,11 @@ use crate::models::ImageRef;
 
 /// Represents the rich media content of a comment.
 #[derive(Default, Clone, Debug)]
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
+#[cfg_attr(
+    feature = "serde",
+    derive(Deserialize, Serialize),
+    serde(rename_all = "snake_case")
+)]
 pub enum Content {
     /// No specific content
     #[default]
@@ -31,6 +35,7 @@ pub enum Content {
         gif: Option<ImageRef>,
     },
     /// An unknown content type
+    #[cfg_attr(feature = "serde", serde(untagged))]
     Unknown(i64),
 }
 impl Content {

@@ -8,10 +8,14 @@ use crate::sealed::Sealed;
 /// Represents a union of all possible additional data types for a publication.
 ///
 /// This enum acts as a catch-all for various publication kinds when the specific type is not
-/// known or needed, storing additional data relevant to that type. Large variants are
-/// [`Box`]-ed to prevent the enum from becoming catastrophically large.
+/// known or needed, storing additional data relevant to that type. Large variants are [`Box`]-ed to
+/// prevent the enum from becoming catastrophically large.
 #[derive(Clone, Debug)]
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
+#[cfg_attr(
+    feature = "serde",
+    derive(Deserialize, Serialize),
+    serde(rename_all = "snake_case")
+)]
 pub enum AnyPublication {
     /// The publication contains additional post data
     Post(Box<Post>),
@@ -38,6 +42,7 @@ pub enum AnyPublication {
     /// The publication contains additional quest data
     Quest,
     /// The publication has an unknown type, thus no specific data can be parsed
+    #[cfg_attr(feature = "serde", serde(untagged))]
     Unknown(i64),
 }
 

@@ -29,6 +29,7 @@ pub struct Publication<T: Publishable = AnyPublication> {
     /// The unique identifier of this publication
     pub id: u64,
     /// Additional, type-specific data for this publication
+    #[cfg_attr(feature = "serde", serde(flatten))]
     pub kind: T,
     /// The date and time when this publication was created (or published, for posts/quests)
     pub created_at: DateTime<Utc>,

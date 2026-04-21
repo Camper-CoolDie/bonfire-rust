@@ -5,7 +5,11 @@ use serde::{Deserialize, Serialize};
 ///
 /// Stages are sorted in the order they should appear to the user.
 #[derive(Default, Clone, Debug, PartialEq, Eq)]
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
+#[cfg_attr(
+    feature = "serde",
+    derive(Deserialize, Serialize),
+    serde(rename_all = "snake_case")
+)]
 pub enum Stage {
     /// The initial stage
     #[default]
@@ -39,6 +43,7 @@ pub enum Stage {
     /// The completion stage
     Complete,
     /// An unknown stage
+    #[cfg_attr(feature = "serde", serde(untagged))]
     Unknown(i64),
 }
 impl Stage {

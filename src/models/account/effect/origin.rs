@@ -5,7 +5,11 @@ use super::ReasonKind;
 
 /// Represents the origin or source of an [`Effect`][super::Effect].
 #[derive(Clone, Debug)]
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
+#[cfg_attr(
+    feature = "serde",
+    derive(Deserialize, Serialize),
+    serde(rename_all = "snake_case")
+)]
 pub enum Origin {
     /// The effect was applied by another account
     Account {

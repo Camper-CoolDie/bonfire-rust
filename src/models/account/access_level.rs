@@ -23,7 +23,11 @@ const EXPERT_REQUIREMENT: (f64, f64) = (12.0, 1300.0);
 /// specific [`level`][AccessLevel::requirement()] and [`karma30`][AccessLevel::requirement()]
 /// requirements that an account must meet to attain that level.
 #[derive(Default, Clone, Debug, PartialOrd, Ord, PartialEq, Eq, EnumIter)]
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
+#[cfg_attr(
+    feature = "serde",
+    derive(Deserialize, Serialize),
+    serde(rename_all = "snake_case")
+)]
 pub enum AccessLevel {
     /// Standard user level, the default for all accounts
     #[default]
@@ -95,7 +99,7 @@ impl Account {
     /// being set.
     #[must_use]
     pub fn access_level(&self, config: &Config) -> AccessLevel {
-        // NOTE: Linear `.contains()` search is preferred for small vectors, so there's no overhead
+        // Linear `.contains()` search is preferred for small vectors, so there's no overhead
         if config.protoadmin_ids.contains(&self.id) {
             AccessLevel::Protoadmin
         } else {

@@ -3,7 +3,11 @@ use serde::{Deserialize, Serialize};
 
 /// Represents a predefined accent color for themes.
 #[derive(Default, Clone, Debug, PartialEq, Eq)]
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
+#[cfg_attr(
+    feature = "serde",
+    derive(Deserialize, Serialize),
+    serde(rename_all = "snake_case")
+)]
 pub enum Color {
     /// The default accent color
     #[default]

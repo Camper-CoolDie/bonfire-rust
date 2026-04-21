@@ -5,7 +5,11 @@ use crate::models::ImageRef;
 
 /// Represents the content of a referenced chat message.
 #[derive(Default, Clone, Debug)]
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
+#[cfg_attr(
+    feature = "serde",
+    derive(Deserialize, Serialize),
+    serde(rename_all = "snake_case")
+)]
 pub enum RefContent {
     /// No specific content
     #[default]

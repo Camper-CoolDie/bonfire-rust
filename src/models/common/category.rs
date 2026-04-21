@@ -3,7 +3,11 @@ use serde::{Deserialize, Serialize};
 
 /// Represents a category that a fandom can belong to.
 #[derive(Default, Clone, Debug, PartialEq, Eq)]
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
+#[cfg_attr(
+    feature = "serde",
+    derive(Deserialize, Serialize),
+    serde(rename_all = "snake_case")
+)]
 pub enum Category {
     /// The fandom represents a game
     #[default]
@@ -21,5 +25,6 @@ pub enum Category {
     /// The fandom has a non-standard category
     Other,
     /// The fandom has an unknown category
+    #[cfg_attr(feature = "serde", serde(untagged))]
     Unknown(i64),
 }

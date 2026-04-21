@@ -19,7 +19,11 @@ use serde::{Deserialize, Serialize};
 
 /// Represents the specific type of a publication.
 #[derive(Default, Clone, Debug, PartialEq, Eq)]
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
+#[cfg_attr(
+    feature = "serde",
+    derive(Deserialize, Serialize),
+    serde(rename_all = "snake_case")
+)]
 pub enum Kind {
     /// The publication is a post
     #[default]
@@ -47,5 +51,6 @@ pub enum Kind {
     /// The publication is a quest
     Quest,
     /// The publication has an unknown type
+    #[cfg_attr(feature = "serde", serde(untagged))]
     Unknown(i64),
 }

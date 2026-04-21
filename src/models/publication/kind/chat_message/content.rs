@@ -9,7 +9,11 @@ use crate::models::{Gender, ImageRef, VoiceRef};
 
 /// Represents the content of a chat message.
 #[derive(Default, Clone, Debug)]
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
+#[cfg_attr(
+    feature = "serde",
+    derive(Deserialize, Serialize),
+    serde(rename_all = "snake_case")
+)]
 pub enum Content {
     /// No specific content
     #[default]

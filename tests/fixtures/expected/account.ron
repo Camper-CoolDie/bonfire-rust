@@ -11,7 +11,7 @@ Account(
             height: 0,
         ),
     ),
-    gender: Other,
+    gender: other,
     karma30: 405.88,
     sponsor_amount: 7151,
     sponsor_count: 5,
@@ -22,8 +22,8 @@ Account(
             account_id: 207506,
             applied_at: "2026-02-07T15:27:44.350Z",
             ends_at: "2126-02-07T15:27:44.350Z",
-            kind: EternalWinter,
-            origin: Account(
+            kind: eternal_winter,
+            origin: account(
                 name: "TestUser941",
                 reason: "Descriptive effect reason",
             ),
@@ -33,9 +33,9 @@ Account(
             account_id: 207506,
             applied_at: "2026-03-28T03:32:53.721Z",
             ends_at: "2126-03-28T03:32:53.721Z",
-            kind: Watchman,
-            origin: System(
-                reason_kind: RejectedBlocks,
+            kind: watchman,
+            origin: system(
+                reason_kind: rejected_blocks,
             ),
         ),
     ],

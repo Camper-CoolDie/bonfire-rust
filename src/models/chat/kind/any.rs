@@ -10,7 +10,11 @@ use crate::sealed::Sealed;
 /// This enum acts as a catch-all for various chat kinds when the specific type is not known
 /// or needed, storing the specific data relevant to that type.
 #[derive(Clone, Debug)]
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
+#[cfg_attr(
+    feature = "serde",
+    derive(Deserialize, Serialize),
+    serde(rename_all = "snake_case")
+)]
 pub enum AnyChat {
     /// A fandom root chat
     FandomRoot(FandomRoot),

@@ -3,7 +3,11 @@ use serde::{Deserialize, Serialize};
 
 /// Represents a preselected reason for an effect being applied.
 #[derive(Default, Clone, Debug, PartialEq, Eq)]
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
+#[cfg_attr(
+    feature = "serde",
+    derive(Deserialize, Serialize),
+    serde(rename_all = "snake_case")
+)]
 pub enum ReasonKind {
     /// Punished for inappropriate behavior towards the gods
     #[default]
@@ -19,5 +23,6 @@ pub enum ReasonKind {
     /// Punished for being uncultured
     Uncultured,
     /// An unknown reason
+    #[cfg_attr(feature = "serde", serde(untagged))]
     Unknown(i64),
 }

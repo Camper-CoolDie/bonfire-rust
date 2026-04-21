@@ -35,6 +35,7 @@ pub trait Messageable: Sealed {
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct Chat<T: Messageable = AnyChat> {
     /// The specific kind of chat, holding its unique data
+    #[cfg_attr(feature = "serde", serde(flatten))]
     pub kind: T,
     /// The last message sent in this chat, if any
     pub last_message: Option<Publication<ChatMessage>>,
