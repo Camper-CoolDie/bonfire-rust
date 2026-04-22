@@ -14,8 +14,6 @@ pub struct Style {
     pub theme: Theme,
     /// The kind of user interface (navigation panel or menu)
     pub interface_kind: InterfaceKind,
-    /// The base font size in scaled pixels (sp)
-    pub font_size_sp: u32,
     /// Whether avatars should be displayed as round
     pub round_avatars: bool,
     /// The corner radius in density-independent pixels (dp) for avatars if not round
@@ -47,7 +45,6 @@ impl Default for Style {
         Self {
             theme: Theme::default(),
             interface_kind: InterfaceKind::default(),
-            font_size_sp: 15,
             round_avatars: false,
             avatars_corner_radius_dp: 10,
             show_new_account_interface: true,

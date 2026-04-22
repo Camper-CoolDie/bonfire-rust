@@ -23,8 +23,6 @@ pub(crate) struct RawSettings {
     pub theme: RawTheme,
     #[serde(rename = "interfaceType")]
     pub interface_kind: RawInterfaceKind,
-    #[serde(rename = "postFontSize")]
-    pub font_size_sp: u32,
     #[serde(rename = "styleSquare")]
     pub square_avatars: bool,
     #[serde(rename = "styleCorned")]
@@ -208,7 +206,6 @@ impl TryFrom<RawSettings> for Settings {
             style: Style {
                 theme: value.theme.into(),
                 interface_kind: value.interface_kind.try_into()?,
-                font_size_sp: value.font_size_sp,
                 round_avatars: !value.square_avatars,
                 avatars_corner_radius_dp: value.avatars_corner_radius_dp,
                 show_new_account_interface: value.show_new_account_interface,
@@ -357,7 +354,6 @@ impl TryFrom<Settings> for RawSettings {
         Ok(Self {
             theme: value.style.theme.into(),
             interface_kind: value.style.interface_kind.into(),
-            font_size_sp: value.style.font_size_sp,
             square_avatars: !value.style.round_avatars,
             avatars_corner_radius_dp: value.style.avatars_corner_radius_dp,
             show_new_account_interface: value.style.show_new_account_interface,
