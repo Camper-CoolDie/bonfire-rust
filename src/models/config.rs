@@ -9,6 +9,11 @@ pub struct Config {
     /// This list is fetched from the server via
     /// [`Client::get_initial_data`][crate::Client::get_initial_data] and is empty by default.
     pub protoadmin_ids: Vec<u64>,
+    /// Whether the user has any follows.
+    ///
+    /// This value is fetched from the server via
+    /// [`Client::get_initial_data`][crate::Client::get_initial_data] and is `false` by default.
+    pub has_follows: bool,
     /// The default fandom ID to use for quick post creation
     pub quick_post_fandom_id: u64,
     /// The default fandom name to use for quick post creation
@@ -23,6 +28,7 @@ impl Default for Config {
     fn default() -> Self {
         Self {
             protoadmin_ids: Vec::new(),
+            has_follows: false,
             quick_post_fandom_id: DEFAULT_ANYTHING_FANDOM_ID,
             quick_post_fandom_name: DEFAULT_ANYTHING_FANDOM_NAME.to_string(),
             quick_image_fandom_id: DEFAULT_ANYTHING_FANDOM_ID,
