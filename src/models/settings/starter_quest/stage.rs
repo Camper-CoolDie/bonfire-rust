@@ -1,10 +1,11 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
+use strum::EnumIter;
 
 /// Represents a stage in the starter quest.
 ///
 /// Stages are sorted in the order they should appear to the user.
-#[derive(Default, Clone, Debug, PartialEq, Eq)]
+#[derive(Default, Clone, Debug, PartialEq, Eq, EnumIter)]
 #[cfg_attr(
     feature = "serde",
     derive(Deserialize, Serialize),

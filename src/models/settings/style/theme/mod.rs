@@ -76,7 +76,7 @@ mod inner_serde {
                 Some(Color::Default) | None => "",
             };
 
-            serializer.serialize_str(&(theme_code.to_owned() + color_code))
+            serializer.serialize_str(&format!("{theme_code}:{color_code}"))
         }
     }
 
