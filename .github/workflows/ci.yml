@@ -32,6 +32,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Set up Protobuf compiler
+        uses: arduino/setup-protoc@v3
+        with:
+          version: "34.x"
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Set up Rust toolchain
         uses: actions-rs/toolchain@v1
         with:
@@ -48,6 +54,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Set up Protobuf compiler
+        uses: arduino/setup-protoc@v3
+        with:
+          version: "34.x"
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Set up Rust toolchain
         uses: actions-rs/toolchain@v1
         with:
@@ -71,6 +83,26 @@ jobs:
           - macOS-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Set up OpenSSL
+        uses: johnwason/vcpkg-action@v7
+        with:
+          pkgs: openssl:x64-windows-static-md
+          triplet: x64-windows
+          token: ${{ github.token }}
+        if: matrix.os == 'windows-latest'
+
+      - name: Set OpenSSL installation path for openssl-sys crate
+        run: |
+          echo "OPENSSL_DIR=${{ github.workspace }}/vcpkg/installed/x64-windows-static-md" >> $env:GITHUB_ENV
+          echo "OPENSSL_STATIC=1" >> $env:GITHUB_ENV
+        if: matrix.os == 'windows-latest'
+
+      - name: Set up Protobuf compiler
+        uses: arduino/setup-protoc@v3
+        with:
+          version: "34.x"
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Set up Rust toolchain
         uses: actions-rs/toolchain@v1
         with:
@@ -86,6 +118,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Set up Protobuf compiler
+        uses: arduino/setup-protoc@v3
+        with:
+          version: "34.x"
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Set up Rust toolchain
         uses: actions-rs/toolchain@v1
         with:
@@ -104,6 +142,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Set up Protobuf compiler
+        uses: arduino/setup-protoc@v3
+        with:
+          version: "34.x"
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Get MSRV from package metadata
         id: msrv
         run: echo "version=$(yq '.package.rust-version' Cargo.toml)" >> $GITHUB_OUTPUT

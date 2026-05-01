@@ -9,22 +9,33 @@ mod token_provider;
 use std::sync::Arc;
 
 pub use builder::Builder;
+use bytes::Bytes;
 pub use error::{Error, Result};
 use governor::clock::DefaultClock;
 use governor::state::{InMemoryState, NotKeyed};
 use governor::{Quota, RateLimiter};
 use http::{HeaderMap, Uri, header};
-pub use jwt::JwtError;
+use http_body_util::{Either, Empty, Full};
+use hyper_rustls::{HttpsConnector, HttpsConnectorBuilder};
+use hyper_util::client::legacy::connect::HttpConnector;
+use hyper_util::rt::TokioExecutor;
+pub use jwt::Error as JwtError;
 pub(crate) use request::{
     EmptyResponse, InfallibleRequest, Request, RequestError, RequestErrorSource,
 };
+#[cfg(feature = "fcm")]
+use service::FcmService;
+#[cfg(feature = "fcm")]
+pub use service::fcm::Error as FcmError;
 use service::{MeliorService, RootService};
 use token_provider::TokenProvider;
 use tracing::instrument;
 
-use crate::models::{Auth, InitialData};
+use crate::models::{Auth, FirebaseConfig, InitialData};
+#[cfg(feature = "fcm")]
+use crate::models::{FcmAndroidRegistration, FcmCredentials};
 use crate::queries::auth::{LoginEmailQuery, LogoutQuery};
-use crate::requests::other::GetInitialDataRequest;
+use crate::requests::other::BootstrapRequest;
 use crate::{MeliorError, MeliorQuery, RootError, RootRequest};
 
 // Some requests require this value and return various responses depending on it
@@ -33,10 +44,18 @@ const API_VERSION: &str = "3.1.0";
 // The maximum allowed size for any type of attachment (6 MiB)
 const ATTACHMENT_MAX_SIZE: usize = 6 * 1024 * 1024;
 
+type HyperClient = hyper_util::client::legacy::Client<
+    HttpsConnector<HttpConnector>,
+    Either<Full<Bytes>, Empty<Bytes>>,
+>;
+
 #[derive(Debug)]
 struct Inner {
+    hyper_client: HyperClient,
     root_service: RootService,
     melior_service: MeliorService,
+    #[cfg(feature = "fcm")]
+    fcm_service: FcmService,
     token_provider: TokenProvider,
     rate_limiter: RateLimiter<NotKeyed, InMemoryState, DefaultClock>,
 }
@@ -68,11 +87,27 @@ pub struct Client {
     inner: Arc<Inner>,
 }
 impl Client {
-    fn new(root_uri: Uri, melior_uri: Uri, auth: Option<Auth>, quota: Quota) -> Self {
+    fn new(
+        root_uri: Uri,
+        melior_uri: Uri,
+        auth: Option<Auth>,
+        quota: Quota,
+        firebase_config: FirebaseConfig,
+    ) -> Self {
+        let connector = HttpsConnectorBuilder::new()
+            .with_webpki_roots()
+            .https_or_http()
+            .enable_all_versions()
+            .build();
+
         Self {
             inner: Arc::new(Inner {
+                hyper_client: hyper_util::client::legacy::Client::builder(TokioExecutor::new())
+                    .build(connector),
                 root_service: RootService::new(root_uri),
                 melior_service: MeliorService::new(melior_uri),
+                #[cfg(feature = "fcm")]
+                fcm_service: FcmService::new(firebase_config),
                 // This error was previously caught in Builder::auth()
                 token_provider: TokenProvider::new(auth).expect("failed to create TokenProvider"),
                 rate_limiter: RateLimiter::direct(quota),
@@ -261,7 +296,8 @@ impl Client {
         Ok(self)
     }
 
-    /// Fetches essential data from the server for app initialization.
+    /// Fetches essential data from the server for app initialization. Optionally accepts a FCM
+    /// token to register for push notifications.
     ///
     /// This method retrieves the authenticated user's account, settings, protoadmin list, server
     /// time, and follows status. It should be called once at startup after authentication (via
@@ -273,11 +309,90 @@ impl Client {
     /// # Errors
     ///
     /// Returns [`Error`] if an error occurs while sending the request.
-    pub async fn get_initial_data(&self) -> Result<InitialData> {
-        GetInitialDataRequest::new()
+    pub async fn bootstrap(&self, fcm_token: Option<&str>) -> Result<InitialData> {
+        BootstrapRequest::new(fcm_token)
             .send_request(self)
             .await?
             .try_into()
+    }
+
+    /// Registers with FCM to receive push notifications.
+    ///
+    /// This method performs a full registration with Firebase Cloud Messaging, including both
+    /// Android device registration and FCM token generation. Use this when you need to receive push
+    /// notifications on a new device or after clearing app data.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`FcmError`] if registration fails or [`Error`] if any other error occurs during the
+    /// request.
+    #[cfg(feature = "fcm")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "fcm")))]
+    #[instrument(skip(self))]
+    pub async fn register_fcm(&self) -> Result<FcmCredentials> {
+        tracing::info!("registering with GCM");
+        let android = self
+            .inner
+            .fcm_service
+            .register_android(&self.inner.hyper_client)
+            .await
+            .inspect_err(|error| tracing::error!(?error, "failed to register with GCM"))?;
+
+        tracing::info!("registering with FCM");
+        self.inner
+            .fcm_service
+            .register(&self.inner.hyper_client, android)
+            .await
+            .inspect_err(|error| tracing::error!(?error, "failed to register with FCM"))
+    }
+
+    /// Generates a FCM token from existing Android registration data.
+    ///
+    /// Useful when you have already obtained Android registration data and want to generate a new
+    /// FCM token without re-registering with Google Cloud Messaging services.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`FcmError`] if registration fails or [`Error`] if any other error occurs during the
+    /// request.
+    #[cfg(feature = "fcm")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "fcm")))]
+    #[instrument(skip(self))]
+    pub async fn register_fcm_from_android(
+        &self,
+        android: FcmAndroidRegistration,
+    ) -> Result<FcmCredentials> {
+        tracing::info!("registering with FCM");
+        self.inner
+            .fcm_service
+            .register(&self.inner.hyper_client, android)
+            .await
+            .inspect_err(|error| tracing::error!(?error, "failed to register with FCM"))
+    }
+
+    /// Unregisters from FCM to stop receiving push notifications.
+    ///
+    /// This method removes the provided token from FCM servers, stopping all push notifications for
+    /// this device.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`FcmError`] if unregistration fails or [`Error`] if any other error occurs during
+    /// the request.
+    #[cfg(feature = "fcm")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "fcm")))]
+    #[instrument(skip(self))]
+    pub async fn unregister_fcm(&self, credentials: &FcmCredentials) -> Result<()> {
+        tracing::info!("unregistering from FCM");
+        self.inner
+            .fcm_service
+            .unregister(
+                &self.inner.hyper_client,
+                &credentials.android,
+                &credentials.token,
+            )
+            .await
+            .inspect_err(|error| tracing::error!(?error, "failed to unregister from FCM"))
     }
 
     #[instrument(skip(self, content, attachments))]
@@ -325,7 +440,12 @@ impl Client {
         tracing::info!("sending request");
         self.inner
             .root_service
-            .send_request(request, attachments, HeaderMap::new())
+            .send_request(
+                &self.inner.hyper_client,
+                request,
+                attachments,
+                HeaderMap::new(),
+            )
             .await
             .inspect_err(|error| tracing::error!(?error, "failed to send request"))
     }
@@ -345,6 +465,12 @@ impl Client {
         tracing::debug!("obtaining auth token");
         let token = self.inner.token_provider.token(self).await?;
 
+        let query = MeliorQuery {
+            operation_name,
+            variables,
+            query: graphql::contents(graphql_path),
+        };
+
         let mut headers = HeaderMap::new();
         if let Some(token) = token {
             headers.insert(
@@ -356,14 +482,7 @@ impl Client {
         tracing::info!("sending query");
         self.inner
             .melior_service
-            .send_query(
-                MeliorQuery {
-                    operation_name,
-                    variables,
-                    query: graphql::contents(graphql_path),
-                },
-                headers,
-            )
+            .send_query(&self.inner.hyper_client, query, headers)
             .await
             .inspect_err(|error| tracing::error!(?error, "failed to send query"))
     }
@@ -380,17 +499,16 @@ impl Client {
     {
         self.inner.rate_limiter.until_ready().await;
 
+        let query = MeliorQuery {
+            operation_name,
+            variables,
+            query: graphql::contents(graphql_path),
+        };
+
         tracing::info!("sending query without auth");
         self.inner
             .melior_service
-            .send_query(
-                MeliorQuery {
-                    operation_name,
-                    variables,
-                    query: graphql::contents(graphql_path),
-                },
-                HeaderMap::new(),
-            )
+            .send_query(&self.inner.hyper_client, query, HeaderMap::new())
             .await
             .inspect_err(|error| tracing::error!(?error, "failed to send an authless query"))
     }

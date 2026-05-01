@@ -1,6 +1,5 @@
 use std::result::Result as StdResult;
 
-use serde::de::Error as _;
 use serde::{Deserialize, Serialize};
 
 use crate::models::Language;
@@ -125,9 +124,9 @@ impl TryFrom<RawLanguage> for String {
             RawLanguage::French => "fr".to_owned(),
             RawLanguage::UnknownString(unknown) => unknown,
             RawLanguage::UnknownInteger(unknown) => {
-                return Err(Error::JsonError(serde_json::Error::custom(format!(
+                return Err(Error::ConversionError(format!(
                     "cannot convert unknown language integer {unknown:?} to string"
-                ))));
+                )));
             }
         })
     }

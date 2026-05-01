@@ -15,11 +15,11 @@ fn deserialize_timestamp<'de, D: Deserializer<'de>>(
         .ok_or_else(|| D::Error::custom(format!("timestamp {seconds} is out of range")))
 }
 
-pub(super) type JwtResult<T> = StdResult<T, JwtError>;
+pub(super) type Result<T> = StdResult<T, Error>;
 
 /// Represents an error that can occur while parsing or validating JSON Web Tokens (JWT).
 #[derive(Error, Debug)]
-pub enum JwtError {
+pub enum Error {
     /// The provided access token does not contain a payload
     #[error("no payload")]
     NoPayload,
@@ -32,7 +32,7 @@ pub enum JwtError {
 }
 
 #[derive(Debug, Deserialize)]
-pub(super) struct JwtClaims {
+pub(super) struct Claims {
     #[serde(rename = "sub")]
     pub subject: String,
     #[serde(rename = "exp", deserialize_with = "deserialize_timestamp")]
@@ -42,13 +42,13 @@ pub(super) struct JwtClaims {
     // There are other fields, but we don't need them yet
 }
 
-pub(super) fn decode_token(token: &str) -> JwtResult<JwtClaims> {
+pub(super) fn decode_token(token: &str) -> Result<Claims> {
     token
         .split('.')
         .nth(1)
-        .ok_or(JwtError::NoPayload)
-        .and_then(|data| BASE64_URL_SAFE_NO_PAD.decode(data).map_err(JwtError::from))
-        .and_then(|decoded| serde_json::from_slice::<JwtClaims>(&decoded).map_err(JwtError::from))
+        .ok_or(Error::NoPayload)
+        .and_then(|data| BASE64_URL_SAFE_NO_PAD.decode(data).map_err(Error::from))
+        .and_then(|decoded| serde_json::from_slice::<Claims>(&decoded).map_err(Error::from))
         .inspect(|claims| {
             tracing::debug!(
                 subject = claims.subject,

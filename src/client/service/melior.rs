@@ -1,37 +1,24 @@
 use bytes::Bytes;
 use http::{HeaderMap, HeaderValue, Method, Uri, header};
-use http_body_util::{BodyExt as _, Full};
-use hyper_rustls::{HttpsConnector, HttpsConnectorBuilder};
-use hyper_util::client::legacy::Client as HyperClient;
-use hyper_util::client::legacy::connect::HttpConnector;
-use hyper_util::rt::TokioExecutor;
+use http_body_util::{BodyExt as _, Either, Full};
 
 use crate::client::service::USER_AGENT;
-use crate::client::{Request, RequestError};
+use crate::client::{HyperClient, Request, RequestError};
 use crate::queries::RawMeliorError;
 use crate::{Error, MeliorError, MeliorQuery, MeliorResponse, Result};
 
 #[derive(Debug)]
 pub(crate) struct MeliorService {
-    hyper_client: HyperClient<HttpsConnector<HttpConnector>, Full<Bytes>>,
     uri: Uri,
 }
 impl MeliorService {
     pub(crate) fn new(uri: Uri) -> Self {
-        let connector = HttpsConnectorBuilder::new()
-            .with_webpki_roots()
-            .https_or_http()
-            .enable_all_versions()
-            .build();
-
-        Self {
-            hyper_client: HyperClient::builder(TokioExecutor::new()).build(connector),
-            uri,
-        }
+        Self { uri }
     }
 
     pub(crate) async fn send_query<R: Request>(
         &self,
+        client: &HyperClient,
         query: MeliorQuery<'_, R>,
         headers: HeaderMap<HeaderValue>,
     ) -> Result<R::Response>
@@ -40,7 +27,7 @@ impl MeliorService {
     {
         let body = serde_json::to_vec(&query)?;
 
-        let bytes = self.send_raw(Bytes::from(body), &headers).await?;
+        let bytes = self.send_raw(client, Bytes::from(body), &headers).await?;
         let response = serde_json::from_slice::<MeliorResponse<R>>(&bytes)
             .inspect_err(|error| tracing::error!(?error, "failed to parse melior response"))?;
 
@@ -64,7 +51,12 @@ impl MeliorService {
             .unwrap_or_else(|error| error)
     }
 
-    async fn send_raw(&self, body: Bytes, headers: &HeaderMap<HeaderValue>) -> Result<Bytes> {
+    async fn send_raw(
+        &self,
+        client: &HyperClient,
+        body: Bytes,
+        headers: &HeaderMap<HeaderValue>,
+    ) -> Result<Bytes> {
         let builder = http::Request::builder()
             .uri(&self.uri)
             .method(Method::POST)
@@ -75,8 +67,8 @@ impl MeliorService {
             .iter()
             .fold(builder, |builder, (key, value)| builder.header(key, value));
 
-        let request = builder.body(Full::new(body))?;
-        let response = self.hyper_client.request(request).await?;
+        let request = builder.body(Either::Left(Full::new(body)))?;
+        let response = client.request(request).await?;
 
         let status = response.status();
         if status.is_success() {

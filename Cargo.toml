@@ -10,30 +10,35 @@ repository = "https://github.com/Camper-CoolDie/bonfire-rust"
 license = "MIT OR Apache-2.0"
 keywords = ["bonfire", "api", "bot"]
 categories = ["api-bindings", "web-programming::http-client"]
-include = ["/src/**/*.rs", "/src/graphql/**/*.graphql", "/build.rs"]
+include = ["/src/**/*.rs", "/src/graphql/**/*.graphql", "/src/proto/**/*.proto", "/build.rs"]
 
 [features]
+fcm = ["dep:ece", "dep:prost", "dep:prost-build", "dep:rand", "dep:serde_urlencoded"]
 serde = []
 
 [dependencies]
 base64 = "0.22"
 bytes = "1.11"
 chrono = { version = "0.4", features = ["serde"] }
+ece = { version = "2.3", optional = true }
 futures = "0.3"
 governor = "0.10"
 http = "1.4"
 http-body-util = "0.1"
-hyper = "1.8"
+hyper = "1.9"
 hyper-rustls = { version = "0.27", features = ["http2", "webpki-roots"] }
 hyper-util = { version = "0.1", features = ["tokio"] }
 include_dir = "0.7"
 nonzero_ext = "0.3"
 os_info = "3.14"
+prost = { version = "0.14", optional = true }
+rand = { version = "0.10", optional = true }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+serde_urlencoded = { version = "0.7", optional = true }
 strum = { version = "0.28", features = ["derive"] }
 thiserror = "2.0"
-tokio = { version = "1.50", features = ["macros", "sync"] }
+tokio = { version = "1.52", features = ["macros", "sync"] }
 tracing = "0.1"
 
 [dev-dependencies]
@@ -43,14 +48,16 @@ futures-util = "0.3"
 httpmock = "0.8"
 nanoid = "0.5"
 ron = "0.12"
-tokio = { version = "1.50", features = ["rt-multi-thread"] }
+tokio = { version = "1.52", features = ["rt-multi-thread"] }
 
 [build-dependencies]
 graphql-minify = "0.1"
-walkdir = "2.3"
+prost-build = { version = "0.14", optional = true }
+walkdir = "2.5"
 
 [package.metadata.docs.rs]
 all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
 
 [package.metadata.cargo-udeps.ignore]
 development = ["anyhow"]

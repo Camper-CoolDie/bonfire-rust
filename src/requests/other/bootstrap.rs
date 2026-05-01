@@ -5,14 +5,19 @@ use crate::requests::raw::RawInitialData;
 use crate::{Client, Result, RootError};
 
 #[derive(Serialize)]
-pub(crate) struct GetInitialDataRequest {}
-impl GetInitialDataRequest {
-    pub(crate) fn new() -> Self {
-        Self {}
+pub(crate) struct BootstrapRequest<'a> {
+    #[serde(rename = "tokenNotification", skip_serializing_if = "str::is_empty")]
+    fcm_token: &'a str,
+}
+impl<'a> BootstrapRequest<'a> {
+    pub(crate) fn new(fcm_token: Option<&'a str>) -> Self {
+        Self {
+            fcm_token: fcm_token.unwrap_or(""),
+        }
     }
 }
 
-impl Request for GetInitialDataRequest {
+impl Request for BootstrapRequest<'_> {
     type Response = RawInitialData;
     type Error = InfallibleRequest<RootError>;
 

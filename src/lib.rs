@@ -97,6 +97,8 @@
 //! # }
 //! ```
 
+// `doc_cfg` feature when building documentation for docs.rs
+#![cfg_attr(docsrs, feature(doc_cfg))]
 // General lints
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]

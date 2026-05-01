@@ -1,6 +1,5 @@
 use chrono::NaiveDate;
 use serde::Deserialize;
-use serde::de::Error as _;
 
 use crate::models::Profile;
 use crate::{Error, Result};
@@ -24,7 +23,7 @@ impl TryFrom<RawProfile> for Profile {
         Ok(Self {
             // This field will always contain an integer, trust me
             id: value.id.parse().map_err(|error| {
-                serde_json::Error::custom(format!("failed to convert id into u64 ({error})"))
+                Error::ConversionError(format!("failed to convert id into u64 ({error})"))
             })?,
             name: value.name,
             email: value.email,

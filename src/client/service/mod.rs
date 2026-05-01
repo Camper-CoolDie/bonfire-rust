@@ -1,8 +1,12 @@
+#[cfg(feature = "fcm")]
+pub(super) mod fcm;
 mod melior;
 mod root;
 
 use std::sync::LazyLock;
 
+#[cfg(feature = "fcm")]
+pub(super) use fcm::FcmService;
 pub(super) use melior::MeliorService;
 pub(super) use root::RootService;
 

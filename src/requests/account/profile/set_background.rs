@@ -1,6 +1,5 @@
 use std::result::Result as StdResult;
 
-use serde::de::Error as _;
 use serde::{Deserialize, Serialize};
 
 use crate::client::Request;
@@ -31,7 +30,9 @@ impl TryFrom<Response> for (ImageRef, ImageRef) {
             value.new_background.into(),
             value
                 .new_background_gif
-                .ok_or(serde_json::Error::custom("missing field \"imageGif\""))?
+                .ok_or(Error::ConversionError(
+                    "missing field \"imageGif\"".to_owned(),
+                ))?
                 .into(),
         ))
     }

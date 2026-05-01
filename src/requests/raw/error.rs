@@ -1,5 +1,4 @@
 use serde::Deserialize;
-use serde::de::Error as _;
 
 use crate::requests::raw::conversions::timestamp_from_millis;
 use crate::{Error, Result, RootError, UnavailableError};
@@ -44,7 +43,7 @@ impl TryFrom<RawRootError> for RootError {
             RawRootError::BadReason => RootError::BadReason,
             RawRootError::Banned { params } => {
                 let millis = params[0].parse::<i64>().map_err(|error| {
-                    serde_json::Error::custom(format!(
+                    Error::ConversionError(format!(
                         "failed to convert field `banned_until` into an integer: {error}"
                     ))
                 })?;
@@ -96,7 +95,7 @@ impl TryFrom<RawUnavailableError> for UnavailableError {
         Ok(match value {
             RawUnavailableError::Blocked { params } => {
                 let moderation_id = params[0].parse::<i64>().map_err(|error| {
-                    serde_json::Error::custom(format!(
+                    Error::ConversionError(format!(
                         "failed to convert field `moderation_id` into an integer: {error}"
                     ))
                 })?;

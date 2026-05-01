@@ -6,6 +6,8 @@ use std::sync::Arc;
 use http::StatusCode;
 use thiserror::Error;
 
+#[cfg(feature = "fcm")]
+use crate::client::FcmError;
 use crate::client::{JwtError, RequestError};
 use crate::{MeliorError, RootError};
 
@@ -27,6 +29,14 @@ pub enum Error {
     /// The provided attachment exceeds the maximum size the server can process
     #[error("attachment is too large")]
     AttachmentTooLarge,
+    /// An error occurred while converting the response's raw data into models or vice-versa
+    #[error("{0}")]
+    ConversionError(String),
+    /// An error occurred during FCM registration or unregistration
+    #[cfg(feature = "fcm")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "fcm")))]
+    #[error("FCM error")]
+    FcmError(#[from] FcmError),
     /// An error occurred during JSON serialization or deserialization
     #[error("JSON error")]
     JsonError(#[from] serde_json::Error),

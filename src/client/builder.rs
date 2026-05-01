@@ -6,8 +6,8 @@ use http::Uri;
 use nonzero_ext::nonzero;
 
 use crate::Client;
-use crate::client::jwt::{JwtResult, decode_token};
-use crate::models::Auth;
+use crate::client::jwt::{Result as JwtResult, decode_token};
+use crate::models::{Auth, FirebaseConfig};
 
 // It's great when we can test our requests against a mock server, hence the ability to specify
 // custom URIs
@@ -25,6 +25,7 @@ pub struct Builder {
     melior_uri: Uri,
     auth: Option<Auth>,
     quota: Quota,
+    firebase_config: FirebaseConfig,
 }
 impl Builder {
     /// Creates a new `Builder` with default API endpoint URIs and no authentication
@@ -36,12 +37,19 @@ impl Builder {
             melior_uri: MELIOR_SERVER_URI.clone(),
             auth: None,
             quota: DEFAULT_QUOTA,
+            firebase_config: FirebaseConfig::default(),
         }
     }
 
     /// Consumes the `Builder` and creates a [`Client`] instance.
     pub fn build(self) -> Client {
-        Client::new(self.root_uri, self.melior_uri, self.auth, self.quota)
+        Client::new(
+            self.root_uri,
+            self.melior_uri,
+            self.auth,
+            self.quota,
+            self.firebase_config,
+        )
     }
 
     /// Sets the URI for the Root API server.
@@ -146,6 +154,13 @@ impl Builder {
     #[must_use]
     pub fn quota(mut self, quota: Quota) -> Self {
         self.quota = quota;
+        self
+    }
+
+    /// Sets the Firebase configuration for FCM push notifications.
+    #[must_use]
+    pub fn firebase_config(mut self, config: FirebaseConfig) -> Self {
+        self.firebase_config = config;
         self
     }
 }

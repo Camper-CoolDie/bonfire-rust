@@ -1,13 +1,9 @@
 use bytes::{BufMut as _, Bytes, BytesMut};
 use http::{HeaderMap, HeaderValue, Method, Uri, header};
-use http_body_util::{BodyExt as _, Full};
-use hyper_rustls::{HttpsConnector, HttpsConnectorBuilder};
-use hyper_util::client::legacy::Client as HyperClient;
-use hyper_util::client::legacy::connect::HttpConnector;
-use hyper_util::rt::TokioExecutor;
+use http_body_util::{BodyExt as _, Either, Full};
 
 use crate::client::service::USER_AGENT;
-use crate::client::{Request, RequestError};
+use crate::client::{HyperClient, Request, RequestError};
 use crate::requests::RawRootError;
 use crate::{Error, Result, RootError, RootRequest, RootResponse};
 
@@ -16,25 +12,16 @@ const PAYLOAD_MAX_SIZE: usize = 10 * 1024 * 1024;
 
 #[derive(Debug)]
 pub(crate) struct RootService {
-    hyper_client: HyperClient<HttpsConnector<HttpConnector>, Full<Bytes>>,
     uri: Uri,
 }
 impl RootService {
     pub(crate) fn new(uri: Uri) -> Self {
-        let connector = HttpsConnectorBuilder::new()
-            .with_webpki_roots()
-            .https_or_http()
-            .enable_all_versions()
-            .build();
-
-        Self {
-            hyper_client: HyperClient::builder(TokioExecutor::new()).build(connector),
-            uri,
-        }
+        Self { uri }
     }
 
     pub(crate) async fn send_request<R: Request>(
         &self,
+        client: &HyperClient,
         request: RootRequest<'_, R>,
         attachments: Vec<&[u8]>,
         headers: HeaderMap<HeaderValue>,
@@ -60,7 +47,7 @@ impl RootService {
             payload.put_slice(attachment);
         }
 
-        let bytes = self.send_raw(payload.freeze(), &headers).await?;
+        let bytes = self.send_raw(client, payload.freeze(), &headers).await?;
 
         match serde_json::from_slice::<RootResponse<R>>(&bytes)
             .inspect_err(|error| tracing::error!(?error, "failed to parse root response"))?
@@ -84,7 +71,12 @@ impl RootService {
             .unwrap_or_else(|error| error)
     }
 
-    async fn send_raw(&self, body: Bytes, headers: &HeaderMap<HeaderValue>) -> Result<Bytes> {
+    async fn send_raw(
+        &self,
+        client: &HyperClient,
+        body: Bytes,
+        headers: &HeaderMap<HeaderValue>,
+    ) -> Result<Bytes> {
         let builder = http::Request::builder()
             .uri(&self.uri)
             .method(Method::POST)
@@ -94,8 +86,8 @@ impl RootService {
             .iter()
             .fold(builder, |builder, (key, value)| builder.header(key, value));
 
-        let request = builder.body(Full::new(body))?;
-        let response = self.hyper_client.request(request).await?;
+        let request = builder.body(Either::Left(Full::new(body)))?;
+        let response = client.request(request).await?;
 
         let status = response.status();
         if status.is_success() {
