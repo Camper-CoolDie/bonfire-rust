@@ -1,0 +1,19 @@
+use serde::Serialize;
+
+use crate::client::{EmptyResponse, Request};
+use crate::models::auth::LogoutError;
+use crate::{Client, Result};
+
+#[derive(Serialize)]
+pub(crate) struct LogoutQuery {}
+
+impl Request for LogoutQuery {
+    type Response = EmptyResponse;
+    type Error = LogoutError;
+
+    async fn send_request(&self, client: &Client) -> Result<EmptyResponse> {
+        client
+            .send_query("Logout", "auth/Logout.graphql", self)
+            .await
+    }
+}

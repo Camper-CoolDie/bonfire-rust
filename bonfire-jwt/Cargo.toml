@@ -1,0 +1,26 @@
+[package]
+name = "bonfire-jwt"
+version = "0.1.0"
+description = "Utility library for the Bonfire API client for decoding JSON Web Tokens"
+readme = "README.md"
+keywords = ["bonfire", "jwt", "web", "token"]
+categories = ["api-bindings"]
+
+edition.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+license.workspace = true
+
+[dependencies]
+base64 = "0.23"
+chrono = "0.4"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+thiserror = "2.0"
+tracing = "0.1"
+
+[lib]
+doc = false
+
+[lints]
+workspace = true

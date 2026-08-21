@@ -1,0 +1,3 @@
+mutation TerminateSession($sessionId: ID!) {
+    terminateSession(sessionId: $sessionId)
+}

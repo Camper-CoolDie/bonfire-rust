@@ -1,0 +1,3 @@
+mutation SetNotificationToken($token: String!) {
+    setNotificationToken(tokenType: FCM, token: $token)
+}

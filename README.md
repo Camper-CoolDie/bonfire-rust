@@ -3,26 +3,27 @@
 [![Crate](https://img.shields.io/crates/v/bonfire)](https://crates.io/crates/bonfire)
 [![Documentation](https://img.shields.io/docsrs/bonfire)](https://docs.rs/bonfire)
 [![CI Status](https://github.com/Camper-CoolDie/bonfire-rust/workflows/CI/badge.svg)](https://github.com/Camper-CoolDie/bonfire-rust/actions/workflows/ci.yml)
-![License](https://img.shields.io/crates/l/bonfire.svg)
+[![License](https://img.shields.io/crates/l/bonfire.svg)](#license)
 
-A modern, well-documented asynchronous Rust client library for the
-[Bonfire API](https://github.com/timas130/bonfire).
+bonfire-rust is a client library for the [Bonfire API](https://github.com/timas130/bonfire). It
+exposes asynchronous methods for sending API requests and receiving FCM notifications (with `fcm`
+feature). The initial goal was to create a desktop Bonfire client on top of an API library, but
+because of a full backend rework coming soon bonfire-rust has shifted its goals towards bot
+development.
 
-## Features
+Other features include `serde`, which implements Serialize and Deserialize on almost every API
+object. You will probably want to enable this for caching authentication tokens at least, see
+[example](#searching-accounts-by-name). `http1` and `http2` enable corresponding HTTP versions, at
+least one must be present (the latter is enabled by default).
 
-- **Modern asynchronous design**: Built on [`tokio`](https://crates.io/crates/tokio) and
-  [`hyper`](https://crates.io/crates/hyper) for non-blocking, high-performance network requests.
-- **Ergonomic and fluent API**: Interact with API models like `Account` and `Fandom` directly (e.g.,
-  `account.list_follows()`) rather than managing request structs manually.
-- **Automatic session management**: Handles authentication token refreshing transparently. Log in
-  once and the client manages the rest.
+## Examples
 
-## Usage
+You can use the following code as a base for your future program.
 
-### Quick start: Logging in and printing user's email and ID
+### Logging in and printing user's email and ID
 
-This simple example shows how to create a client, log in and fetch the profile of the currently
-authenticated user:
+The shortest example, which shows how to create a client, log in and fetch the profile of the
+currently authenticated user:
 
 ```rust
 use bonfire::prelude::*;
@@ -40,16 +41,15 @@ async fn main() -> ApiResult<()> {
     // Fetch the authenticated user's profile
     let profile = Profile::get(client).await?;
     println!("Logged in as {} (ID: {})", profile.name, profile.id);
-
     Ok(())
 }
 ```
 
-### Advanced usage: Searching accounts by name
+### Searching accounts by name
 
 Some methods like `Account::search` return a `Stream`, allowing you to asynchronously iterate over
-accounts while the API loads them. This example also shows how to properly save and load
-authentication tokens to reuse the same session:
+accounts while the API loads them (the library manages pagination internally). This example also
+shows how to properly save and load authentication tokens to reuse the same session:
 
 ```rust
 use std::fs;
@@ -69,19 +69,18 @@ async fn save_credentials(client: &Client) -> Result<()> {
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // Build client & authenticate (either by using `credentials.json` or sending a login request)
+    // Build client & authenticate (either from `credentials.json` or by sending a login request)
     let auth_data = fs::read("credentials.json")
         .ok()
         .map(|data| serde_json::from_slice::<Auth>(&data))
         .transpose()?;
-    let client = &match auth_data {
-        Some(auth) => Client::builder().auth(auth).expect("invalid auth").build(),
-        None => {
-            let client = Client::default();
-            client.login(EMAIL, PASSWORD).await?;
-            save_credentials(&client).await?;
-            client
-        }
+    let client = &if let Some(auth) = auth_data {
+        Client::builder().auth(auth).expect("invalid auth").build()
+    } else {
+        let client = Client::default();
+        client.login(EMAIL, PASSWORD).await?;
+        save_credentials(&client).await?;
+        client
     };
 
     // Fetch accounts that have "Sus" in their name
@@ -92,11 +91,17 @@ async fn main() -> Result<()> {
         })
         .await?;
 
-    // Save authentication credentials and exit program
+    // Save tokens and exit program
     save_credentials(client).await?;
     Ok(())
 }
 ```
+
+### Debugging
+
+The library supports [`tracing`](https://crates.io/crates/tracing). One can easily enable logging by
+calling `tracing_subscriber::fmt().init()`. Log output includes errors and outgoing requests by
+default and even more info if the maximum log level is set to `DEBUG`.
 
 ## License
 
