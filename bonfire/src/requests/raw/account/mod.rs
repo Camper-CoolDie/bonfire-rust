@@ -3,6 +3,7 @@ mod ban_entry;
 mod customization;
 mod effect;
 mod info;
+mod reference;
 mod stat;
 
 pub(crate) use badge::RawBadge;
@@ -13,6 +14,7 @@ pub(crate) use effect::{
     RawEffect, RawKind as RawEffectKind, RawReasonKind as RawEffectReasonKind,
 };
 pub(crate) use info::RawInfo;
+pub(crate) use reference::RawAccountRef;
 use serde::Deserialize;
 pub(crate) use stat::RawStat;
 

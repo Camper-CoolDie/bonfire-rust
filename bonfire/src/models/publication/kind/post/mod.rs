@@ -1,5 +1,10 @@
+mod item;
+mod title;
+
+pub use item::Kind as ItemKind;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
+pub use title::Title;
 
 use crate::client::Request as _;
 use crate::models::publication::{Kind, PostTag, Publishable};

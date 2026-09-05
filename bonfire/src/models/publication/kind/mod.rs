@@ -12,7 +12,7 @@ pub use chat_message::{
 pub use comment::{
     Comment, Content as CommentContent, RefContent as CommentRefContent, Reference as CommentRef,
 };
-pub use post::Post;
+pub use post::{ItemKind as PostItemKind, Post, Title as PostTitle};
 pub use post_tag::PostTag;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};

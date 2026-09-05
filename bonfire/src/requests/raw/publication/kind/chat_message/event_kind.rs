@@ -3,9 +3,9 @@ use std::result::Result as StdResult;
 use serde::{Deserialize, Deserializer};
 
 use crate::models::publication::ChatMessageContent;
-use crate::requests::raw::RawGender;
 use crate::requests::raw::chat::RawMemberRole;
 use crate::requests::raw::conversions::timestamp_from_millis;
+use crate::requests::raw::{RawAccountRef, RawGender};
 use crate::{Error, Result};
 
 pub(crate) enum RawEventKind {
@@ -46,10 +46,10 @@ impl<'de> Deserialize<'de> for RawEventKind {
 }
 
 pub(super) struct IntoEventOptions {
-    pub event_kind: RawEventKind,
-    pub by_account_id: u64,
-    pub by_account_name: String,
-    pub by_account_gender: RawGender,
+    pub kind: RawEventKind,
+    pub creator_id: u64,
+    pub creator_name: String,
+    pub creator_gender: RawGender,
     pub target_name: String,
     pub target_id: u64,
     pub reason: String,
@@ -62,80 +62,60 @@ impl TryFrom<IntoEventOptions> for ChatMessageContent {
     type Error = Error;
 
     fn try_from(value: IntoEventOptions) -> Result<Self> {
-        Ok(match value.event_kind {
+        let creator = RawAccountRef {
+            id: value.creator_id,
+            name: value.creator_name,
+            gender: value.creator_gender,
+        };
+
+        Ok(match value.kind {
             RawEventKind::Block => ChatMessageContent::BlockEvent {
-                by_account_id: value.by_account_id,
-                by_account_name: value.by_account_name,
-                by_account_gender: value.by_account_gender.try_into()?,
-                name: value.target_name,
-                reason: value.reason,
+                target_name: value.target_name,
                 moderation_id: value.moderation_id,
+                moderator: creator.try_into()?,
                 is_punished: value.banned_until != 0,
                 banned_until: match value.banned_until {
                     // -1: warn, 0: do nothing
                     -1 | 0 => None,
                     timestamp => Some(timestamp_from_millis(timestamp)?),
                 },
+                reason: value.reason,
             },
             RawEventKind::Create => ChatMessageContent::CreateEvent {
-                by_account_id: value.by_account_id,
-                by_account_name: value.by_account_name,
-                by_account_gender: value.by_account_gender.try_into()?,
+                moderator: creator.try_into()?,
             },
             RawEventKind::AddMember => ChatMessageContent::AddMemberEvent {
-                by_account_id: value.by_account_id,
-                by_account_name: value.by_account_name,
-                by_account_gender: value.by_account_gender.try_into()?,
-                name: value.target_name,
+                target_name: value.target_name,
+                member: creator.try_into()?,
             },
             RawEventKind::RemoveMember => ChatMessageContent::RemoveMemberEvent {
-                by_account_id: value.by_account_id,
-                by_account_name: value.by_account_name,
-                by_account_gender: value.by_account_gender.try_into()?,
-                name: value.target_name,
+                target_name: value.target_name,
+                member: creator.try_into()?,
             },
             RawEventKind::ChangeRole => ChatMessageContent::ChangeRoleEvent {
-                by_account_id: value.by_account_id,
-                by_account_name: value.by_account_name,
-                by_account_gender: value.by_account_gender.try_into()?,
-                name: value.target_name,
+                target_name: value.target_name,
                 new_role: value.new_role.try_into()?,
+                member: creator.try_into()?,
             },
-            RawEventKind::Enter => ChatMessageContent::EnterEvent {
-                id: value.by_account_id,
-                name: value.by_account_name,
-                gender: value.by_account_gender.try_into()?,
-            },
-            RawEventKind::Leave => ChatMessageContent::LeaveEvent {
-                id: value.by_account_id,
-                name: value.by_account_name,
-                gender: value.by_account_gender.try_into()?,
-            },
+            RawEventKind::Enter => ChatMessageContent::EnterEvent(creator.try_into()?),
+            RawEventKind::Leave => ChatMessageContent::LeaveEvent(creator.try_into()?),
             RawEventKind::Rename => ChatMessageContent::RenameEvent {
-                by_account_id: value.by_account_id,
-                by_account_name: value.by_account_name,
-                by_account_gender: value.by_account_gender.try_into()?,
                 new_name: value.target_name,
+                member: creator.try_into()?,
             },
             RawEventKind::ChangeIcon => ChatMessageContent::ChangeIconEvent {
-                by_account_id: value.by_account_id,
-                by_account_name: value.by_account_name,
-                by_account_gender: value.by_account_gender.try_into()?,
-                image_id: value.target_id,
+                new_icon_id: value.target_id,
+                member: creator.try_into()?,
             },
             RawEventKind::ChangeBackground => ChatMessageContent::ChangeBackgroundEvent {
-                by_account_id: value.by_account_id,
-                by_account_name: value.by_account_name,
-                by_account_gender: value.by_account_gender.try_into()?,
-                image_id: match value.target_id {
+                new_background_id: match value.target_id {
                     0 => None,
                     id => Some(id),
                 },
+                member: creator.try_into()?,
             },
             RawEventKind::ChangeParams => ChatMessageContent::ChangeParamsEvent {
-                by_account_id: value.by_account_id,
-                by_account_name: value.by_account_name,
-                by_account_gender: value.by_account_gender.try_into()?,
+                member: creator.try_into()?,
             },
             RawEventKind::Unknown(unknown) => ChatMessageContent::UnknownEvent(unknown),
         })

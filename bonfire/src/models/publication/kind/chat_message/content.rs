@@ -5,7 +5,7 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 use crate::models::chat::MemberRole;
-use crate::models::{Gender, ImageRef, VoiceRef};
+use crate::models::{AccountRef, ImageRef, VoiceRef};
 
 /// Represents the content of a chat message.
 #[derive(Default, Clone, Debug)]
@@ -43,128 +43,60 @@ pub enum Content {
     /// An event indicating a message was blocked by moderators. Can appear only inside a fandom
     /// chat
     BlockEvent {
-        /// The ID of the account that performed the block
-        by_account_id: u64,
-        /// The name of the account that performed the block
-        by_account_name: String,
-        /// The gender of the account that performed the block
-        by_account_gender: Gender,
-        /// The name of the user whose message was blocked
-        name: String,
-        /// The reason for blocking the message
-        reason: String,
+        target_name: String,
         /// The ID of the moderation action
         moderation_id: u64,
+        moderator: AccountRef,
         /// Indicates if the user was punished
         is_punished: bool,
         /// The date until the user is banned, if applicable
         banned_until: Option<DateTime<Utc>>,
+        /// The reason for blocking the message
+        reason: String,
     },
     /// An event indicating a chat was created. Can appear only inside groups
-    CreateEvent {
-        /// The ID of the account that created the chat
-        by_account_id: u64,
-        /// The name of the account that created the chat
-        by_account_name: String,
-        /// The gender of the account that created the chat
-        by_account_gender: Gender,
-    },
+    CreateEvent { moderator: AccountRef },
     /// An event indicating a member was added to the chat. Can appear only inside groups
     AddMemberEvent {
-        /// The ID of the account that added the member
-        by_account_id: u64,
-        /// The name of the account that added the member
-        by_account_name: String,
-        /// The gender of the account that added the member
-        by_account_gender: Gender,
-        /// The name of the member who was added
-        name: String,
+        target_name: String,
+        member: AccountRef,
     },
     /// An event indicating a member was removed from the chat. Can appear only inside groups
     RemoveMemberEvent {
-        /// The ID of the account that removed the member
-        by_account_id: u64,
-        /// The name of the account that removed the member
-        by_account_name: String,
-        /// The gender of the account that removed the member
-        by_account_gender: Gender,
-        /// The name of the member who was removed
-        name: String,
+        target_name: String,
+        member: AccountRef,
     },
     /// An event indicating a member's role was changed. Can appear only inside groups
     ChangeRoleEvent {
-        /// The ID of the account that changed the role
-        by_account_id: u64,
-        /// The name of the account that changed the role
-        by_account_name: String,
-        /// The gender of the account that changed the role
-        by_account_gender: Gender,
-        /// The name of the member whose role was changed
-        name: String,
+        target_name: String,
         /// The new role assigned to the member
         new_role: MemberRole,
+        member: AccountRef,
     },
     /// An event indicating a member entered the chat by link. Can appear only inside groups
-    EnterEvent {
-        /// The ID of the member who entered
-        id: u64,
-        /// The name of the member who entered
-        name: String,
-        /// The gender of the member who entered
-        gender: Gender,
-    },
+    EnterEvent(AccountRef),
     /// An event indicating a member left the chat. Can appear only inside groups
-    LeaveEvent {
-        /// The ID of the member who left
-        id: u64,
-        /// The name of the member who left
-        name: String,
-        /// The gender of the member who left
-        gender: Gender,
-    },
+    LeaveEvent(AccountRef),
     /// An event indicating the chat was renamed. Can appear only inside groups
     RenameEvent {
-        /// The ID of the account that renamed the chat
-        by_account_id: u64,
-        /// The name of the account that renamed the chat
-        by_account_name: String,
-        /// The gender of the account that renamed the chat
-        by_account_gender: Gender,
         /// The new name of the chat
         new_name: String,
+        member: AccountRef,
     },
     /// An event indicating the chat icon was changed. Can appear only inside groups
     ChangeIconEvent {
-        /// The ID of the account that changed the icon
-        by_account_id: u64,
-        /// The name of the account that changed the icon
-        by_account_name: String,
-        /// The gender of the account that changed the icon
-        by_account_gender: Gender,
-        /// The ID of the new icon image
-        image_id: u64,
+        new_icon_id: u64,
+        member: AccountRef,
     },
     /// An event indicating the chat background was changed or removed. Can appear only inside
     /// groups
     ChangeBackgroundEvent {
-        /// The ID of the account that changed the background
-        by_account_id: u64,
-        /// The name of the account that changed the background
-        by_account_name: String,
-        /// The gender of the account that changed the background
-        by_account_gender: Gender,
         /// The ID of the new background image, or `None` if it was removed
-        image_id: Option<u64>,
+        new_background_id: Option<u64>,
+        member: AccountRef,
     },
     /// An event indicating chat parameters were changed. Can appear only inside groups
-    ChangeParamsEvent {
-        /// The ID of the account that changed the parameters
-        by_account_id: u64,
-        /// The name of the account that changed the parameters
-        by_account_name: String,
-        /// The gender of the account that changed the parameters
-        by_account_gender: Gender,
-    },
+    ChangeParamsEvent { member: AccountRef },
     /// An unknown content type
     Unknown(i64),
     /// An unknown event type

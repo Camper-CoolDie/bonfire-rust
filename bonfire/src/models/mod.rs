@@ -19,11 +19,15 @@ pub mod publication;
 pub mod settings;
 mod streams;
 
-pub use account::{AccessLevel, Account, Badge, Effect, Info as AccountInfo, Stat as AccountStat};
+// TODO: Fandom/Account.get_by_ref
+
+pub use account::{
+    AccessLevel, Account, AccountRef, Badge, Effect, Info as AccountInfo, Stat as AccountStat,
+};
 pub use auth::Auth;
 pub use chat::{AnyChat, Chat, Direct, FandomRoot, FandomSub, Group, Tag as ChatTag};
 pub use common::{Category, ImageRef, Language, VoiceRef};
-pub use fandom::Fandom;
+pub use fandom::{Fandom, FandomRef};
 pub use other::{Config, InitialData};
 pub use profile::{Gender, Link, Profile};
 pub use publication::{AnyPublication, ChatMessage, Comment, Post, PostTag, Publication, Reaction};

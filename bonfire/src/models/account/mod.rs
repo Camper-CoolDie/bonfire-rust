@@ -6,6 +6,7 @@ mod effect;
 mod error;
 mod info;
 mod profile;
+mod reference;
 mod stat;
 
 pub use access_level::AccessLevel;
@@ -18,6 +19,7 @@ pub use effect::{
 pub use error::*;
 use futures::Stream;
 pub use info::Info;
+pub use reference::AccountRef;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 pub use stat::Stat;

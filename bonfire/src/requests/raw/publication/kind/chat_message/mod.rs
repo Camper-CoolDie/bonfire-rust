@@ -27,11 +27,11 @@ pub(crate) struct InnerData {
     #[serde(rename = "systemType")]
     pub event_kind: RawEventKind,
     #[serde(rename = "systemOwnerId")]
-    pub event_by_account_id: u64,
+    pub event_creator_id: u64,
     #[serde(rename = "systemOwnerName")]
-    pub event_by_account_name: String,
+    pub event_creator_name: String,
     #[serde(rename = "systemOwnerSex")]
-    pub event_by_account_gender: RawGender,
+    pub event_creator_gender: RawGender,
     #[serde(rename = "systemTargetName")]
     pub event_target_name: String,
     #[serde(rename = "systemTargetId")]
@@ -150,9 +150,9 @@ impl TryFrom<RawChatMessage> for ChatMessage {
             content: IntoContentOptions {
                 content_kind: value.inner.content_kind,
                 event_kind: value.inner.event_kind,
-                event_by_account_id: value.inner.event_by_account_id,
-                event_by_account_name: value.inner.event_by_account_name,
-                event_by_account_gender: value.inner.event_by_account_gender,
+                event_creator_id: value.inner.event_creator_id,
+                event_creator_name: value.inner.event_creator_name,
+                event_creator_gender: value.inner.event_creator_gender,
                 event_target_name: value.inner.event_target_name,
                 event_target_id: value.inner.event_target_id,
                 event_reason: value.inner.event_reason,

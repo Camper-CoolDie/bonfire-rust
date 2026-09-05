@@ -43,9 +43,9 @@ impl<'de> Deserialize<'de> for RawContentKind {
 pub(super) struct IntoContentOptions {
     pub content_kind: RawContentKind,
     pub event_kind: RawEventKind,
-    pub event_by_account_id: u64,
-    pub event_by_account_name: String,
-    pub event_by_account_gender: RawGender,
+    pub event_creator_id: u64,
+    pub event_creator_name: String,
+    pub event_creator_gender: RawGender,
     pub event_target_name: String,
     pub event_target_id: u64,
     pub event_reason: String,
@@ -70,10 +70,10 @@ impl TryFrom<IntoContentOptions> for ChatMessageContent {
         Ok(match value.content_kind {
             RawContentKind::Text => ChatMessageContent::Text,
             RawContentKind::Event => IntoEventOptions {
-                event_kind: value.event_kind,
-                by_account_id: value.event_by_account_id,
-                by_account_name: value.event_by_account_name,
-                by_account_gender: value.event_by_account_gender,
+                kind: value.event_kind,
+                creator_id: value.event_creator_id,
+                creator_name: value.event_creator_name,
+                creator_gender: value.event_creator_gender,
                 target_name: value.event_target_name,
                 target_id: value.event_target_id,
                 reason: value.event_reason,

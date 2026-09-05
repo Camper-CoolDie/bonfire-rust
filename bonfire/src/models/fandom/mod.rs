@@ -1,6 +1,8 @@
+mod reference;
 mod status;
 
 use chrono::{DateTime, Utc};
+pub use reference::FandomRef;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 pub use status::Status;
