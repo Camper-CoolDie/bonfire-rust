@@ -2,8 +2,10 @@
 use serde::{Deserialize, Serialize};
 
 use super::{Account, Chat, Fandom, Post, Profile, Publication, Rubric};
-use crate::models::publication::{CommentRefContent, Kind as PublicationKind, PostTitle};
-use crate::models::{self, AccountRef, Gender, Language};
+use crate::models::notification::{Kind, Notifiable};
+use crate::models::publication::Kind as PublicationKind;
+use crate::models::{Account as AccountModel, AccountRef, Gender, Language};
+use crate::sealed::Sealed;
 
 #[derive(Clone, Debug)]
 #[cfg_attr(
@@ -22,8 +24,8 @@ pub enum AnyNotification {
     AdminActionRejected {
         // TODO: admin actions
         // action: AdminAction,
-        rejected_by: models::Account,
-        created_by: models::Account,
+        rejected_by: AccountModel,
+        created_by: AccountModel,
         reason: String,
     },
     BlockRejected {
@@ -36,13 +38,10 @@ pub enum AnyNotification {
     },
     CommentReplied {
         id: u64,
-        replied_to_comment_id: u64,
         author: AccountRef,
         parent_id: u64,
         parent_kind: PublicationKind,
-        parent_post_title: Option<PostTitle>,
         text: Option<String>,
-        content: CommentRefContent,
     },
     DonationProcessed {
         amount: u64,
@@ -50,3 +49,24 @@ pub enum AnyNotification {
     #[cfg_attr(feature = "serde", serde(untagged))]
     Unknown(i64),
 }
+
+impl Notifiable for AnyNotification {
+    fn kind(&self) -> Kind {
+        match self {
+            AnyNotification::Account(account) => account.kind(),
+            AnyNotification::Chat(chat) => chat.kind(),
+            AnyNotification::Fandom(fandom) => fandom.kind(),
+            AnyNotification::Post(post) => post.kind(),
+            AnyNotification::Profile(profile) => profile.kind(),
+            AnyNotification::Publication(publication) => publication.kind(),
+            AnyNotification::Rubric(rubric) => rubric.kind(),
+            AnyNotification::AdminActionRejected { .. } => Kind::AdminActionRejected,
+            AnyNotification::BlockRejected { .. } => Kind::BlockRejected,
+            AnyNotification::CommentReplied { .. } => Kind::CommentReplied,
+            AnyNotification::DonationProcessed { .. } => Kind::DonationProcessed,
+            AnyNotification::Unknown(kind) => Kind::Unknown(*kind),
+        }
+    }
+}
+
+impl Sealed for AnyNotification {}

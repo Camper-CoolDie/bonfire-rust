@@ -34,9 +34,8 @@ pub trait Messageable: Sealed {
 #[derive(Default, Clone, Debug)]
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct Chat<T: Messageable = AnyChat> {
-    /// The specific kind of chat, holding its unique data
     #[cfg_attr(feature = "serde", serde(flatten))]
-    pub kind: T,
+    pub info: T,
     /// The last message sent in this chat, if any
     pub last_message: Option<Publication<ChatMessage>>,
     /// The number of unread messages in this chat
@@ -53,7 +52,7 @@ impl Chat {
     #[must_use]
     pub fn new(tag: Tag) -> Self {
         Self {
-            kind: AnyChat::new(tag),
+            info: AnyChat::new(tag),
             ..Default::default()
         }
     }

@@ -28,13 +28,17 @@ pub trait Publishable: Sealed {
 pub struct Publication<T: Publishable = AnyPublication> {
     /// The unique identifier of this publication
     pub id: u64,
-    /// Additional, type-specific data for this publication
     #[cfg_attr(feature = "serde", serde(flatten))]
-    pub kind: T,
+    pub content: T,
     /// The date and time when this publication was created (or published, for posts/quests)
     pub created_at: DateTime<Utc>,
     /// The current status of this publication, or `None` if unspecified
     pub status: Option<Status>,
     /// A value indicating the "hotness" or popularity of this publication
     pub hotness: f32,
+}
+impl Publication {
+    pub fn kind(&self) -> Kind {
+        self.content.kind()
+    }
 }

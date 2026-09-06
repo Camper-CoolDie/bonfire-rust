@@ -2,7 +2,7 @@
 use serde::{Deserialize, Serialize};
 
 /// Represents a preselected reason for an effect being applied.
-#[derive(Default, Clone, Debug, PartialEq, Eq)]
+#[derive(Default, Clone, Copy, Debug, PartialEq, Eq)]
 #[cfg_attr(
     feature = "serde",
     derive(Deserialize, Serialize),

@@ -1,7 +1,9 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
+use crate::models::notification::{Kind, Notifiable};
 use crate::models::{AccountRef, FandomRef, Language};
+use crate::sealed::Sealed;
 
 #[derive(Clone, Debug)]
 #[cfg_attr(
@@ -67,3 +69,18 @@ pub enum Rubric {
         reason: String,
     },
 }
+
+impl Notifiable for Rubric {
+    fn kind(&self) -> Kind {
+        match self {
+            Rubric::FandomChanged { .. } => Kind::RubricFandomChanged,
+            Rubric::KarmaCoefChanged { .. } => Kind::RubricKarmaCoefChanged,
+            Rubric::NameChanged { .. } => Kind::RubricNameChanged,
+            Rubric::OwnerAssigned { .. } => Kind::RubricOwnerAssigned,
+            Rubric::OwnerTransferred { .. } => Kind::RubricOwnerTransferred,
+            Rubric::Removed { .. } => Kind::RubricRemoved,
+        }
+    }
+}
+
+impl Sealed for Rubric {}

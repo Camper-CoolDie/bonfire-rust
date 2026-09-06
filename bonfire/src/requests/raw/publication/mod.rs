@@ -45,7 +45,7 @@ where
 
     fn try_from(value: RawPublication<T>) -> Result<Self> {
         Ok(Self {
-            kind: T::new(value.additional_data, value.kind)?.try_into()?,
+            content: T::new(value.additional_data, value.kind)?.try_into()?,
             id: value.id,
             created_at: timestamp_from_millis(value.created_at)?,
             status: Option::<Status>::try_from(value.status)?,

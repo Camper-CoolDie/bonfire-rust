@@ -3,8 +3,10 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 use crate::models::account::EffectKind;
+use crate::models::notification::{Kind, Notifiable};
 use crate::models::publication::Kind as PublicationKind;
-use crate::models::{self, AccountRef, ChatTag, Effect, FandomRef, Gender};
+use crate::models::{Account as AccountModel, AccountRef, ChatTag, Effect, FandomRef, Gender};
+use crate::sealed::Sealed;
 
 #[derive(Clone, Debug)]
 #[cfg_attr(
@@ -15,8 +17,6 @@ use crate::models::{self, AccountRef, ChatTag, Effect, FandomRef, Gender};
 pub enum Account {
     EffectApplied {
         effect: Effect,
-        admin_name: String,
-        admin_gender: Gender,
     },
     EffectRemoved {
         id: u64,
@@ -41,8 +41,8 @@ pub enum Account {
         text: String,
     },
     Punished {
-        reason: String,
         banned_until: Option<DateTime<Utc>>,
+        reason: String,
     },
     PunishmentRemoved {
         admin: AccountRef,
@@ -51,12 +51,29 @@ pub enum Account {
     TargetAdminActionRejected {
         // TODO: admin actions
         // action: AdminAction,
-        rejected_by: models::Account,
-        created_by: models::Account,
-        target: models::Account,
+        rejected_by: AccountModel,
+        created_by: AccountModel,
         reason: String,
     },
     Unfollowed {
         account: AccountRef,
     },
 }
+
+impl Notifiable for Account {
+    fn kind(&self) -> Kind {
+        match self {
+            Account::EffectApplied { .. } => Kind::EffectApplied,
+            Account::EffectRemoved { .. } => Kind::EffectRemoved,
+            Account::FandomUnbanned { .. } => Kind::AccountFandomUnbanned,
+            Account::Followed { .. } => Kind::AccountFollowed,
+            Account::Mentioned { .. } => Kind::AccountMentioned,
+            Account::Punished { .. } => Kind::AccountPunished,
+            Account::PunishmentRemoved { .. } => Kind::PunishmentRemoved,
+            Account::TargetAdminActionRejected { .. } => Kind::AccountTargetAdminActionRejected,
+            Account::Unfollowed { .. } => Kind::AccountUnfollowed,
+        }
+    }
+}
+
+impl Sealed for Account {}

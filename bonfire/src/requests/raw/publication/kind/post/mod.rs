@@ -1,7 +1,11 @@
 mod favorites_folder;
+mod item;
+mod title;
 
 pub(crate) use favorites_folder::RawFavoritesFolder;
+pub(crate) use item::RawKind as RawItemKind;
 use serde::Deserialize;
+pub(crate) use title::RawTitle;
 
 use crate::models::Post;
 use crate::requests::raw::publication::{RawKind, RawPublishable};

@@ -2,7 +2,7 @@
 use serde::{Deserialize, Serialize};
 
 /// Represents a category that a fandom can belong to.
-#[derive(Default, Clone, Debug, PartialEq, Eq)]
+#[derive(Default, Clone, Copy, Debug, PartialEq, Eq)]
 #[cfg_attr(
     feature = "serde",
     derive(Deserialize, Serialize),

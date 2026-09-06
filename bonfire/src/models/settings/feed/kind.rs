@@ -2,7 +2,7 @@
 use serde::{Deserialize, Serialize};
 
 /// Represents the kinds of publications that can be shown in the feed.
-#[derive(Default, Clone, Debug, PartialEq, Eq)]
+#[derive(Default, Clone, Copy, Debug, PartialEq, Eq)]
 #[cfg_attr(
     feature = "serde",
     derive(Deserialize, Serialize),

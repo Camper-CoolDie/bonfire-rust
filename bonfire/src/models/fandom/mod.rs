@@ -2,7 +2,7 @@ mod reference;
 mod status;
 
 use chrono::{DateTime, Utc};
-pub use reference::FandomRef;
+pub use reference::Reference;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 pub use status::Status;
@@ -94,6 +94,17 @@ impl Fandom {
     /// the request.
     pub async fn get_by_id(client: &Client, id: u64) -> Result<Self> {
         ListFandomsRequest::new(&[id])
+            .send_request(client)
+            .await?
+            .try_into()
+    }
+
+    pub async fn get_by_ref(
+        client: &Client,
+        reference: &Reference,
+        my_language: Language,
+    ) -> Result<Self> {
+        GetFandomRequest::new(reference.id, reference.language, my_language)
             .send_request(client)
             .await?
             .try_into()

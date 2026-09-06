@@ -21,6 +21,7 @@ pub(super) use common::{RawCategory, RawImageRef, RawLanguage};
 pub(crate) use error::RawRootError;
 pub(super) use error::RawUnavailableError;
 pub(super) use fandom::{RawFandom, RawFandomRef};
+pub(super) use notification::{AnyRawNotification, RawNotification};
 pub(super) use other::RawInitialData;
 pub(super) use profile::{RawGender, RawLink};
 pub(super) use publication::{

@@ -1,8 +1,10 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
+use crate::models::notification::{Kind, Notifiable};
 use crate::models::publication::PostTitle;
 use crate::models::{AccountRef, FandomRef, Gender};
+use crate::sealed::Sealed;
 
 #[derive(Clone, Debug)]
 #[cfg_attr(
@@ -13,8 +15,8 @@ use crate::models::{AccountRef, FandomRef, Gender};
 pub enum Post {
     Closed {
         moderation_id: u64,
-        admin_name: String,
-        admin_gender: Gender,
+        moderator_name: String,
+        moderator_gender: Gender,
         reason: String,
     },
     Drafted {
@@ -62,8 +64,8 @@ pub enum Post {
     },
     Opened {
         moderation_id: u64,
-        admin_name: String,
-        admin_gender: Gender,
+        moderator_name: String,
+        moderator_gender: Gender,
         reason: String,
     },
     RelayPostCreated {
@@ -97,3 +99,26 @@ pub enum Post {
         reason: String,
     },
 }
+
+impl Notifiable for Post {
+    fn kind(&self) -> Kind {
+        match self {
+            Post::Closed { .. } => Kind::PostClosed,
+            Post::Drafted { .. } => Kind::PostDrafted,
+            Post::FandomChanged { .. } => Kind::PostFandomChanged,
+            Post::FollowedPostCreated { .. } => Kind::FollowedPostCreated,
+            Post::ImagesPurged { .. } => Kind::PostImagesPurged,
+            Post::ImportantPostCreated { .. } => Kind::ImportantPostCreated,
+            Post::MultilingualDisabled { .. } => Kind::PostMultilingualDisabled,
+            Post::NsfwToggled { .. } => Kind::PostNsfwToggled,
+            Post::Opened { .. } => Kind::PostOpened,
+            Post::RelayPostCreated { .. } => Kind::PostRelayPostCreated,
+            Post::RelayTurnAssigned { .. } => Kind::PostRelayTurnAssigned,
+            Post::RelayTurnMissed { .. } => Kind::PostRelayTurnMissed,
+            Post::RelayTurnRejected { .. } => Kind::PostRelayTurnRejected,
+            Post::TagsChanged { .. } => Kind::PostTagsChanged,
+        }
+    }
+}
+
+impl Sealed for Post {}

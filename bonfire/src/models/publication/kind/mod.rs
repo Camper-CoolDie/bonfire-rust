@@ -18,7 +18,7 @@ pub use post_tag::PostTag;
 use serde::{Deserialize, Serialize};
 
 /// Represents the specific type of a publication.
-#[derive(Default, Clone, Debug, PartialEq, Eq)]
+#[derive(Default, Clone, Copy, Debug, PartialEq, Eq)]
 #[cfg_attr(
     feature = "serde",
     derive(Deserialize, Serialize),

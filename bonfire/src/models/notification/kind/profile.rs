@@ -2,6 +2,8 @@
 use serde::{Deserialize, Serialize};
 
 use crate::models::Gender;
+use crate::models::notification::{Kind, Notifiable};
+use crate::sealed::Sealed;
 
 #[derive(Clone, Debug)]
 #[cfg_attr(
@@ -33,3 +35,17 @@ pub enum Profile {
         reason: String,
     },
 }
+
+impl Notifiable for Profile {
+    fn kind(&self) -> Kind {
+        match self {
+            Profile::AchievementUnlocked => Kind::AchievementUnlocked,
+            Profile::DescriptionCleared { .. } => Kind::ProfileDescriptionCleared,
+            Profile::LinkRemoved { .. } => Kind::ProfileLinkRemoved,
+            Profile::NameCleared { .. } => Kind::ProfileNameCleared,
+            Profile::StatusCleared { .. } => Kind::ProfileStatusCleared,
+        }
+    }
+}
+
+impl Sealed for Profile {}

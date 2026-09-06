@@ -3,7 +3,7 @@ mod color;
 pub use color::Color;
 
 /// Represents the visual theme selected by the user.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, Copy, PartialEq, Eq)]
 pub enum Theme {
     /// The theme automatically adjusts based on the system's theme settings.
     ///

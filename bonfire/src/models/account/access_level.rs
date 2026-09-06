@@ -22,7 +22,7 @@ const EXPERT_REQUIREMENT: (f64, f64) = (12.0, 1300.0);
 /// Each access level (except for [`AccessLevel::User`] and [`AccessLevel::Protoadmin`]) has
 /// specific [`level`][AccessLevel::requirement()] and [`karma30`][AccessLevel::requirement()]
 /// requirements that an account must meet to attain that level.
-#[derive(Default, Clone, Debug, PartialOrd, Ord, PartialEq, Eq, EnumIter)]
+#[derive(Default, Clone, Copy, Debug, PartialOrd, Ord, PartialEq, Eq, EnumIter)]
 #[cfg_attr(
     feature = "serde",
     derive(Deserialize, Serialize),

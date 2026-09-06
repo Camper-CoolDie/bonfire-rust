@@ -1,7 +1,9 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
+use crate::models::notification::{Kind, Notifiable};
 use crate::models::{AccountRef, FandomRef, Gender};
+use crate::sealed::Sealed;
 
 #[derive(Clone, Debug)]
 #[cfg_attr(
@@ -37,8 +39,24 @@ pub enum Fandom {
     },
     Reviewed {
         is_accepted: bool,
-        fandom: FandomRef,
+        fandom_id: u64,
+        fandom_name: String,
         admin_name: String,
         note: String,
     },
 }
+
+impl Notifiable for Fandom {
+    fn kind(&self) -> Kind {
+        match self {
+            Fandom::CuratorAssigned { .. } => Kind::FandomCuratorAssigned,
+            Fandom::CuratorRevoked { .. } => Kind::FandomCuratorRevoked,
+            Fandom::ModeratorGranted { .. } => Kind::FandomModeratorGranted,
+            Fandom::ModeratorRevoked { .. } => Kind::FandomModeratorRevoked,
+            Fandom::RemovalRejected { .. } => Kind::FandomRemovalRejected,
+            Fandom::Reviewed { .. } => Kind::FandomReviewed,
+        }
+    }
+}
+
+impl Sealed for Fandom {}

@@ -5,8 +5,8 @@ use crate::models::Language;
 
 #[derive(Default, Clone, Debug)]
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
-pub struct FandomRef {
+pub struct Reference {
     pub id: u64,
-    pub language: Language,
+    pub language: Option<Language>,
     pub name: String,
 }

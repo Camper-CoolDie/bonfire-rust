@@ -1,5 +1,8 @@
+mod any;
+
 use std::result::Result as StdResult;
 
+pub(crate) use any::AnyRawNotification;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 use crate::models::notification::Kind;

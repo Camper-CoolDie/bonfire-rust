@@ -19,7 +19,7 @@ pub use effect::{
 pub use error::*;
 use futures::Stream;
 pub use info::Info;
-pub use reference::AccountRef;
+pub use reference::Reference;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 pub use stat::Stat;
@@ -128,6 +128,13 @@ impl Account {
     /// request.
     pub async fn get_by_name(client: &Client, name: &str) -> Result<Self> {
         GetAccountRequest::new_by_name(name)
+            .send_request(client)
+            .await?
+            .try_into()
+    }
+
+    pub async fn get_by_ref(client: &Client, reference: &Reference) -> Result<Self> {
+        GetAccountRequest::new_by_id(reference.id)
             .send_request(client)
             .await?
             .try_into()

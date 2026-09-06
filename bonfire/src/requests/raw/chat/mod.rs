@@ -44,7 +44,7 @@ where
 
     fn try_from(value: RawChat<T>) -> Result<Self> {
         Ok(Self {
-            kind: T::new(value.additional_data, value.tag)?.try_into()?,
+            info: T::new(value.additional_data, value.tag)?.try_into()?,
             last_message: Option::<Publication<_>>::try_from(value.last_message)?,
             unread_count: value.unread_count,
             read_at: match value.read_at {

@@ -1,7 +1,9 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
+use crate::models::notification::{Kind, Notifiable};
 use crate::models::{ChatMessage, ChatTag, Publication};
+use crate::sealed::Sealed;
 
 #[derive(Clone, Debug)]
 #[cfg_attr(
@@ -36,3 +38,18 @@ pub enum Chat {
         chat_tag: ChatTag,
     },
 }
+
+impl Notifiable for Chat {
+    fn kind(&self) -> Kind {
+        match self {
+            Chat::MessageCreated { .. } => Kind::ChatMessageCreated,
+            Chat::MessageEdited { .. } => Kind::ChatMessageEdited,
+            Chat::MessageRemoved { .. } => Kind::ChatMessageRemoved,
+            Chat::MessageReplied { .. } => Kind::ChatMessageReplied,
+            Chat::Read { .. } => Kind::ChatRead,
+            Chat::Typing { .. } => Kind::ChatTyping,
+        }
+    }
+}
+
+impl Sealed for Chat {}

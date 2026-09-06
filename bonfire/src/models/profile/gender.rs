@@ -7,7 +7,7 @@ use crate::requests::account::profile::SetGenderRequest;
 use crate::{Client, Result};
 
 /// Represents the declared gender of an account.
-#[derive(Default, Clone, Debug, PartialEq, Eq)]
+#[derive(Default, Clone, Copy, Debug, PartialEq, Eq)]
 #[cfg_attr(
     feature = "serde",
     derive(Deserialize, Serialize),
