@@ -54,7 +54,7 @@ impl RawPublishable for RawPost {
     type Target = Post;
 
     fn new(data: serde_json::Value, _kind: RawKind) -> Result<Self> {
-        Ok(serde_json::from_value::<RawPost>(data)?)
+        Ok(serde_json::from_value(data)?)
     }
 }
 

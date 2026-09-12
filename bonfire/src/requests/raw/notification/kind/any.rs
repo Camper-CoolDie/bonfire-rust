@@ -1,718 +1,412 @@
-use serde::Deserialize;
+use serde_json::Value;
 
+use super::*;
 use crate::models::AnyNotification;
-use crate::requests::raw::account::RawEffectKind;
-use crate::requests::raw::chat::RawKind as RawChatKind;
-use crate::requests::raw::publication::{RawKind as RawPublicationKind, RawPostItemKind};
-use crate::requests::raw::{
-    RawAccount, RawChatMessage, RawChatTag, RawEffect, RawGender, RawLanguage, RawPublication,
-};
+use crate::requests::raw::RawAccountRef;
 use crate::{Error, Result};
 
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase", tag = "J_N_TYPE")]
 pub(crate) enum AnyRawNotification {
-    #[serde(rename = "1")]
-    PublicationRated {
-        #[serde(rename = "J_KARMA_COUNT")]
-        amount: f64,
-        #[serde(rename = "J_ACCOUNT_ID")]
-        account_id: u64,
-        #[serde(rename = "J_ACCOUNT_NAME")]
-        account_name: String,
-        #[serde(rename = "accountSex")]
-        account_gender: RawGender,
-        #[serde(rename = "J_UNIT_ID")]
-        publication_id: u64,
-        #[serde(rename = "J_UNIT_TYPE")]
-        publication_kind: RawPublicationKind,
-        #[serde(rename = "maskText")]
-        post_title_text: String,
-        #[serde(rename = "maskPageType")]
-        post_title_item_kind: RawPostItemKind,
-        #[serde(rename = "J_PARENT_UNIT_ID")]
-        parent_id: u64,
-        #[serde(rename = "J_PARENT_UNIT_TYPE")]
-        parent_kind: RawPublicationKind,
-    },
-    #[serde(rename = "2")]
-    PublicationCommented {
-        #[serde(rename = "J_COMMENT_ID")]
-        id: u64,
-        #[serde(rename = "J_ACCOUNT_ID")]
-        author_id: u64,
-        #[serde(rename = "J_ACCOUNT_NAME")]
-        author_name: String,
-        #[serde(rename = "accountSex")]
-        author_gender: RawGender,
-        fandom_name: String,
-        #[serde(rename = "J_UNIT_ID")]
-        parent_id: u64,
-        #[serde(rename = "J_PARENT_UNIT_TYPE")]
-        parent_kind: RawPublicationKind,
-        #[serde(rename = "unitCreatorId")]
-        parent_author_id: u64,
-        #[serde(rename = "maskText")]
-        parent_post_title_text: String,
-        #[serde(rename = "maskPageType")]
-        parent_post_title_item_kind: RawPostItemKind,
-        #[serde(rename = "commentText")]
-        text: Option<String>,
-    },
-    #[serde(rename = "3")]
-    CommentReplied {
-        #[serde(rename = "J_COMMENT_ID")]
-        id: u64,
-        #[serde(rename = "J_ACCOUNT_ID")]
-        author_id: u64,
-        #[serde(rename = "J_ACCOUNT_NAME")]
-        author_name: String,
-        #[serde(rename = "accountSex")]
-        author_gender: RawGender,
-        #[serde(rename = "J_UNIT_ID")]
-        parent_id: u64,
-        #[serde(rename = "J_PARENT_UNIT_TYPE")]
-        parent_kind: RawPublicationKind,
-        #[serde(rename = "commentText")]
-        text: Option<String>,
-    },
-    #[serde(rename = "4")]
-    AccountFollowed {
-        #[serde(rename = "J_ACCOUNT_ID")]
-        account_id: u64,
-        #[serde(rename = "J_ACCOUNT_NAME")]
-        account_name: String,
-        #[serde(rename = "accountSex")]
-        account_gender: RawGender,
-    },
-    #[serde(rename = "7")]
-    AchievementUnlocked,
-    #[serde(rename = "8")]
-    ChatMessageCreated {
-        #[serde(rename = "unitChatMessage")]
-        message: RawPublication<RawChatMessage>,
-        #[serde(rename = "tag")]
-        chat_tag: RawChatTag,
-        #[serde(rename = "subscribed")]
-        is_subscribed: bool,
-    },
-    #[serde(rename = "9")]
-    ChatMessageReplied {
-        #[serde(rename = "unitChatMessage")]
-        reply: RawPublication<RawChatMessage>,
-        #[serde(rename = "tag")]
-        chat_tag: RawChatTag,
-        #[serde(rename = "subscribed")]
-        is_subscribed: bool,
-    },
-    #[serde(rename = "10")]
-    FollowedPostCreated {
-        #[serde(rename = "J_UNIT_ID")]
-        id: u64,
-        #[serde(rename = "J_ACCOUNT_ID")]
-        author_id: u64,
-        #[serde(rename = "J_ACCOUNT_NAME")]
-        author_name: String,
-        #[serde(rename = "accountSex")]
-        author_gender: RawGender,
-    },
-    #[serde(rename = "11")]
-    ChatMessageEdited {
-        #[serde(rename = "J_UNIT_ID")]
-        id: u64,
-        #[serde(rename = "J_TEXT")]
-        new_text: String,
-    },
-    #[serde(rename = "12")]
-    PublicationBlocked {
-        #[serde(rename = "blockUnitType")]
-        publication_kind: RawPublicationKind,
-        #[serde(rename = "J_MODERATION_ID")]
-        moderation_id: u64,
-        #[serde(rename = "J_BLOCK_LAST")]
-        with_last_publications: bool,
-        #[serde(rename = "J_BLOCK_ACCOUNT_DATE")]
-        banned_until: i64,
-        #[serde(rename = "J_COMMENT")]
-        reason: String,
-    },
-    #[serde(rename = "13")]
-    ChatMessageRemoved {
-        #[serde(rename = "J_UNIT_ID")]
-        id: u64,
-    },
-    #[serde(rename = "14")]
-    ChatTyping {
-        account_id: u64,
-        account_name: String,
-        chat_tag: RawChatTag,
-    },
-    #[serde(rename = "15")]
-    FandomReviewed {
-        #[serde(rename = "accepted")]
-        is_accepted: bool,
-        fandom_id: u64,
-        fandom_name: String,
-        admin_name: String,
-        #[serde(rename = "comment")]
-        note: String,
-    },
-    #[serde(rename = "19")]
-    ImportantPostCreated {
-        #[serde(rename = "unitId")]
-        id: u64,
-        fandom_id: u64,
-        #[serde(rename = "fandomLanguageId")]
-        fandom_language: RawLanguage,
-        fandom_name: String,
-        #[serde(rename = "moderatorAccountId")]
-        importance_moderator_id: u64,
-        #[serde(rename = "comment")]
-        importance_reason: String,
-    },
-    #[serde(rename = "20")]
-    PostDrafted {
-        #[serde(rename = "maskText")]
-        title_text: String,
-        #[serde(rename = "maskPageType")]
-        title_item_kind: RawPostItemKind,
-        moderation_id: u64,
-        moderator_name: String,
-        #[serde(rename = "moderatorSex")]
-        moderator_gender: RawGender,
-        #[serde(rename = "comment")]
-        reason: String,
-    },
-    #[serde(rename = "22")]
-    PostTagsChanged {
-        moderation_id: u64,
-        moderator_id: u64,
-        moderator_name: String,
-        #[serde(rename = "moderatorSex")]
-        moderator_gender: RawGender,
-        #[serde(rename = "comment")]
-        reason: String,
-    },
-    #[serde(rename = "23")]
-    AccountFandomUnbanned {
-        fandom_id: u64,
-        #[serde(rename = "languageId")]
-        fandom_language: RawLanguage,
-        fandom_name: String,
-        moderator_id: u64,
-        moderator_name: String,
-        #[serde(rename = "moderatorSex")]
-        moderator_gender: RawGender,
-        #[serde(rename = "comment")]
-        reason: String,
-    },
-    #[serde(rename = "24")]
-    ChatRead {
-        #[serde(rename = "tag")]
-        chat_tag: RawChatTag,
-    },
-    #[serde(rename = "25")]
-    AccountPunished {
-        #[serde(rename = "J_BLOCK_ACCOUNT_DATE")]
-        banned_until: i64,
-        #[serde(rename = "J_COMMENT")]
-        reason: String,
-    },
-    #[serde(rename = "26")]
-    FandomModeratorGranted {
-        fandom_id: u64,
-        #[serde(rename = "languageId")]
-        fandom_language: RawLanguage,
-        fandom_name: String,
-        #[serde(rename = "comment")]
-        reason: String,
-    },
-    #[serde(rename = "27")]
-    FandomModeratorRevoked {
-        fandom_id: u64,
-        #[serde(rename = "languageId")]
-        fandom_language: RawLanguage,
-        fandom_name: String,
-        #[serde(rename = "comment")]
-        reason: String,
-    },
-    #[serde(rename = "28")]
-    PunishmentRemoved {
-        #[serde(rename = "fromAccountId")]
-        admin_id: u64,
-        #[serde(rename = "fromAccountName")]
-        admin_name: String,
-        #[serde(rename = "fromAccountSex")]
-        admin_gender: RawGender,
-        #[serde(rename = "comment")]
-        reason: String,
-    },
-    #[serde(rename = "29")]
-    PublicationRestored {
-        #[serde(rename = "unitId")]
-        id: u64,
-        #[serde(rename = "unitType")]
-        kind: RawPublicationKind,
-        #[serde(rename = "parentUnitId")]
-        parent_id: u64,
-        #[serde(rename = "parentPublicationType")]
-        parent_kind: RawPublicationKind,
-        #[serde(rename = "comment")]
-        reason: String,
-    },
-    #[serde(rename = "30")]
-    BlockRejected {
-        moderation_id: u64,
-        fandom_id: u64,
-        #[serde(rename = "languageId")]
-        fandom_language: RawLanguage,
-        admin_name: String,
-        #[serde(rename = "adminSex")]
-        admin_gender: RawGender,
-        #[serde(rename = "comment")]
-        reason: String,
-    },
-    #[serde(rename = "31")]
-    ProfileStatusCleared {
-        admin_name: String,
-        #[serde(rename = "adminSex")]
-        admin_gender: RawGender,
-        #[serde(rename = "comment")]
-        reason: String,
-    },
-    #[serde(rename = "32")]
-    ProfileDescriptionCleared {
-        admin_name: String,
-        #[serde(rename = "adminSex")]
-        admin_gender: RawGender,
-        #[serde(rename = "comment")]
-        reason: String,
-    },
-    #[serde(rename = "33")]
-    ProfileNameCleared {
-        admin_name: String,
-        #[serde(rename = "adminSex")]
-        admin_gender: RawGender,
-        #[serde(rename = "comment")]
-        reason: String,
-    },
-    #[serde(rename = "34")]
-    ProfileLinkRemoved {
-        admin_name: String,
-        #[serde(rename = "adminSex")]
-        admin_gender: RawGender,
-        #[serde(rename = "comment")]
-        reason: String,
-    },
-    #[serde(rename = "35")]
-    PostFandomChanged {
-        #[serde(rename = "unitId")]
-        post_id: u64,
-        old_fandom_id: u64,
-        #[serde(rename = "oldLanguageId")]
-        old_fandom_language: RawLanguage,
-        old_fandom_name: RawLanguage,
-        new_fandom_id: u64,
-        #[serde(rename = "newLanguageId")]
-        new_fandom_language: RawLanguage,
-        new_fandom_name: RawLanguage,
-        admin_id: u64,
-        admin_name: String,
-        #[serde(rename = "adminSex")]
-        admin_gender: RawGender,
-        #[serde(rename = "comment")]
-        reason: String,
-    },
-    #[serde(rename = "36")]
-    PublicationBlockedAfterReport {
-        #[serde(rename = "blockUnitType")]
-        publication_kind: RawPublicationKind,
-        moderation_id: u64,
-        #[serde(rename = "blockLastUnits")]
-        with_last_publications: bool,
-        #[serde(rename = "blockAccountDate")]
-        banned_until: i64,
-        #[serde(rename = "comment")]
-        reason: String,
-    },
-    #[serde(rename = "37")]
-    AccountMentioned {
-        #[serde(rename = "fromAccountId")]
-        account_id: u64,
-        #[serde(rename = "fromAccountName")]
-        account_name: String,
-        #[serde(rename = "fromAccountSex")]
-        account_gender: RawGender,
-        #[serde(rename = "unitId")]
-        publication_id: u64,
-        #[serde(rename = "unitType")]
-        publication_kind: RawPublicationKind,
-        #[serde(rename = "tag1")]
-        chat_kind: RawChatKind,
-        #[serde(rename = "tag2")]
-        chat_first_id: u64,
-        #[serde(rename = "tag3")]
-        chat_second_id: u64,
-        text: String,
-    },
-    #[serde(rename = "39")]
-    PostMultilingualDisabled {
-        moderation_id: u64,
-        moderator_name: String,
-        #[serde(rename = "moderatorSex")]
-        moderator_gender: RawGender,
-        #[serde(rename = "comment")]
-        reason: String,
-    },
-    #[serde(rename = "41")]
-    PostClosed {
-        moderation_id: u64,
-        moderator_name: String,
-        #[serde(rename = "moderatorSex")]
-        moderator_gender: RawGender,
-        #[serde(rename = "comment")]
-        reason: String,
-    },
-    #[serde(rename = "42")]
-    PostOpened {
-        moderation_id: u64,
-        moderator_name: String,
-        #[serde(rename = "moderatorSex")]
-        moderator_gender: RawGender,
-        #[serde(rename = "comment")]
-        reason: String,
-    },
-    #[serde(rename = "43")]
-    RubricNameChanged {
-        #[serde(rename = "rubricId")]
-        id: u64,
-        #[serde(rename = "rubricOldName")]
-        old_name: String,
-        #[serde(rename = "rubricNewName")]
-        new_name: String,
-        fandom_id: u64,
-        #[serde(rename = "languageId")]
-        fandom_language: RawLanguage,
-        moderation_id: u64,
-        #[serde(rename = "adminId")]
-        moderator_id: u64,
-        #[serde(rename = "adminName")]
-        moderator_name: String,
-        #[serde(rename = "adminSex")]
-        moderator_gender: RawGender,
-        #[serde(rename = "comment")]
-        reason: String,
-    },
-    #[serde(rename = "44")]
-    RubricOwnerTransferred {
-        #[serde(rename = "rubricId")]
-        id: u64,
-        #[serde(rename = "rubricName")]
-        name: String,
-        fandom_id: u64,
-        #[serde(rename = "languageId")]
-        fandom_language: RawLanguage,
-        new_owner_id: u64,
-        new_owner_name: String,
-        moderation_id: u64,
-        #[serde(rename = "adminId")]
-        moderator_id: u64,
-        #[serde(rename = "adminName")]
-        moderator_name: String,
-        #[serde(rename = "adminSex")]
-        moderator_gender: RawGender,
-        #[serde(rename = "comment")]
-        reason: String,
-    },
-    #[serde(rename = "45")]
-    RubricOwnerAssigned {
-        #[serde(rename = "rubricId")]
-        id: u64,
-        #[serde(rename = "rubricName")]
-        name: String,
-        fandom_id: u64,
-        #[serde(rename = "languageId")]
-        fandom_language: RawLanguage,
-        moderation_id: u64,
-        #[serde(rename = "adminId")]
-        moderator_id: u64,
-        #[serde(rename = "adminName")]
-        moderator_name: String,
-        #[serde(rename = "adminSex")]
-        moderator_gender: RawGender,
-        #[serde(rename = "comment")]
-        reason: String,
-    },
-    #[serde(rename = "46")]
-    RubricRemoved {
-        #[serde(rename = "rubricId")]
-        id: u64,
-        #[serde(rename = "rubricName")]
-        name: String,
-        fandom_id: u64,
-        #[serde(rename = "languageId")]
-        fandom_language: RawLanguage,
-        moderation_id: u64,
-        #[serde(rename = "adminId")]
-        moderator_id: u64,
-        #[serde(rename = "adminName")]
-        moderator_name: String,
-        #[serde(rename = "adminSex")]
-        moderator_gender: RawGender,
-        #[serde(rename = "comment")]
-        reason: String,
-    },
-    #[serde(rename = "47")]
-    RubricKarmaCoefChanged {
-        #[serde(rename = "rubricId")]
-        id: u64,
-        #[serde(rename = "rubricName")]
-        name: String,
-        fandom_id: u64,
-        #[serde(rename = "languageId")]
-        fandom_language: RawLanguage,
-        #[serde(rename = "newCof")]
-        new_coef: f64,
-        #[serde(rename = "cofChange")]
-        coef_change: f64,
-    },
-    #[serde(rename = "48")]
-    PublicationReacted {
-        #[serde(rename = "reactionIndex")]
-        index: i64,
-        account_id: u64,
-        account_name: String,
-        #[serde(rename = "accountSex")]
-        account_gender: RawGender,
-        #[serde(rename = "unitId")]
-        publication_id: u64,
-        #[serde(rename = "unitType")]
-        publication_kind: RawPublicationKind,
-        #[serde(rename = "parentUnitId")]
-        parent_id: u64,
-        #[serde(rename = "parentUnitType")]
-        parent_kind: RawPublicationKind,
-    },
-    #[serde(rename = "49")]
-    PostRelayTurnAssigned {
-        #[serde(rename = "fromAccountId")]
-        account_id: u64,
-        #[serde(rename = "fromAccountName")]
-        account_name: String,
-        #[serde(rename = "fromAccountSex")]
-        account_gender: RawGender,
-        #[serde(rename = "activityId")]
-        id: u64,
-        #[serde(rename = "activityName")]
-        name: String,
-        fandom_id: u64,
-        #[serde(rename = "fandomLanguageId")]
-        fandom_language: RawLanguage,
-        fandom_name: String,
-    },
-    #[serde(rename = "50")]
-    PostRelayTurnMissed {
-        #[serde(rename = "activityId")]
-        id: u64,
-        #[serde(rename = "activityName")]
-        name: String,
-        fandom_id: u64,
-        #[serde(rename = "fandomLanguageId")]
-        fandom_language: RawLanguage,
-        fandom_name: String,
-        #[serde(rename = "newAccountId")]
-        next_account_id: u64,
-        #[serde(rename = "newAccountName")]
-        next_account_name: String,
-        #[serde(rename = "newAccountSex")]
-        next_account_gender: RawGender,
-    },
-    #[serde(rename = "51")]
-    PostRelayPostCreated {
-        post_id: u64,
-        fandom_id: u64,
-        #[serde(rename = "fandomLanguageId")]
-        fandom_language: RawLanguage,
-        fandom_name: String,
-        #[serde(rename = "activityId")]
-        relay_id: u64,
-        #[serde(rename = "activityName")]
-        relay_name: String,
-    },
-    #[serde(rename = "52")]
-    PostRelayTurnRejected {
-        #[serde(rename = "rejectedAccountId")]
-        account_id: u64,
-        #[serde(rename = "rejectedAccountName")]
-        account_name: String,
-        #[serde(rename = "rejectedAccountSex")]
-        account_gender: RawGender,
-        #[serde(rename = "activityId")]
-        id: u64,
-        #[serde(rename = "activityName")]
-        name: String,
-        fandom_id: u64,
-        #[serde(rename = "fandomLanguageId")]
-        fandom_language: RawLanguage,
-        fandom_name: String,
-        #[serde(rename = "newAccountId")]
-        next_account_id: u64,
-        #[serde(rename = "newAccountName")]
-        next_account_name: String,
-        #[serde(rename = "newAccountSex")]
-        next_account_gender: RawGender,
-    },
-    #[serde(rename = "53")]
-    FandomCuratorAssigned {
-        #[serde(rename = "oldAccountId")]
-        old_curator_id: u64,
-        fandom_id: u64,
-        #[serde(rename = "languageId")]
-        fandom_language: RawLanguage,
-        fandom_name: String,
-        #[serde(rename = "adminAcccountId")]
-        admin_id: u64,
-        #[serde(rename = "adminAcccountName")]
-        admin_name: String,
-        #[serde(rename = "adminAcccountSex")]
-        admin_gender: RawGender,
-        #[serde(rename = "comment")]
-        reason: String,
-    },
-    #[serde(rename = "54")]
-    FandomCuratorRevoked {
-        fandom_id: u64,
-        #[serde(rename = "languageId")]
-        fandom_language: RawLanguage,
-        fandom_name: String,
-        #[serde(rename = "adminAcccountId")]
-        admin_id: u64,
-        #[serde(rename = "adminAcccountName")]
-        admin_name: String,
-        #[serde(rename = "adminAcccountSex")]
-        admin_gender: RawGender,
-        #[serde(rename = "comment")]
-        reason: String,
-    },
-    #[serde(rename = "56")]
-    DonationProcessed {
-        #[serde(rename = "sum")]
-        amount: u64,
-    },
-    #[serde(rename = "57")]
-    EffectApplied {
-        #[serde(rename = "mAccEffect")]
-        effect: RawEffect,
-    },
-    #[serde(rename = "58")]
-    EffectRemoved {
-        #[serde(rename = "effectId")]
-        id: u64,
-        #[serde(rename = "effectIndex")]
-        kind: RawEffectKind,
-        admin_name: String,
-        #[serde(rename = "adminSex")]
-        admin_gender: RawGender,
-        #[serde(rename = "comment")]
-        reason: String,
-    },
-    #[serde(rename = "61")]
-    PostImagesPurged {
-        post_id: u64,
-        admin_name: String,
-        #[serde(rename = "adminSex")]
-        admin_gender: RawGender,
-        #[serde(rename = "comment")]
-        reason: String,
-    },
-    #[serde(rename = "62")]
-    FandomRemovalRejected {
-        fandom_id: u64,
-        #[serde(rename = "languageId")]
-        fandom_language: RawLanguage,
-        fandom_name: String,
-        admin_name: String,
-        #[serde(rename = "adminSex")]
-        admin_gender: RawGender,
-        #[serde(rename = "comment")]
-        reason: String,
-    },
-    #[serde(rename = "63")]
-    AdminActionRejected {
-        // #[serde(rename = "mAdminVote")]
-        // action: RawAdminAction,
-        #[serde(rename = "cancelAdminAccount")]
-        rejected_by: RawAccount,
-        #[serde(rename = "actionAdminAccount")]
-        created_by: RawAccount,
-        #[serde(rename = "comment")]
-        reason: String,
-    },
-    #[serde(rename = "64")]
-    AccountTargetAdminActionRejected {
-        // #[serde(rename = "mAdminVote")]
-        // action: RawAdminAction,
-        #[serde(rename = "cancelAdminAccount")]
-        rejected_by: RawAccount,
-        #[serde(rename = "actionAdminAccount")]
-        created_by: RawAccount,
-        #[serde(rename = "comment")]
-        reason: String,
-    },
-    #[serde(rename = "65")]
-    RubricFandomChanged {
-        #[serde(rename = "rubricId")]
-        id: u64,
-        #[serde(rename = "rubricName")]
-        name: String,
-        moderation_id: u64,
-        admin_id: u64,
-        admin_name: String,
-        #[serde(rename = "adminSex")]
-        admin_gender: RawGender,
-        #[serde(rename = "srcFandomId")]
-        old_fandom_id: u64,
-        #[serde(rename = "srcLanguageId")]
-        old_fandom_language: RawLanguage,
-        #[serde(rename = "srcFandomName")]
-        old_fandom_name: String,
-        #[serde(rename = "destFandomId")]
-        new_fandom_id: u64,
-        #[serde(rename = "destLanguageId")]
-        new_fandom_language: RawLanguage,
-        #[serde(rename = "destFandomName")]
-        new_fandom_name: String,
-        #[serde(rename = "comment")]
-        reason: String,
-    },
-    #[serde(rename = "66")]
-    AccountUnfollowed {
-        #[serde(rename = "J_ACCOUNT_ID")]
-        account_id: u64,
-        #[serde(rename = "J_ACCOUNT_NAME")]
-        account_name: String,
-        #[serde(rename = "accountSex")]
-        account_gender: RawGender,
-    },
-    #[serde(rename = "67")]
-    PostNsfwToggled {
-        #[serde(rename = "nsfw")]
-        is_nsfw: bool,
-        moderation_id: u64,
-        moderator_name: String,
-        #[serde(rename = "moderatorSex")]
-        moderator_gender: RawGender,
-        #[serde(rename = "comment")]
-        reason: String,
-    },
-    #[serde(other)]
-    Unknown,
+    AccountFandomUnbanned(RawAccountFandomUnbanned),
+    AccountFollowed(RawAccountRef),
+    AccountMentioned(RawAccountMentioned),
+    AccountPunished(RawAccountPunished),
+    AccountTargetAdminActionRejected(RawAdminActionRejected),
+    AccountUnfollowed(RawAccountRef),
+    AchievementUnlocked(RawAchievementUnlocked),
+    AdminActionRejected(RawAdminActionRejected),
+    ChatMessageCreated(RawChatMessageCreated),
+    ChatMessageEdited(RawChatMessageEdited),
+    ChatMessageRemoved(RawChatMessageRemoved),
+    ChatMessageReplied(RawChatMessageReplied),
+    ChatRead(RawChatRead),
+    ChatTyping(RawChatTyping),
+    CommentReplied(RawCommentReplied),
+    DonationProcessed(RawDonationProcessed),
+    EffectApplied(RawEffectApplied),
+    EffectRemoved(RawEffectRemoved),
+    FandomCuratorAssigned(RawFandomCuratorAssigned),
+    FandomCuratorRevoked(RawFandomCuratorRevoked),
+    FandomModeratorGranted(RawFandomModeratorSet),
+    FandomModeratorRevoked(RawFandomModeratorSet),
+    FandomRemovalRejected(RawFandomRemovalRejected),
+    FandomReviewed(RawFandomReviewed),
+    FollowedPostCreated(RawFollowedPostCreated),
+    ImportantPostCreated(RawImportantPostCreated),
+    PostClosed(RawPostVisibilityChanged),
+    PostFandomChanged(RawPostFandomChanged),
+    PostImagesPurged(RawPostImagesPurged),
+    PostMultilingualDisabled(RawPostMultilingualDisabled),
+    PostNsfwToggled(RawPostNsfwToggled),
+    PostOpened(RawPostVisibilityChanged),
+    PostRelayPostCreated(RawPostRelayPostCreated),
+    PostRelayTurnAssigned(RawPostRelayTurnAssigned),
+    PostRelayTurnMissed(RawPostRelayTurnMissed),
+    PostRelayTurnRejected(RawPostRelayTurnRejected),
+    PostTagsChanged(RawPostTagsChanged),
+    ProfileDescriptionCleared(RawProfileFieldSet),
+    ProfileLinkRemoved(RawProfileFieldSet),
+    ProfileNameCleared(RawProfileFieldSet),
+    ProfileStatusCleared(RawProfileFieldSet),
+    PublicationBlockRejected(RawPublicationBlockRejected),
+    PublicationBlocked(RawPublicationBlocked),
+    PublicationBlockedAfterReport(RawPublicationBlockedAfterReport),
+    PublicationCommented(RawPublicationCommented),
+    PublicationDrafted(RawPublicationDrafted),
+    PublicationRated(RawPublicationRated),
+    PublicationReacted(RawPublicationReacted),
+    PublicationRestored(RawPublicationRestored),
+    PunishmentRemoved(RawPunishmentRemoved),
+    RubricFandomChanged(RawRubricFandomChanged),
+    RubricKarmaCoefChanged(RawRubricKarmaCoefChanged),
+    RubricNameChanged(RawRubricNameChanged),
+    RubricOwnerAssigned(RawRubricOwnerAssigned),
+    RubricOwnerTransferred(RawRubricOwnerTransferred),
+    RubricRemoved(RawRubricRemoved),
+    Unknown(i64),
+}
+impl AnyRawNotification {
+    pub(crate) fn new(data: Value, kind: RawKind) -> Result<Self> {
+        // TODO: replace this and TryFrom with macros (derive?)
+        Ok(match kind {
+            RawKind::AccountFandomUnbanned => {
+                AnyRawNotification::AccountFandomUnbanned(serde_json::from_value(data)?)
+            }
+            RawKind::AccountFollowed => {
+                AnyRawNotification::AccountFollowed(serde_json::from_value(data)?)
+            }
+            RawKind::AccountMentioned => {
+                AnyRawNotification::AccountMentioned(serde_json::from_value(data)?)
+            }
+            RawKind::AccountPunished => {
+                AnyRawNotification::AccountPunished(serde_json::from_value(data)?)
+            }
+            RawKind::AccountTargetAdminActionRejected => {
+                AnyRawNotification::AccountTargetAdminActionRejected(serde_json::from_value(data)?)
+            }
+            RawKind::AccountUnfollowed => {
+                AnyRawNotification::AccountUnfollowed(serde_json::from_value(data)?)
+            }
+            RawKind::AchievementUnlocked => {
+                AnyRawNotification::AchievementUnlocked(serde_json::from_value(data)?)
+            }
+            RawKind::AdminActionRejected => {
+                AnyRawNotification::AdminActionRejected(serde_json::from_value(data)?)
+            }
+            RawKind::ChatMessageCreated => {
+                AnyRawNotification::ChatMessageCreated(serde_json::from_value(data)?)
+            }
+            RawKind::ChatMessageEdited => {
+                AnyRawNotification::ChatMessageEdited(serde_json::from_value(data)?)
+            }
+            RawKind::ChatMessageRemoved => {
+                AnyRawNotification::ChatMessageRemoved(serde_json::from_value(data)?)
+            }
+            RawKind::ChatMessageReplied => {
+                AnyRawNotification::ChatMessageReplied(serde_json::from_value(data)?)
+            }
+            RawKind::ChatRead => AnyRawNotification::ChatRead(serde_json::from_value(data)?),
+            RawKind::ChatTyping => AnyRawNotification::ChatTyping(serde_json::from_value(data)?),
+            RawKind::CommentReplied => {
+                AnyRawNotification::CommentReplied(serde_json::from_value(data)?)
+            }
+            RawKind::DonationProcessed => {
+                AnyRawNotification::DonationProcessed(serde_json::from_value(data)?)
+            }
+            RawKind::EffectApplied => {
+                AnyRawNotification::EffectApplied(serde_json::from_value(data)?)
+            }
+            RawKind::EffectRemoved => {
+                AnyRawNotification::EffectRemoved(serde_json::from_value(data)?)
+            }
+            RawKind::FandomCuratorAssigned => {
+                AnyRawNotification::FandomCuratorAssigned(serde_json::from_value(data)?)
+            }
+            RawKind::FandomCuratorRevoked => {
+                AnyRawNotification::FandomCuratorRevoked(serde_json::from_value(data)?)
+            }
+            RawKind::FandomModeratorGranted => {
+                AnyRawNotification::FandomModeratorGranted(serde_json::from_value(data)?)
+            }
+            RawKind::FandomModeratorRevoked => {
+                AnyRawNotification::FandomModeratorRevoked(serde_json::from_value(data)?)
+            }
+            RawKind::FandomRemovalRejected => {
+                AnyRawNotification::FandomRemovalRejected(serde_json::from_value(data)?)
+            }
+            RawKind::FandomReviewed => {
+                AnyRawNotification::FandomReviewed(serde_json::from_value(data)?)
+            }
+            RawKind::FollowedPostCreated => {
+                AnyRawNotification::FollowedPostCreated(serde_json::from_value(data)?)
+            }
+            RawKind::ImportantPostCreated => {
+                AnyRawNotification::ImportantPostCreated(serde_json::from_value(data)?)
+            }
+            RawKind::PostClosed => AnyRawNotification::PostClosed(serde_json::from_value(data)?),
+            RawKind::PostFandomChanged => {
+                AnyRawNotification::PostFandomChanged(serde_json::from_value(data)?)
+            }
+            RawKind::PostImagesPurged => {
+                AnyRawNotification::PostImagesPurged(serde_json::from_value(data)?)
+            }
+            RawKind::PostMultilingualDisabled => {
+                AnyRawNotification::PostMultilingualDisabled(serde_json::from_value(data)?)
+            }
+            RawKind::PostNsfwToggled => {
+                AnyRawNotification::PostNsfwToggled(serde_json::from_value(data)?)
+            }
+            RawKind::PostOpened => AnyRawNotification::PostOpened(serde_json::from_value(data)?),
+            RawKind::PostRelayPostCreated => {
+                AnyRawNotification::PostRelayPostCreated(serde_json::from_value(data)?)
+            }
+            RawKind::PostRelayTurnAssigned => {
+                AnyRawNotification::PostRelayTurnAssigned(serde_json::from_value(data)?)
+            }
+            RawKind::PostRelayTurnMissed => {
+                AnyRawNotification::PostRelayTurnMissed(serde_json::from_value(data)?)
+            }
+            RawKind::PostRelayTurnRejected => {
+                AnyRawNotification::PostRelayTurnRejected(serde_json::from_value(data)?)
+            }
+            RawKind::PostTagsChanged => {
+                AnyRawNotification::PostTagsChanged(serde_json::from_value(data)?)
+            }
+            RawKind::ProfileDescriptionCleared => {
+                AnyRawNotification::ProfileDescriptionCleared(serde_json::from_value(data)?)
+            }
+            RawKind::ProfileLinkRemoved => {
+                AnyRawNotification::ProfileLinkRemoved(serde_json::from_value(data)?)
+            }
+            RawKind::ProfileNameCleared => {
+                AnyRawNotification::ProfileNameCleared(serde_json::from_value(data)?)
+            }
+            RawKind::ProfileStatusCleared => {
+                AnyRawNotification::ProfileStatusCleared(serde_json::from_value(data)?)
+            }
+            RawKind::PublicationBlockRejected => {
+                AnyRawNotification::PublicationBlockRejected(serde_json::from_value(data)?)
+            }
+            RawKind::PublicationBlocked => {
+                AnyRawNotification::PublicationBlocked(serde_json::from_value(data)?)
+            }
+            RawKind::PublicationBlockedAfterReport => {
+                AnyRawNotification::PublicationBlockedAfterReport(serde_json::from_value(data)?)
+            }
+            RawKind::PublicationCommented => {
+                AnyRawNotification::PublicationCommented(serde_json::from_value(data)?)
+            }
+            RawKind::PublicationDrafted => {
+                AnyRawNotification::PublicationDrafted(serde_json::from_value(data)?)
+            }
+            RawKind::PublicationRated => {
+                AnyRawNotification::PublicationRated(serde_json::from_value(data)?)
+            }
+            RawKind::PublicationReacted => {
+                AnyRawNotification::PublicationReacted(serde_json::from_value(data)?)
+            }
+            RawKind::PublicationRestored => {
+                AnyRawNotification::PublicationRestored(serde_json::from_value(data)?)
+            }
+            RawKind::PunishmentRemoved => {
+                AnyRawNotification::PunishmentRemoved(serde_json::from_value(data)?)
+            }
+            RawKind::RubricFandomChanged => {
+                AnyRawNotification::RubricFandomChanged(serde_json::from_value(data)?)
+            }
+            RawKind::RubricKarmaCoefChanged => {
+                AnyRawNotification::RubricKarmaCoefChanged(serde_json::from_value(data)?)
+            }
+            RawKind::RubricNameChanged => {
+                AnyRawNotification::RubricNameChanged(serde_json::from_value(data)?)
+            }
+            RawKind::RubricOwnerAssigned => {
+                AnyRawNotification::RubricOwnerAssigned(serde_json::from_value(data)?)
+            }
+            RawKind::RubricOwnerTransferred => {
+                AnyRawNotification::RubricOwnerTransferred(serde_json::from_value(data)?)
+            }
+            RawKind::RubricRemoved => {
+                AnyRawNotification::RubricRemoved(serde_json::from_value(data)?)
+            }
+            RawKind::Unknown(kind) => AnyRawNotification::Unknown(kind),
+        })
+    }
 }
 
 impl TryFrom<AnyRawNotification> for AnyNotification {
     type Error = Error;
 
     fn try_from(value: AnyRawNotification) -> Result<Self> {
-        todo!()
+        Ok(match value {
+            AnyRawNotification::AccountFandomUnbanned(notification) => {
+                AnyNotification::AccountFandomUnbanned(notification.try_into()?)
+            }
+            AnyRawNotification::AccountFollowed(notification) => {
+                AnyNotification::AccountFollowed(notification.try_into()?)
+            }
+            AnyRawNotification::AccountMentioned(notification) => {
+                AnyNotification::AccountMentioned(notification.try_into()?)
+            }
+            AnyRawNotification::AccountPunished(notification) => {
+                AnyNotification::AccountPunished(notification.try_into()?)
+            }
+            AnyRawNotification::AccountTargetAdminActionRejected(notification) => {
+                AnyNotification::AccountTargetAdminActionRejected(notification.try_into()?)
+            }
+            AnyRawNotification::AccountUnfollowed(notification) => {
+                AnyNotification::AccountUnfollowed(notification.try_into()?)
+            }
+            AnyRawNotification::AchievementUnlocked(notification) => {
+                AnyNotification::AchievementUnlocked(notification.into())
+            }
+            AnyRawNotification::AdminActionRejected(notification) => {
+                AnyNotification::AdminActionRejected(notification.try_into()?)
+            }
+            AnyRawNotification::ChatMessageCreated(notification) => {
+                AnyNotification::ChatMessageCreated(notification.try_into()?)
+            }
+            AnyRawNotification::ChatMessageEdited(notification) => {
+                AnyNotification::ChatMessageEdited(notification.into())
+            }
+            AnyRawNotification::ChatMessageRemoved(notification) => {
+                AnyNotification::ChatMessageRemoved(notification.into())
+            }
+            AnyRawNotification::ChatMessageReplied(notification) => {
+                AnyNotification::ChatMessageReplied(notification.try_into()?)
+            }
+            AnyRawNotification::ChatRead(notification) => {
+                AnyNotification::ChatRead(notification.try_into()?)
+            }
+            AnyRawNotification::ChatTyping(notification) => {
+                AnyNotification::ChatTyping(notification.try_into()?)
+            }
+            AnyRawNotification::CommentReplied(notification) => {
+                AnyNotification::CommentReplied(notification.try_into()?)
+            }
+            AnyRawNotification::DonationProcessed(notification) => {
+                AnyNotification::DonationProcessed(notification.into())
+            }
+            AnyRawNotification::EffectApplied(notification) => {
+                AnyNotification::EffectApplied(notification.try_into()?)
+            }
+            AnyRawNotification::EffectRemoved(notification) => {
+                AnyNotification::EffectRemoved(notification.try_into()?)
+            }
+            AnyRawNotification::FandomCuratorAssigned(notification) => {
+                AnyNotification::FandomCuratorAssigned(notification.try_into()?)
+            }
+            AnyRawNotification::FandomCuratorRevoked(notification) => {
+                AnyNotification::FandomCuratorRevoked(notification.try_into()?)
+            }
+            AnyRawNotification::FandomModeratorGranted(notification) => {
+                AnyNotification::FandomModeratorGranted(notification.try_into()?)
+            }
+            AnyRawNotification::FandomModeratorRevoked(notification) => {
+                AnyNotification::FandomModeratorRevoked(notification.try_into()?)
+            }
+            AnyRawNotification::FandomRemovalRejected(notification) => {
+                AnyNotification::FandomRemovalRejected(notification.try_into()?)
+            }
+            AnyRawNotification::FandomReviewed(notification) => {
+                AnyNotification::FandomReviewed(notification.into())
+            }
+            AnyRawNotification::FollowedPostCreated(notification) => {
+                AnyNotification::FollowedPostCreated(notification.try_into()?)
+            }
+            AnyRawNotification::ImportantPostCreated(notification) => {
+                AnyNotification::ImportantPostCreated(notification.try_into()?)
+            }
+            AnyRawNotification::PostClosed(notification) => {
+                AnyNotification::PostClosed(notification.try_into()?)
+            }
+            AnyRawNotification::PostFandomChanged(notification) => {
+                AnyNotification::PostFandomChanged(notification.try_into()?)
+            }
+            AnyRawNotification::PostImagesPurged(notification) => {
+                AnyNotification::PostImagesPurged(notification.try_into()?)
+            }
+            AnyRawNotification::PostMultilingualDisabled(notification) => {
+                AnyNotification::PostMultilingualDisabled(notification.try_into()?)
+            }
+            AnyRawNotification::PostNsfwToggled(notification) => {
+                AnyNotification::PostNsfwToggled(notification.try_into()?)
+            }
+            AnyRawNotification::PostOpened(notification) => {
+                AnyNotification::PostOpened(notification.try_into()?)
+            }
+            AnyRawNotification::PostRelayPostCreated(notification) => {
+                AnyNotification::PostRelayPostCreated(notification.try_into()?)
+            }
+            AnyRawNotification::PostRelayTurnAssigned(notification) => {
+                AnyNotification::PostRelayTurnAssigned(notification.try_into()?)
+            }
+            AnyRawNotification::PostRelayTurnMissed(notification) => {
+                AnyNotification::PostRelayTurnMissed(notification.try_into()?)
+            }
+            AnyRawNotification::PostRelayTurnRejected(notification) => {
+                AnyNotification::PostRelayTurnRejected(notification.try_into()?)
+            }
+            AnyRawNotification::PostTagsChanged(notification) => {
+                AnyNotification::PostTagsChanged(notification.try_into()?)
+            }
+            AnyRawNotification::ProfileDescriptionCleared(notification) => {
+                AnyNotification::ProfileDescriptionCleared(notification.try_into()?)
+            }
+            AnyRawNotification::ProfileLinkRemoved(notification) => {
+                AnyNotification::ProfileLinkRemoved(notification.try_into()?)
+            }
+            AnyRawNotification::ProfileNameCleared(notification) => {
+                AnyNotification::ProfileNameCleared(notification.try_into()?)
+            }
+            AnyRawNotification::ProfileStatusCleared(notification) => {
+                AnyNotification::ProfileStatusCleared(notification.try_into()?)
+            }
+            AnyRawNotification::PublicationBlockRejected(notification) => {
+                AnyNotification::PublicationBlockRejected(notification.try_into()?)
+            }
+            AnyRawNotification::PublicationBlocked(notification) => {
+                AnyNotification::PublicationBlocked(notification.try_into()?)
+            }
+            AnyRawNotification::PublicationBlockedAfterReport(notification) => {
+                AnyNotification::PublicationBlockedAfterReport(notification.try_into()?)
+            }
+            AnyRawNotification::PublicationCommented(notification) => {
+                AnyNotification::PublicationCommented(notification.try_into()?)
+            }
+            AnyRawNotification::PublicationDrafted(notification) => {
+                AnyNotification::PublicationDrafted(notification.try_into()?)
+            }
+            AnyRawNotification::PublicationRated(notification) => {
+                AnyNotification::PublicationRated(notification.try_into()?)
+            }
+            AnyRawNotification::PublicationReacted(notification) => {
+                AnyNotification::PublicationReacted(notification.try_into()?)
+            }
+            AnyRawNotification::PublicationRestored(notification) => {
+                AnyNotification::PublicationRestored(notification.into())
+            }
+            AnyRawNotification::PunishmentRemoved(notification) => {
+                AnyNotification::PunishmentRemoved(notification.try_into()?)
+            }
+            AnyRawNotification::RubricFandomChanged(notification) => {
+                AnyNotification::RubricFandomChanged(notification.try_into()?)
+            }
+            AnyRawNotification::RubricKarmaCoefChanged(notification) => {
+                AnyNotification::RubricKarmaCoefChanged(notification.try_into()?)
+            }
+            AnyRawNotification::RubricNameChanged(notification) => {
+                AnyNotification::RubricNameChanged(notification.try_into()?)
+            }
+            AnyRawNotification::RubricOwnerAssigned(notification) => {
+                AnyNotification::RubricOwnerAssigned(notification.try_into()?)
+            }
+            AnyRawNotification::RubricOwnerTransferred(notification) => {
+                AnyNotification::RubricOwnerTransferred(notification.try_into()?)
+            }
+            AnyRawNotification::RubricRemoved(notification) => {
+                AnyNotification::RubricRemoved(notification.try_into()?)
+            }
+            AnyRawNotification::Unknown(kind) => AnyNotification::Unknown(kind),
+        })
     }
 }

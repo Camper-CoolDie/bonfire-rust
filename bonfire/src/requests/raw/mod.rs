@@ -11,7 +11,7 @@ pub(super) mod publication;
 pub(super) mod settings;
 
 pub(super) use account::{
-    RawAccount, RawAccountRef, RawBadge, RawEffect, RawInfo as RawAccountInfo,
+    RawAccount, RawBadge, RawEffect, RawInfo as RawAccountInfo, RawReference as RawAccountRef,
     RawStat as RawAccountStat,
 };
 pub(super) use chat::{
@@ -20,11 +20,12 @@ pub(super) use chat::{
 pub(super) use common::{RawCategory, RawImageRef, RawLanguage};
 pub(crate) use error::RawRootError;
 pub(super) use error::RawUnavailableError;
-pub(super) use fandom::{RawFandom, RawFandomRef};
+pub(super) use fandom::{RawFandom, RawReference as RawFandomRef};
 pub(super) use notification::{AnyRawNotification, RawNotification};
 pub(super) use other::RawInitialData;
 pub(super) use profile::{RawGender, RawLink};
 pub(super) use publication::{
-    AnyRawPublication, RawChatMessage, RawComment, RawPost, RawPostTag, RawPublication, RawReaction,
+    AnyRawPublication, RawChatMessage, RawComment, RawPost, RawPostTag, RawPublication,
+    RawReaction, RawReference as RawPublicationRef,
 };
 pub(super) use settings::RawSettings;

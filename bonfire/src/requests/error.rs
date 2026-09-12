@@ -9,6 +9,7 @@ use crate::client::RequestErrorSource;
 ///
 /// Common errors are categorized into predefined variants, while [`RootError::Other`]
 /// captures any non-predefined errors.
+#[non_exhaustive]
 #[derive(Error, Debug)]
 pub enum RootError {
     /// The request was denied due to insufficient permissions

@@ -96,7 +96,7 @@ impl RawPublishable for RawChatMessage {
     type Target = ChatMessage;
 
     fn new(data: serde_json::Value, _kind: RawKind) -> Result<Self> {
-        Ok(serde_json::from_value::<RawChatMessage>(data)?)
+        Ok(serde_json::from_value(data)?)
     }
 }
 

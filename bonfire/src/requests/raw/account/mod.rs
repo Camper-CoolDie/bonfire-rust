@@ -14,7 +14,7 @@ pub(crate) use effect::{
     RawEffect, RawKind as RawEffectKind, RawReasonKind as RawEffectReasonKind,
 };
 pub(crate) use info::RawInfo;
-pub(crate) use reference::RawAccountRef;
+pub(crate) use reference::RawReference;
 use serde::Deserialize;
 pub(crate) use stat::RawStat;
 

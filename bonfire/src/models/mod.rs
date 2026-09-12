@@ -30,5 +30,8 @@ pub use fandom::{Fandom, Reference as FandomRef};
 pub use notification::{AnyNotification, Notification};
 pub use other::{Config, InitialData};
 pub use profile::{Gender, Link, Profile};
-pub use publication::{AnyPublication, ChatMessage, Comment, Post, PostTag, Publication, Reaction};
+pub use publication::{
+    AnyPublication, ChatMessage, Comment, Post, PostTag, Publication, Reaction,
+    Reference as PublicationRef,
+};
 pub use settings::Settings;

@@ -1,7 +1,7 @@
 mod reference;
 mod status;
 
-pub(crate) use reference::RawFandomRef;
+pub(crate) use reference::RawReference;
 use serde::Deserialize;
 pub(crate) use status::RawStatus;
 

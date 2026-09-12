@@ -2,85 +2,44 @@ mod account;
 mod any;
 mod chat;
 mod fandom;
+mod other;
 mod post;
 mod profile;
 mod publication;
 mod rubric;
 
-pub use account::Account;
+pub use account::{
+    EffectRemoved, FandomUnbanned as AccountFandomUnbanned, Mentioned as AccountMentioned,
+    Punished as AccountPunished, PunishmentRemoved,
+};
 pub use any::AnyNotification;
-pub use chat::Chat;
-pub use fandom::Fandom;
-pub use post::Post;
-pub use profile::Profile;
-pub use publication::Publication;
-pub use rubric::Rubric;
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(Deserialize, Serialize),
-    serde(rename_all = "snake_case")
-)]
-pub enum Kind {
-    AccountFandomUnbanned,
-    AccountFollowed,
-    AccountMentioned,
-    AccountPunished,
-    AccountTargetAdminActionRejected,
-    AccountUnfollowed,
-    AchievementUnlocked,
-    AdminActionRejected,
-    BlockRejected,
-    ChatMessageCreated,
-    ChatMessageEdited,
-    ChatMessageRemoved,
-    ChatMessageReplied,
-    ChatRead,
-    ChatTyping,
-    CommentReplied,
-    DonationProcessed,
-    EffectApplied,
-    EffectRemoved,
-    FandomCuratorAssigned,
-    FandomCuratorRevoked,
-    FandomModeratorGranted,
-    FandomModeratorRevoked,
-    FandomRemovalRejected,
-    FandomReviewed,
-    FollowedPostCreated,
-    ImportantPostCreated,
-    PostClosed,
-    PostDrafted,
-    PostFandomChanged,
-    PostImagesPurged,
-    PostMultilingualDisabled,
-    PostNsfwToggled,
-    PostOpened,
-    PostRelayPostCreated,
-    PostRelayTurnAssigned,
-    PostRelayTurnMissed,
-    PostRelayTurnRejected,
-    PostTagsChanged,
-    ProfileDescriptionCleared,
-    ProfileLinkRemoved,
-    ProfileNameCleared,
-    ProfileStatusCleared,
-    PublicationBlocked,
-    PublicationBlockedAfterReport,
-    PublicationCommented,
-    PublicationRated,
-    PublicationReacted,
-    PublicationRestored,
-    PunishmentRemoved,
-    RubricFandomChanged,
-    RubricKarmaCoefChanged,
-    RubricNameChanged,
-    RubricOwnerAssigned,
-    RubricOwnerTransferred,
-    RubricRemoved,
-    #[cfg_attr(feature = "serde", serde(untagged))]
-    Unknown(i64),
-}
+pub use chat::{
+    MessageCreated as ChatMessageCreated, MessageEdited as ChatMessageEdited,
+    MessageRemoved as ChatMessageRemoved, MessageReplied as ChatMessageReplied,
+    Typing as ChatTyping,
+};
+pub use fandom::{
+    CuratorAssigned as FandomCuratorAssigned, CuratorRevoked as FandomCuratorRevoked,
+    ModeratorSet as FandomModeratorSet, RemovalRejected as FandomRemovalRejected,
+    Reviewed as FandomReviewed,
+};
+pub use other::{AdminActionRejected, DonationProcessed};
+pub use post::{
+    FandomChanged as PostFandomChanged, FollowedPostCreated, ImagesPurged as PostImagesPurged,
+    ImportantPostCreated, MultilingualDisabled as PostMultilingualDisabled,
+    NsfwToggled as PostNsfwToggled, RelayPostCreated as PostRelayPostCreated,
+    RelayTurnAssigned as PostRelayTurnAssigned, RelayTurnMissed as PostRelayTurnMissed,
+    RelayTurnRejected as PostRelayTurnRejected, TagsChanged as PostTagsChanged,
+    VisibilityChanged as PostVisibilityChanged,
+};
+pub use profile::{AchievementUnlocked, FieldSet as ProfileFieldSet};
+pub use publication::{
+    BlockRejected as PublicationBlockRejected, Blocked as PublicationBlocked, CommentReplied,
+    Commented as PublicationCommented, Drafted as PublicationDrafted, Rated as PublicationRated,
+    Reacted as PublicationReacted, Restored as PublicationRestored,
+};
+pub use rubric::{
+    FandomChanged as RubricFandomChanged, KarmaCoefChanged as RubricKarmaCoefChanged,
+    NameChanged as RubricNameChanged, OwnerAssigned as RubricOwnerAssigned,
+    OwnerTransferred as RubricOwnerTransferred, Removed as RubricRemoved,
+};

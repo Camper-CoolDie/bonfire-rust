@@ -13,3 +13,12 @@ pub enum Title {
     Text { text: String, is_truncated: bool },
     Other { item_kind: ItemKind },
 }
+
+impl Default for Title {
+    fn default() -> Self {
+        Self::Text {
+            text: String::new(),
+            is_truncated: false,
+        }
+    }
+}

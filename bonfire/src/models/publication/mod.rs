@@ -1,12 +1,14 @@
 mod filter;
 mod kind;
 mod reaction;
+mod reference;
 mod status;
 
 use chrono::{DateTime, Utc};
 pub use filter::{AccountFilter, FandomFilter};
 pub use kind::*;
 pub use reaction::Reaction;
+pub use reference::Reference;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 pub use status::Status;

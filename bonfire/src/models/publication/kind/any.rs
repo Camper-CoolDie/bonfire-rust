@@ -10,6 +10,7 @@ use crate::sealed::Sealed;
 /// This enum acts as a catch-all for various publication kinds when the specific type is not
 /// known or needed, storing additional data relevant to that type. Large variants are [`Box`]-ed to
 /// prevent the enum from becoming catastrophically large.
+#[non_exhaustive]
 #[derive(Clone, Debug)]
 #[cfg_attr(
     feature = "serde",

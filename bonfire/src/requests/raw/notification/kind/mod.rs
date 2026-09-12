@@ -1,11 +1,54 @@
+mod account;
 mod any;
+mod chat;
+mod fandom;
+mod other;
+mod post;
+mod profile;
+mod publication;
+mod rubric;
 
 use std::result::Result as StdResult;
 
+pub(crate) use account::{
+    RawEffectApplied, RawEffectRemoved, RawFandomUnbanned as RawAccountFandomUnbanned,
+    RawMentioned as RawAccountMentioned, RawPunished as RawAccountPunished, RawPunishmentRemoved,
+};
 pub(crate) use any::AnyRawNotification;
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
-
-use crate::models::notification::Kind;
+pub(crate) use chat::{
+    RawMessageCreated as RawChatMessageCreated, RawMessageEdited as RawChatMessageEdited,
+    RawMessageRemoved as RawChatMessageRemoved, RawMessageReplied as RawChatMessageReplied,
+    RawRead as RawChatRead, RawTyping as RawChatTyping,
+};
+pub(crate) use fandom::{
+    RawCuratorAssigned as RawFandomCuratorAssigned, RawCuratorRevoked as RawFandomCuratorRevoked,
+    RawModeratorSet as RawFandomModeratorSet, RawRemovalRejected as RawFandomRemovalRejected,
+    RawReviewed as RawFandomReviewed,
+};
+pub(crate) use other::{RawAdminActionRejected, RawDonationProcessed};
+pub(crate) use post::{
+    RawFandomChanged as RawPostFandomChanged, RawFollowedPostCreated,
+    RawImagesPurged as RawPostImagesPurged, RawImportantPostCreated,
+    RawMultilingualDisabled as RawPostMultilingualDisabled, RawNsfwToggled as RawPostNsfwToggled,
+    RawRelayPostCreated as RawPostRelayPostCreated,
+    RawRelayTurnAssigned as RawPostRelayTurnAssigned, RawRelayTurnMissed as RawPostRelayTurnMissed,
+    RawRelayTurnRejected as RawPostRelayTurnRejected, RawTagsChanged as RawPostTagsChanged,
+    RawVisibilityChanged as RawPostVisibilityChanged,
+};
+pub(crate) use profile::{RawAchievementUnlocked, RawFieldSet as RawProfileFieldSet};
+pub(crate) use publication::{
+    RawBlockRejected as RawPublicationBlockRejected, RawBlocked as RawPublicationBlocked,
+    RawBlockedAfterReport as RawPublicationBlockedAfterReport, RawCommentReplied,
+    RawCommented as RawPublicationCommented, RawDrafted as RawPublicationDrafted,
+    RawRated as RawPublicationRated, RawReacted as RawPublicationReacted,
+    RawRestored as RawPublicationRestored,
+};
+pub(crate) use rubric::{
+    RawFandomChanged as RawRubricFandomChanged, RawKarmaCoefChanged as RawRubricKarmaCoefChanged,
+    RawNameChanged as RawRubricNameChanged, RawOwnerAssigned as RawRubricOwnerAssigned,
+    RawOwnerTransferred as RawRubricOwnerTransferred, RawRemoved as RawRubricRemoved,
+};
+use serde::{Deserialize, Deserializer};
 
 pub(crate) enum RawKind {
     AccountFandomUnbanned,
@@ -16,7 +59,6 @@ pub(crate) enum RawKind {
     AccountUnfollowed,
     AchievementUnlocked,
     AdminActionRejected,
-    BlockRejected,
     ChatMessageCreated,
     ChatMessageEdited,
     ChatMessageRemoved,
@@ -36,7 +78,6 @@ pub(crate) enum RawKind {
     FollowedPostCreated,
     ImportantPostCreated,
     PostClosed,
-    PostDrafted,
     PostFandomChanged,
     PostImagesPurged,
     PostMultilingualDisabled,
@@ -51,9 +92,11 @@ pub(crate) enum RawKind {
     ProfileLinkRemoved,
     ProfileNameCleared,
     ProfileStatusCleared,
+    PublicationBlockRejected,
     PublicationBlocked,
     PublicationBlockedAfterReport,
     PublicationCommented,
+    PublicationDrafted,
     PublicationRated,
     PublicationReacted,
     PublicationRestored,
@@ -65,75 +108,6 @@ pub(crate) enum RawKind {
     RubricOwnerTransferred,
     RubricRemoved,
     Unknown(i64),
-}
-
-impl Serialize for RawKind {
-    fn serialize<S>(&self, serializer: S) -> StdResult<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let kind = match self {
-            RawKind::PublicationRated => 1,
-            RawKind::PublicationCommented => 2,
-            RawKind::CommentReplied => 3,
-            RawKind::AccountFollowed => 4,
-            RawKind::AchievementUnlocked => 7,
-            RawKind::ChatMessageCreated => 8,
-            RawKind::ChatMessageReplied => 9,
-            RawKind::FollowedPostCreated => 10,
-            RawKind::ChatMessageEdited => 11,
-            RawKind::PublicationBlocked => 12,
-            RawKind::ChatMessageRemoved => 13,
-            RawKind::ChatTyping => 14,
-            RawKind::FandomReviewed => 15,
-            RawKind::ImportantPostCreated => 19,
-            RawKind::PostDrafted => 20,
-            RawKind::PostTagsChanged => 22,
-            RawKind::AccountFandomUnbanned => 23,
-            RawKind::ChatRead => 24,
-            RawKind::AccountPunished => 25,
-            RawKind::FandomModeratorGranted => 26,
-            RawKind::FandomModeratorRevoked => 27,
-            RawKind::PunishmentRemoved => 28,
-            RawKind::PublicationRestored => 29,
-            RawKind::BlockRejected => 30,
-            RawKind::ProfileStatusCleared => 31,
-            RawKind::ProfileDescriptionCleared => 32,
-            RawKind::ProfileNameCleared => 33,
-            RawKind::ProfileLinkRemoved => 34,
-            RawKind::PostFandomChanged => 35,
-            RawKind::PublicationBlockedAfterReport => 36,
-            RawKind::AccountMentioned => 37,
-            RawKind::PostMultilingualDisabled => 39,
-            RawKind::PostClosed => 41,
-            RawKind::PostOpened => 42,
-            RawKind::RubricNameChanged => 43,
-            RawKind::RubricOwnerTransferred => 44,
-            RawKind::RubricOwnerAssigned => 45,
-            RawKind::RubricRemoved => 46,
-            RawKind::RubricKarmaCoefChanged => 47,
-            RawKind::PublicationReacted => 48,
-            RawKind::PostRelayTurnAssigned => 49,
-            RawKind::PostRelayTurnMissed => 50,
-            RawKind::PostRelayPostCreated => 51,
-            RawKind::PostRelayTurnRejected => 52,
-            RawKind::FandomCuratorAssigned => 53,
-            RawKind::FandomCuratorRevoked => 54,
-            RawKind::DonationProcessed => 56,
-            RawKind::EffectApplied => 57,
-            RawKind::EffectRemoved => 58,
-            RawKind::PostImagesPurged => 61,
-            RawKind::FandomRemovalRejected => 62,
-            RawKind::AdminActionRejected => 63,
-            RawKind::AccountTargetAdminActionRejected => 64,
-            RawKind::RubricFandomChanged => 65,
-            RawKind::AccountUnfollowed => 66,
-            RawKind::PostNsfwToggled => 67,
-            RawKind::Unknown(unknown) => *unknown,
-        };
-
-        serializer.serialize_i64(kind)
-    }
 }
 
 impl<'de> Deserialize<'de> for RawKind {
@@ -156,7 +130,7 @@ impl<'de> Deserialize<'de> for RawKind {
             14 => RawKind::ChatTyping,
             15 => RawKind::FandomReviewed,
             19 => RawKind::ImportantPostCreated,
-            20 => RawKind::PostDrafted,
+            20 => RawKind::PublicationDrafted,
             22 => RawKind::PostTagsChanged,
             23 => RawKind::AccountFandomUnbanned,
             24 => RawKind::ChatRead,
@@ -165,7 +139,7 @@ impl<'de> Deserialize<'de> for RawKind {
             27 => RawKind::FandomModeratorRevoked,
             28 => RawKind::PunishmentRemoved,
             29 => RawKind::PublicationRestored,
-            30 => RawKind::BlockRejected,
+            30 => RawKind::PublicationBlockRejected,
             31 => RawKind::ProfileStatusCleared,
             32 => RawKind::ProfileDescriptionCleared,
             33 => RawKind::ProfileNameCleared,
@@ -200,69 +174,5 @@ impl<'de> Deserialize<'de> for RawKind {
             67 => RawKind::PostNsfwToggled,
             other => RawKind::Unknown(other),
         })
-    }
-}
-
-impl From<RawKind> for Kind {
-    fn from(value: RawKind) -> Self {
-        match value {
-            RawKind::PublicationRated => Kind::PublicationRated,
-            RawKind::PublicationCommented => Kind::PublicationCommented,
-            RawKind::CommentReplied => Kind::CommentReplied,
-            RawKind::AccountFollowed => Kind::AccountFollowed,
-            RawKind::AchievementUnlocked => Kind::AchievementUnlocked,
-            RawKind::ChatMessageCreated => Kind::ChatMessageCreated,
-            RawKind::ChatMessageReplied => Kind::ChatMessageReplied,
-            RawKind::FollowedPostCreated => Kind::FollowedPostCreated,
-            RawKind::ChatMessageEdited => Kind::ChatMessageEdited,
-            RawKind::PublicationBlocked => Kind::PublicationBlocked,
-            RawKind::ChatMessageRemoved => Kind::ChatMessageRemoved,
-            RawKind::ChatTyping => Kind::ChatTyping,
-            RawKind::FandomReviewed => Kind::FandomReviewed,
-            RawKind::ImportantPostCreated => Kind::ImportantPostCreated,
-            RawKind::PostDrafted => Kind::PostDrafted,
-            RawKind::PostTagsChanged => Kind::PostTagsChanged,
-            RawKind::AccountFandomUnbanned => Kind::AccountFandomUnbanned,
-            RawKind::ChatRead => Kind::ChatRead,
-            RawKind::AccountPunished => Kind::AccountPunished,
-            RawKind::FandomModeratorGranted => Kind::FandomModeratorGranted,
-            RawKind::FandomModeratorRevoked => Kind::FandomModeratorRevoked,
-            RawKind::PunishmentRemoved => Kind::PunishmentRemoved,
-            RawKind::PublicationRestored => Kind::PublicationRestored,
-            RawKind::BlockRejected => Kind::BlockRejected,
-            RawKind::ProfileStatusCleared => Kind::ProfileStatusCleared,
-            RawKind::ProfileDescriptionCleared => Kind::ProfileDescriptionCleared,
-            RawKind::ProfileNameCleared => Kind::ProfileNameCleared,
-            RawKind::ProfileLinkRemoved => Kind::ProfileLinkRemoved,
-            RawKind::PostFandomChanged => Kind::PostFandomChanged,
-            RawKind::PublicationBlockedAfterReport => Kind::PublicationBlockedAfterReport,
-            RawKind::AccountMentioned => Kind::AccountMentioned,
-            RawKind::PostMultilingualDisabled => Kind::PostMultilingualDisabled,
-            RawKind::PostClosed => Kind::PostClosed,
-            RawKind::PostOpened => Kind::PostOpened,
-            RawKind::RubricNameChanged => Kind::RubricNameChanged,
-            RawKind::RubricOwnerTransferred => Kind::RubricOwnerTransferred,
-            RawKind::RubricOwnerAssigned => Kind::RubricOwnerAssigned,
-            RawKind::RubricRemoved => Kind::RubricRemoved,
-            RawKind::RubricKarmaCoefChanged => Kind::RubricKarmaCoefChanged,
-            RawKind::PublicationReacted => Kind::PublicationReacted,
-            RawKind::PostRelayTurnAssigned => Kind::PostRelayTurnAssigned,
-            RawKind::PostRelayTurnMissed => Kind::PostRelayTurnMissed,
-            RawKind::PostRelayPostCreated => Kind::PostRelayPostCreated,
-            RawKind::PostRelayTurnRejected => Kind::PostRelayTurnRejected,
-            RawKind::FandomCuratorAssigned => Kind::FandomCuratorAssigned,
-            RawKind::FandomCuratorRevoked => Kind::FandomCuratorRevoked,
-            RawKind::DonationProcessed => Kind::DonationProcessed,
-            RawKind::EffectApplied => Kind::EffectApplied,
-            RawKind::EffectRemoved => Kind::EffectRemoved,
-            RawKind::PostImagesPurged => Kind::PostImagesPurged,
-            RawKind::FandomRemovalRejected => Kind::FandomRemovalRejected,
-            RawKind::AdminActionRejected => Kind::AdminActionRejected,
-            RawKind::AccountTargetAdminActionRejected => Kind::AccountTargetAdminActionRejected,
-            RawKind::RubricFandomChanged => Kind::RubricFandomChanged,
-            RawKind::AccountUnfollowed => Kind::AccountUnfollowed,
-            RawKind::PostNsfwToggled => Kind::PostNsfwToggled,
-            RawKind::Unknown(unknown) => Kind::Unknown(unknown),
-        }
     }
 }

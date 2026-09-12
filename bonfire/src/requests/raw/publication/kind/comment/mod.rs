@@ -64,7 +64,7 @@ impl RawPublishable for RawComment {
     type Target = Comment;
 
     fn new(data: serde_json::Value, _kind: RawKind) -> Result<Self> {
-        Ok(serde_json::from_value::<RawComment>(data)?)
+        Ok(serde_json::from_value(data)?)
     }
 }
 

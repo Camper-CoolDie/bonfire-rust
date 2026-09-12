@@ -1,11 +1,13 @@
 mod kind;
 mod reaction;
+mod reference;
 mod status;
 
 use std::marker::PhantomData;
 
 pub(crate) use kind::*;
 pub(crate) use reaction::RawReaction;
+pub(crate) use reference::RawReference;
 use serde::Deserialize;
 use serde_json::Value;
 pub(crate) use status::RawStatus;

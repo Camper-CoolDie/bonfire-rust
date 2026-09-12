@@ -27,7 +27,7 @@ impl RawPublishable for RawPostTag {
     type Target = PostTag;
 
     fn new(data: serde_json::Value, _kind: RawKind) -> Result<Self> {
-        Ok(serde_json::from_value::<RawPostTag>(data)?)
+        Ok(serde_json::from_value(data)?)
     }
 }
 
