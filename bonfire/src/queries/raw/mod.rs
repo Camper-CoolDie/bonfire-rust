@@ -1,8 +1,7 @@
-pub(super) mod auth;
-pub(super) mod error;
-pub(super) mod profile;
+pub(crate) mod auth;
+pub(crate) mod error;
+pub(crate) mod profile;
 
-pub(super) use auth::RawAuth;
-pub(crate) use error::RawMeliorError;
-pub(super) use error::{RawQueryLocation, RawQueryPath};
-pub(super) use profile::RawProfile;
+pub(crate) use auth::RawAuth;
+pub(crate) use error::{RawMeliorError, RawQueryLocation, RawQueryPath};
+pub(crate) use profile::RawProfile;

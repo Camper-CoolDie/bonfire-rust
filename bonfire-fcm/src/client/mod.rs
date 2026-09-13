@@ -18,9 +18,9 @@ use hyper_util::rt::TokioExecutor;
 use token_provider::TokenProvider;
 use tokio_util::sync::CancellationToken;
 
-use crate::Listener;
-use crate::models::{Config, Credentials, Message, Subscription};
+use crate::models::{Config, Credentials, Subscription};
 use crate::requests::{PushRegistrationRequest, PushUnregistrationRequest};
+use crate::{Listener, Parse};
 
 pub(super) type HyperClient = hyper_util::client::legacy::Client<
     HttpsConnector<HttpConnector>,
@@ -115,12 +115,13 @@ impl Client {
         Ok(self)
     }
 
-    pub async fn listen(
+    pub async fn listen<P: Parse>(
         &self,
+        parser: P,
         subscription: Subscription,
         cancellation_token: CancellationToken,
         buffer: usize,
-    ) -> Result<impl Stream<Item = Message>> {
+    ) -> Result<impl Stream<Item = P::Target>> {
         let registration = self
             .inner
             .token_provider
@@ -128,6 +129,7 @@ impl Client {
             .await?;
 
         Ok(Listener::spawn(
+            parser,
             subscription,
             registration.android_id,
             registration.security_token,

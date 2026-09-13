@@ -30,6 +30,9 @@ pub enum Error {
     /// An error occurred while converting the response's raw data into models or vice-versa
     #[error("{0}")]
     ConversionError(String),
+    #[cfg(feature = "fcm")]
+    #[error("FCM error")]
+    FcmError(#[from] fcm::Error),
     /// An error occurred during JSON serialization or deserialization
     #[error("JSON error")]
     JsonError(#[from] serde_json::Error),

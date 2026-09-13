@@ -27,6 +27,8 @@ pub use auth::Auth;
 pub use chat::{AnyChat, Chat, Direct, FandomRoot, FandomSub, Group, Tag as ChatTag};
 pub use common::{Category, ImageRef, Language, VoiceRef};
 pub use fandom::{Fandom, Reference as FandomRef};
+#[cfg(feature = "fcm")]
+pub use notification::Parser as NotificationParser;
 pub use notification::{AnyNotification, Notification};
 pub use other::{Config, InitialData};
 pub use profile::{Gender, Link, Profile};

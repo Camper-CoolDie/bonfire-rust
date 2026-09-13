@@ -1,6 +1,8 @@
 mod heartbeat;
+mod parse;
 
 use std::collections::VecDeque;
+use std::error::Error as StdError;
 use std::panic;
 use std::time::{Duration, Instant};
 
@@ -8,6 +10,7 @@ use backon::{BackoffBuilder as _, FibonacciBuilder, Retryable as _};
 use ece::EcKeyComponents;
 use futures::{FutureExt as _, Stream};
 use heartbeat::{Command as HeartbeatCommand, Heartbeat};
+pub use parse::Parse;
 use serde::Deserialize;
 use tokio::sync::mpsc;
 use tokio::task::JoinSet;
@@ -30,88 +33,86 @@ struct MessageData {
 
 pub(super) struct Listener;
 impl Listener {
-    pub(super) fn spawn(
+    pub(super) fn spawn<P: Parse>(
+        parser: P,
         subscription: Subscription,
         android_id: u64,
         security_token: u64,
         cancellation_token: CancellationToken,
         buffer: usize,
-    ) -> impl Stream<Item = Message> {
-        let (message_sender, message_receiver) = mpsc::channel(buffer);
-        tokio::spawn(Listener::task(
+    ) -> impl Stream<Item = P::Target> {
+        let (sender, receiver) = mpsc::channel(buffer);
+        tokio::spawn(Self::task(
+            parser,
             subscription,
-            message_sender,
+            sender,
             cancellation_token,
             android_id,
             security_token,
         ));
-        ReceiverStream::new(message_receiver)
+        ReceiverStream::new(receiver)
     }
 
     #[instrument(name = "listener", skip_all, fields(id = subscription.id))]
-    async fn task(
+    async fn task<P: Parse>(
+        parser: P,
         mut subscription: Subscription,
-        message_sender: mpsc::Sender<Message>,
+        sender: mpsc::Sender<P::Target>,
         cancellation_token: CancellationToken,
         android_id: u64,
         security_token: u64,
     ) {
         loop {
             let started_at = Instant::now();
-            let result = Self::task_loop(
+            let (error, should_retry) = Self::task_loop(
+                &parser,
                 &mut subscription,
-                &message_sender,
+                &sender,
                 &cancellation_token,
                 android_id,
                 security_token,
             )
-            .await;
+            .await
+            .map_or((None, false), |(error, should_retry)| {
+                (Some(error), should_retry)
+            });
 
             // If `task_loop()` has been running for a long enough time, try reconnecting
-            if let Err(ref error) = result
-                && Self::is_retryable(error)
-                && started_at.elapsed() > MIN_DURATION_FOR_RETRY
-            {
+            if should_retry && started_at.elapsed() > MIN_DURATION_FOR_RETRY {
                 tracing::info!(?error, elapsed = ?started_at.elapsed(), "reconnecting");
                 continue;
             }
 
-            // Pass subscription with modified `persistent_ids` back to the caller
-            let _ = message_sender
-                .send(Message::ListenerStopped {
-                    subscription,
-                    error: result.err(),
-                })
-                .await
-                .inspect_err(|error| {
-                    tracing::warn!(
-                        ?error,
-                        "failed to send ListenerStopped message (receiver closed)"
-                    );
-                });
+            // Pass subscription with modified `persistent_ids` to the parser
+            parser.stop(subscription, error).await;
             break;
         }
     }
 
-    async fn task_loop(
+    async fn task_loop<P: Parse>(
+        parser: &P,
         subscription: &mut Subscription,
-        message_sender: &mpsc::Sender<Message>,
+        sender: &mpsc::Sender<P::Target>,
         cancellation_token: &CancellationToken,
         android_id: u64,
         security_token: u64,
-    ) -> Result<()> {
+    ) -> Option<(P::Error, bool)> {
         let id = subscription.id;
         let key_components = &subscription.key_components;
         let auth_secret = &subscription.auth_secret;
         let persistent_ids = &mut subscription.persistent_ids;
-        let connection = Self::connect_and_login(
+        let connection = match Self::connect_and_login(
             key_components,
             auth_secret,
             persistent_ids,
             android_id,
             security_token,
         )
-        .await?;
+        .await
+        {
+            Ok(connection) => connection,
+            Err(error) => return Some(Self::map_error(error)),
+        };
 
         // JoinSet aborts the underlying task when dropped
         let mut join_set = JoinSet::new();
@@ -142,8 +143,10 @@ impl Listener {
                 () = cancellation_token.cancelled() => {
                     tracing::debug!("stopping");
                     // Heartbeat task also finishes on cancellation, so it should be awaited
-                    heartbeat_future.await?;
-                    break;
+                    match heartbeat_future.await {
+                        Ok(()) => break,
+                        Err(error) => return Some(Self::map_error(error)),
+                    }
                 }
                 result = &mut heartbeat_future => {
                     match result {
@@ -151,36 +154,61 @@ impl Listener {
                             tracing::debug!("heartbeat task exited, stopping");
                             break;
                         }
-                        Err(error) => return Err(error),
+                        Err(error) => return Some(Self::map_error(error)),
                     }
                 }
                 result = connection.read() => {
-                    match result {
+                    let (option, should_close) = match result {
                         Ok(Some(message)) => {
-                            let should_close = Self::parse_message(
-                                message,
-                                persistent_ids,
-                                message_sender,
-                                &heartbeat_sender,
-                            )
-                            .await?;
-
-                            if should_close {
-                                break;
+                            match Self::parse_message(message, persistent_ids, &heartbeat_sender)
+                                .await
+                            {
+                                Ok((option, should_close)) => (option, should_close),
+                                Err(error) => {
+                                    return Some(Self::map_error(error));
+                                }
                             }
                         }
-                        Ok(None) => {}
+                        Ok(None) => continue,
                         Err(error) => {
                             tracing::error!(?error, "failed to read next message");
-                            return Err(error);
+                            return Some(Self::map_error(error));
                         }
+                    };
+
+                    if let Some(message) = option {
+                        match parser.parse(message).await {
+                            Ok(Some(target)) => {
+                                if sender.send(target).await.is_err() {
+                                    // The receiver has closed
+                                    break;
+                                }
+                            }
+                            Ok(None) => {}
+                            Err(error) => {
+                                tracing::error!(?error, "failed to parse message");
+                                return Some((error, false));
+                            }
+                        }
+                    }
+
+                    if should_close {
+                        break;
                     }
                 }
             }
         }
 
-        connection.shutdown().await?;
-        Ok(())
+        connection.shutdown().await.err().map(Self::map_error)
+    }
+
+    fn map_error<E: From<Error> + StdError + Send>(error: Error) -> (E, bool) {
+        let should_retry = Self::is_retryable(&error);
+        (error.into(), should_retry)
+    }
+
+    fn is_retryable(error: &Error) -> bool {
+        matches!(error, Error::IoError(_))
     }
 
     async fn connect_and_login(
@@ -218,17 +246,11 @@ impl Listener {
         .await
     }
 
-    fn is_retryable(error: &Error) -> bool {
-        matches!(error, Error::IoError(_))
-    }
-
-    // Returns true if the connection should close
     async fn parse_message(
         message: RawMessage,
         persistent_ids: &mut VecDeque<String>,
-        message_sender: &mpsc::Sender<Message>,
         heartbeat_sender: &mpsc::Sender<HeartbeatCommand>,
-    ) -> Result<bool> {
+    ) -> Result<(Option<Message>, bool)> {
         match message {
             RawMessage::Data {
                 persistent_id,
@@ -239,7 +261,7 @@ impl Listener {
                 let _ = heartbeat_sender
                     .send(HeartbeatCommand::MessageReceived)
                     .await;
-                Ok(message_sender.send(Message::Data(content)).await.is_err())
+                Ok((Some(Message::Data(content)), false))
             }
             RawMessage::MessagesDeleted {
                 persistent_id,
@@ -249,10 +271,7 @@ impl Listener {
                 let _ = heartbeat_sender
                     .send(HeartbeatCommand::MessageReceived)
                     .await;
-                Ok(message_sender
-                    .send(Message::MessagesDeleted { count })
-                    .await
-                    .is_err())
+                Ok((Some(Message::MessagesDeleted { count }), false))
             }
             RawMessage::HeartbeatPing(ping) => {
                 let _ = heartbeat_sender
@@ -260,15 +279,15 @@ impl Listener {
                         status: ping.status,
                     })
                     .await;
-                Ok(false)
+                Ok((None, false))
             }
             RawMessage::HeartbeatAck(_) => {
                 let _ = heartbeat_sender.send(HeartbeatCommand::Acked).await;
-                Ok(false)
+                Ok((None, false))
             }
             RawMessage::Close => {
                 tracing::info!("closing connection");
-                Ok(true)
+                Ok((None, true))
             }
             other => Err(Error::McsProtocolError(format!(
                 "unexpected tag: {:?}",

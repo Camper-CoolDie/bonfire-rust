@@ -19,8 +19,5 @@ serde_json = "1.0"
 thiserror = "2.0"
 tracing = "0.1"
 
-[lib]
-doc = false
-
 [lints]
 workspace = true

@@ -50,6 +50,7 @@ pub(crate) use rubric::{
 };
 use serde::{Deserialize, Deserializer};
 
+#[derive(Debug)]
 pub(crate) enum RawKind {
     AccountFandomUnbanned,
     AccountFollowed,

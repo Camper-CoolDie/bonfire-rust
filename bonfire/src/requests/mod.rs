@@ -4,7 +4,7 @@ mod error;
 pub(crate) mod fandom;
 pub(crate) mod other;
 pub(crate) mod publication;
-mod raw;
+pub(crate) mod raw;
 
 use std::result::Result as StdResult;
 

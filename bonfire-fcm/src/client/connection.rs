@@ -3,7 +3,7 @@ use std::sync::{Arc, LazyLock};
 use std::time::Duration;
 
 use base64::Engine as _;
-use base64::engine::general_purpose::URL_SAFE;
+use base64::engine::general_purpose::URL_SAFE_PAD_INDIFFERENT;
 use bytes::{Bytes, BytesMut};
 use ece::EcKeyComponents;
 use ece::legacy::{AesGcmEncryptedBlock, decrypt_aesgcm};
@@ -192,7 +192,7 @@ impl Connection {
                     }
 
                     if let Some(("dh", key)) = value.split_once('=') {
-                        dh = Some(URL_SAFE.decode(key)?);
+                        dh = Some(Self::decode_data_field(key)?);
                     } else {
                         return Err(Error::invalid_format("crypto-key", "data message"));
                     }
@@ -203,7 +203,7 @@ impl Connection {
                     }
 
                     if let Some(("salt", key)) = value.split_once('=') {
-                        salt = Some(URL_SAFE.decode(key)?);
+                        salt = Some(Self::decode_data_field(key)?);
                     } else {
                         return Err(Error::invalid_format("encryption", "data message"));
                     }
@@ -252,6 +252,15 @@ impl Connection {
                 body,
             })
         }
+    }
+
+    pub(crate) fn decode_data_field(field: &str) -> Result<Vec<u8>> {
+        // The field may look like "...; p256ecdsa=..."
+        let field = field
+            .trim_matches('"')
+            .split_once(';')
+            .map_or(field, |(field, _)| field);
+        Ok(URL_SAFE_PAD_INDIFFERENT.decode(field)?)
     }
 
     pub(crate) async fn write_version(&self) -> Result<()> {

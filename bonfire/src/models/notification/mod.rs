@@ -1,9 +1,13 @@
 mod filter;
 mod kind;
+#[cfg(feature = "fcm")]
+mod parser;
 
 use chrono::{DateTime, Utc};
 pub use filter::Filter;
 pub use kind::*;
+#[cfg(feature = "fcm")]
+pub use parser::Parser;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 

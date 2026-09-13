@@ -2,7 +2,7 @@ pub(crate) mod auth;
 mod error;
 pub(crate) mod notification;
 pub(crate) mod profile;
-mod raw;
+pub(crate) mod raw;
 
 pub use error::{MeliorError, QueryLocation, QueryPath};
 use serde::{Deserialize, Serialize};

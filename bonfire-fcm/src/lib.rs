@@ -15,3 +15,4 @@ mod proto {
 pub use client::{Builder as ClientBuilder, Client, Error, Result};
 use client::{Connection, HyperClient};
 use listener::Listener;
+pub use listener::Parse;
