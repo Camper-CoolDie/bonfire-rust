@@ -11,7 +11,7 @@
 //!
 //! ## Examples
 //!
-//! You can use the following code as a base for your future program.
+//! You can use one of the following examples as a base for your future program.
 //!
 //! ### Logging in and printing user's email and ID
 //!
@@ -89,6 +89,14 @@
 //!     Ok(())
 //! }
 //! ```
+//!
+//! ### Receiving notifications
+//!
+//! Since Bonfire relies on FCM to deliver notifications, a large portion of the GCM (Google Cloud
+//! Messaging) protocol was implemented specifically for this API based on
+//! [Chromium source code](https://source.chromium.org) and several other sources. To use this
+//! implementation, see
+//! [`notification_listener.rs`](https://github.com/Camper-CoolDie/bonfire-rust/blob/HEAD/bonfire/examples/notification_listener.rs).
 //!
 //! ### Debugging
 //!

@@ -6,7 +6,7 @@ use crate::{Error, Result};
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub(crate) struct RawRevoked {
+pub(crate) struct RawCuratorRevoked {
     pub fandom_id: u64,
     #[serde(rename = "languageId")]
     pub fandom_language: RawLanguage,
@@ -21,10 +21,10 @@ pub(crate) struct RawRevoked {
     pub reason: String,
 }
 
-impl TryFrom<RawRevoked> for FandomCuratorRevoked {
+impl TryFrom<RawCuratorRevoked> for FandomCuratorRevoked {
     type Error = Error;
 
-    fn try_from(value: RawRevoked) -> Result<Self> {
+    fn try_from(value: RawCuratorRevoked) -> Result<Self> {
         Ok(Self {
             fandom: RawFandomRef {
                 id: value.fandom_id,

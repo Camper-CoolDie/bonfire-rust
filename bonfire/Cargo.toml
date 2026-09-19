@@ -62,10 +62,15 @@ httpmock = "0.8"
 nanoid = "0.5"
 ron = "0.12"
 tokio = { version = "1.53", features = ["rt-multi-thread"] }
+tokio-util = "0.7"
 
 [build-dependencies]
 graphql-minify = "0.1"
 walkdir = "2.5"
+
+[[example]]
+name = "notification_listener"
+required-features = ["fcm", "serde"]
 
 [[example]]
 name = "search_accounts"

@@ -9,7 +9,7 @@ use crate::{Client, Result, RootError};
 
 #[derive(Serialize)]
 pub(crate) struct NotifyTypingRequest {
-    tag: RawChatTag,
+    pub tag: RawChatTag,
 }
 impl NotifyTypingRequest {
     pub(crate) const PERIOD: Duration = Duration::from_secs(5);

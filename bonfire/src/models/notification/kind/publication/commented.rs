@@ -6,7 +6,7 @@ use crate::models::{AccountRef, PublicationRef};
 
 #[derive(Default, Clone, Debug)]
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
-pub struct Commented {
+pub struct PublicationCommented {
     pub id: u64,
     pub author: AccountRef,
     pub fandom_name: Option<String>,

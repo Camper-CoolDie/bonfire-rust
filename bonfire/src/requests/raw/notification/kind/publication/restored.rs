@@ -5,7 +5,7 @@ use crate::requests::raw::RawPublicationRef;
 use crate::requests::raw::publication::RawKind;
 
 #[derive(Deserialize)]
-pub(crate) struct RawRestored {
+pub(crate) struct RawPublicationRestored {
     #[serde(rename = "unitId")]
     pub id: u64,
     #[serde(rename = "unitType")]
@@ -18,8 +18,8 @@ pub(crate) struct RawRestored {
     pub reason: String,
 }
 
-impl From<RawRestored> for PublicationRestored {
-    fn from(value: RawRestored) -> Self {
+impl From<RawPublicationRestored> for PublicationRestored {
+    fn from(value: RawPublicationRestored) -> Self {
         Self {
             publication: RawPublicationRef {
                 id: value.id,

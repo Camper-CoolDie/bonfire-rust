@@ -1,4 +1,4 @@
-mod kind;
+pub mod kind;
 mod tag;
 mod typing;
 
@@ -11,9 +11,9 @@ pub use tag::Tag;
 pub use typing::Handler as TypingHandler;
 
 use crate::client::Request as _;
-use crate::models::streams::auto_paginated_stream;
+use crate::models::streams::{auto_paginated_stream, paginated_stream};
 use crate::models::{ChatMessage, Publication};
-use crate::requests::chat::{GetChatRequest, ListChatsRequest};
+use crate::requests::chat::{GetChatRequest, ListChatsRequest, ListMessagesRequest};
 use crate::sealed::Sealed;
 use crate::{Client, Result};
 
@@ -115,5 +115,36 @@ impl Chat {
             offset,
             ListChatsRequest::PAGE_SIZE,
         )
+    }
+
+    pub fn list_messages(
+        &self,
+        client: &Client,
+        offset_date: Option<DateTime<Utc>>,
+        newest_first: bool,
+        message_id: Option<u64>,
+    ) -> impl Stream<Item = Result<Publication<ChatMessage>>> + '_ {
+        let tag = self.tag();
+
+        paginated_stream(
+            move |offset_date| async move {
+                ListMessagesRequest::new(tag, offset_date, newest_first, message_id)
+                    .send_request(client)
+                    .await?
+                    .try_into()
+            },
+            offset_date,
+            |messages, _| {
+                let length = messages.len();
+                (length >= ListMessagesRequest::PAGE_SIZE)
+                    .then(|| messages.last())
+                    .flatten()
+                    .map(|message| Some(message.created_at))
+            },
+        )
+    }
+
+    pub fn tag(&self) -> Tag {
+        self.info.tag()
     }
 }

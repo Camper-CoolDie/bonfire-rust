@@ -1,5 +1,5 @@
 mod filter;
-mod kind;
+pub mod kind;
 #[cfg(feature = "fcm")]
 mod parser;
 

@@ -6,7 +6,7 @@ use crate::{Error, Result};
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub(crate) struct RawAssigned {
+pub(crate) struct RawCuratorAssigned {
     #[serde(rename = "oldAccountId")]
     pub old_curator_id: u64,
     pub fandom_id: u64,
@@ -23,10 +23,10 @@ pub(crate) struct RawAssigned {
     pub reason: String,
 }
 
-impl TryFrom<RawAssigned> for FandomCuratorAssigned {
+impl TryFrom<RawCuratorAssigned> for FandomCuratorAssigned {
     type Error = Error;
 
-    fn try_from(value: RawAssigned) -> Result<Self> {
+    fn try_from(value: RawCuratorAssigned) -> Result<Self> {
         Ok(Self {
             old_curator_id: match value.old_curator_id {
                 0 => None,

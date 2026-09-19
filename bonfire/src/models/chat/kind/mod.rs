@@ -1,8 +1,8 @@
 mod any;
-mod direct;
-mod fandom_root;
-mod fandom_sub;
-mod group;
+pub mod direct;
+pub mod fandom_root;
+pub mod fandom_sub;
+pub mod group;
 
 pub use any::AnyChat;
 pub use direct::Direct;

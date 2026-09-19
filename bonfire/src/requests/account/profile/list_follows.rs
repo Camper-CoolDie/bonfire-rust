@@ -21,9 +21,9 @@ impl TryFrom<Response> for Vec<Account> {
 #[derive(Serialize)]
 pub(crate) struct ListFollowsRequest {
     #[serde(rename = "followsOfaAccountId")]
-    id: u64,
-    offset: usize,
-    followers: bool,
+    pub id: u64,
+    pub offset: usize,
+    pub followers: bool,
 }
 impl ListFollowsRequest {
     pub(crate) const PAGE_SIZE: usize = 20;

@@ -6,6 +6,6 @@ mod punishment_removed;
 
 pub use effect_removed::EffectRemoved;
 pub use fandom_unbanned::FandomUnbanned;
-pub use mentioned::Mentioned;
-pub use punished::Punished;
+pub use mentioned::AccountMentioned;
+pub use punished::AccountPunished;
 pub use punishment_removed::PunishmentRemoved;

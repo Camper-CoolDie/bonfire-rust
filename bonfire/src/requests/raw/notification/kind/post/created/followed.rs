@@ -5,7 +5,7 @@ use crate::requests::raw::{RawAccountRef, RawGender};
 use crate::{Error, Result};
 
 #[derive(Deserialize)]
-pub(crate) struct RawFollowed {
+pub(crate) struct RawFollowedPostCreated {
     #[serde(rename = "J_UNIT_ID")]
     pub id: u64,
     #[serde(rename = "J_ACCOUNT_ID")]
@@ -16,10 +16,10 @@ pub(crate) struct RawFollowed {
     pub author_gender: RawGender,
 }
 
-impl TryFrom<RawFollowed> for FollowedPostCreated {
+impl TryFrom<RawFollowedPostCreated> for FollowedPostCreated {
     type Error = Error;
 
-    fn try_from(value: RawFollowed) -> Result<Self> {
+    fn try_from(value: RawFollowedPostCreated) -> Result<Self> {
         Ok(Self {
             id: value.id,
             author: RawAccountRef {

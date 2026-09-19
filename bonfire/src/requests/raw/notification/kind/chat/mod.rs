@@ -3,8 +3,7 @@ mod read;
 mod typing;
 
 pub(crate) use message::{
-    RawCreated as RawMessageCreated, RawEdited as RawMessageEdited,
-    RawRemoved as RawMessageRemoved, RawReplied as RawMessageReplied,
+    RawMessageCreated, RawMessageEdited, RawMessageRemoved, RawMessageReplied,
 };
-pub(crate) use read::RawRead;
-pub(crate) use typing::RawTyping;
+pub(crate) use read::RawChatRead;
+pub(crate) use typing::RawChatTyping;

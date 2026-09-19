@@ -2,6 +2,6 @@ mod assigned;
 mod missed;
 mod rejected;
 
-pub(crate) use assigned::RawAssigned;
-pub(crate) use missed::RawMissed;
-pub(crate) use rejected::RawRejected;
+pub(crate) use assigned::RawRelayTurnAssigned;
+pub(crate) use missed::RawRelayTurnMissed;
+pub(crate) use rejected::RawRelayTurnRejected;

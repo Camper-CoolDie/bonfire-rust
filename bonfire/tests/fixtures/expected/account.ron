@@ -35,7 +35,7 @@ Account(
             ends_at: "2126-03-28T03:32:53.721Z",
             kind: watchman,
             origin: system(
-                reason_kind: rejected_blocks,
+                reason_kind: Some(rejected_blocks),
             ),
         ),
     ],

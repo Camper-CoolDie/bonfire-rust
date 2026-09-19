@@ -21,11 +21,11 @@ impl TryFrom<Response> for Fandom {
 #[derive(Serialize)]
 pub(crate) struct GetFandomRequest {
     #[serde(rename = "fandomId")]
-    id: u64,
+    pub id: u64,
     #[serde(rename = "languageId")]
-    language: RawLanguage,
+    pub language: RawLanguage,
     #[serde(rename = "accountLanguageId")]
-    my_language: RawLanguage,
+    pub my_language: RawLanguage,
 }
 impl GetFandomRequest {
     pub(crate) fn new(id: u64, language: Option<Language>, my_language: Language) -> Self {

@@ -21,7 +21,7 @@ impl TryFrom<Response> for Vec<Chat> {
 
 #[derive(Serialize)]
 pub(crate) struct ListChatsRequest {
-    offset: usize,
+    pub offset: usize,
 }
 impl ListChatsRequest {
     pub(crate) const PAGE_SIZE: usize = 10;

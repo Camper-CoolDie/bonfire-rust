@@ -21,7 +21,7 @@ impl TryFrom<Response> for Vec<BanEntry> {
 
 #[derive(Serialize)]
 pub(crate) struct ListBannedRequest {
-    offset: usize,
+    pub offset: usize,
 }
 impl ListBannedRequest {
     pub(crate) const PAGE_SIZE: usize = 20;

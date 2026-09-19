@@ -6,7 +6,7 @@ use crate::{Client, Result};
 
 #[derive(Serialize)]
 pub(crate) struct SetNameRequest<'a> {
-    name: &'a str,
+    pub name: &'a str,
 }
 impl<'a> SetNameRequest<'a> {
     pub(crate) fn new(name: &'a str) -> Self {

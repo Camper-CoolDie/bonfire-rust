@@ -76,7 +76,7 @@ impl TryFrom<Response> for Vec<Option<Fandom>> {
 #[derive(Serialize)]
 pub(crate) struct ListFandomsRequest<'a> {
     #[serde(rename = "fandomsIds")]
-    ids: &'a [u64],
+    pub ids: &'a [u64],
 }
 impl<'a> ListFandomsRequest<'a> {
     pub(crate) fn new(ids: &'a [u64]) -> Self {

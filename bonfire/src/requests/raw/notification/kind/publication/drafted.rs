@@ -7,7 +7,7 @@ use crate::{Error, Result};
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub(crate) struct RawDrafted {
+pub(crate) struct RawPublicationDrafted {
     #[serde(rename = "publicationTyoe")]
     pub kind: RawKind,
     #[serde(rename = "maskText")]
@@ -22,10 +22,10 @@ pub(crate) struct RawDrafted {
     pub reason: String,
 }
 
-impl TryFrom<RawDrafted> for PublicationDrafted {
+impl TryFrom<RawPublicationDrafted> for PublicationDrafted {
     type Error = Error;
 
-    fn try_from(value: RawDrafted) -> Result<Self> {
+    fn try_from(value: RawPublicationDrafted) -> Result<Self> {
         Ok(Self {
             title: match value.kind {
                 RawKind::Post => Some(

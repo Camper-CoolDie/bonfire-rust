@@ -12,6 +12,7 @@ fn deserialize_timestamp<'de, D: Deserializer<'de>>(
         .ok_or_else(|| D::Error::custom(format!("timestamp {seconds} is out of range")))
 }
 
+#[doc(hidden)]
 #[derive(Debug, Deserialize)]
 pub struct Claims {
     #[serde(rename = "sub")]

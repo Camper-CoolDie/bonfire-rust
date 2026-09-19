@@ -7,7 +7,7 @@ use crate::{Client, Result};
 #[derive(Serialize)]
 pub(crate) struct SetReferrerRequest {
     #[serde(rename = "accountId")]
-    id: u64,
+    pub id: u64,
 }
 impl SetReferrerRequest {
     pub(crate) fn new(id: u64) -> Self {

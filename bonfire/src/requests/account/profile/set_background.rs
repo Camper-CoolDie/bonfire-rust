@@ -63,18 +63,16 @@ impl Request for SetBackgroundRequest<'_> {
     type Error = SetProfileImageError;
 
     async fn send_request(&self, client: &Client) -> Result<Response> {
+        let attachments = match self {
+            Self::Normal(background) => vec![*background, &[]],
+            Self::Gif {
+                first_frame,
+                animated,
+            } => vec![*first_frame, *animated],
+        };
+
         client
-            .send_request(
-                "RAccountsChangeTitleImage",
-                self,
-                match self {
-                    Self::Normal(background) => vec![background, &[]],
-                    Self::Gif {
-                        first_frame,
-                        animated,
-                    } => vec![first_frame, animated],
-                },
-            )
+            .send_request("RAccountsChangeTitleImage", self, attachments)
             .await
     }
 }

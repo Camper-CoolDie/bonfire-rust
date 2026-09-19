@@ -7,7 +7,7 @@ use crate::requests::raw::{RawAccountRef, RawChatTag, RawGender, RawPublicationR
 use crate::{Error, Result};
 
 #[derive(Deserialize)]
-pub(crate) struct RawMentioned {
+pub(crate) struct RawAccountMentioned {
     #[serde(rename = "fromAccountId")]
     pub account_id: u64,
     #[serde(rename = "fromAccountName")]
@@ -27,10 +27,10 @@ pub(crate) struct RawMentioned {
     pub text: String,
 }
 
-impl TryFrom<RawMentioned> for AccountMentioned {
+impl TryFrom<RawAccountMentioned> for AccountMentioned {
     type Error = Error;
 
-    fn try_from(value: RawMentioned) -> Result<Self> {
+    fn try_from(value: RawAccountMentioned) -> Result<Self> {
         Ok(Self {
             account: RawAccountRef {
                 id: value.account_id,

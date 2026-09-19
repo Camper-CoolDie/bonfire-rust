@@ -21,8 +21,8 @@ impl TryFrom<Response> for Vec<Account> {
 #[derive(Serialize)]
 pub(crate) struct ListBlockedAccountsRequest {
     #[serde(rename = "accountId")]
-    id: u64,
-    offset: usize,
+    pub id: u64,
+    pub offset: usize,
 }
 impl ListBlockedAccountsRequest {
     pub(crate) const PAGE_SIZE: usize = 20;

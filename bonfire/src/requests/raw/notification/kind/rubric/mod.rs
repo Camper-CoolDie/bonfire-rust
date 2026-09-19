@@ -7,5 +7,5 @@ mod removed;
 pub(crate) use fandom_changed::RawFandomChanged;
 pub(crate) use karma_coef_changed::RawKarmaCoefChanged;
 pub(crate) use name_changed::RawNameChanged;
-pub(crate) use owner::{RawAssigned as RawOwnerAssigned, RawTransferred as RawOwnerTransferred};
-pub(crate) use removed::RawRemoved;
+pub(crate) use owner::{RawOwnerAssigned, RawOwnerTransferred};
+pub(crate) use removed::RawRubricRemoved;

@@ -36,14 +36,14 @@ impl TryFrom<Response> for Auth {
 }
 
 #[derive(Serialize)]
-struct LoginInput<'a> {
-    email: &'a str,
-    password: &'a str,
+pub(crate) struct LoginInput<'a> {
+    pub email: &'a str,
+    pub password: &'a str,
 }
 
 #[derive(Serialize)]
 pub(crate) struct LoginEmailQuery<'a> {
-    input: LoginInput<'a>,
+    pub input: LoginInput<'a>,
 }
 impl<'a> LoginEmailQuery<'a> {
     pub(crate) fn new(email: &'a str, password: &'a str) -> Self {

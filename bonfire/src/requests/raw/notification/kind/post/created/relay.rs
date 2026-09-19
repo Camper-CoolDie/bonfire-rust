@@ -6,7 +6,7 @@ use crate::{Error, Result};
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub(crate) struct RawRelay {
+pub(crate) struct RawRelayPostCreated {
     pub post_id: u64,
     pub fandom_id: u64,
     #[serde(rename = "fandomLanguageId")]
@@ -18,10 +18,10 @@ pub(crate) struct RawRelay {
     pub relay_name: String,
 }
 
-impl TryFrom<RawRelay> for PostRelayPostCreated {
+impl TryFrom<RawRelayPostCreated> for PostRelayPostCreated {
     type Error = Error;
 
-    fn try_from(value: RawRelay) -> Result<Self> {
+    fn try_from(value: RawRelayPostCreated) -> Result<Self> {
         Ok(Self {
             post_id: value.post_id,
             fandom: RawFandomRef {

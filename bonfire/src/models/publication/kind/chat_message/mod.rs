@@ -1,18 +1,26 @@
 mod content;
+mod error;
 mod ref_content;
 mod reference;
 
 use std::ops::RangeInclusive;
 
 pub use content::Content;
+pub use error::*;
 pub use ref_content::RefContent;
 pub use reference::Reference;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
+use crate::client::Request as _;
 use crate::models::publication::{Kind, Publishable};
-use crate::models::{Account, ChatTag, Fandom};
+use crate::models::{Account, ChatTag, Fandom, Publication};
+use crate::requests::publication::chat_message::SendChatMessageRequest;
+pub use crate::requests::publication::chat_message::{
+    SendChatMessageContent, SendChatMessageOptions,
+};
 use crate::sealed::Sealed;
+use crate::{Client, Result};
 
 /// Represents the specific data for a chat message publication, containing text, and optionally a
 /// media [`Content`][content::Content] or a [`ChatMessageRef`][Reference] to another publication.
@@ -54,3 +62,15 @@ impl Publishable for ChatMessage {
 }
 
 impl Sealed for ChatMessage {}
+
+impl Publication<ChatMessage> {
+    pub async fn send(
+        client: &Client,
+        options: SendChatMessageOptions<'_>,
+    ) -> Result<Publication<ChatMessage>> {
+        SendChatMessageRequest::new(options)
+            .send_request(client)
+            .await?
+            .try_into()
+    }
+}

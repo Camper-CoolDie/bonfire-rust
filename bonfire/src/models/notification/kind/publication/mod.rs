@@ -8,10 +8,10 @@ mod reacted;
 mod restored;
 
 pub use block_rejected::BlockRejected;
-pub use blocked::Blocked;
+pub use blocked::PublicationBlocked;
 pub use comment_replied::CommentReplied;
-pub use commented::Commented;
-pub use drafted::Drafted;
-pub use rated::Rated;
-pub use reacted::Reacted;
-pub use restored::Restored;
+pub use commented::PublicationCommented;
+pub use drafted::PublicationDrafted;
+pub use rated::PublicationRated;
+pub use reacted::PublicationReacted;
+pub use restored::PublicationRestored;

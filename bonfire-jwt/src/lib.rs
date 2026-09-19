@@ -8,6 +8,7 @@ use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 pub use claims::Claims;
 pub use error::{Error, Result};
 
+#[doc(hidden)]
 pub fn decode(token: &str) -> Result<Claims> {
     token
         .split('.')

@@ -6,7 +6,7 @@ use crate::{Client, Result};
 
 #[derive(Serialize)]
 pub(crate) struct SetDescriptionRequest<'a> {
-    description: &'a str,
+    pub description: &'a str,
 }
 impl<'a> SetDescriptionRequest<'a> {
     pub(crate) fn new(description: Option<&'a str>) -> Self {

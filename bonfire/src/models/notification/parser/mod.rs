@@ -1,57 +1,40 @@
 mod data;
 
-use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 use chrono::Utc;
 use data::Data;
 use fcm::Parse;
 use fcm::models::{Message, Subscription};
+use tokio::sync::oneshot;
 
 use crate::models::Notification;
 use crate::requests::raw::RawNotification;
 use crate::{Error, Result};
 
 #[derive(Debug)]
-struct Inner<C, Fut>
-where
-    C: Fn(Subscription, Option<Error>) -> Fut + Send + Sync + 'static,
-    Fut: Future<Output = ()> + Send + Sync + 'static,
-{
-    callback: C,
+pub struct Parser {
+    subscription_sender: oneshot::Sender<(Subscription, Option<Error>)>,
     started_at: i64,
     dropped_count: AtomicUsize,
 }
+impl Parser {
+    #[must_use]
+    pub fn new() -> (Self, oneshot::Receiver<(Subscription, Option<Error>)>) {
+        let (subscription_sender, subscription_receiver) = oneshot::channel();
 
-#[derive(Clone, Debug)]
-pub struct Parser<C, Fut>
-where
-    C: Fn(Subscription, Option<Error>) -> Fut + Send + Sync + 'static,
-    Fut: Future<Output = ()> + Send + Sync + 'static,
-{
-    inner: Arc<Inner<C, Fut>>,
-}
-impl<C, Fut> Parser<C, Fut>
-where
-    C: Fn(Subscription, Option<Error>) -> Fut + Send + Sync + 'static,
-    Fut: Future<Output = ()> + Send + Sync + 'static,
-{
-    pub fn new(callback: C) -> Self {
-        Self {
-            inner: Arc::new(Inner {
-                callback,
+        (
+            Self {
+                subscription_sender,
                 started_at: Utc::now().timestamp_millis(),
                 dropped_count: AtomicUsize::new(0),
-            }),
-        }
+            },
+            subscription_receiver,
+        )
     }
 }
 
-impl<C, Fut> Parse for Parser<C, Fut>
-where
-    C: Fn(Subscription, Option<Error>) -> Fut + Send + Sync + 'static,
-    Fut: Future<Output = ()> + Send + Sync + 'static,
-{
+impl Parse for Parser {
     type Target = Notification;
     type Error = Error;
 
@@ -59,7 +42,7 @@ where
         let data = match message {
             Message::Data(data) => serde_json::from_value::<Data>(data)?,
             Message::MessagesDeleted { count } => {
-                self.inner.dropped_count.fetch_add(count, Ordering::AcqRel);
+                self.dropped_count.fetch_add(count, Ordering::AcqRel);
                 return Ok(None);
             }
         };
@@ -69,21 +52,22 @@ where
 
         // The server may cache notifications when disconnected and send them after connecting. They
         // must be dropped
-        if notification.sent_at < self.inner.started_at {
-            self.inner.dropped_count.fetch_add(1, Ordering::AcqRel);
+        if notification.sent_at < self.started_at {
+            self.dropped_count.fetch_add(1, Ordering::AcqRel);
             return Ok(None);
         }
 
-        let dropped_count = self.inner.dropped_count.swap(0, Ordering::AcqRel);
+        let dropped_count = self.dropped_count.swap(0, Ordering::AcqRel);
         if dropped_count > 0 {
-            tracing::info!("dropped {dropped_count} notifications");
+            tracing::warn!("dropped {dropped_count} notifications");
         }
 
-        tracing::debug!(kind = ?notification.kind, "received notification");
+        tracing::info!(kind = ?notification.kind, "parsed notification");
         Ok(Some(notification.try_into()?))
     }
 
-    async fn stop(&self, subscription: Subscription, error: Option<Error>) {
-        (self.inner.callback)(subscription, error).await;
+    async fn stop(self, subscription: Subscription, error: Option<Error>) {
+        // Allow cases when caller intentionally drops the receiver
+        let _ = self.subscription_sender.send((subscription, error));
     }
 }

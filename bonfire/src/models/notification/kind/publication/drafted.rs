@@ -6,7 +6,7 @@ use crate::models::publication::{Kind, PostTitle};
 
 #[derive(Default, Clone, Debug)]
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
-pub struct Drafted {
+pub struct PublicationDrafted {
     pub kind: Kind,
     pub title: Option<PostTitle>,
     pub moderation_id: u64,

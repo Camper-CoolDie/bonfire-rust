@@ -32,16 +32,17 @@ impl<'de> Deserialize<'de> for RawReasonKind {
     }
 }
 
-impl From<RawReasonKind> for EffectReasonKind {
+impl From<RawReasonKind> for Option<EffectReasonKind> {
     fn from(value: RawReasonKind) -> Self {
         match value {
-            RawReasonKind::Gods => EffectReasonKind::Gods,
-            RawReasonKind::RejectedBlocks => EffectReasonKind::RejectedBlocks,
-            RawReasonKind::TooManyBlocks => EffectReasonKind::TooManyBlocks,
-            RawReasonKind::Swearing => EffectReasonKind::Swearing,
-            RawReasonKind::Hater => EffectReasonKind::Hater,
-            RawReasonKind::Uncultured => EffectReasonKind::Uncultured,
-            RawReasonKind::Unknown(kind) => EffectReasonKind::Unknown(kind),
+            RawReasonKind::Unknown(0) => None,
+            RawReasonKind::Gods => Some(EffectReasonKind::Gods),
+            RawReasonKind::RejectedBlocks => Some(EffectReasonKind::RejectedBlocks),
+            RawReasonKind::TooManyBlocks => Some(EffectReasonKind::TooManyBlocks),
+            RawReasonKind::Swearing => Some(EffectReasonKind::Swearing),
+            RawReasonKind::Hater => Some(EffectReasonKind::Hater),
+            RawReasonKind::Uncultured => Some(EffectReasonKind::Uncultured),
+            RawReasonKind::Unknown(kind) => Some(EffectReasonKind::Unknown(kind)),
         }
     }
 }

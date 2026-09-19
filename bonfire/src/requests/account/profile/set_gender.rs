@@ -8,7 +8,7 @@ use crate::{Client, Result, RootError};
 #[derive(Serialize)]
 pub(crate) struct SetGenderRequest {
     #[serde(rename = "sex")]
-    gender: RawGender,
+    pub gender: RawGender,
 }
 impl SetGenderRequest {
     pub(crate) fn new(gender: Gender) -> Self {

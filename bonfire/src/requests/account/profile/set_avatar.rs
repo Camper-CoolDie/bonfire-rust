@@ -21,7 +21,7 @@ impl From<Response> for ImageRef {
 #[derive(Serialize)]
 pub(crate) struct SetAvatarRequest<'a> {
     #[serde(skip)]
-    avatar: &'a [u8],
+    pub avatar: &'a [u8],
 }
 impl<'a> SetAvatarRequest<'a> {
     pub(crate) fn new(avatar: &'a [u8]) -> Self {

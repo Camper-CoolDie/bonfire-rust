@@ -4,6 +4,7 @@ use std::result::Result as StdResult;
 use crate::Error;
 use crate::models::{Message, Subscription};
 
+#[doc(hidden)]
 pub trait Parse: Send + Sync + 'static {
     type Target: Send;
     type Error: From<Error> + StdError + Send;
@@ -14,7 +15,7 @@ pub trait Parse: Send + Sync + 'static {
     ) -> impl Future<Output = StdResult<Option<Self::Target>, Self::Error>> + Send;
 
     fn stop(
-        &self,
+        self,
         subscription: Subscription,
         error: Option<Self::Error>,
     ) -> impl Future<Output = ()> + Send;

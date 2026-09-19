@@ -1,5 +1,5 @@
 mod filter;
-mod kind;
+pub mod kind;
 mod reaction;
 mod reference;
 mod status;

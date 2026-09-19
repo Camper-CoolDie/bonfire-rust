@@ -140,18 +140,11 @@ impl Listener {
 
         loop {
             tokio::select! {
-                () = cancellation_token.cancelled() => {
-                    tracing::debug!("stopping");
-                    // Heartbeat task also finishes on cancellation, so it should be awaited
-                    match heartbeat_future.await {
-                        Ok(()) => break,
-                        Err(error) => return Some(Self::map_error(error)),
-                    }
-                }
+                // Heartbeat task must finish first before stopping the listener
                 result = &mut heartbeat_future => {
                     match result {
                         Ok(()) => {
-                            tracing::debug!("heartbeat task exited, stopping");
+                            tracing::debug!("stopping");
                             break;
                         }
                         Err(error) => return Some(Self::map_error(error)),
@@ -180,7 +173,7 @@ impl Listener {
                         match parser.parse(message).await {
                             Ok(Some(target)) => {
                                 if sender.send(target).await.is_err() {
-                                    // The receiver has closed
+                                    tracing::warn!("receiver has been dropped abruptly");
                                     break;
                                 }
                             }

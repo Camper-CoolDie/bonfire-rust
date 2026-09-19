@@ -30,7 +30,7 @@ impl TryFrom<Response> for (Publication<Post>, Vec<Publication<PostTag>>) {
 #[derive(Serialize)]
 pub(crate) struct GetPostRequest {
     #[serde(rename = "unitId")]
-    id: u64,
+    pub id: u64,
 }
 impl GetPostRequest {
     pub(crate) fn new(id: u64) -> Self {

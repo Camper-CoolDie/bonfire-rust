@@ -7,7 +7,7 @@ use crate::{Error, Result};
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub(crate) struct RawBlockedAfterReport {
+pub(crate) struct RawPublicationBlockedAfterReport {
     #[serde(rename = "blockUnitType")]
     pub publication_kind: RawKind,
     pub moderation_id: u64,
@@ -19,10 +19,10 @@ pub(crate) struct RawBlockedAfterReport {
     pub reason: String,
 }
 
-impl TryFrom<RawBlockedAfterReport> for PublicationBlocked {
+impl TryFrom<RawPublicationBlockedAfterReport> for PublicationBlocked {
     type Error = Error;
 
-    fn try_from(value: RawBlockedAfterReport) -> Result<Self> {
+    fn try_from(value: RawPublicationBlockedAfterReport) -> Result<Self> {
         Ok(Self {
             publication_kind: value.publication_kind.into(),
             moderation_id: value.moderation_id,

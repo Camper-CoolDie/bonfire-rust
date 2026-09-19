@@ -6,10 +6,10 @@ use crate::{Client, Result};
 
 #[derive(Serialize)]
 pub(crate) struct SetLinkRequest<'a> {
-    index: u32,
-    title: &'a str,
+    pub index: u32,
+    pub title: &'a str,
     #[serde(rename = "url")]
-    uri: &'a str,
+    pub uri: &'a str,
 }
 impl<'a> SetLinkRequest<'a> {
     pub(crate) fn new(index: u32, title: &'a str, uri: &'a str) -> Self {

@@ -20,7 +20,7 @@ impl From<Response> for Vec<u64> {
 #[derive(Serialize)]
 pub(crate) struct ListBlockedFandomIdsRequest {
     #[serde(rename = "accountId")]
-    id: u64,
+    pub id: u64,
 }
 impl ListBlockedFandomIdsRequest {
     pub(crate) fn new(id: u64) -> Self {

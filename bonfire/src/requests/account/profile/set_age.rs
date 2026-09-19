@@ -6,7 +6,7 @@ use crate::{Client, Result};
 
 #[derive(Serialize)]
 pub(crate) struct SetAgeRequest {
-    age: i64,
+    pub age: i64,
 }
 impl SetAgeRequest {
     pub(crate) fn new(age: Option<i64>) -> Self {

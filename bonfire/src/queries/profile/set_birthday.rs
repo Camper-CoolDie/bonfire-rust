@@ -22,7 +22,7 @@ impl TryFrom<Response> for Profile {
 
 #[derive(Serialize)]
 pub(crate) struct SetBirthdayQuery {
-    birthday: NaiveDate,
+    pub birthday: NaiveDate,
 }
 impl SetBirthdayQuery {
     pub(crate) fn new(birthday: NaiveDate) -> Self {

@@ -1,5 +1,5 @@
 mod assigned;
 mod revoked;
 
-pub use assigned::Assigned;
-pub use revoked::Revoked;
+pub use assigned::CuratorAssigned;
+pub use revoked::CuratorRevoked;

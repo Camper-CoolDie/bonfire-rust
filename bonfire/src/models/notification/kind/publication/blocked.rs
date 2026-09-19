@@ -6,7 +6,7 @@ use crate::models::publication::Kind;
 
 #[derive(Default, Clone, Debug)]
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
-pub struct Blocked {
+pub struct PublicationBlocked {
     pub publication_kind: Kind,
     pub moderation_id: u64,
     pub with_last_publications: bool,

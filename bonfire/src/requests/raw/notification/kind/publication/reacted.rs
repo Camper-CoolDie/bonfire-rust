@@ -7,7 +7,7 @@ use crate::{Error, Result};
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub(crate) struct RawReacted {
+pub(crate) struct RawPublicationReacted {
     #[serde(rename = "reactionIndex")]
     pub index: i64,
     pub account_id: u64,
@@ -24,10 +24,10 @@ pub(crate) struct RawReacted {
     pub parent_kind: RawKind,
 }
 
-impl TryFrom<RawReacted> for PublicationReacted {
+impl TryFrom<RawPublicationReacted> for PublicationReacted {
     type Error = Error;
 
-    fn try_from(value: RawReacted) -> Result<Self> {
+    fn try_from(value: RawPublicationReacted) -> Result<Self> {
         Ok(Self {
             index: value.index,
             account: RawAccountRef {

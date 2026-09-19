@@ -36,15 +36,15 @@ impl TryFrom<Response> for Vec<Account> {
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct ListOnlineRequest {
-    offset_date: i64,
-    limit_date: i64,
+    pub offset_date: i64,
+    pub limit_date: i64,
 }
 impl ListOnlineRequest {
     pub(crate) const PAGE_SIZE: usize = 50;
 
-    pub(crate) fn new(offset_date: Option<DateTime<Utc>>, limit_date: DateTime<Utc>) -> Self {
+    pub(crate) fn new(limit_date: DateTime<Utc>) -> Self {
         Self {
-            offset_date: offset_date.map_or(0, |date| date.timestamp_millis()),
+            offset_date: 0,
             limit_date: limit_date.timestamp_millis(),
         }
     }

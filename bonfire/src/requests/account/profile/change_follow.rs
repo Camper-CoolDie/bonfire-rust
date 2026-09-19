@@ -6,8 +6,8 @@ use crate::{Client, Result, RootError};
 #[derive(Serialize)]
 pub(crate) struct ChangeFollowRequest {
     #[serde(rename = "accountId")]
-    id: u64,
-    follow: bool,
+    pub id: u64,
+    pub follow: bool,
 }
 impl ChangeFollowRequest {
     pub(crate) fn new_follow(id: u64) -> Self {

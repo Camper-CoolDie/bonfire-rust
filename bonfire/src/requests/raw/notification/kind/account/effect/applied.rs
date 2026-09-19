@@ -5,15 +5,15 @@ use crate::requests::raw::RawEffect;
 use crate::{Error, Result};
 
 #[derive(Deserialize)]
-pub(crate) struct RawApplied {
+pub(crate) struct RawEffectApplied {
     #[serde(rename = "mAccEffect")]
     pub effect: RawEffect,
 }
 
-impl TryFrom<RawApplied> for Effect {
+impl TryFrom<RawEffectApplied> for Effect {
     type Error = Error;
 
-    fn try_from(value: RawApplied) -> Result<Self> {
+    fn try_from(value: RawEffectApplied) -> Result<Self> {
         value.effect.try_into()
     }
 }

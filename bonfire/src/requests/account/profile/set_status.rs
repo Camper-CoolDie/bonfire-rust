@@ -6,7 +6,7 @@ use crate::{Client, Result};
 
 #[derive(Serialize)]
 pub(crate) struct SetStatusRequest<'a> {
-    status: &'a str,
+    pub status: &'a str,
 }
 impl<'a> SetStatusRequest<'a> {
     pub(crate) fn new(status: Option<&'a str>) -> Self {

@@ -7,7 +7,7 @@ use crate::{Error, Result};
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub(crate) struct RawCommented {
+pub(crate) struct RawPublicationCommented {
     #[serde(rename = "J_COMMENT_ID")]
     pub id: u64,
     #[serde(rename = "J_ACCOUNT_ID")]
@@ -31,10 +31,10 @@ pub(crate) struct RawCommented {
     pub text: String,
 }
 
-impl TryFrom<RawCommented> for PublicationCommented {
+impl TryFrom<RawPublicationCommented> for PublicationCommented {
     type Error = Error;
 
-    fn try_from(value: RawCommented) -> Result<Self> {
+    fn try_from(value: RawPublicationCommented) -> Result<Self> {
         Ok(Self {
             id: value.id,
             author: RawAccountRef {

@@ -7,7 +7,7 @@ use crate::{Client, Result, RootError};
 #[derive(Serialize)]
 pub(crate) struct GetStatRequest {
     #[serde(rename = "accountId")]
-    id: u64,
+    pub id: u64,
 }
 impl GetStatRequest {
     pub(crate) fn new(id: u64) -> Self {

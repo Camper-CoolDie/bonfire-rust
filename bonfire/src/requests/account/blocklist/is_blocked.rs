@@ -18,7 +18,7 @@ impl From<Response> for bool {
 #[derive(Serialize)]
 pub(crate) struct IsAccountBlockedRequest {
     #[serde(rename = "accountId")]
-    id: u64,
+    pub id: u64,
 }
 impl IsAccountBlockedRequest {
     pub(crate) fn new(id: u64) -> Self {

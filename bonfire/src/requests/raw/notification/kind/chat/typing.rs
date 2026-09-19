@@ -6,16 +6,16 @@ use crate::{Error, Result};
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub(crate) struct RawTyping {
+pub(crate) struct RawChatTyping {
     pub account_id: u64,
     pub account_name: String,
     pub chat_tag: RawChatTag,
 }
 
-impl TryFrom<RawTyping> for ChatTyping {
+impl TryFrom<RawChatTyping> for ChatTyping {
     type Error = Error;
 
-    fn try_from(value: RawTyping) -> Result<Self> {
+    fn try_from(value: RawChatTyping) -> Result<Self> {
         Ok(Self {
             account_id: value.account_id,
             account_name: value.account_name,

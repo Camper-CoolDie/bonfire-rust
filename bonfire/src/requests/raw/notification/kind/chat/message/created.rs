@@ -1,11 +1,12 @@
 use serde::Deserialize;
 
 use crate::models::notification::ChatMessageCreated;
+use crate::models::{ChatMessage, Publication};
 use crate::requests::raw::{RawChatMessage, RawChatTag, RawPublication};
 use crate::{Error, Result};
 
 #[derive(Deserialize)]
-pub(crate) struct RawCreated {
+pub(crate) struct RawMessageCreated {
     #[serde(rename = "unitChatMessage")]
     pub message: RawPublication<RawChatMessage>,
     #[serde(rename = "tag")]
@@ -14,13 +15,16 @@ pub(crate) struct RawCreated {
     pub is_subscribed: bool,
 }
 
-impl TryFrom<RawCreated> for ChatMessageCreated {
+impl TryFrom<RawMessageCreated> for ChatMessageCreated {
     type Error = Error;
 
-    fn try_from(value: RawCreated) -> Result<Self> {
+    fn try_from(value: RawMessageCreated) -> Result<Self> {
+        // Message has an empty chat tag
+        let mut message = Publication::<ChatMessage>::try_from(value.message)?;
+        message.content.chat_tag = value.chat_tag.try_into()?;
+
         Ok(Self {
-            message: value.message.try_into()?,
-            chat_tag: value.chat_tag.try_into()?,
+            message,
             is_subscribed: value.is_subscribed,
         })
     }

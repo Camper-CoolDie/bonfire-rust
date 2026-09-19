@@ -6,7 +6,7 @@ use crate::{Error, Result};
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub(crate) struct RawRemoved {
+pub(crate) struct RawRubricRemoved {
     #[serde(rename = "rubricId")]
     pub id: u64,
     #[serde(rename = "rubricName")]
@@ -25,10 +25,10 @@ pub(crate) struct RawRemoved {
     pub reason: String,
 }
 
-impl TryFrom<RawRemoved> for RubricRemoved {
+impl TryFrom<RawRubricRemoved> for RubricRemoved {
     type Error = Error;
 
-    fn try_from(value: RawRemoved) -> Result<Self> {
+    fn try_from(value: RawRubricRemoved) -> Result<Self> {
         Ok(Self {
             id: value.id,
             name: value.name,

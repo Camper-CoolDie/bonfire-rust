@@ -1,8 +1,8 @@
 mod any;
-mod chat_message;
-mod comment;
-mod post;
-mod post_tag;
+pub mod chat_message;
+pub mod comment;
+pub mod post;
+pub mod post_tag;
 
 pub use any::AnyPublication;
 pub use chat_message::{

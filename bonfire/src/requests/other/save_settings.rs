@@ -7,7 +7,7 @@ use crate::{Client, Result, RootError};
 
 #[derive(Serialize)]
 pub(crate) struct SaveSettingsRequest {
-    settings: RawSettings,
+    pub settings: RawSettings,
 }
 impl SaveSettingsRequest {
     pub(crate) fn new(settings: Settings) -> Result<Self> {

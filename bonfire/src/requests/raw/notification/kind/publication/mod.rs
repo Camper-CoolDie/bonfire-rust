@@ -9,11 +9,11 @@ mod reacted;
 mod restored;
 
 pub(crate) use block_rejected::RawBlockRejected;
-pub(crate) use blocked::RawBlocked;
-pub(crate) use blocked_after_report::RawBlockedAfterReport;
+pub(crate) use blocked::RawPublicationBlocked;
+pub(crate) use blocked_after_report::RawPublicationBlockedAfterReport;
 pub(crate) use comment_replied::RawCommentReplied;
-pub(crate) use commented::RawCommented;
-pub(crate) use drafted::RawDrafted;
-pub(crate) use rated::RawRated;
-pub(crate) use reacted::RawReacted;
-pub(crate) use restored::RawRestored;
+pub(crate) use commented::RawPublicationCommented;
+pub(crate) use drafted::RawPublicationDrafted;
+pub(crate) use rated::RawPublicationRated;
+pub(crate) use reacted::RawPublicationReacted;
+pub(crate) use restored::RawPublicationRestored;

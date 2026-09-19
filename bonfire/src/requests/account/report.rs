@@ -7,8 +7,8 @@ use crate::{Client, Result};
 #[derive(Serialize)]
 pub(crate) struct ReportRequest<'a> {
     #[serde(rename = "accountId")]
-    id: u64,
-    comment: &'a str,
+    pub id: u64,
+    pub comment: &'a str,
 }
 impl<'a> ReportRequest<'a> {
     pub(crate) fn new(id: u64, comment: &'a str) -> Self {

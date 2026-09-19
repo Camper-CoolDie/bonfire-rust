@@ -5,7 +5,7 @@ use crate::models::{AccountRef, FandomRef};
 
 #[derive(Default, Clone, Debug)]
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
-pub struct Missed {
+pub struct RelayTurnMissed {
     pub id: u64,
     pub name: String,
     pub fandom: FandomRef,

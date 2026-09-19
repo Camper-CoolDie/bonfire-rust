@@ -6,7 +6,7 @@ use crate::requests::raw::publication::RawKind;
 use crate::{Error, Result};
 
 #[derive(Deserialize)]
-pub(crate) struct RawBlocked {
+pub(crate) struct RawPublicationBlocked {
     #[serde(rename = "blockUnitType")]
     pub publication_kind: RawKind,
     #[serde(rename = "J_MODERATION_ID")]
@@ -19,10 +19,10 @@ pub(crate) struct RawBlocked {
     pub reason: String,
 }
 
-impl TryFrom<RawBlocked> for PublicationBlocked {
+impl TryFrom<RawPublicationBlocked> for PublicationBlocked {
     type Error = Error;
 
-    fn try_from(value: RawBlocked) -> Result<Self> {
+    fn try_from(value: RawPublicationBlocked) -> Result<Self> {
         Ok(Self {
             publication_kind: value.publication_kind.into(),
             moderation_id: value.moderation_id,

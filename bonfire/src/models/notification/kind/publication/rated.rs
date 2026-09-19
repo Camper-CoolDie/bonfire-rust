@@ -6,7 +6,7 @@ use crate::models::{AccountRef, PublicationRef};
 
 #[derive(Default, Clone, Debug)]
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
-pub struct Rated {
+pub struct PublicationRated {
     pub amount: f64,
     pub account: Option<AccountRef>,
     pub publication: PublicationRef,

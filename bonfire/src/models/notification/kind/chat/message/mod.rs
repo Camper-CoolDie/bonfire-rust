@@ -3,7 +3,7 @@ mod edited;
 mod removed;
 mod replied;
 
-pub use created::Created;
-pub use edited::Edited;
-pub use removed::Removed;
-pub use replied::Replied;
+pub use created::MessageCreated;
+pub use edited::MessageEdited;
+pub use removed::MessageRemoved;
+pub use replied::MessageReplied;

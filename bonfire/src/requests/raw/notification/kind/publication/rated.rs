@@ -6,7 +6,7 @@ use crate::requests::raw::{RawAccountRef, RawGender, RawPublicationRef};
 use crate::{Error, Result};
 
 #[derive(Deserialize)]
-pub(crate) struct RawRated {
+pub(crate) struct RawPublicationRated {
     #[serde(rename = "J_KARMA_COUNT")]
     pub amount: f64,
     #[serde(rename = "J_ACCOUNT_ID")]
@@ -29,10 +29,10 @@ pub(crate) struct RawRated {
     pub parent_kind: RawKind,
 }
 
-impl TryFrom<RawRated> for PublicationRated {
+impl TryFrom<RawPublicationRated> for PublicationRated {
     type Error = Error;
 
-    fn try_from(value: RawRated) -> Result<Self> {
+    fn try_from(value: RawPublicationRated) -> Result<Self> {
         Ok(Self {
             amount: value.amount / 100.0,
             account: RawAccountRef {

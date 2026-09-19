@@ -5,7 +5,7 @@ use crate::models::{AccountRef, PublicationRef};
 
 #[derive(Default, Clone, Debug)]
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
-pub struct Reacted {
+pub struct PublicationReacted {
     pub index: i64,
     pub account: AccountRef,
     pub publication: PublicationRef,

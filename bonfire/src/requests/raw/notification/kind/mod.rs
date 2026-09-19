@@ -11,19 +11,19 @@ mod rubric;
 use std::result::Result as StdResult;
 
 pub(crate) use account::{
-    RawEffectApplied, RawEffectRemoved, RawFandomUnbanned as RawAccountFandomUnbanned,
-    RawMentioned as RawAccountMentioned, RawPunished as RawAccountPunished, RawPunishmentRemoved,
+    RawAccountMentioned, RawAccountPunished, RawEffectApplied, RawEffectRemoved,
+    RawFandomUnbanned as RawAccountFandomUnbanned, RawPunishmentRemoved,
 };
 pub(crate) use any::AnyRawNotification;
 pub(crate) use chat::{
-    RawMessageCreated as RawChatMessageCreated, RawMessageEdited as RawChatMessageEdited,
-    RawMessageRemoved as RawChatMessageRemoved, RawMessageReplied as RawChatMessageReplied,
-    RawRead as RawChatRead, RawTyping as RawChatTyping,
+    RawChatRead, RawChatTyping, RawMessageCreated as RawChatMessageCreated,
+    RawMessageEdited as RawChatMessageEdited, RawMessageRemoved as RawChatMessageRemoved,
+    RawMessageReplied as RawChatMessageReplied,
 };
 pub(crate) use fandom::{
     RawCuratorAssigned as RawFandomCuratorAssigned, RawCuratorRevoked as RawFandomCuratorRevoked,
-    RawModeratorSet as RawFandomModeratorSet, RawRemovalRejected as RawFandomRemovalRejected,
-    RawReviewed as RawFandomReviewed,
+    RawFandomReviewed, RawModeratorSet as RawFandomModeratorSet,
+    RawRemovalRejected as RawFandomRemovalRejected,
 };
 pub(crate) use other::{RawAdminActionRejected, RawDonationProcessed};
 pub(crate) use post::{
@@ -37,16 +37,14 @@ pub(crate) use post::{
 };
 pub(crate) use profile::{RawAchievementUnlocked, RawFieldSet as RawProfileFieldSet};
 pub(crate) use publication::{
-    RawBlockRejected as RawPublicationBlockRejected, RawBlocked as RawPublicationBlocked,
-    RawBlockedAfterReport as RawPublicationBlockedAfterReport, RawCommentReplied,
-    RawCommented as RawPublicationCommented, RawDrafted as RawPublicationDrafted,
-    RawRated as RawPublicationRated, RawReacted as RawPublicationReacted,
-    RawRestored as RawPublicationRestored,
+    RawBlockRejected as RawPublicationBlockRejected, RawCommentReplied, RawPublicationBlocked,
+    RawPublicationBlockedAfterReport, RawPublicationCommented, RawPublicationDrafted,
+    RawPublicationRated, RawPublicationReacted, RawPublicationRestored,
 };
 pub(crate) use rubric::{
     RawFandomChanged as RawRubricFandomChanged, RawKarmaCoefChanged as RawRubricKarmaCoefChanged,
     RawNameChanged as RawRubricNameChanged, RawOwnerAssigned as RawRubricOwnerAssigned,
-    RawOwnerTransferred as RawRubricOwnerTransferred, RawRemoved as RawRubricRemoved,
+    RawOwnerTransferred as RawRubricOwnerTransferred, RawRubricRemoved,
 };
 use serde::{Deserialize, Deserializer};
 

@@ -21,8 +21,8 @@ impl TryFrom<Response> for Vec<Fandom> {
 #[derive(Serialize)]
 pub(crate) struct ListSubscriptionsRequest {
     #[serde(rename = "accountId")]
-    id: u64,
-    offset: usize,
+    pub id: u64,
+    pub offset: usize,
 }
 impl ListSubscriptionsRequest {
     pub(crate) const PAGE_SIZE: usize = 20;

@@ -1,5 +1,5 @@
 mod assigned;
 mod transferred;
 
-pub use assigned::Assigned;
-pub use transferred::Transferred;
+pub use assigned::OwnerAssigned;
+pub use transferred::OwnerTransferred;

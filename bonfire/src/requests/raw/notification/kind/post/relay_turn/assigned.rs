@@ -6,7 +6,7 @@ use crate::{Error, Result};
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub(crate) struct RawAssigned {
+pub(crate) struct RawRelayTurnAssigned {
     #[serde(rename = "fromAccountId")]
     pub account_id: u64,
     #[serde(rename = "fromAccountName")]
@@ -23,10 +23,10 @@ pub(crate) struct RawAssigned {
     pub fandom_name: String,
 }
 
-impl TryFrom<RawAssigned> for PostRelayTurnAssigned {
+impl TryFrom<RawRelayTurnAssigned> for PostRelayTurnAssigned {
     type Error = Error;
 
-    fn try_from(value: RawAssigned) -> Result<Self> {
+    fn try_from(value: RawRelayTurnAssigned) -> Result<Self> {
         Ok(Self {
             account: RawAccountRef {
                 id: value.account_id,

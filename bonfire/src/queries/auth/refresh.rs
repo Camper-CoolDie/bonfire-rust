@@ -21,7 +21,7 @@ impl From<Response> for Auth {
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct RefreshQuery<'a> {
-    refresh_token: &'a str,
+    pub refresh_token: &'a str,
 }
 impl<'a> RefreshQuery<'a> {
     pub(crate) fn new(refresh_token: &'a str) -> Self {

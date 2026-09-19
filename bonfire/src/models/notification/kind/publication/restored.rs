@@ -5,7 +5,7 @@ use crate::models::PublicationRef;
 
 #[derive(Default, Clone, Debug)]
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
-pub struct Restored {
+pub struct PublicationRestored {
     pub publication: PublicationRef,
     pub parent: PublicationRef,
     pub reason: String,

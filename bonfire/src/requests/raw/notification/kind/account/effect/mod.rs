@@ -1,5 +1,5 @@
 mod applied;
 mod removed;
 
-pub(crate) use applied::RawApplied;
-pub(crate) use removed::RawRemoved;
+pub(crate) use applied::RawEffectApplied;
+pub(crate) use removed::RawEffectRemoved;

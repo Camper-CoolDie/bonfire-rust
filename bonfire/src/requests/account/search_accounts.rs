@@ -21,8 +21,8 @@ impl TryFrom<Response> for Vec<Account> {
 #[derive(Serialize)]
 pub(crate) struct SearchAccountsRequest<'a> {
     #[serde(rename = "username", skip_serializing_if = "str::is_empty")]
-    query: &'a str,
-    offset: usize,
+    pub query: &'a str,
+    pub offset: usize,
 }
 impl<'a> SearchAccountsRequest<'a> {
     pub(crate) const PAGE_SIZE: usize = 20;

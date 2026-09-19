@@ -20,8 +20,8 @@ pub enum Origin {
     },
     /// The effect was applied by the system
     System {
-        /// The kind of reason for the system-applied effect
-        reason_kind: ReasonKind,
+        /// The kind of reason for the system-applied effect, if specified
+        reason_kind: Option<ReasonKind>,
     },
 }
 
