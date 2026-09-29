@@ -17,7 +17,6 @@ pub mod profile;
 pub mod publication;
 /// Contains structs and helper types for user settings.
 pub mod settings;
-mod streams;
 
 pub use account::{
     AccessLevel, Account, Badge, Effect, Info as AccountInfo, Reference as AccountRef,
@@ -26,7 +25,7 @@ pub use account::{
 pub use auth::Auth;
 pub use chat::{AnyChat, Chat, Direct, FandomRoot, FandomSub, Group, Tag as ChatTag};
 pub use common::{Category, ImageRef, Language, VoiceRef};
-pub use fandom::{Fandom, Reference as FandomRef};
+pub use fandom::{Fandom, Reference as FandomRef, RubricRef};
 #[cfg(feature = "fcm")]
 pub use notification::Parser as NotificationParser;
 pub use notification::{AnyNotification, Notification};

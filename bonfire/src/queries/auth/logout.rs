@@ -7,13 +7,14 @@ use crate::{Client, Result};
 #[derive(Serialize)]
 pub(crate) struct LogoutQuery {}
 
-impl Request for LogoutQuery {
+impl Request<()> for LogoutQuery {
     type Response = EmptyResponse;
     type Error = LogoutError;
 
-    async fn send_request(&self, client: &Client) -> Result<EmptyResponse> {
+    async fn send(&self, client: &Client) -> Result<()> {
         client
             .send_query("Logout", "auth/Logout.graphql", self)
-            .await
+            .await?;
+        Ok(())
     }
 }

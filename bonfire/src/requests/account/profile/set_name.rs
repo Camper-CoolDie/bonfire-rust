@@ -6,7 +6,7 @@ use crate::{Client, Result};
 
 #[derive(Serialize)]
 pub(crate) struct SetNameRequest<'a> {
-    pub name: &'a str,
+    name: &'a str,
 }
 impl<'a> SetNameRequest<'a> {
     pub(crate) fn new(name: &'a str) -> Self {
@@ -14,13 +14,14 @@ impl<'a> SetNameRequest<'a> {
     }
 }
 
-impl Request for SetNameRequest<'_> {
+impl Request<()> for SetNameRequest<'_> {
     type Response = EmptyResponse;
     type Error = SetNameError;
 
-    async fn send_request(&self, client: &Client) -> Result<EmptyResponse> {
+    async fn send(&self, client: &Client) -> Result<()> {
         client
             .send_request("RAccountsChangeName", self, Vec::new())
-            .await
+            .await?;
+        Ok(())
     }
 }

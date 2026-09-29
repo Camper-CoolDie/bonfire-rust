@@ -33,7 +33,7 @@ pub(crate) struct RawPublication<T: RawPublishable = AnyRawPublication> {
     pub status: RawStatus,
     pub hotness: f32,
     #[serde(flatten)]
-    pub additional_data: Value,
+    pub extra: Value,
     #[serde(skip)]
     pub _marker: PhantomData<T>,
 }
@@ -47,7 +47,7 @@ where
 
     fn try_from(value: RawPublication<T>) -> Result<Self> {
         Ok(Self {
-            content: T::new(value.additional_data, value.kind)?.try_into()?,
+            spec: T::new(value.extra, value.kind)?.try_into()?,
             id: value.id,
             created_at: timestamp_from_millis(value.created_at)?,
             status: Option::<Status>::try_from(value.status)?,

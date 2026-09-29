@@ -25,7 +25,6 @@ use serde::{Deserialize, Serialize};
 pub use stat::Stat;
 
 use crate::client::Request as _;
-use crate::models::streams::{auto_paginated_stream, paginated_stream};
 use crate::models::{Gender, ImageRef};
 use crate::requests::account::{
     GetAccountRequest, ListBannedRequest, ListOnlineRequest, ReportRequest, SearchAccountsRequest,
@@ -48,7 +47,7 @@ pub struct Account {
     pub avatar: Option<ImageRef>,
     /// The declared gender of this account
     pub gender: Gender,
-    /// The karma earned by this account over the last 30 days
+    /// The karma earned by ttis account over the last 30 days
     pub karma30: f64,
     /// The amount of money this account has donated sequentially
     pub sponsor_amount: u64,
@@ -67,7 +66,7 @@ impl Account {
 
     /// Creates a new `Account` instance with only its identifier set.
     ///
-    /// This is useful when you only need to reference an account by its ID for sending associated
+    /// This is useful when an account needs to be referenced only by its ID for sending associated
     /// requests. However, obtaining a fully populated `Account` struct from methods like
     /// [`Account::get_by_id()`] or [`Account::get_by_name()`] is generally preferred.
     ///
@@ -111,10 +110,7 @@ impl Account {
     /// the provided identifier exists, or [`Error`][crate::Error] if any other error occurs during
     /// the request.
     pub async fn get_by_id(client: &Client, id: u64) -> Result<Self> {
-        GetAccountRequest::new_by_id(id)
-            .send_request(client)
-            .await?
-            .try_into()
+        GetAccountRequest::new_by_id(id).send(client).await
     }
 
     /// Retrieves an account by its name.
@@ -127,17 +123,13 @@ impl Account {
     /// the provided name exists, or [`Error`][crate::Error] if any other error occurs during the
     /// request.
     pub async fn get_by_name(client: &Client, name: &str) -> Result<Self> {
-        GetAccountRequest::new_by_name(name)
-            .send_request(client)
-            .await?
-            .try_into()
+        GetAccountRequest::new_by_name(name).send(client).await
     }
 
     pub async fn get_by_ref(client: &Client, reference: &Reference) -> Result<Self> {
         GetAccountRequest::new_by_id(reference.id)
-            .send_request(client)
-            .await?
-            .try_into()
+            .send(client)
+            .await
     }
 
     /// Searches for accounts by their name.
@@ -158,16 +150,7 @@ impl Account {
         query: Option<&'a str>,
         offset: usize,
     ) -> impl Stream<Item = Result<Self>> + 'a {
-        auto_paginated_stream(
-            move |offset| async move {
-                SearchAccountsRequest::new(query, offset)
-                    .send_request(client)
-                    .await?
-                    .try_into()
-            },
-            offset,
-            SearchAccountsRequest::PAGE_SIZE,
-        )
+        SearchAccountsRequest::new(query, offset).stream(client)
     }
 
     /// Retrieves a [`Stream`] of accounts that are currently online.
@@ -189,25 +172,8 @@ impl Account {
     pub fn list_online(
         client: &Client,
         offset_date: Option<DateTime<Utc>>,
-    ) -> impl Stream<Item = Result<Self>> + '_ {
-        let limit_date = Utc::now();
-
-        paginated_stream(
-            move |offset_date| async move {
-                ListOnlineRequest::new(offset_date, limit_date)
-                    .send_request(client)
-                    .await?
-                    .try_into()
-            },
-            offset_date,
-            |accounts, _| {
-                let length = accounts.len();
-                (length >= ListOnlineRequest::PAGE_SIZE)
-                    .then(|| accounts.last())
-                    .flatten()
-                    .map(|account| Some(account.last_online_at))
-            },
-        )
+    ) -> impl Stream<Item = Result<Self>> {
+        ListOnlineRequest::new(offset_date).stream(client)
     }
 
     /// Retrieves a [`Stream`] of all currently banned accounts.
@@ -217,20 +183,8 @@ impl Account {
     /// needed. The `offset` parameter can be used to skip a number of banned accounts from the
     /// beginning of the list. If an [`Error`][crate::Error] occurs during the retrieval of any
     /// page, the stream will yield that single error and then terminate.
-    pub fn list_banned(
-        client: &Client,
-        offset: usize,
-    ) -> impl Stream<Item = Result<BanEntry>> + '_ {
-        auto_paginated_stream(
-            move |offset| async move {
-                ListBannedRequest::new(offset)
-                    .send_request(client)
-                    .await?
-                    .try_into()
-            },
-            offset,
-            ListBannedRequest::PAGE_SIZE,
-        )
+    pub fn list_banned(client: &Client, offset: usize) -> impl Stream<Item = Result<BanEntry>> {
+        ListBannedRequest::new(offset).stream(client)
     }
 
     /// Reports this account.
@@ -240,9 +194,7 @@ impl Account {
     /// Returns [`ReportError::AlreadyReported`] if this account has already been reported, or
     /// [`Error`][crate::Error] if any other error occurs during the request.
     pub async fn report(&self, client: &Client, comment: &str) -> Result<&Self> {
-        ReportRequest::new(self.id, comment)
-            .send_request(client)
-            .await?;
+        ReportRequest::new(self.id, comment).send(client).await?;
         Ok(self)
     }
 }

@@ -38,6 +38,12 @@ impl TokenProvider {
         })
     }
 
+    pub(super) async fn invalidate(&self) {
+        tracing::warn!("android_id expired, invalidating");
+        let mut guard = self.inner.lock().await;
+        *guard = InnerState::Unregistered;
+    }
+
     pub(super) async fn android_registration(
         &self,
         client: &HyperClient,
@@ -135,7 +141,7 @@ impl TokenProvider {
         config: &Config,
     ) -> Result<AndroidRegistration> {
         tracing::info!("sending check-in request");
-        let response = CheckInRequest::new().send_request(client).await?;
+        let response = CheckInRequest::new().send(client).await?;
         let android_id = response
             .android_id
             .ok_or(Error::missing_field("android_id", "check-in response"))?;
@@ -150,7 +156,7 @@ impl TokenProvider {
             android_id,
             security_token,
         )
-        .send_request(client)
+        .send(client)
         .await?;
         let gcm_token = match response {
             AndroidRegistrationResponse::Ok { gcm_token } => gcm_token,
@@ -174,7 +180,7 @@ impl TokenProvider {
         tracing::info!("sending installation request");
         let response =
             InstallationRequest::new(&config.project_id, &config.app_id, &config.api_key)
-                .send_request(client)
+                .send(client)
                 .await?;
 
         // Token expires in 7 days
@@ -231,7 +237,7 @@ impl TokenProvider {
             id,
             refresh_token,
         )
-        .send_request(client)
+        .send(client)
         .await?;
 
         let auth_token = response.token;

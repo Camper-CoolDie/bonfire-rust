@@ -24,9 +24,6 @@ pub enum Error {
     /// The client is already authenticated
     #[error("already authenticated")]
     AlreadyAuthenticated,
-    /// The provided attachment exceeds the maximum size the server can process
-    #[error("attachment is too large")]
-    AttachmentTooLarge,
     /// An error occurred while converting the response's raw data into models or vice-versa
     #[error("{0}")]
     ConversionError(String),

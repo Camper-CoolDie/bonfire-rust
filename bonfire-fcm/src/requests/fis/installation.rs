@@ -34,7 +34,7 @@ impl<'a> InstallationRequest<'a> {
         }
     }
 
-    pub(crate) async fn send_request(&self, client: &HyperClient) -> Result<InstallationResponse> {
+    pub(crate) async fn send(&self, client: &HyperClient) -> Result<InstallationResponse> {
         let request = json!({
             "fid": Self::generate_id(),
             "authVersion": "FIS_v2",

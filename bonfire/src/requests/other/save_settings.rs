@@ -7,7 +7,7 @@ use crate::{Client, Result, RootError};
 
 #[derive(Serialize)]
 pub(crate) struct SaveSettingsRequest {
-    pub settings: RawSettings,
+    settings: RawSettings,
 }
 impl SaveSettingsRequest {
     pub(crate) fn new(settings: Settings) -> Result<Self> {
@@ -17,13 +17,14 @@ impl SaveSettingsRequest {
     }
 }
 
-impl Request for SaveSettingsRequest {
+impl Request<()> for SaveSettingsRequest {
     type Response = EmptyResponse;
     type Error = InfallibleRequest<RootError>;
 
-    async fn send_request(&self, client: &Client) -> Result<EmptyResponse> {
+    async fn send(&self, client: &Client) -> Result<()> {
         client
             .send_request("RAccountSetSettings", self, Vec::new())
-            .await
+            .await?;
+        Ok(())
     }
 }

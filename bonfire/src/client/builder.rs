@@ -16,7 +16,7 @@ static MELIOR_SERVER_URI: LazyLock<Uri> =
     LazyLock::new(|| Uri::from_static("https://api.bonfire.moe"));
 
 // 30 requests per minute with a burst of 15 requests
-const DEFAULT_QUOTA: Quota = Quota::per_minute(nonzero!(30u32)).allow_burst(nonzero!(15u32));
+const QUOTA: Quota = Quota::per_minute(nonzero!(30u32)).allow_burst(nonzero!(15u32));
 
 /// A builder-like pattern for constructing and configuring a [`Client`] instance.
 pub struct Builder {
@@ -34,7 +34,7 @@ impl Builder {
             root_uri: ROOT_SERVER_URI.clone(),
             melior_uri: MELIOR_SERVER_URI.clone(),
             auth: None,
-            quota: DEFAULT_QUOTA,
+            quota: QUOTA,
         }
     }
 

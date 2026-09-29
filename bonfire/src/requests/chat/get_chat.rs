@@ -3,20 +3,7 @@ use serde::{Deserialize, Serialize};
 use crate::client::{InfallibleRequest, Request};
 use crate::models::{Chat, ChatTag};
 use crate::requests::raw::{RawChat, RawChatTag};
-use crate::{Client, Error, Result, RootError};
-
-#[derive(Deserialize)]
-pub(crate) struct Response {
-    chat: RawChat,
-}
-
-impl TryFrom<Response> for Chat {
-    type Error = Error;
-
-    fn try_from(value: Response) -> Result<Self> {
-        value.chat.try_into()
-    }
-}
+use crate::{Client, Result, RootError};
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -34,11 +21,20 @@ impl GetChatRequest {
     }
 }
 
-impl Request for GetChatRequest {
+#[derive(Deserialize)]
+pub(crate) struct Response {
+    chat: RawChat,
+}
+
+impl Request<Chat> for GetChatRequest {
     type Response = Response;
     type Error = InfallibleRequest<RootError>;
 
-    async fn send_request(&self, client: &Client) -> Result<Response> {
-        client.send_request("RChatGet", self, Vec::new()).await
+    async fn send(&self, client: &Client) -> Result<Chat> {
+        client
+            .send_request("RChatGet", self, Vec::new())
+            .await?
+            .chat
+            .try_into()
     }
 }

@@ -1,9 +1,36 @@
+use std::num::NonZeroUsize;
+
+use futures::Stream;
+use nonzero_ext::nonzero;
 use serde::{Deserialize, Serialize};
 
-use crate::client::{InfallibleRequest, Request};
+use crate::client::{InfallibleRequest, PaginatedRequest, Request};
 use crate::models::Chat;
 use crate::requests::raw::RawChat;
-use crate::{Client, Error, Result, RootError};
+use crate::{Client, Result, RootError};
+
+const PAGE_SIZE: NonZeroUsize = nonzero!(10usize);
+
+#[derive(Serialize)]
+pub(crate) struct ListChatsRequest {
+    offset: usize,
+}
+impl ListChatsRequest {
+    pub(crate) fn new(offset: usize) -> Self {
+        Self { offset }
+    }
+
+    pub(crate) fn stream(self, client: &Client) -> impl Stream<Item = Result<Chat>> {
+        PaginatedRequest::new(
+            client,
+            self,
+            |request, chats| {
+                request.offset += chats.len();
+            },
+            PAGE_SIZE,
+        )
+    }
+}
 
 #[derive(Deserialize)]
 pub(crate) struct Response {
@@ -11,31 +38,17 @@ pub(crate) struct Response {
     chats: Vec<RawChat>,
 }
 
-impl TryFrom<Response> for Vec<Chat> {
-    type Error = Error;
-
-    fn try_from(value: Response) -> Result<Self> {
-        value.chats.into_iter().map(TryInto::try_into).collect()
-    }
-}
-
-#[derive(Serialize)]
-pub(crate) struct ListChatsRequest {
-    pub offset: usize,
-}
-impl ListChatsRequest {
-    pub(crate) const PAGE_SIZE: usize = 10;
-
-    pub(crate) fn new(offset: usize) -> Self {
-        Self { offset }
-    }
-}
-
-impl Request for ListChatsRequest {
+impl Request<Vec<Chat>> for ListChatsRequest {
     type Response = Response;
     type Error = InfallibleRequest<RootError>;
 
-    async fn send_request(&self, client: &Client) -> Result<Response> {
-        client.send_request("RChatsGetAll", self, Vec::new()).await
+    async fn send(&self, client: &Client) -> Result<Vec<Chat>> {
+        client
+            .send_request("RChatsGetAll", self, Vec::new())
+            .await?
+            .chats
+            .into_iter()
+            .map(TryInto::try_into)
+            .collect()
     }
 }

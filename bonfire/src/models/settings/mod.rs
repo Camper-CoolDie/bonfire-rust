@@ -32,8 +32,7 @@ pub struct Settings {
     pub notifications: Notifications,
     /// Feed settings
     pub feed: Feed,
-    /// The preferred language for the application, or `None` if the language is taken from the
-    /// system
+    /// The preferred language for the application, or `None` if the language is system-dependent
     pub language: Option<Language>,
     /// Filter for account publications
     pub account_publications_filter: AccountFilter,
@@ -130,9 +129,7 @@ impl Settings {
     ///
     /// Returns [`Error`][crate::Error] if an error occurs while sending the request.
     pub async fn save(&self, client: &Client) -> Result<()> {
-        SaveSettingsRequest::new(self.clone())?
-            .send_request(client)
-            .await?;
+        SaveSettingsRequest::new(self.clone())?.send(client).await?;
         Ok(())
     }
 }

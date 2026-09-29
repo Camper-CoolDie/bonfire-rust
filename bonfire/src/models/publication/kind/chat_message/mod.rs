@@ -68,9 +68,6 @@ impl Publication<ChatMessage> {
         client: &Client,
         options: SendChatMessageOptions<'_>,
     ) -> Result<Publication<ChatMessage>> {
-        SendChatMessageRequest::new(options)
-            .send_request(client)
-            .await?
-            .try_into()
+        SendChatMessageRequest::new(options).send(client).await
     }
 }

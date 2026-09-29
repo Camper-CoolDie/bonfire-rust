@@ -1,12 +1,12 @@
 use serde::Serialize;
 
 use crate::client::{EmptyResponse, Request};
-use crate::models::profile::SetProfileTextError;
+use crate::models::profile::SetProfileFieldError;
 use crate::{Client, Result};
 
 #[derive(Serialize)]
 pub(crate) struct SetDescriptionRequest<'a> {
-    pub description: &'a str,
+    description: &'a str,
 }
 impl<'a> SetDescriptionRequest<'a> {
     pub(crate) fn new(description: Option<&'a str>) -> Self {
@@ -16,13 +16,14 @@ impl<'a> SetDescriptionRequest<'a> {
     }
 }
 
-impl Request for SetDescriptionRequest<'_> {
+impl Request<()> for SetDescriptionRequest<'_> {
     type Response = EmptyResponse;
-    type Error = SetProfileTextError;
+    type Error = SetProfileFieldError;
 
-    async fn send_request(&self, client: &Client) -> Result<EmptyResponse> {
+    async fn send(&self, client: &Client) -> Result<()> {
         client
             .send_request("RAccountsBioSetDescription", self, Vec::new())
-            .await
+            .await?;
+        Ok(())
     }
 }

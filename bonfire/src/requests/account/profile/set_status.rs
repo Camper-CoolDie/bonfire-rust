@@ -1,12 +1,12 @@
 use serde::Serialize;
 
 use crate::client::{EmptyResponse, Request};
-use crate::models::profile::SetProfileTextError;
+use crate::models::profile::SetProfileFieldError;
 use crate::{Client, Result};
 
 #[derive(Serialize)]
 pub(crate) struct SetStatusRequest<'a> {
-    pub status: &'a str,
+    status: &'a str,
 }
 impl<'a> SetStatusRequest<'a> {
     pub(crate) fn new(status: Option<&'a str>) -> Self {
@@ -16,13 +16,14 @@ impl<'a> SetStatusRequest<'a> {
     }
 }
 
-impl Request for SetStatusRequest<'_> {
+impl Request<()> for SetStatusRequest<'_> {
     type Response = EmptyResponse;
-    type Error = SetProfileTextError;
+    type Error = SetProfileFieldError;
 
-    async fn send_request(&self, client: &Client) -> Result<EmptyResponse> {
+    async fn send(&self, client: &Client) -> Result<()> {
         client
             .send_request("RAccountsStatusSet", self, Vec::new())
-            .await
+            .await?;
+        Ok(())
     }
 }

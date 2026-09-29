@@ -9,7 +9,9 @@ pub(crate) use title::RawTitle;
 
 use crate::models::Post;
 use crate::requests::raw::publication::{RawKind, RawPublishable};
-use crate::requests::raw::{RawAccount, RawCategory, RawComment, RawFandom, RawPublication};
+use crate::requests::raw::{
+    RawAccount, RawCategory, RawComment, RawFandom, RawPublication, RawRubricRef,
+};
 use crate::{Error, Result};
 
 #[derive(Deserialize)]
@@ -74,18 +76,12 @@ impl TryFrom<RawPost> for Post {
             },
             is_closed: value.is_closed,
             comments_count: value.comments_count,
-            rubric_id: match value.rubric_id {
-                0 => None,
-                id => Some(id),
-            },
-            rubric_name: match value.rubric_id {
-                0 => None,
-                _ => Some(value.rubric_name),
-            },
-            rubric_karma_coef: match value.rubric_id {
-                0 => None,
-                _ => Some(value.rubric_karma_coef / 100.0),
-            },
+            rubric: RawRubricRef {
+                id: value.rubric_id,
+                name: value.rubric_name,
+                karma_coef: value.rubric_karma_coef,
+            }
+            .into(),
             is_important: matches!(value.importance, -1),
             is_hidden: value.is_hidden,
             is_nsfw: value.is_nsfw,

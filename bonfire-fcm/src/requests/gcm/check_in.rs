@@ -23,7 +23,7 @@ impl CheckInRequest {
         Self {}
     }
 
-    pub(crate) async fn send_request(&self, client: &HyperClient) -> Result<CheckInResponse> {
+    pub(crate) async fn send(&self, client: &HyperClient) -> Result<CheckInResponse> {
         let request = proto::AndroidCheckinRequest {
             checkin: proto::AndroidCheckinProto {
                 r#type: Some(3),

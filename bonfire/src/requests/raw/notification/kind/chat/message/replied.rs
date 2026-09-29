@@ -21,7 +21,7 @@ impl TryFrom<RawMessageReplied> for ChatMessageReplied {
     fn try_from(value: RawMessageReplied) -> Result<Self> {
         // Reply has an empty chat tag
         let mut reply = Publication::<ChatMessage>::try_from(value.reply)?;
-        reply.content.chat_tag = value.chat_tag.try_into()?;
+        reply.spec.chat_tag = value.chat_tag.try_into()?;
 
         Ok(Self {
             reply,

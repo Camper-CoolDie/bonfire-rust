@@ -16,19 +16,20 @@ impl Service {
         Self { uri }
     }
 
-    pub(crate) async fn send_query<R: Request>(
+    pub(crate) async fn send<T, R>(
         &self,
         client: &HyperClient,
-        query: MeliorQuery<'_, R>,
+        query: MeliorQuery<'_, T, R>,
         headers: HeaderMap<HeaderValue>,
     ) -> Result<R::Response>
     where
+        R: Request<T>,
         for<'a> &'a <R::Error as RequestError>::Source: From<&'a MeliorError>,
     {
         let body = serde_json::to_vec(&query)?;
 
         let bytes = self.send_raw(client, Bytes::from(body), &headers).await?;
-        let response = serde_json::from_slice::<MeliorResponse<R>>(&bytes)
+        let response = serde_json::from_slice::<MeliorResponse<T, R>>(&bytes)
             .inspect_err(|error| tracing::error!(?error, "failed to parse melior response"))?;
 
         response
@@ -36,8 +37,9 @@ impl Service {
             .ok_or_else(|| Self::map_errors::<R::Error>(response.errors))
     }
 
-    fn map_errors<E: RequestError>(errors: Option<Vec<RawMeliorError>>) -> Error
+    fn map_errors<E>(errors: Option<Vec<RawMeliorError>>) -> Error
     where
+        E: RequestError,
         for<'a> &'a E::Source: From<&'a MeliorError>,
     {
         errors

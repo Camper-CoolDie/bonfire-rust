@@ -30,7 +30,7 @@ pub use post::{
     RelayTurnRejected as PostRelayTurnRejected, TagsChanged as PostTagsChanged,
     VisibilityChanged as PostVisibilityChanged,
 };
-pub use profile::{AchievementUnlocked, FieldSet as ProfileFieldSet};
+pub use profile::{AchievementProgressed, FieldSet as ProfileFieldSet};
 pub use publication::{
     BlockRejected as PublicationBlockRejected, CommentReplied, PublicationBlocked,
     PublicationCommented, PublicationDrafted, PublicationRated, PublicationReacted,

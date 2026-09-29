@@ -15,6 +15,6 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct Notification {
     #[cfg_attr(feature = "serde", serde(flatten))]
-    pub content: AnyNotification,
+    pub spec: AnyNotification,
     pub sent_at: DateTime<Utc>,
 }

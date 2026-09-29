@@ -41,7 +41,7 @@ impl<'a> RegistrationRequest<'a> {
         }
     }
 
-    pub(crate) async fn send_request(&self, client: &HyperClient) -> Result<Token> {
+    pub(crate) async fn send(&self, client: &HyperClient) -> Result<Token> {
         let endpoint = format!("{ENDPOINT}/send/{}", self.gcm_token);
         let public_key = URL_SAFE_NO_PAD.encode(self.public_key);
         let auth_secret = URL_SAFE_NO_PAD.encode(self.auth_secret);

@@ -225,7 +225,7 @@ impl Listener {
 
             tracing::info!("logging in");
             LoginRequest::new(android_id, security_token, persistent_ids)
-                .send_message(&connection)
+                .send(&connection)
                 .await
                 .inspect_err(|error| {
                     tracing::error!(?error, "failed to log in");

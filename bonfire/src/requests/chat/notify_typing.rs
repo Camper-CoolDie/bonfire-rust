@@ -9,7 +9,7 @@ use crate::{Client, Result, RootError};
 
 #[derive(Serialize)]
 pub(crate) struct NotifyTypingRequest {
-    pub tag: RawChatTag,
+    tag: RawChatTag,
 }
 impl NotifyTypingRequest {
     pub(crate) const PERIOD: Duration = Duration::from_secs(5);
@@ -19,11 +19,12 @@ impl NotifyTypingRequest {
     }
 }
 
-impl Request for NotifyTypingRequest {
+impl Request<()> for NotifyTypingRequest {
     type Response = EmptyResponse;
     type Error = InfallibleRequest<RootError>;
 
-    async fn send_request(&self, client: &Client) -> Result<EmptyResponse> {
-        client.send_request("RChatTyping", self, Vec::new()).await
+    async fn send(&self, client: &Client) -> Result<()> {
+        client.send_request("RChatTyping", self, Vec::new()).await?;
+        Ok(())
     }
 }

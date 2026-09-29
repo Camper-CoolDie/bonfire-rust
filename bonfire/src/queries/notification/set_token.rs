@@ -13,17 +13,18 @@ impl<'a> SetTokenQuery<'a> {
     }
 }
 
-impl Request for SetTokenQuery<'_> {
+impl Request<()> for SetTokenQuery<'_> {
     type Response = EmptyResponse;
     type Error = InfallibleRequest<MeliorError>;
 
-    async fn send_request(&self, client: &Client) -> Result<EmptyResponse> {
+    async fn send(&self, client: &Client) -> Result<()> {
         client
             .send_query(
                 "SetNotificationToken",
                 "notification/SetNotificationToken.graphql",
                 self,
             )
-            .await
+            .await?;
+        Ok(())
     }
 }

@@ -1,5 +1,5 @@
-const DEFAULT_ANYTHING_FANDOM_ID: u64 = 1627;
-const DEFAULT_ANYTHING_FANDOM_NAME: &str = "Anything";
+const ANYTHING_FANDOM_ID: u64 = 1627;
+const ANYTHING_FANDOM_NAME: &str = "Anything";
 
 /// Represents the default configuration values for the Bonfire API client.
 #[derive(Clone, Debug)]
@@ -29,10 +29,10 @@ impl Default for Config {
         Self {
             protoadmin_ids: Vec::new(),
             has_follows: false,
-            quick_post_fandom_id: DEFAULT_ANYTHING_FANDOM_ID,
-            quick_post_fandom_name: DEFAULT_ANYTHING_FANDOM_NAME.to_string(),
-            quick_image_fandom_id: DEFAULT_ANYTHING_FANDOM_ID,
-            quick_image_fandom_name: DEFAULT_ANYTHING_FANDOM_NAME.to_string(),
+            quick_post_fandom_id: ANYTHING_FANDOM_ID,
+            quick_post_fandom_name: ANYTHING_FANDOM_NAME.to_string(),
+            quick_image_fandom_id: ANYTHING_FANDOM_ID,
+            quick_image_fandom_name: ANYTHING_FANDOM_NAME.to_string(),
         }
     }
 }

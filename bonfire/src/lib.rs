@@ -47,7 +47,7 @@
 //! ```no_run
 //! use std::fs;
 //!
-//! use anyhow::Result;
+//! use anyhow::{Context as _, Result};
 //! use bonfire::prelude::*;
 //! use futures_util::TryStreamExt as _;
 //!
@@ -67,8 +67,12 @@
 //!         .ok()
 //!         .map(|data| serde_json::from_slice::<Auth>(&data))
 //!         .transpose()?;
+//!
 //!     let client = &if let Some(auth) = auth_data {
-//!         Client::builder().auth(auth).expect("invalid auth").build()
+//!         Client::builder()
+//!             .auth(auth)
+//!             .context("invalid auth")?
+//!             .build()
 //!     } else {
 //!         let client = Client::default();
 //!         client.login(EMAIL, PASSWORD).await?;

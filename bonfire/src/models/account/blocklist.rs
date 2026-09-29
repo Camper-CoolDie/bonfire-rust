@@ -2,7 +2,6 @@ use futures::Stream;
 
 use crate::client::Request;
 use crate::models::Account;
-use crate::models::streams::auto_paginated_stream;
 use crate::requests::account::blocklist::{
     BlockAccountRequest, IsAccountBlockedRequest, ListBlockedAccountsRequest, UnblockAccountRequest,
 };
@@ -14,40 +13,34 @@ impl Account {
     ///
     /// # Errors
     ///
-    /// Returns [`RootError::AccessDenied`][crate::RootError::AccessDenied] if you attempt to block
-    /// your own account, or [`Error`][crate::Error] if any other error occurs during the request.
+    /// Returns [`RootError::AccessDenied`][crate::RootError::AccessDenied] if attempting to block
+    /// the authenticated user's own account, or [`Error`][crate::Error] if any other error occurs
+    /// during the request.
     pub async fn block(&self, client: &Client) -> Result<&Self> {
-        BlockAccountRequest::new(self.id)
-            .send_request(client)
-            .await?;
+        BlockAccountRequest::new(self.id).send(client).await?;
         Ok(self)
     }
 
-    /// Unblocks this account, making its publications reappear and allowing it to send you direct
-    /// messages.
+    /// Unblocks this account, making its publications reappear and allowing it to send direct
+    /// messages to the authenticated user.
     ///
     /// # Errors
     ///
     /// Returns [`Error`][crate::Error] if an error occurs while sending the request.
     pub async fn unblock(&self, client: &Client) -> Result<&Self> {
-        UnblockAccountRequest::new(self.id)
-            .send_request(client)
-            .await?;
+        UnblockAccountRequest::new(self.id).send(client).await?;
         Ok(self)
     }
 
-    /// Checks if this account is currently blocked by you.
+    /// Checks if this account is currently blocked by the authenticated user.
     ///
     /// # Errors
     ///
-    /// Returns [`RootError::AccessDenied`][crate::RootError::AccessDenied] if you attempt to check
-    /// the block status of your own account, or [`Error`][crate::Error] if any other error occurs
-    /// during the request.
+    /// Returns [`RootError::AccessDenied`][crate::RootError::AccessDenied] if attempting to check
+    /// the block status of the authenticated user's own account, or [`Error`][crate::Error] if any
+    /// other error occurs during the request.
     pub async fn is_blocked(&self, client: &Client) -> Result<bool> {
-        Ok(IsAccountBlockedRequest::new(self.id)
-            .send_request(client)
-            .await?
-            .into())
+        IsAccountBlockedRequest::new(self.id).send(client).await
     }
 
     /// Retrieves a [`Stream`] of accounts that are currently blocked by this account.
@@ -62,16 +55,7 @@ impl Account {
         client: &'a Client,
         offset: usize,
     ) -> impl Stream<Item = Result<Self>> + 'a {
-        auto_paginated_stream(
-            move |offset| async move {
-                ListBlockedAccountsRequest::new(self.id, offset)
-                    .send_request(client)
-                    .await?
-                    .try_into()
-            },
-            offset,
-            ListBlockedAccountsRequest::PAGE_SIZE,
-        )
+        ListBlockedAccountsRequest::new(self.id, offset).stream(client)
     }
 
     /// Retrieves a list of IDs of fandoms that are currently blocked by this account.
@@ -80,9 +64,6 @@ impl Account {
     ///
     /// Returns [`Error`][crate::Error] if an error occurs while sending the request.
     pub async fn list_blocked_fandom_ids(&self, client: &Client) -> Result<Vec<u64>> {
-        Ok(ListBlockedFandomIdsRequest::new(self.id)
-            .send_request(client)
-            .await?
-            .into())
+        ListBlockedFandomIdsRequest::new(self.id).send(client).await
     }
 }

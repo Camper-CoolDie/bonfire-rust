@@ -6,7 +6,7 @@ use crate::models::Language;
 /// Represents a unique identifier for different types of chats.
 ///
 /// This enum allows distinguishing between various chat contexts within the Bonfire API.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub enum Tag {
     /// Identifies a main chat for a fandom

@@ -15,7 +15,7 @@ pub(crate) struct RawNotification {
     #[serde(rename = "J_N_TYPE")]
     pub kind: RawKind,
     #[serde(flatten)]
-    pub additional_data: Value,
+    pub extra: Value,
 }
 
 impl TryFrom<RawNotification> for Notification {
@@ -23,7 +23,7 @@ impl TryFrom<RawNotification> for Notification {
 
     fn try_from(value: RawNotification) -> Result<Self> {
         Ok(Self {
-            content: AnyRawNotification::new(value.additional_data, value.kind)?.try_into()?,
+            spec: AnyRawNotification::new(value.extra, &value.kind)?.try_into()?,
             sent_at: timestamp_from_millis(value.sent_at)?,
         })
     }

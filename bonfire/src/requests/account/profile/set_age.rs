@@ -6,7 +6,7 @@ use crate::{Client, Result};
 
 #[derive(Serialize)]
 pub(crate) struct SetAgeRequest {
-    pub age: i64,
+    age: i64,
 }
 impl SetAgeRequest {
     pub(crate) fn new(age: Option<i64>) -> Self {
@@ -16,13 +16,14 @@ impl SetAgeRequest {
     }
 }
 
-impl Request for SetAgeRequest {
+impl Request<()> for SetAgeRequest {
     type Response = EmptyResponse;
     type Error = SetAgeError;
 
-    async fn send_request(&self, client: &Client) -> Result<EmptyResponse> {
+    async fn send(&self, client: &Client) -> Result<()> {
         client
             .send_request("RAccountsBioSetAge", self, Vec::new())
-            .await
+            .await?;
+        Ok(())
     }
 }

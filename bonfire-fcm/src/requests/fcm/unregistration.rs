@@ -25,7 +25,7 @@ impl<'a> UnregistrationRequest<'a> {
         }
     }
 
-    pub(crate) async fn send_request(&self, client: &HyperClient) -> Result<()> {
+    pub(crate) async fn send(&self, client: &HyperClient) -> Result<()> {
         let uri = format!(
             "{URI}/projects/{}/registrations/{}",
             self.project_id, self.push_token

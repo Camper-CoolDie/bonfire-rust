@@ -8,7 +8,7 @@ use serde::Deserialize;
 
 use crate::models::ChatMessage;
 use crate::models::publication::ChatMessageRef;
-use crate::requests::raw::chat::{RawKind as RawChatKind, RawMemberRole};
+use crate::requests::raw::chat::RawMemberRole;
 use crate::requests::raw::publication::{RawKind, RawPublishable};
 use crate::requests::raw::{RawAccount, RawChatTag, RawFandom, RawGender, RawImageRef};
 use crate::{Error, Result};
@@ -82,12 +82,8 @@ pub(crate) struct RawChatMessage {
     pub fandom: RawFandom,
     #[serde(rename = "creator")]
     pub author: RawAccount,
-    #[serde(rename = "tag_1")]
-    pub chat_kind: RawChatKind,
-    #[serde(rename = "tag_2")]
-    pub chat_first_id: u64,
-    #[serde(rename = "tag_3")]
-    pub chat_second_id: u64,
+    #[serde(rename = "tag_s_1")]
+    pub chat_tag: RawChatTag,
     #[serde(rename = "jsonDB")]
     pub inner: InnerData,
 }
@@ -170,17 +166,14 @@ impl TryFrom<RawChatMessage> for ChatMessage {
                 voice_waveform: value.inner.voice_waveform,
             }
             .try_into()?,
-            fandom: match value.chat_kind {
-                RawChatKind::FandomRoot | RawChatKind::FandomSub => Some(value.fandom.try_into()?),
+            fandom: match value.chat_tag {
+                RawChatTag::FandomRoot { .. } | RawChatTag::FandomSub { .. } => {
+                    Some(value.fandom.try_into()?)
+                }
                 _ => None,
             },
             author: value.author.try_into()?,
-            chat_tag: RawChatTag::from((
-                value.chat_kind,
-                value.chat_first_id,
-                value.chat_second_id,
-            ))
-            .try_into()?,
+            chat_tag: value.chat_tag.try_into()?,
             reply_to,
             answering_name: match value.inner.answering_name.as_str() {
                 "" => None,

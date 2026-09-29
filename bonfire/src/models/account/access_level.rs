@@ -73,7 +73,7 @@ impl AccessLevel {
     /// Returns `None` for [`AccessLevel::User`] and [`AccessLevel::Protoadmin`] as they don't have
     /// specific dynamic requirements.
     #[must_use]
-    pub fn requirement(&self) -> Option<(f64, f64)> {
+    pub const fn requirement(self) -> Option<(f64, f64)> {
         match self {
             AccessLevel::Trusted => Some(TRUSTED_REQUIREMENT),
             AccessLevel::Experienced => Some(EXPERIENCED_REQUIREMENT),
@@ -98,7 +98,7 @@ impl Account {
     /// This method relies on [`Account::id`], [`Account::level`] and [`Account::karma30`] fields
     /// being set.
     #[must_use]
-    pub fn access_level(&self, config: &Config) -> AccessLevel {
+    pub fn access_level(self, config: &Config) -> AccessLevel {
         // Linear `.contains()` search is preferred for small vectors, so there's no overhead
         if config.protoadmin_ids.contains(&self.id) {
             AccessLevel::Protoadmin

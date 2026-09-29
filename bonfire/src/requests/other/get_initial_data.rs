@@ -1,19 +1,21 @@
 use serde::Serialize;
 
 use crate::client::{InfallibleRequest, Request};
+use crate::models::InitialData;
 use crate::requests::raw::RawInitialData;
 use crate::{Client, Result, RootError};
 
 #[derive(Serialize)]
 pub(crate) struct GetInitialDataRequest {}
 
-impl Request for GetInitialDataRequest {
+impl Request<InitialData> for GetInitialDataRequest {
     type Response = RawInitialData;
     type Error = InfallibleRequest<RootError>;
 
-    async fn send_request(&self, client: &Client) -> Result<RawInitialData> {
+    async fn send(&self, client: &Client) -> Result<InitialData> {
         client
             .send_request("RAccountsLogin", self, Vec::new())
-            .await
+            .await?
+            .try_into()
     }
 }

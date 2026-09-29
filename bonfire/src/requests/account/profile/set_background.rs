@@ -1,88 +1,52 @@
 use std::result::Result as StdResult;
 
-use serde::{Deserialize, Serialize, Serializer};
+use serde::{Serialize, Serializer};
 
 use crate::client::Request;
-use crate::models::ImageRef;
 use crate::models::profile::SetProfileImageError;
-use crate::requests::raw::RawImageRef;
-use crate::{Client, Error, Result};
+use crate::requests::raw::Image;
+use crate::requests::raw::image::{Gif, Normal};
+use crate::{Client, Result};
 
-#[derive(Deserialize)]
-pub(crate) struct Response {
-    #[serde(rename = "image")]
-    new_background: RawImageRef,
-    #[serde(rename = "imageGif")]
-    new_background_gif: Option<RawImageRef>,
+pub(crate) struct SetBackgroundRequest<I: Image> {
+    background: I,
 }
 
-impl From<Response> for ImageRef {
-    fn from(value: Response) -> Self {
-        value.new_background.into()
-    }
-}
-
-impl TryFrom<Response> for (ImageRef, ImageRef) {
-    type Error = Error;
-
-    fn try_from(value: Response) -> Result<Self> {
-        Ok((
-            value.new_background.into(),
-            value
-                .new_background_gif
-                .ok_or(Error::ConversionError(
-                    "missing field \"imageGif\"".to_owned(),
-                ))?
-                .into(),
-        ))
-    }
-}
-
-pub(crate) enum SetBackgroundRequest<'a> {
-    Normal(&'a [u8]),
-    Gif {
-        first_frame: &'a [u8],
-        animated: &'a [u8],
-    },
-}
-impl<'a> SetBackgroundRequest<'a> {
+impl<'a> SetBackgroundRequest<Normal<'a>> {
     pub(crate) fn new(background: &'a [u8]) -> Self {
-        Self::Normal(background)
-    }
-
-    pub(crate) fn new_gif(first_frame: &'a [u8], animated: &'a [u8]) -> Self {
-        Self::Gif {
-            first_frame,
-            animated,
+        SetBackgroundRequest {
+            background: Normal::new(background),
         }
     }
 }
 
-impl Request for SetBackgroundRequest<'_> {
-    type Response = Response;
-    type Error = SetProfileImageError;
-
-    async fn send_request(&self, client: &Client) -> Result<Response> {
-        let attachments = match self {
-            Self::Normal(background) => vec![*background, &[]],
-            Self::Gif {
-                first_frame,
-                animated,
-            } => vec![*first_frame, *animated],
-        };
-
-        client
-            .send_request("RAccountsChangeTitleImage", self, attachments)
-            .await
+impl<'a> SetBackgroundRequest<Gif<'a>> {
+    pub(crate) fn new_gif(first_frame: &'a [u8], animated: &'a [u8]) -> Self {
+        SetBackgroundRequest {
+            background: Gif::new(first_frame, animated),
+        }
     }
 }
 
-impl Serialize for SetBackgroundRequest<'_> {
+impl<I: Image> Serialize for SetBackgroundRequest<I> {
     fn serialize<S>(&self, serializer: S) -> StdResult<S::Ok, S::Error>
     where
         S: Serializer,
     {
         // Serializes into `{}`
         serializer.serialize_unit_struct("SetBackgroundRequest")
+    }
+}
+
+impl<I: Image> Request<I::Target> for SetBackgroundRequest<I> {
+    type Response = I::Response;
+    type Error = SetProfileImageError;
+
+    async fn send(&self, client: &Client) -> Result<I::Target> {
+        let attachments = self.background.attachments();
+        let response = client
+            .send_request("RAccountsChangeTitleImage", self, attachments)
+            .await?;
+        self.background.parse_response(response)
     }
 }

@@ -3,29 +3,16 @@ use serde::{Deserialize, Serialize};
 use crate::client::{InfallibleRequest, Request};
 use crate::models::{Fandom, Language};
 use crate::requests::raw::{RawFandom, RawLanguage};
-use crate::{Client, Error, Result, RootError};
-
-#[derive(Deserialize)]
-pub(crate) struct Response {
-    fandom: RawFandom,
-}
-
-impl TryFrom<Response> for Fandom {
-    type Error = Error;
-
-    fn try_from(value: Response) -> Result<Self> {
-        value.fandom.try_into()
-    }
-}
+use crate::{Client, Result, RootError};
 
 #[derive(Serialize)]
 pub(crate) struct GetFandomRequest {
     #[serde(rename = "fandomId")]
-    pub id: u64,
+    id: u64,
     #[serde(rename = "languageId")]
-    pub language: RawLanguage,
+    language: RawLanguage,
     #[serde(rename = "accountLanguageId")]
-    pub my_language: RawLanguage,
+    my_language: RawLanguage,
 }
 impl GetFandomRequest {
     pub(crate) fn new(id: u64, language: Option<Language>, my_language: Language) -> Self {
@@ -37,11 +24,20 @@ impl GetFandomRequest {
     }
 }
 
-impl Request for GetFandomRequest {
+#[derive(Deserialize)]
+pub(crate) struct Response {
+    fandom: RawFandom,
+}
+
+impl Request<Fandom> for GetFandomRequest {
     type Response = Response;
     type Error = InfallibleRequest<RootError>;
 
-    async fn send_request(&self, client: &Client) -> Result<Response> {
-        client.send_request("RFandomsGet", self, Vec::new()).await
+    async fn send(&self, client: &Client) -> Result<Fandom> {
+        client
+            .send_request("RFandomsGet", self, Vec::new())
+            .await?
+            .fandom
+            .try_into()
     }
 }

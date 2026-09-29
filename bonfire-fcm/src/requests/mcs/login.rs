@@ -21,7 +21,7 @@ impl<'a> LoginRequest<'a> {
         }
     }
 
-    pub(crate) async fn send_message(&self, connection: &Connection) -> Result<()> {
+    pub(crate) async fn send(&self, connection: &Connection) -> Result<()> {
         let android_id = self.android_id.to_string();
         let security_token = self.security_token.to_string();
 

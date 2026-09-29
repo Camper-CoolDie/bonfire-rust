@@ -28,10 +28,7 @@ pub(super) enum Command {
 // problem as they can only be processed by the server
 pub(super) struct Heartbeat;
 impl Heartbeat {
-    #[instrument(
-        name = "heartbeat",
-        skip(command_receiver, connection, cancellation_token)
-    )]
+    #[instrument(name = "heartbeat", skip_all, fields(id = id))]
     pub(super) async fn task(
         mut command_receiver: mpsc::Receiver<Command>,
         connection: Connection,

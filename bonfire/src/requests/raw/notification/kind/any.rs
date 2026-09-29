@@ -12,7 +12,7 @@ pub(crate) enum AnyRawNotification {
     AccountPunished(RawAccountPunished),
     AccountTargetAdminActionRejected(RawAdminActionRejected),
     AccountUnfollowed(RawAccountRef),
-    AchievementUnlocked(RawAchievementUnlocked),
+    AchievementProgressed(RawAchievementProgressed),
     AdminActionRejected(RawAdminActionRejected),
     ChatMessageCreated(RawChatMessageCreated),
     ChatMessageEdited(RawChatMessageEdited),
@@ -65,7 +65,7 @@ pub(crate) enum AnyRawNotification {
     Unknown(i64),
 }
 impl AnyRawNotification {
-    pub(crate) fn new(data: Value, kind: RawKind) -> Result<Self> {
+    pub(crate) fn new(data: Value, kind: &RawKind) -> Result<Self> {
         // TODO: replace this and TryFrom with macros (derive?)
         Ok(match kind {
             RawKind::AccountFandomUnbanned => {
@@ -86,8 +86,8 @@ impl AnyRawNotification {
             RawKind::AccountUnfollowed => {
                 AnyRawNotification::AccountUnfollowed(serde_json::from_value(data)?)
             }
-            RawKind::AchievementUnlocked => {
-                AnyRawNotification::AchievementUnlocked(serde_json::from_value(data)?)
+            RawKind::AchievementProgressed => {
+                AnyRawNotification::AchievementProgressed(serde_json::from_value(data)?)
             }
             RawKind::AdminActionRejected => {
                 AnyRawNotification::AdminActionRejected(serde_json::from_value(data)?)
@@ -228,7 +228,7 @@ impl AnyRawNotification {
             RawKind::RubricRemoved => {
                 AnyRawNotification::RubricRemoved(serde_json::from_value(data)?)
             }
-            RawKind::Unknown(kind) => AnyRawNotification::Unknown(kind),
+            RawKind::Unknown(kind) => AnyRawNotification::Unknown(*kind),
         })
     }
 }
@@ -256,8 +256,8 @@ impl TryFrom<AnyRawNotification> for AnyNotification {
             AnyRawNotification::AccountUnfollowed(notification) => {
                 AnyNotification::AccountUnfollowed(notification.try_into()?)
             }
-            AnyRawNotification::AchievementUnlocked(notification) => {
-                AnyNotification::AchievementUnlocked(notification.into())
+            AnyRawNotification::AchievementProgressed(notification) => {
+                AnyNotification::AchievementProgressed(notification.into())
             }
             AnyRawNotification::AdminActionRejected(notification) => {
                 AnyNotification::AdminActionRejected(notification.try_into()?)

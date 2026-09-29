@@ -1,5 +1,5 @@
-mod achievement_unlocked;
+mod achievement_progressed;
 mod field_set;
 
-pub(crate) use achievement_unlocked::RawAchievementUnlocked;
+pub(crate) use achievement_progressed::RawAchievementProgressed;
 pub(crate) use field_set::RawFieldSet;

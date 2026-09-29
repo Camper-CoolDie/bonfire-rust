@@ -6,6 +6,7 @@ pub(crate) mod other;
 pub(crate) mod publication;
 pub(crate) mod raw;
 
+use std::marker::PhantomData;
 use std::result::Result as StdResult;
 
 pub use error::{RootError, UnavailableError};
@@ -31,7 +32,7 @@ fn serialize_data_output<S: Serializer>(
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
-pub(crate) struct RootRequest<'a, R: Request> {
+pub(crate) struct RootRequest<'a, T, R: Request<T>> {
     #[serde(flatten)]
     pub content: &'a R,
     #[serde(rename = "J_REQUEST_NAME")]
@@ -45,11 +46,13 @@ pub(crate) struct RootRequest<'a, R: Request> {
     pub api_access_token: Option<&'a str>,
     #[serde(rename = "requestApiVersion")]
     pub api_version: &'static str,
+    #[serde(skip)]
+    pub _marker: PhantomData<T>,
 }
 
 #[derive(Deserialize)]
 #[serde(tag = "J_STATUS", content = "J_RESPONSE")]
-pub(crate) enum RootResponse<R: Request> {
+pub(crate) enum RootResponse<T, R: Request<T>> {
     #[serde(rename = "J_STATUS_OK")]
     Ok(R::Response),
     #[serde(rename = "J_STATUS_ERROR")]

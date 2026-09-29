@@ -5,6 +5,7 @@ mod request;
 mod service;
 mod token_provider;
 
+use std::marker::PhantomData;
 use std::sync::Arc;
 
 pub use builder::Builder;
@@ -19,7 +20,7 @@ use hyper_rustls::{HttpsConnector, HttpsConnectorBuilder};
 use hyper_util::client::legacy::connect::HttpConnector;
 use hyper_util::rt::TokioExecutor;
 pub(crate) use request::{
-    EmptyResponse, InfallibleRequest, Request, RequestError, RequestErrorSource,
+    EmptyResponse, InfallibleRequest, PaginatedRequest, Request, RequestError, RequestErrorSource,
 };
 use service::{MeliorService, RootService};
 use token_provider::TokenProvider;
@@ -33,9 +34,6 @@ use crate::{MeliorError, MeliorQuery, RootError, RootRequest};
 
 // Some requests require this value and return various responses depending on it
 const API_VERSION: &str = "3.1.0";
-
-// The maximum allowed size for any type of attachment (6 MiB)
-const ATTACHMENT_MAX_SIZE: usize = 6 * 1024 * 1024;
 
 type HyperClient = hyper_util::client::legacy::Client<
     HttpsConnector<HttpConnector>,
@@ -168,11 +166,7 @@ impl Client {
             return Err(Error::AlreadyAuthenticated);
         }
 
-        let auth = Auth::try_from(
-            LoginEmailQuery::new(email, password)
-                .send_request(self)
-                .await?,
-        )?;
+        let auth = LoginEmailQuery::new(email, password).send(self).await?;
         self.inner.token_provider.set_auth(Some(auth)).await?;
         Ok(self)
     }
@@ -210,7 +204,7 @@ impl Client {
             return Err(Error::Unauthenticated);
         }
 
-        LogoutQuery {}.send_request(self).await?;
+        LogoutQuery {}.send(self).await?;
         self.inner.token_provider.set_auth(None).await?;
         Ok(self)
     }
@@ -297,27 +291,23 @@ impl Client {
     ///
     /// Returns [`Error`] if an error occurs while sending the request.
     pub async fn get_initial_data(&self) -> Result<InitialData> {
-        GetInitialDataRequest {}
-            .send_request(self)
-            .await?
-            .try_into()
+        GetInitialDataRequest {}.send(self).await
     }
 
     pub async fn set_push_token(&self, token: &str) -> Result<&Self> {
-        SetNotificationTokenQuery::new(token)
-            .send_request(self)
-            .await?;
+        SetNotificationTokenQuery::new(token).send(self).await?;
         Ok(self)
     }
 
-    #[instrument(skip(self, content, attachments))]
-    pub(crate) async fn send_request<R: Request>(
+    #[instrument(skip_all, fields(name = request_name))]
+    pub(crate) async fn send_request<T, R>(
         &self,
         request_name: &'static str,
         content: &R,
         attachments: Vec<&[u8]>,
     ) -> Result<R::Response>
     where
+        R: Request<T>,
         for<'a> &'a <R::Error as RequestError>::Source: From<&'a RootError>,
     {
         self.inner.rate_limiter.until_ready().await;
@@ -329,20 +319,14 @@ impl Client {
         let data_output = attachments
             .iter()
             .map(|slice| {
-                (!slice.is_empty())
-                    .then(|| {
-                        let length = slice.len();
-
-                        #[expect(clippy::cast_possible_truncation, clippy::cast_possible_wrap)]
-                        if length > ATTACHMENT_MAX_SIZE {
-                            Err(Error::AttachmentTooLarge)
-                        } else {
-                            Ok(length as i32)
-                        }
-                    })
-                    .transpose()
+                (!slice.is_empty()).then(|| {
+                    slice
+                        .len()
+                        .try_into()
+                        .expect("failed to convert attachment length to i32")
+                })
             })
-            .collect::<Result<_>>()?;
+            .collect();
 
         let request = RootRequest {
             content,
@@ -350,24 +334,26 @@ impl Client {
             data_output,
             api_access_token: token.as_deref(),
             api_version: API_VERSION,
+            _marker: PhantomData,
         };
 
         tracing::info!("sending request");
         self.inner
             .root_service
-            .send_request(&self.hyper_client, request, attachments, HeaderMap::new())
+            .send(&self.hyper_client, request, attachments, HeaderMap::new())
             .await
             .inspect_err(|error| tracing::error!(?error, "failed to send request"))
     }
 
-    #[instrument(skip(self, graphql_path, variables))]
-    pub(crate) async fn send_query<R: Request>(
+    #[instrument(skip_all, fields(name = operation_name))]
+    pub(crate) async fn send_query<T, R>(
         &self,
         operation_name: &'static str,
         graphql_path: &'static str,
         variables: &R,
     ) -> Result<R::Response>
     where
+        R: Request<T>,
         for<'a> &'a <R::Error as RequestError>::Source: From<&'a MeliorError>,
     {
         self.inner.rate_limiter.until_ready().await;
@@ -379,6 +365,7 @@ impl Client {
             operation_name,
             variables,
             query: graphql::contents(graphql_path),
+            _marker: PhantomData,
         };
 
         let mut headers = HeaderMap::new();
@@ -392,19 +379,20 @@ impl Client {
         tracing::info!("sending query");
         self.inner
             .melior_service
-            .send_query(&self.hyper_client, query, headers)
+            .send(&self.hyper_client, query, headers)
             .await
             .inspect_err(|error| tracing::error!(?error, "failed to send query"))
     }
 
-    #[instrument(skip(self, graphql_path, variables))]
-    pub(crate) async fn send_query_authless<R: Request>(
+    #[instrument(skip_all, fields(name = operation_name))]
+    pub(crate) async fn send_query_authless<T, R>(
         &self,
         operation_name: &'static str,
         graphql_path: &'static str,
         variables: &R,
     ) -> Result<R::Response>
     where
+        R: Request<T>,
         for<'a> &'a <R::Error as RequestError>::Source: From<&'a MeliorError>,
     {
         self.inner.rate_limiter.until_ready().await;
@@ -413,12 +401,13 @@ impl Client {
             operation_name,
             variables,
             query: graphql::contents(graphql_path),
+            _marker: PhantomData,
         };
 
         tracing::info!("sending query without auth");
         self.inner
             .melior_service
-            .send_query(&self.hyper_client, query, HeaderMap::new())
+            .send(&self.hyper_client, query, HeaderMap::new())
             .await
             .inspect_err(|error| tracing::error!(?error, "failed to send an authless query"))
     }

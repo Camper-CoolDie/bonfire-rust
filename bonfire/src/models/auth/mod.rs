@@ -40,6 +40,6 @@ impl Auth {
     /// # }
     /// ```
     pub async fn get_profile(client: &Client) -> Result<Profile> {
-        GetProfileQuery {}.send_request(client).await?.try_into()
+        GetProfileQuery {}.send(client).await
     }
 }

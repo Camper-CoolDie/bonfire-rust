@@ -11,8 +11,8 @@ pub use tag::Tag;
 pub use typing::Handler as TypingHandler;
 
 use crate::client::Request as _;
-use crate::models::streams::{auto_paginated_stream, paginated_stream};
 use crate::models::{ChatMessage, Publication};
+pub use crate::requests::chat::ListMessagesAnchor;
 use crate::requests::chat::{GetChatRequest, ListChatsRequest, ListMessagesRequest};
 use crate::sealed::Sealed;
 use crate::{Client, Result};
@@ -24,6 +24,7 @@ use crate::{Client, Result};
 /// unspecified specific types.
 pub trait Messageable: Sealed {
     /// Returns the specific tag that identifies this type of chat.
+    #[must_use]
     fn tag(&self) -> Tag;
 }
 
@@ -46,7 +47,7 @@ pub struct Chat<T: Messageable = AnyChat> {
 impl Chat {
     /// Creates a new `Chat` instance from its tag.
     ///
-    /// This is useful when you only need to reference a chat by its tag for sending associated
+    /// This is useful when chat needs to be referenced only by its tag for sending associated
     /// requests. However, obtaining a fully populated `Chat` struct from methods like
     /// [`Chat::get_by_tag()`] or [`Chat::list()`] is generally preferred.
     #[must_use]
@@ -71,10 +72,7 @@ impl Chat {
     ///   and is private, or if the user has been removed from it.
     /// * Returns [`Error`][crate::Error] if any other error occurs during the request.
     pub async fn get_by_tag(client: &Client, tag: Tag) -> Result<Self> {
-        GetChatRequest::new_by_tag(tag)
-            .send_request(client)
-            .await?
-            .try_into()
+        GetChatRequest::new_by_tag(tag).send(client).await
     }
 
     /// Retrieves a single chat by a message ID contained within it.
@@ -90,10 +88,7 @@ impl Chat {
     ///   private, or if the user has been removed from it.
     /// * Returns [`Error`][crate::Error] if any other error occurs during the request.
     pub async fn get_by_message_id(client: &Client, id: u64) -> Result<Self> {
-        GetChatRequest::new_by_message_id(id)
-            .send_request(client)
-            .await?
-            .try_into()
+        GetChatRequest::new_by_message_id(id).send(client).await
     }
 
     /// Retrieves a [`Stream`] of chats for the currently authenticated user.
@@ -104,46 +99,20 @@ impl Chat {
     /// to skip a number of chats from the beginning of the list. If an [`Error`][crate::Error]
     /// occurs during the retrieval of any page, the stream will yield that single error and then
     /// terminate.
-    pub fn list(client: &Client, offset: usize) -> impl Stream<Item = Result<Self>> + '_ {
-        auto_paginated_stream(
-            move |offset| async move {
-                ListChatsRequest::new(offset)
-                    .send_request(client)
-                    .await?
-                    .try_into()
-            },
-            offset,
-            ListChatsRequest::PAGE_SIZE,
-        )
+    pub fn list(client: &Client, offset: usize) -> impl Stream<Item = Result<Self>> {
+        ListChatsRequest::new(offset).stream(client)
     }
 
-    pub fn list_messages(
-        &self,
-        client: &Client,
-        offset_date: Option<DateTime<Utc>>,
+    pub fn list_messages<'a>(
+        &'a self,
+        client: &'a Client,
         newest_first: bool,
-        message_id: Option<u64>,
-    ) -> impl Stream<Item = Result<Publication<ChatMessage>>> + '_ {
-        let tag = self.tag();
-
-        paginated_stream(
-            move |offset_date| async move {
-                ListMessagesRequest::new(tag, offset_date, newest_first, message_id)
-                    .send_request(client)
-                    .await?
-                    .try_into()
-            },
-            offset_date,
-            |messages, _| {
-                let length = messages.len();
-                (length >= ListMessagesRequest::PAGE_SIZE)
-                    .then(|| messages.last())
-                    .flatten()
-                    .map(|message| Some(message.created_at))
-            },
-        )
+        anchor: &ListMessagesAnchor,
+    ) -> impl Stream<Item = Result<Publication<ChatMessage>>> + 'a {
+        ListMessagesRequest::new(self.tag(), newest_first, anchor).stream(client)
     }
 
+    #[must_use]
     pub fn tag(&self) -> Tag {
         self.info.tag()
     }

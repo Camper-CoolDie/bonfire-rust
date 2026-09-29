@@ -1,7 +1,6 @@
 use futures::Stream;
 
 use crate::client::Request;
-use crate::models::streams::auto_paginated_stream;
 use crate::models::{Account, Fandom};
 use crate::requests::account::profile::{
     ChangeFollowRequest, ListCuratedFandomsRequest, ListFollowsRequest,
@@ -14,11 +13,12 @@ impl Account {
     ///
     /// # Errors
     ///
-    /// Returns [`RootError::AccessDenied`][crate::RootError::AccessDenied] if you attempt to follow
-    /// your own account, or [`Error`][crate::Error] if any other error occurs during the request.
+    /// Returns [`RootError::AccessDenied`][crate::RootError::AccessDenied] if attempting to follow
+    /// the authenticated user's own account, or [`Error`][crate::Error] if any other error occurs
+    /// during the request.
     pub async fn follow(&self, client: &Client) -> Result<&Self> {
         ChangeFollowRequest::new_follow(self.id)
-            .send_request(client)
+            .send(client)
             .await?;
         Ok(self)
     }
@@ -27,12 +27,12 @@ impl Account {
     ///
     /// # Errors
     ///
-    /// Returns [`RootError::AccessDenied`][crate::RootError::AccessDenied] if you attempt to
-    /// unfollow your own account, or [`Error`][crate::Error] if any other error occurs during the
-    /// request.
+    /// Returns [`RootError::AccessDenied`][crate::RootError::AccessDenied] if attempting to
+    /// unfollow the authenticated user's own account, or [`Error`][crate::Error] if any other error
+    /// occurs during the request.
     pub async fn unfollow(&self, client: &Client) -> Result<&Self> {
         ChangeFollowRequest::new_unfollow(self.id)
-            .send_request(client)
+            .send(client)
             .await?;
         Ok(self)
     }
@@ -49,16 +49,7 @@ impl Account {
         client: &'a Client,
         offset: usize,
     ) -> impl Stream<Item = Result<Self>> + 'a {
-        auto_paginated_stream(
-            move |offset| async move {
-                ListFollowsRequest::new_follows(self.id, offset)
-                    .send_request(client)
-                    .await?
-                    .try_into()
-            },
-            offset,
-            ListFollowsRequest::PAGE_SIZE,
-        )
+        ListFollowsRequest::new_follows(self.id, offset).stream(client)
     }
 
     /// Retrieves a [`Stream`] of accounts that are following this account.
@@ -73,16 +64,7 @@ impl Account {
         client: &'a Client,
         offset: usize,
     ) -> impl Stream<Item = Result<Self>> + 'a {
-        auto_paginated_stream(
-            move |offset| async move {
-                ListFollowsRequest::new_followers(self.id, offset)
-                    .send_request(client)
-                    .await?
-                    .try_into()
-            },
-            offset,
-            ListFollowsRequest::PAGE_SIZE,
-        )
+        ListFollowsRequest::new_followers(self.id, offset).stream(client)
     }
 
     /// Retrieves a [`Stream`] of fandoms this account is subscribed to.
@@ -97,16 +79,7 @@ impl Account {
         client: &'a Client,
         offset: usize,
     ) -> impl Stream<Item = Result<Fandom>> + 'a {
-        auto_paginated_stream(
-            move |offset| async move {
-                ListSubscriptionsRequest::new(self.id, offset)
-                    .send_request(client)
-                    .await?
-                    .try_into()
-            },
-            offset,
-            ListSubscriptionsRequest::PAGE_SIZE,
-        )
+        ListSubscriptionsRequest::new(self.id, offset).stream(client)
     }
 
     /// Retrieves a [`Stream`] of fandoms this account moderates.
@@ -121,16 +94,7 @@ impl Account {
         client: &'a Client,
         offset: usize,
     ) -> impl Stream<Item = Result<Fandom>> + 'a {
-        auto_paginated_stream(
-            move |offset| async move {
-                ListModeratedFandomsRequest::new(self.id, offset)
-                    .send_request(client)
-                    .await?
-                    .try_into()
-            },
-            offset,
-            ListModeratedFandomsRequest::PAGE_SIZE,
-        )
+        ListModeratedFandomsRequest::new(self.id, offset).stream(client)
     }
 
     /// Retrieves a [`Stream`] of fandoms this account curates.
@@ -145,15 +109,6 @@ impl Account {
         client: &'a Client,
         offset: usize,
     ) -> impl Stream<Item = Result<Fandom>> + 'a {
-        auto_paginated_stream(
-            move |offset| async move {
-                ListCuratedFandomsRequest::new(self.id, offset)
-                    .send_request(client)
-                    .await?
-                    .try_into()
-            },
-            offset,
-            ListCuratedFandomsRequest::PAGE_SIZE,
-        )
+        ListCuratedFandomsRequest::new(self.id, offset).stream(client)
     }
 }

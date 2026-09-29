@@ -7,7 +7,7 @@ use crate::{Client, Result};
 #[derive(Serialize)]
 pub(crate) struct SetReferrerRequest {
     #[serde(rename = "accountId")]
-    pub id: u64,
+    id: u64,
 }
 impl SetReferrerRequest {
     pub(crate) fn new(id: u64) -> Self {
@@ -15,13 +15,14 @@ impl SetReferrerRequest {
     }
 }
 
-impl Request for SetReferrerRequest {
+impl Request<()> for SetReferrerRequest {
     type Response = EmptyResponse;
     type Error = SetReferrerError;
 
-    async fn send_request(&self, client: &Client) -> Result<EmptyResponse> {
+    async fn send(&self, client: &Client) -> Result<()> {
         client
             .send_request("RAccountsSetRecruiter", self, Vec::new())
-            .await
+            .await?;
+        Ok(())
     }
 }

@@ -6,22 +6,10 @@ use crate::models::profile::SetProfileImageError;
 use crate::requests::raw::RawImageRef;
 use crate::{Client, Result};
 
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub(crate) struct Response {
-    new_avatar: RawImageRef,
-}
-
-impl From<Response> for ImageRef {
-    fn from(value: Response) -> Self {
-        value.new_avatar.into()
-    }
-}
-
 #[derive(Serialize)]
 pub(crate) struct SetAvatarRequest<'a> {
     #[serde(skip)]
-    pub avatar: &'a [u8],
+    avatar: &'a [u8],
 }
 impl<'a> SetAvatarRequest<'a> {
     pub(crate) fn new(avatar: &'a [u8]) -> Self {
@@ -29,13 +17,21 @@ impl<'a> SetAvatarRequest<'a> {
     }
 }
 
-impl Request for SetAvatarRequest<'_> {
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct Response {
+    new_avatar: RawImageRef,
+}
+
+impl Request<ImageRef> for SetAvatarRequest<'_> {
     type Response = Response;
     type Error = SetProfileImageError;
 
-    async fn send_request(&self, client: &Client) -> Result<Response> {
-        client
+    async fn send(&self, client: &Client) -> Result<ImageRef> {
+        Ok(client
             .send_request("RAccountsChangeAvatar", self, vec![self.avatar])
-            .await
+            .await?
+            .new_avatar
+            .into())
     }
 }

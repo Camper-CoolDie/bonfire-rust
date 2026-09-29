@@ -21,6 +21,7 @@ use crate::sealed::Sealed;
 /// [`AnyPublication`] serves as a catch-all for publications with unspecified specific types.
 pub trait Publishable: Sealed {
     /// Returns the specific kind of this publication.
+    #[must_use]
     fn kind(&self) -> Kind;
 }
 
@@ -31,7 +32,7 @@ pub struct Publication<T: Publishable = AnyPublication> {
     /// The unique identifier of this publication
     pub id: u64,
     #[cfg_attr(feature = "serde", serde(flatten))]
-    pub content: T,
+    pub spec: T,
     /// The date and time when this publication was created (or published, for posts/quests)
     pub created_at: DateTime<Utc>,
     /// The current status of this publication, or `None` if unspecified
@@ -40,7 +41,8 @@ pub struct Publication<T: Publishable = AnyPublication> {
     pub hotness: f32,
 }
 impl Publication {
+    #[must_use]
     pub fn kind(&self) -> Kind {
-        self.content.kind()
+        self.spec.kind()
     }
 }

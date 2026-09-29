@@ -31,7 +31,7 @@ pub struct Comment {
     pub parent_kind: Kind,
     /// The total karma received by this publication (can be positive or negative)
     pub karma: f64,
-    /// The karma you personally placed on this publication, if any
+    /// The karma that the authenticated user personally placed on this publication, if any
     pub my_karma: Option<f64>,
     /// The text content of the comment, if any
     pub text: Option<String>,

@@ -7,8 +7,8 @@ use crate::{Client, Result};
 #[derive(Serialize)]
 pub(crate) struct ReportRequest<'a> {
     #[serde(rename = "accountId")]
-    pub id: u64,
-    pub comment: &'a str,
+    id: u64,
+    comment: &'a str,
 }
 impl<'a> ReportRequest<'a> {
     pub(crate) fn new(id: u64, comment: &'a str) -> Self {
@@ -16,13 +16,14 @@ impl<'a> ReportRequest<'a> {
     }
 }
 
-impl Request for ReportRequest<'_> {
+impl Request<()> for ReportRequest<'_> {
     type Response = EmptyResponse;
     type Error = ReportError;
 
-    async fn send_request(&self, client: &Client) -> Result<EmptyResponse> {
+    async fn send(&self, client: &Client) -> Result<()> {
         client
             .send_request("RAccountsReport", self, Vec::new())
-            .await
+            .await?;
+        Ok(())
     }
 }

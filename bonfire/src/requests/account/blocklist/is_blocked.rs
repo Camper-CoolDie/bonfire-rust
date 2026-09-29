@@ -3,22 +3,10 @@ use serde::{Deserialize, Serialize};
 use crate::client::{InfallibleRequest, Request};
 use crate::{Client, Result, RootError};
 
-#[derive(Deserialize)]
-pub(crate) struct Response {
-    #[serde(rename = "isInBlackList")]
-    is_blocked: bool,
-}
-
-impl From<Response> for bool {
-    fn from(value: Response) -> Self {
-        value.is_blocked
-    }
-}
-
 #[derive(Serialize)]
 pub(crate) struct IsAccountBlockedRequest {
     #[serde(rename = "accountId")]
-    pub id: u64,
+    id: u64,
 }
 impl IsAccountBlockedRequest {
     pub(crate) fn new(id: u64) -> Self {
@@ -26,13 +14,20 @@ impl IsAccountBlockedRequest {
     }
 }
 
-impl Request for IsAccountBlockedRequest {
+#[derive(Deserialize)]
+pub(crate) struct Response {
+    #[serde(rename = "isInBlackList")]
+    is_blocked: bool,
+}
+
+impl Request<bool> for IsAccountBlockedRequest {
     type Response = Response;
     type Error = InfallibleRequest<RootError>;
 
-    async fn send_request(&self, client: &Client) -> Result<Response> {
-        client
+    async fn send(&self, client: &Client) -> Result<bool> {
+        Ok(client
             .send_request("RAccountsBlackListCheck", self, Vec::new())
-            .await
+            .await?
+            .is_blocked)
     }
 }

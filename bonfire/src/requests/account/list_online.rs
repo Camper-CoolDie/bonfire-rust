@@ -1,65 +1,70 @@
+use std::num::NonZeroUsize;
+
 use chrono::{DateTime, Utc};
+use futures::Stream;
+use nonzero_ext::nonzero;
 use serde::{Deserialize, Serialize};
 
-use crate::client::{InfallibleRequest, Request};
+use crate::client::{InfallibleRequest, PaginatedRequest, Request};
 use crate::models::Account;
 use crate::requests::raw::RawAccount;
-use crate::{Client, Error, Result, RootError};
+use crate::{Client, Result, RootError};
+
+const PAGE_SIZE: NonZeroUsize = nonzero!(50usize);
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct ListOnlineRequest {
+    offset_date: i64,
+    #[serde(skip)]
+    limit_date: i64,
+}
+impl ListOnlineRequest {
+    pub(crate) fn new(offset_date: Option<DateTime<Utc>>) -> Self {
+        Self {
+            offset_date: offset_date.map_or(0, |date| date.timestamp_millis()),
+            limit_date: Utc::now().timestamp_millis(),
+        }
+    }
+
+    pub(crate) fn stream(self, client: &Client) -> impl Stream<Item = Result<Account>> {
+        PaginatedRequest::new(
+            client,
+            self,
+            |request, accounts| {
+                if let Some(account) = accounts.last() {
+                    request.offset_date = account.last_online_at.timestamp_millis();
+                }
+            },
+            PAGE_SIZE,
+        )
+    }
+}
 
 #[derive(Deserialize)]
 pub(crate) struct Response {
     accounts: Vec<RawAccount>,
-    #[serde(skip)]
-    limit_date: i64,
 }
 
-impl TryFrom<Response> for Vec<Account> {
-    type Error = Error;
+impl Request<Vec<Account>> for ListOnlineRequest {
+    type Response = Response;
+    type Error = InfallibleRequest<RootError>;
 
-    fn try_from(value: Response) -> Result<Self> {
+    async fn send(&self, client: &Client) -> Result<Vec<Account>> {
         // The server returns a list of accounts sorted by last_online_at in descending order: this
         // would be a big problem when we'll try to load more than one page (because last_online_at
         // is taken only from the last element), so the list is reversed. We also check that it
         // doesn't exceed a statically-defined limit_date to prevent accounts from appearing more
         // than once, even though it's better to get all the pages instantly
-        value
+        client
+            .send_request("RAccountsGetAllOnline", self, Vec::new())
+            .await?
             .accounts
             .into_iter()
             .rev()
             .filter_map(|account| {
-                (account.last_online_at <= value.limit_date).then(|| Account::try_from(account))
+                (account.last_online_at < self.limit_date).then(|| Account::try_from(account))
             })
             .collect()
-    }
-}
-
-#[derive(Serialize)]
-#[serde(rename_all = "camelCase")]
-pub(crate) struct ListOnlineRequest {
-    pub offset_date: i64,
-    pub limit_date: i64,
-}
-impl ListOnlineRequest {
-    pub(crate) const PAGE_SIZE: usize = 50;
-
-    pub(crate) fn new(limit_date: DateTime<Utc>) -> Self {
-        Self {
-            offset_date: 0,
-            limit_date: limit_date.timestamp_millis(),
-        }
-    }
-}
-
-impl Request for ListOnlineRequest {
-    type Response = Response;
-    type Error = InfallibleRequest<RootError>;
-
-    async fn send_request(&self, client: &Client) -> Result<Response> {
-        let mut response = client
-            .send_request("RAccountsGetAllOnline", self, Vec::new())
-            .await?;
-
-        response.limit_date = self.limit_date;
-        Ok(response)
     }
 }

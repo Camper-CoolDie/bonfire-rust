@@ -8,7 +8,7 @@ pub use title::Title;
 
 use crate::client::Request as _;
 use crate::models::publication::{Kind, PostTag, Publishable};
-use crate::models::{Account, Category, Comment, Fandom, Publication};
+use crate::models::{Account, Category, Comment, Fandom, Publication, RubricRef};
 use crate::requests::publication::post::GetPostRequest;
 use crate::sealed::Sealed;
 use crate::{Client, Result};
@@ -29,19 +29,14 @@ pub struct Post {
     pub best_comment: Option<Publication<Comment>>,
     /// The total karma received by this publication (can be positive or negative)
     pub karma: f64,
-    /// The karma you personally placed on this publication, if any
+    /// The karma that the authenticated user personally placed on this publication, if any
     pub my_karma: Option<f64>,
     /// Indicates if this publication will appear in the main feed (may be overriden by
     /// [`Feed::show_closed`][crate::models::settings::Feed::show_closed])
     pub is_closed: bool,
     /// The total number of comments associated with this publication
     pub comments_count: u64,
-    /// The identifier of the rubric this post is linked to
-    pub rubric_id: Option<u64>,
-    /// The name of the rubric this post is linked to
-    pub rubric_name: Option<String>,
-    /// The karma coefficient of the rubric this post is linked to
-    pub rubric_karma_coef: Option<f64>,
+    pub rubric: Option<RubricRef>,
     // pub post_relay: Option<PostRelay>,
     /// Indicates if this publication has been marked as important
     pub is_important: bool,
@@ -81,9 +76,6 @@ impl Publication<Post> {
     ///   blocked.
     /// * Returns [`Error`][crate::Error] if any other error occurs during the request.
     pub async fn get_by_id(client: &Client, id: u64) -> Result<(Self, Vec<Publication<PostTag>>)> {
-        GetPostRequest::new(id)
-            .send_request(client)
-            .await?
-            .try_into()
+        GetPostRequest::new(id).send(client).await
     }
 }

@@ -61,7 +61,7 @@ impl Handler {
                     }
                 }
                 _ = interval.tick(), if !is_paused => {
-                    let _ = request.send_request(client).await;
+                    let _ = request.send(client).await;
                 }
             }
         }

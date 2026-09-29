@@ -8,7 +8,7 @@ use crate::{Client, Result, RootError};
 #[derive(Serialize)]
 pub(crate) struct SetGenderRequest {
     #[serde(rename = "sex")]
-    pub gender: RawGender,
+    gender: RawGender,
 }
 impl SetGenderRequest {
     pub(crate) fn new(gender: Gender) -> Self {
@@ -18,13 +18,14 @@ impl SetGenderRequest {
     }
 }
 
-impl Request for SetGenderRequest {
+impl Request<()> for SetGenderRequest {
     type Response = EmptyResponse;
     type Error = InfallibleRequest<RootError>;
 
-    async fn send_request(&self, client: &Client) -> Result<EmptyResponse> {
+    async fn send(&self, client: &Client) -> Result<()> {
         client
             .send_request("RAccountsBioSetSex", self, Vec::new())
-            .await
+            .await?;
+        Ok(())
     }
 }

@@ -44,7 +44,7 @@ impl<'a> RegistrationRequest<'a> {
         }
     }
 
-    pub(crate) async fn send_request(&self, client: &HyperClient) -> Result<RegistrationResponse> {
+    pub(crate) async fn send(&self, client: &HyperClient) -> Result<RegistrationResponse> {
         let subtype = format!("wp:{}/#{}", self.uri, Uuid::new_v4().hyphenated());
         let android_id = self.android_id.to_string();
 

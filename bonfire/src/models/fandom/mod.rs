@@ -1,8 +1,10 @@
 mod reference;
+mod rubric;
 mod status;
 
 use chrono::{DateTime, Utc};
 pub use reference::Reference;
+pub use rubric::Reference as RubricRef;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 pub use status::Status;
@@ -51,7 +53,7 @@ pub struct Fandom {
 impl Fandom {
     /// Creates a new `Fandom` instance with only its identifier and language set.
     ///
-    /// This is useful when you only need to reference a fandom by its ID and language for sending
+    /// This is useful when a fandom needs to be referenced only by its ID and language for sending
     /// associated requests. However, obtaining a fully populated `Fandom` struct from methods like
     /// [`Fandom::get_by_id_and_language()`] or [`Fandom::get_by_id()`] is generally preferred.
     #[must_use]
@@ -80,9 +82,8 @@ impl Fandom {
         my_language: Language,
     ) -> Result<Self> {
         GetFandomRequest::new(id, language, my_language)
-            .send_request(client)
-            .await?
-            .try_into()
+            .send(client)
+            .await
     }
 
     /// Retrieves a single fandom by its unique identifier.
@@ -93,10 +94,7 @@ impl Fandom {
     /// the provided identifier exists, or [`Error`][crate::Error] if any other error occurs during
     /// the request.
     pub async fn get_by_id(client: &Client, id: u64) -> Result<Self> {
-        ListFandomsRequest::new(&[id])
-            .send_request(client)
-            .await?
-            .try_into()
+        ListFandomsRequest::new_by_id(&[id]).send(client).await
     }
 
     pub async fn get_by_ref(
@@ -105,9 +103,8 @@ impl Fandom {
         my_language: Language,
     ) -> Result<Self> {
         GetFandomRequest::new(reference.id, reference.language, my_language)
-            .send_request(client)
-            .await?
-            .try_into()
+            .send(client)
+            .await
     }
 
     /// Retrieves multiple fandoms by their unique identifiers.
@@ -119,10 +116,7 @@ impl Fandom {
     ///
     /// Returns [`Error`][crate::Error] if an error occurs during the request.
     pub async fn list_by_ids(client: &Client, ids: &[u64]) -> Result<Vec<Option<Self>>> {
-        ListFandomsRequest::new(ids)
-            .send_request(client)
-            .await?
-            .try_into()
+        ListFandomsRequest::new_by_ids(ids).send(client).await
     }
 
     /// Retrieves multiple fandoms by their unique identifiers.
@@ -136,45 +130,37 @@ impl Fandom {
     /// fandom for a given ID is not found, or [`Error`][crate::Error] if any other error occurs
     /// during the request.
     pub async fn list_by_ids_strict(client: &Client, ids: &[u64]) -> Result<Vec<Self>> {
-        ListFandomsRequest::new(ids)
-            .send_request(client)
-            .await?
-            .try_into()
+        ListFandomsRequest::new_by_ids_strict(ids)
+            .send(client)
+            .await
     }
 
-    /// Blocks this fandom, hiding all its publications from your feed.
+    /// Blocks this fandom, hiding all its publications from the feed.
     ///
     /// # Errors
     ///
     /// Returns [`Error`][crate::Error] if an error occurs while sending the request.
     pub async fn block(&self, client: &Client) -> Result<&Self> {
-        BlockFandomRequest::new(self.id)
-            .send_request(client)
-            .await?;
+        BlockFandomRequest::new(self.id).send(client).await?;
         Ok(self)
     }
 
-    /// Unblocks this fandom, making its publications visible in your feed again.
+    /// Unblocks this fandom, making its publications visible in the feed again.
     ///
     /// # Errors
     ///
     /// Returns [`Error`][crate::Error] if an error occurs while sending the request.
     pub async fn unblock(&self, client: &Client) -> Result<&Self> {
-        UnblockFandomRequest::new(self.id)
-            .send_request(client)
-            .await?;
+        UnblockFandomRequest::new(self.id).send(client).await?;
         Ok(self)
     }
 
-    /// Checks if this fandom is currently blocked by you.
+    /// Checks if this fandom is currently blocked by the authenticated user.
     ///
     /// # Errors
     ///
     /// Returns [`Error`][crate::Error] if an error occurs while sending the request.
     pub async fn is_blocked(&self, client: &Client) -> Result<bool> {
-        Ok(IsFandomBlockedRequest::new(self.id)
-            .send_request(client)
-            .await?
-            .into())
+        IsFandomBlockedRequest::new(self.id).send(client).await
     }
 }

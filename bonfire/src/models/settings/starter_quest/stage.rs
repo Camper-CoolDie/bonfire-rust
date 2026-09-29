@@ -48,7 +48,7 @@ pub enum Stage {
     Unknown(i64),
 }
 impl Stage {
-    pub(super) fn max_progress(&self) -> Option<usize> {
+    pub(super) fn max_progress(self) -> Option<usize> {
         match self {
             Stage::CreateChatMessages | Stage::CreateComments => Some(5),
             Stage::RatePublications | Stage::CreatePostDraft => Some(3),

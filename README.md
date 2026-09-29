@@ -5,16 +5,15 @@
 [![CI Status](https://github.com/Camper-CoolDie/bonfire-rust/workflows/CI/badge.svg)](https://github.com/Camper-CoolDie/bonfire-rust/actions/workflows/ci.yml)
 [![License](https://img.shields.io/crates/l/bonfire.svg)](#license)
 
-bonfire-rust is a client library for the [Bonfire API](https://github.com/timas130/bonfire). It
-exposes asynchronous methods for sending API requests and receiving FCM notifications (with `fcm`
-feature). The initial goal was to create a desktop Bonfire client on top of an API library, but
-because of a full backend rework coming soon bonfire-rust has shifted its goals towards bot
-development.
+A client library for the [Bonfire API](https://github.com/timas130/bonfire). It exposes asynchronous
+methods for sending API requests and receiving FCM notifications (via the `fcm` feature). The initial
+goal was to create a desktop Bonfire client on top of an API library, but bonfire-rust has shifted
+focus toward bot development due to a pending backend rewrite.
 
-Other features include `serde`, which implements Serialize and Deserialize on almost every API
-object. You will probably want to enable this for caching authentication tokens at least, see
-[example](#searching-accounts-by-name). `http1` and `http2` enable corresponding HTTP versions, at
-least one must be present (the latter is enabled by default).
+Other features include `serde`, which implements (De)Serialize on almost every API object. You will
+likely want to enable this for caching authentication tokens, see
+[example](#searching-accounts-by-name). `http1` and `http2` enable their corresponding HTTP
+versions, at least one must be present (the latter is enabled by default).
 
 ## Examples
 
@@ -54,7 +53,7 @@ shows how to properly save and load authentication tokens to reuse the same sess
 ```rust
 use std::fs;
 
-use anyhow::Result;
+use anyhow::{Context as _, Result};
 use bonfire::prelude::*;
 use futures_util::TryStreamExt as _;
 
@@ -74,8 +73,12 @@ async fn main() -> Result<()> {
         .ok()
         .map(|data| serde_json::from_slice::<Auth>(&data))
         .transpose()?;
+
     let client = &if let Some(auth) = auth_data {
-        Client::builder().auth(auth).expect("invalid auth").build()
+        Client::builder()
+            .auth(auth)
+            .context("invalid auth")?
+            .build()
     } else {
         let client = Client::default();
         client.login(EMAIL, PASSWORD).await?;
@@ -101,8 +104,8 @@ async fn main() -> Result<()> {
 
 Since Bonfire relies on FCM to deliver notifications, a large portion of the GCM (Google Cloud
 Messaging) protocol was implemented specifically for this API based on
-[Chromium source code](https://source.chromium.org) and several other sources. To use this
-implementation, see [notification_listener.rs](bonfire/examples/notification_listener.rs).
+[Chromium source code](https://source.chromium.org) and several other sources. For example usage,
+see [notification_listener.rs](bonfire/examples/notification_listener.rs).
 
 ### Debugging
 

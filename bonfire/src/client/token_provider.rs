@@ -102,9 +102,6 @@ impl TokenProvider {
     }
 
     async fn refresh_now(client: &Client, auth: &Auth) -> Result<Auth> {
-        Ok(RefreshQuery::new(&auth.refresh_token)
-            .send_request(client)
-            .await?
-            .into())
+        RefreshQuery::new(&auth.refresh_token).send(client).await
     }
 }

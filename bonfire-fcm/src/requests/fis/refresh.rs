@@ -31,7 +31,7 @@ impl<'a> RefreshRequest<'a> {
         }
     }
 
-    pub(crate) async fn send_request(&self, client: &HyperClient) -> Result<Token> {
+    pub(crate) async fn send(&self, client: &HyperClient) -> Result<Token> {
         let request = json!({
             "installation": {
                 "appId": self.app_id,

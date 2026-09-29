@@ -30,7 +30,7 @@ impl Profile {
     ///
     /// Returns [`Error`][crate::Error] if an error occurs while sending the request.
     pub async fn set_gender(client: &Client, gender: Gender) -> Result<()> {
-        SetGenderRequest::new(gender).send_request(client).await?;
+        SetGenderRequest::new(gender).send(client).await?;
         Ok(())
     }
 }

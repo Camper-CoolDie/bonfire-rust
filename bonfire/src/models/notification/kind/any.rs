@@ -18,7 +18,7 @@ pub enum AnyNotification {
     AccountPunished(AccountPunished),
     AccountTargetAdminActionRejected(AdminActionRejected),
     AccountUnfollowed(AccountRef),
-    AchievementUnlocked(AchievementUnlocked),
+    AchievementProgressed(AchievementProgressed),
     AdminActionRejected(AdminActionRejected),
     ChatMessageCreated(ChatMessageCreated),
     ChatMessageEdited(ChatMessageEdited),

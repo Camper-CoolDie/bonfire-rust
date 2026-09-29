@@ -3,24 +3,10 @@ use serde::{Deserialize, Serialize};
 use crate::client::{InfallibleRequest, Request};
 use crate::{Client, Result, RootError};
 
-#[derive(Deserialize)]
-pub(crate) struct Response {
-    #[serde(rename = "fandomsIds")]
-    fandom_ids: Vec<u64>,
-}
-
-impl From<Response> for Vec<u64> {
-    fn from(mut value: Response) -> Self {
-        // The server returns an unsorted list of IDs
-        value.fandom_ids.sort_unstable();
-        value.fandom_ids
-    }
-}
-
 #[derive(Serialize)]
 pub(crate) struct ListBlockedFandomIdsRequest {
     #[serde(rename = "accountId")]
-    pub id: u64,
+    id: u64,
 }
 impl ListBlockedFandomIdsRequest {
     pub(crate) fn new(id: u64) -> Self {
@@ -28,13 +14,23 @@ impl ListBlockedFandomIdsRequest {
     }
 }
 
-impl Request for ListBlockedFandomIdsRequest {
+#[derive(Deserialize)]
+pub(crate) struct Response {
+    #[serde(rename = "fandomsIds")]
+    fandom_ids: Vec<u64>,
+}
+
+impl Request<Vec<u64>> for ListBlockedFandomIdsRequest {
     type Response = Response;
     type Error = InfallibleRequest<RootError>;
 
-    async fn send_request(&self, client: &Client) -> Result<Response> {
-        client
+    async fn send(&self, client: &Client) -> Result<Vec<u64>> {
+        let mut response = client
             .send_request("RAccountsGetIgnoredFandoms", self, Vec::new())
-            .await
+            .await?;
+
+        // The server returns an unsorted list of IDs
+        response.fandom_ids.sort_unstable();
+        Ok(response.fandom_ids)
     }
 }

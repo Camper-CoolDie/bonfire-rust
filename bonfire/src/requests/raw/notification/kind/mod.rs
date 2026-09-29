@@ -35,7 +35,7 @@ pub(crate) use post::{
     RawRelayTurnRejected as RawPostRelayTurnRejected, RawTagsChanged as RawPostTagsChanged,
     RawVisibilityChanged as RawPostVisibilityChanged,
 };
-pub(crate) use profile::{RawAchievementUnlocked, RawFieldSet as RawProfileFieldSet};
+pub(crate) use profile::{RawAchievementProgressed, RawFieldSet as RawProfileFieldSet};
 pub(crate) use publication::{
     RawBlockRejected as RawPublicationBlockRejected, RawCommentReplied, RawPublicationBlocked,
     RawPublicationBlockedAfterReport, RawPublicationCommented, RawPublicationDrafted,
@@ -56,7 +56,7 @@ pub(crate) enum RawKind {
     AccountPunished,
     AccountTargetAdminActionRejected,
     AccountUnfollowed,
-    AchievementUnlocked,
+    AchievementProgressed,
     AdminActionRejected,
     ChatMessageCreated,
     ChatMessageEdited,
@@ -119,7 +119,7 @@ impl<'de> Deserialize<'de> for RawKind {
             2 => RawKind::PublicationCommented,
             3 => RawKind::CommentReplied,
             4 => RawKind::AccountFollowed,
-            7 => RawKind::AchievementUnlocked,
+            7 => RawKind::AchievementProgressed,
             8 => RawKind::ChatMessageCreated,
             9 => RawKind::ChatMessageReplied,
             10 => RawKind::FollowedPostCreated,

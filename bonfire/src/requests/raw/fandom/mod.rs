@@ -1,7 +1,9 @@
 mod reference;
+mod rubric;
 mod status;
 
 pub(crate) use reference::RawReference;
+pub(crate) use rubric::RawReference as RawRubricRef;
 use serde::Deserialize;
 pub(crate) use status::RawStatus;
 

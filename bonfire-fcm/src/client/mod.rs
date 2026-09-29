@@ -81,7 +81,7 @@ impl Client {
             key_components.public_key(),
             &auth_secret,
         )
-        .send_request(&self.hyper)
+        .send(&self.hyper)
         .await
         .inspect_err(|error| {
             tracing::error!(?error, "failed to subscribe");
@@ -107,7 +107,7 @@ impl Client {
             &credentials.installation_auth_token,
             &subscription.push_token,
         )
-        .send_request(&self.hyper)
+        .send(&self.hyper)
         .await
         .inspect_err(|error| {
             tracing::error!(?error, "failed to unsubscribe");

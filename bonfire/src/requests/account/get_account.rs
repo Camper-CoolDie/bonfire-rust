@@ -3,20 +3,7 @@ use serde::{Deserialize, Serialize};
 use crate::client::{InfallibleRequest, Request};
 use crate::models::Account;
 use crate::requests::raw::RawAccount;
-use crate::{Client, Error, Result, RootError};
-
-#[derive(Deserialize)]
-pub(crate) struct Response {
-    account: RawAccount,
-}
-
-impl TryFrom<Response> for Account {
-    type Error = Error;
-
-    fn try_from(value: Response) -> Result<Self> {
-        value.account.try_into()
-    }
-}
+use crate::{Client, Result, RootError};
 
 #[derive(Serialize)]
 pub(crate) enum GetAccountRequest<'a> {
@@ -35,11 +22,20 @@ impl<'a> GetAccountRequest<'a> {
     }
 }
 
-impl Request for GetAccountRequest<'_> {
+#[derive(Deserialize)]
+pub(crate) struct Response {
+    account: RawAccount,
+}
+
+impl Request<Account> for GetAccountRequest<'_> {
     type Response = Response;
     type Error = InfallibleRequest<RootError>;
 
-    async fn send_request(&self, client: &Client) -> Result<Response> {
-        client.send_request("RAccountsGet", self, Vec::new()).await
+    async fn send(&self, client: &Client) -> Result<Account> {
+        client
+            .send_request("RAccountsGet", self, Vec::new())
+            .await?
+            .account
+            .try_into()
     }
 }

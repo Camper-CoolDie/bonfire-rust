@@ -1,6 +1,6 @@
 use std::fs;
 
-use anyhow::Result;
+use anyhow::{Context as _, Result};
 use bonfire::fcm::prelude::*;
 use bonfire::prelude::*;
 use futures::StreamExt as _;
@@ -48,11 +48,11 @@ async fn load_credentials() -> Result<(Client, FcmClient, Option<Subscription>)>
         // If credentials are present, reuse them to build new clients
         let client = Client::builder()
             .auth(credentials.auth)
-            .expect("invalid auth")
+            .context("invalid auth")?
             .build();
         let fcm_client = FcmClient::builder()
             .credentials(credentials.fcm)
-            .expect("invalid credentials")
+            .context("invalid credentials")?
             .build();
 
         Ok((client, fcm_client, credentials.subscription))
@@ -104,7 +104,7 @@ async fn main() -> Result<()> {
                 cancellation_token.cancel();
             }
             result = &mut subscription_receiver => {
-                let (subscription, error) = result.expect("parser has been dropped");
+                let (subscription, error) = result.context("parser has been dropped")?;
 
                 // Save updated subscription and propagate the error, if any
                 save_credentials(&client, &fcm_client, Some(subscription)).await?;

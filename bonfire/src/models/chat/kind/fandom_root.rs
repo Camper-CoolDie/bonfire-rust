@@ -39,7 +39,7 @@ impl Messageable for FandomRoot {
     fn tag(&self) -> Tag {
         Tag::FandomRoot {
             fandom_id: self.fandom_id,
-            language: self.language.clone(),
+            language: self.language,
         }
     }
 }

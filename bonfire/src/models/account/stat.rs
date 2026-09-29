@@ -42,7 +42,7 @@ impl Stat {
     ///
     /// Returns [`Error`][crate::Error] if an error occurs while sending the request.
     pub async fn get_by_id(client: &Client, id: u64) -> Result<Self> {
-        Ok(GetStatRequest::new(id).send_request(client).await?.into())
+        GetStatRequest::new(id).send(client).await
     }
 }
 
@@ -54,9 +54,6 @@ impl Account {
     ///
     /// Returns [`Error`][crate::Error] if an error occurs while sending the request.
     pub async fn get_stat(&self, client: &Client) -> Result<Stat> {
-        Ok(GetStatRequest::new(self.id)
-            .send_request(client)
-            .await?
-            .into())
+        GetStatRequest::new(self.id).send(client).await
     }
 }

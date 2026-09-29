@@ -1,7 +1,8 @@
 use serde::Serialize;
 
 use crate::client::{InfallibleRequest, Request};
-use crate::requests::raw::account::RawInfo;
+use crate::models::AccountInfo;
+use crate::requests::raw::RawAccountInfo;
 use crate::{Client, Result, RootError};
 
 #[derive(Serialize)]
@@ -21,13 +22,14 @@ impl<'a> GetInfoRequest<'a> {
     }
 }
 
-impl Request for GetInfoRequest<'_> {
-    type Response = RawInfo;
+impl Request<AccountInfo> for GetInfoRequest<'_> {
+    type Response = RawAccountInfo;
     type Error = InfallibleRequest<RootError>;
 
-    async fn send_request(&self, client: &Client) -> Result<RawInfo> {
+    async fn send(&self, client: &Client) -> Result<AccountInfo> {
         client
             .send_request("RAccountsGetProfile", self, Vec::new())
-            .await
+            .await?
+            .try_into()
     }
 }

@@ -19,14 +19,15 @@ impl Service {
         Self { uri }
     }
 
-    pub(crate) async fn send_request<R: Request>(
+    pub(crate) async fn send<T, R>(
         &self,
         client: &HyperClient,
-        request: RootRequest<'_, R>,
+        request: RootRequest<'_, T, R>,
         attachments: Vec<&[u8]>,
         headers: HeaderMap<HeaderValue>,
     ) -> Result<R::Response>
     where
+        R: Request<T>,
         for<'a> &'a <R::Error as RequestError>::Source: From<&'a RootError>,
     {
         let json_body = serde_json::to_vec(&request)?;
@@ -49,7 +50,7 @@ impl Service {
 
         let bytes = self.send_raw(client, payload.freeze(), &headers).await?;
 
-        match serde_json::from_slice::<RootResponse<R>>(&bytes)
+        match serde_json::from_slice::<RootResponse<T, R>>(&bytes)
             .inspect_err(|error| tracing::error!(?error, "failed to parse root response"))?
         {
             RootResponse::Ok(content) => Ok(content),
@@ -57,8 +58,9 @@ impl Service {
         }
     }
 
-    fn map_error<E: RequestError>(error: RawRootError) -> Error
+    fn map_error<E>(error: RawRootError) -> Error
     where
+        E: RequestError,
         for<'a> &'a E::Source: From<&'a RootError>,
     {
         RootError::try_from(error)

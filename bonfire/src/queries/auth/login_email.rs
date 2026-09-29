@@ -7,9 +7,27 @@ use crate::queries::raw::RawAuth;
 use crate::queries::raw::auth::RawTfaRequired;
 use crate::{Client, Error, Result};
 
+#[derive(Serialize)]
+struct LoginInput<'a> {
+    email: &'a str,
+    password: &'a str,
+}
+
+#[derive(Serialize)]
+pub(crate) struct LoginEmailQuery<'a> {
+    input: LoginInput<'a>,
+}
+impl<'a> LoginEmailQuery<'a> {
+    pub(crate) fn new(email: &'a str, password: &'a str) -> Self {
+        Self {
+            input: LoginInput { email, password },
+        }
+    }
+}
+
 #[derive(Deserialize)]
 #[serde(tag = "__typename")]
-enum LoginResult {
+pub(crate) enum LoginResult {
     #[serde(rename = "LoginResultSuccess")]
     Success(RawAuth),
     #[serde(rename = "LoginResultTfaRequired")]
@@ -22,44 +40,21 @@ pub(crate) struct Response {
     result: LoginResult,
 }
 
-impl TryFrom<Response> for Auth {
-    type Error = Error;
+impl Request<Auth> for LoginEmailQuery<'_> {
+    type Response = Response;
+    type Error = LoginError;
 
-    fn try_from(value: Response) -> Result<Self> {
-        match value.result {
+    async fn send(&self, client: &Client) -> Result<Auth> {
+        let result = client
+            .send_query_authless("LoginEmail", "auth/LoginEmail.graphql", self)
+            .await?
+            .result;
+
+        match result {
             LoginResult::Success(success) => Ok(success.into()),
             LoginResult::TfaRequired(error) => Err(Error::RequestError(Box::new(
                 LoginError::TfaRequired(error.into()),
             ))),
         }
-    }
-}
-
-#[derive(Serialize)]
-pub(crate) struct LoginInput<'a> {
-    pub email: &'a str,
-    pub password: &'a str,
-}
-
-#[derive(Serialize)]
-pub(crate) struct LoginEmailQuery<'a> {
-    pub input: LoginInput<'a>,
-}
-impl<'a> LoginEmailQuery<'a> {
-    pub(crate) fn new(email: &'a str, password: &'a str) -> Self {
-        Self {
-            input: LoginInput { email, password },
-        }
-    }
-}
-
-impl Request for LoginEmailQuery<'_> {
-    type Response = Response;
-    type Error = LoginError;
-
-    async fn send_request(&self, client: &Client) -> Result<Response> {
-        client
-            .send_query_authless("LoginEmail", "auth/LoginEmail.graphql", self)
-            .await
     }
 }

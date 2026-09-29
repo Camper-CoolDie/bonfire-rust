@@ -19,9 +19,9 @@ pub struct Info {
     pub background: Option<ImageRef>,
     /// The GIF background image set for this account's profile
     pub background_gif: Option<ImageRef>,
-    /// Indicates if you are currently following this account
+    /// Indicates if the authenticated user is currently following this account
     pub is_following: bool,
-    /// Indicates if this account is currently following you
+    /// Indicates if this account is currently following the authenticated user
     pub follows_me: bool,
     /// The total number of users this account is following
     pub follows_count: u64,
@@ -36,7 +36,7 @@ pub struct Info {
     /// External links added by this account to their profile, always ordered by [`Link::index`]
     /// but may contain gaps in indices
     pub links: Vec<Link>,
-    /// Your private note associated with this account
+    /// The authenticated user's private note associated with this account
     pub note: Option<String>,
     /// A specific post that this account has pinned to their profile
     pub pinned_post: Option<Publication<Post>>,
@@ -74,10 +74,7 @@ impl Info {
     /// the provided identifier exists, or [`Error`][crate::Error] if any other error occurs during
     /// the request.
     pub async fn get_by_id(client: &Client, id: u64) -> Result<Self> {
-        GetInfoRequest::new_by_id(id)
-            .send_request(client)
-            .await?
-            .try_into()
+        GetInfoRequest::new_by_id(id).send(client).await
     }
 
     /// Retrieves detailed account information by its name.
@@ -88,10 +85,7 @@ impl Info {
     /// the provided name exists, or [`Error`][crate::Error] if any other error occurs during the
     /// request.
     pub async fn get_by_name(client: &Client, name: &str) -> Result<Self> {
-        GetInfoRequest::new_by_name(name)
-            .send_request(client)
-            .await?
-            .try_into()
+        GetInfoRequest::new_by_name(name).send(client).await
     }
 }
 
@@ -104,9 +98,6 @@ impl Account {
     /// the contained identifier exists, or [`Error`][crate::Error] if any other error occurs during
     /// the request.
     pub async fn get_info(&self, client: &Client) -> Result<Info> {
-        GetInfoRequest::new_by_id(self.id)
-            .send_request(client)
-            .await?
-            .try_into()
+        GetInfoRequest::new_by_id(self.id).send(client).await
     }
 }

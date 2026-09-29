@@ -5,19 +5,19 @@ use crate::{Result, RootError};
 
 /// Represents an error that can occur while setting an account's status or description.
 #[derive(Error, Debug)]
-pub enum SetProfileTextError {
+pub enum SetProfileFieldError {
     /// The provided text exceeds the maximum allowed length
     #[error("text is too long")]
     TooLong,
 }
 
-impl RequestError for SetProfileTextError {
+impl RequestError for SetProfileFieldError {
     type Source = RootError;
 
     fn try_convert(error: &RootError) -> Result<Option<Self>> {
         Ok(match error {
             RootError::Other { code, .. } if code == "E_BAD_SIZE" => {
-                Some(SetProfileTextError::TooLong)
+                Some(SetProfileFieldError::TooLong)
             }
             _ => None,
         })

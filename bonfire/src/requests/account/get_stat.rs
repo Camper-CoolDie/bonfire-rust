@@ -1,13 +1,14 @@
 use serde::Serialize;
 
 use crate::client::{InfallibleRequest, Request};
-use crate::requests::raw::account::RawStat;
+use crate::models::AccountStat;
+use crate::requests::raw::RawAccountStat;
 use crate::{Client, Result, RootError};
 
 #[derive(Serialize)]
 pub(crate) struct GetStatRequest {
     #[serde(rename = "accountId")]
-    pub id: u64,
+    id: u64,
 }
 impl GetStatRequest {
     pub(crate) fn new(id: u64) -> Self {
@@ -15,13 +16,14 @@ impl GetStatRequest {
     }
 }
 
-impl Request for GetStatRequest {
-    type Response = RawStat;
+impl Request<AccountStat> for GetStatRequest {
+    type Response = RawAccountStat;
     type Error = InfallibleRequest<RootError>;
 
-    async fn send_request(&self, client: &Client) -> Result<RawStat> {
-        client
+    async fn send(&self, client: &Client) -> Result<AccountStat> {
+        Ok(client
             .send_request("RAccountsGetStory", self, Vec::new())
-            .await
+            .await?
+            .into())
     }
 }

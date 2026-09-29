@@ -45,9 +45,7 @@ impl Profile {
     ///   [`LINKS_MAX_COUNT`][Self::LINKS_MAX_COUNT].
     /// * Returns [`Error`][crate::Error] if any other error occurs during the request.
     pub async fn set_link(client: &Client, index: u32, title: &str, uri: &str) -> Result<()> {
-        SetLinkRequest::new(index, title, uri)
-            .send_request(client)
-            .await?;
+        SetLinkRequest::new(index, title, uri).send(client).await?;
         Ok(())
     }
 
@@ -60,9 +58,7 @@ impl Profile {
     /// [`LINKS_MAX_COUNT`][Self::LINKS_MAX_COUNT], or [`Error`][crate::Error] if any other error
     /// occurs during the request.
     pub async fn remove_link(client: &Client, index: u32) -> Result<()> {
-        SetLinkRequest::new(index, "", "")
-            .send_request(client)
-            .await?;
+        SetLinkRequest::new(index, "", "").send(client).await?;
         Ok(())
     }
 }

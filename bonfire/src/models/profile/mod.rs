@@ -26,17 +26,17 @@ use crate::{Client, Result};
 #[derive(Default, Clone, Debug)]
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct Profile {
-    /// The unique identifier of your account
+    /// The unique identifier of the account
     pub id: u64,
-    /// Your display name
+    /// Display name
     pub name: String,
-    /// Your registered email address
+    /// Registered email address
     pub email: String,
-    /// Your last known level, cached by the API
+    /// Last known level, cached by the API
     pub cached_level: f64,
-    /// Your date of birth, or `None` if not set
+    /// Date of birth, or `None` if not set
     pub birthday: Option<NaiveDate>,
-    /// Indicates whether you are allowed to view NSFW content, or `None` if
+    /// Indicates whether the user is allowed to view NSFW content, or `None` if
     /// [`birthday`][Self::birthday] is also `None`
     pub is_nsfw_allowed: Option<bool>,
 }
@@ -98,7 +98,7 @@ impl Profile {
     /// # }
     /// ```
     pub async fn get(client: &Client) -> Result<Self> {
-        GetProfileQuery {}.send_request(client).await?.try_into()
+        GetProfileQuery {}.send(client).await
     }
 
     /// Sets the authenticated user's birthday.
@@ -123,10 +123,7 @@ impl Profile {
     /// # }
     /// ```
     pub async fn set_birthday(client: &Client, birthday: NaiveDate) -> Result<Self> {
-        SetBirthdayQuery::new(birthday)
-            .send_request(client)
-            .await?
-            .try_into()
+        SetBirthdayQuery::new(birthday).send(client).await
     }
 
     /// Sets the account's age.
@@ -139,7 +136,7 @@ impl Profile {
     /// Returns [`SetAgeError::InvalidAge`] if the provided age is outside the allowed range, or
     /// [`Error`][crate::Error] if any other error occurs during the request.
     pub async fn set_age(client: &Client, age: Option<i64>) -> Result<()> {
-        SetAgeRequest::new(age).send_request(client).await?;
+        SetAgeRequest::new(age).send(client).await?;
         Ok(())
     }
 
@@ -154,11 +151,11 @@ impl Profile {
     ///
     /// * Returns [`RootError::AccessDenied`][crate::RootError::AccessDenied] if the authenticated
     ///   user's access level is below the requirement.
-    /// * Returns [`SetProfileTextError::TooLong`] if the provided status exceeds the maximum
+    /// * Returns [`SetProfileFieldError::TooLong`] if the provided status exceeds the maximum
     ///   allowed length.
     /// * Returns [`Error`][crate::Error] if any other error occurs during the request.
     pub async fn set_status(client: &Client, status: Option<&str>) -> Result<()> {
-        SetStatusRequest::new(status).send_request(client).await?;
+        SetStatusRequest::new(status).send(client).await?;
         Ok(())
     }
 
@@ -169,12 +166,10 @@ impl Profile {
     ///
     /// # Errors
     ///
-    /// Returns [`SetProfileTextError::TooLong`] if the provided description exceeds the maximum
+    /// Returns [`SetProfileFieldError::TooLong`] if the provided description exceeds the maximum
     /// allowed length, or [`Error`][crate::Error] if any other error occurs during the request.
     pub async fn set_description(client: &Client, description: Option<&str>) -> Result<()> {
-        SetDescriptionRequest::new(description)
-            .send_request(client)
-            .await?;
+        SetDescriptionRequest::new(description).send(client).await?;
         Ok(())
     }
 
@@ -200,10 +195,7 @@ impl Profile {
     ///   status `500` if the provided avatar is not a valid image or GIF.
     /// * Returns [`Error`][crate::Error] if any other error occurs during the request.
     pub async fn set_avatar(client: &Client, avatar: &[u8]) -> Result<ImageRef> {
-        Ok(SetAvatarRequest::new(avatar)
-            .send_request(client)
-            .await?
-            .into())
+        SetAvatarRequest::new(avatar).send(client).await
     }
 
     /// Sets the account's static profile background.
@@ -224,10 +216,7 @@ impl Profile {
     ///   status `500` if the provided background is not a valid image.
     /// * Returns [`Error`][crate::Error] if any other error occurs during the request.
     pub async fn set_background(client: &Client, background: &[u8]) -> Result<ImageRef> {
-        Ok(SetBackgroundRequest::new(background)
-            .send_request(client)
-            .await?
-            .into())
+        SetBackgroundRequest::new(background).send(client).await
     }
 
     /// Sets the account's animated (GIF) profile background, returning a tuple where the first
@@ -256,9 +245,8 @@ impl Profile {
         animated: &[u8],
     ) -> Result<(ImageRef, ImageRef)> {
         SetBackgroundRequest::new_gif(first_frame, animated)
-            .send_request(client)
-            .await?
-            .try_into()
+            .send(client)
+            .await
     }
 
     /// Sets the provided account as the referrer for the currently logged-in account.
@@ -269,7 +257,7 @@ impl Profile {
     ///   if the referrer has already been set.
     /// * Returns [`Error`][crate::Error] if any other error occurs during the request.
     pub async fn set_referrer(client: &Client, id: u64) -> Result<()> {
-        SetReferrerRequest::new(id).send_request(client).await?;
+        SetReferrerRequest::new(id).send(client).await?;
         Ok(())
     }
 
@@ -287,7 +275,7 @@ impl Profile {
     /// * Returns [`SetNameError::Taken`] if the provided name is already in use by another account.
     /// * Returns [`Error`][crate::Error] if any other error occurs during the request.
     pub async fn set_name(client: &Client, name: &str) -> Result<()> {
-        SetNameRequest::new(name).send_request(client).await?;
+        SetNameRequest::new(name).send(client).await?;
         Ok(())
     }
 }

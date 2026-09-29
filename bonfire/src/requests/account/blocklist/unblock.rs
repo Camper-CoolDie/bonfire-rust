@@ -6,7 +6,7 @@ use crate::{Client, Result, RootError};
 #[derive(Serialize)]
 pub(crate) struct UnblockAccountRequest {
     #[serde(rename = "accountId")]
-    pub id: u64,
+    id: u64,
 }
 impl UnblockAccountRequest {
     pub(crate) fn new(id: u64) -> Self {
@@ -14,13 +14,14 @@ impl UnblockAccountRequest {
     }
 }
 
-impl Request for UnblockAccountRequest {
+impl Request<()> for UnblockAccountRequest {
     type Response = EmptyResponse;
     type Error = InfallibleRequest<RootError>;
 
-    async fn send_request(&self, client: &Client) -> Result<EmptyResponse> {
+    async fn send(&self, client: &Client) -> Result<()> {
         client
             .send_request("RAccountsBlackListRemove", self, Vec::new())
-            .await
+            .await?;
+        Ok(())
     }
 }
