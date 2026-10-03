@@ -47,7 +47,7 @@ pub struct Account {
     pub avatar: Option<ImageRef>,
     /// The declared gender of this account
     pub gender: Gender,
-    /// The karma earned by ttis account over the last 30 days
+    /// The karma earned by this account over the last 30 days
     pub karma30: f64,
     /// The amount of money this account has donated sequentially
     pub sponsor_amount: u64,

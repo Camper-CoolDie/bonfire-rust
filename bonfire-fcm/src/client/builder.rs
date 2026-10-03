@@ -1,3 +1,5 @@
+use b_core::jwt::{Result as JwtResult, decode_token};
+
 use crate::Client;
 use crate::models::{Config, Credentials};
 
@@ -64,8 +66,8 @@ impl Builder {
         self
     }
 
-    pub fn credentials(mut self, credentials: Credentials) -> jwt::Result<Self> {
-        jwt::decode(&credentials.installation_auth_token)?;
+    pub fn credentials(mut self, credentials: Credentials) -> JwtResult<Self> {
+        decode_token(&credentials.installation_auth_token)?;
         self.credentials = Some(credentials);
         Ok(self)
     }

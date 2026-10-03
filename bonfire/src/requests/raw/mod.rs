@@ -4,7 +4,6 @@ pub(crate) mod common;
 mod conversions;
 pub(crate) mod error;
 pub(crate) mod fandom;
-pub(crate) mod image;
 pub(crate) mod notification;
 mod other;
 pub(crate) mod profile;
@@ -21,7 +20,6 @@ pub(crate) use chat::{
 pub(crate) use common::{RawCategory, RawImageRef, RawLanguage};
 pub(crate) use error::{RawRootError, RawUnavailableError};
 pub(crate) use fandom::{RawFandom, RawReference as RawFandomRef, RawRubricRef};
-pub(crate) use image::Image;
 pub(crate) use notification::{AnyRawNotification, RawNotification};
 pub(crate) use other::RawInitialData;
 pub(crate) use profile::{RawGender, RawLink};

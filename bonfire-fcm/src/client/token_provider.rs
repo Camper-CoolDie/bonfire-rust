@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
+use b_core::jwt::{Claims, Error as JwtError, Result as JwtResult, decode_token};
 use chrono::Utc;
-use jwt::Claims;
 use tokio::sync::Mutex;
 
 use crate::client::AndroidRegistrationError;
@@ -18,7 +18,7 @@ enum InnerState {
     Registered(Credentials, Claims),
     Unregistered,
     // A "poisoned" state, for cases when the server sends an invalid installation token
-    InvalidToken(Arc<jwt::Error>),
+    InvalidToken(Arc<JwtError>),
 }
 
 #[derive(Debug)]
@@ -26,22 +26,16 @@ pub(super) struct TokenProvider {
     inner: Mutex<InnerState>,
 }
 impl TokenProvider {
-    pub(super) fn new(credentials: Option<Credentials>) -> jwt::Result<Self> {
+    pub(super) fn new(credentials: Option<Credentials>) -> JwtResult<Self> {
         Ok(Self {
             inner: Mutex::new(match credentials {
                 Some(credentials) => {
-                    let claims = jwt::decode(&credentials.installation_auth_token)?;
+                    let claims = decode_token(&credentials.installation_auth_token)?;
                     InnerState::Registered(credentials, claims)
                 }
                 None => InnerState::Unregistered,
             }),
         })
-    }
-
-    pub(super) async fn invalidate(&self) {
-        tracing::warn!("android_id expired, invalidating");
-        let mut guard = self.inner.lock().await;
-        *guard = InnerState::Unregistered;
     }
 
     pub(super) async fn android_registration(
@@ -185,7 +179,7 @@ impl TokenProvider {
 
         // Token expires in 7 days
         let auth_token = response.auth_token.token;
-        let claims = jwt::decode(&auth_token)?;
+        let claims = decode_token(&auth_token)?;
 
         Ok((
             Installation {
@@ -241,7 +235,7 @@ impl TokenProvider {
         .await?;
 
         let auth_token = response.token;
-        let claims = jwt::decode(&auth_token)?;
+        let claims = decode_token(&auth_token)?;
         Ok((auth_token, claims))
     }
 }

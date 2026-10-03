@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
+use b_core::jwt::{Claims, Error as JwtError, Result as JwtResult, decode_token};
 use chrono::Utc;
-use jwt::Claims;
 use tokio::sync::RwLock;
 
 use crate::client::Request;
@@ -14,7 +14,7 @@ enum InnerState {
     Authenticated(Auth, Claims),
     Unauthenticated,
     // A "poisoned" state, for cases when the server sends an invalid token
-    InvalidToken(Arc<jwt::Error>),
+    InvalidToken(Arc<JwtError>),
 }
 impl InnerState {
     fn is_auth(&self) -> bool {
@@ -27,11 +27,11 @@ pub(super) struct TokenProvider {
     inner: RwLock<InnerState>,
 }
 impl TokenProvider {
-    pub(super) fn new(auth: Option<Auth>) -> jwt::Result<Self> {
+    pub(super) fn new(auth: Option<Auth>) -> JwtResult<Self> {
         Ok(Self {
             inner: RwLock::new(match auth {
                 Some(auth) => {
-                    let claims = jwt::decode(&auth.access_token)?;
+                    let claims = decode_token(&auth.access_token)?;
                     InnerState::Authenticated(auth, claims)
                 }
                 None => InnerState::Unauthenticated,
@@ -60,11 +60,11 @@ impl TokenProvider {
         Ok(self.auth(client).await?.map(|auth| auth.access_token))
     }
 
-    pub(super) async fn set_auth(&self, auth: Option<Auth>) -> jwt::Result<()> {
+    pub(super) async fn set_auth(&self, auth: Option<Auth>) -> JwtResult<()> {
         let mut guard = self.inner.write().await;
         *guard = match auth {
             Some(auth) => {
-                let claims = jwt::decode(&auth.access_token)?;
+                let claims = decode_token(&auth.access_token)?;
                 InnerState::Authenticated(auth, claims)
             }
             None => InnerState::Unauthenticated,
@@ -89,7 +89,7 @@ impl TokenProvider {
 
         // If `decode()` fails, the server has sent an invalid token, so `Auth` enters a poisoned
         // `InvalidToken` state
-        *guard = match jwt::decode(&auth.access_token) {
+        *guard = match decode_token(&auth.access_token) {
             Ok(claims) => InnerState::Authenticated(auth, claims),
             Err(error) => InnerState::InvalidToken(Arc::new(error)),
         };

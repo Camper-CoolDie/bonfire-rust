@@ -1,10 +1,7 @@
 [package]
 name = "bonfire-fcm"
 version = "0.1.0"
-description = """
-Utility library for the Bonfire API client which implements FCM/GCM protocol for receiving push
-notifications
-"""
+description = "FCM and GCM protocols implementation for the Bonfire API library"
 documentation = "https://docs.rs/bonfire-fcm"
 readme = "README.md"
 keywords = ["bonfire", "fcm", "firebase", "push"]
@@ -42,18 +39,18 @@ tokio-rustls = "0.26"
 tokio-stream = "0.1"
 tokio-util = "0.7"
 tracing = "0.1"
-uuid = { version = "1.26", features = ["serde", "v4"] }
+uuid = { version = "1.27", features = ["serde", "v4"] }
 webpki-roots = "1.0"
+
+[dependencies.b-core]
+package = "bonfire-core"
+path = "../bonfire-core"
+version = "0.1.0"
 
 [dependencies.hyper-rustls]
 version = "0.27"
 default-features = false
 features = ["aws-lc-rs", "http2", "logging", "native-tokio", "tls12", "webpki-roots"]
-
-[dependencies.jwt]
-package = "bonfire-jwt"
-path = "../bonfire-jwt"
-version = "0.1.0"
 
 [build-dependencies]
 prost-build = "0.14"

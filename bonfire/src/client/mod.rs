@@ -8,6 +8,7 @@ mod token_provider;
 use std::marker::PhantomData;
 use std::sync::Arc;
 
+use b_core::jwt::Result as JwtResult;
 pub use builder::Builder;
 use bytes::Bytes;
 pub use error::{Error, Result};
@@ -271,18 +272,17 @@ impl Client {
     ///
     /// # Errors
     ///
-    /// Returns [`jwt::Error`] if an error occurs while parsing the provided credentials.
-    pub async fn set_auth(&self, auth: Option<Auth>) -> jwt::Result<&Self> {
+    /// Returns [`jwt::Error`][crate::jwt::Error] if an error occurs while parsing the provided
+    /// credentials.
+    pub async fn set_auth(&self, auth: Option<Auth>) -> JwtResult<&Self> {
         self.inner.token_provider.set_auth(auth).await?;
         Ok(self)
     }
 
-    /// Fetches essential data from the server for app initialization. Optionally accepts a FCM
-    /// token to register for push notifications.
-    ///
-    /// This method retrieves the authenticated user's account, settings, protoadmin list, server
-    /// time, and follows status. It should be called once at startup after authentication (via
-    /// [`login()`][Self::login()] or [`set_auth()`][Self::set_auth()]).
+    /// Fetches essential data from the server for app initialization: the authenticated user's
+    /// account, settings, protoadmin list, server time, and follows status. It should be called
+    /// once at startup after authentication (via [`login()`][Self::login()] or
+    /// [`set_auth()`][Self::set_auth()]).
     ///
     /// This method can be called multiple times, but the best practice is to call it only on
     /// startup or when the user changes their authentication credentials.

@@ -4,8 +4,8 @@ use serde::{Serialize, Serializer};
 
 use crate::client::Request;
 use crate::models::profile::SetProfileImageError;
-use crate::requests::raw::Image;
-use crate::requests::raw::image::{Gif, Normal};
+use crate::requests::Image;
+use crate::requests::image::{Gif, Normal};
 use crate::{Client, Result};
 
 pub(crate) struct SetBackgroundRequest<I: Image> {

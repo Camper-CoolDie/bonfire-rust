@@ -2,8 +2,8 @@
 resolver = "2"
 members = [
     "bonfire",
+    "bonfire-core",
     "bonfire-fcm",
-    "bonfire-jwt",
 ]
 
 [workspace.package]

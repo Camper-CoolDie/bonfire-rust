@@ -1,5 +1,3 @@
-#![warn(missing_docs)]
-
 mod claims;
 mod error;
 
@@ -9,7 +7,7 @@ pub use claims::Claims;
 pub use error::{Error, Result};
 
 #[doc(hidden)]
-pub fn decode(token: &str) -> Result<Claims> {
+pub fn decode_token(token: &str) -> Result<Claims> {
     token
         .split('.')
         .nth(1)

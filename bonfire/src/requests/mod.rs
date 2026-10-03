@@ -2,6 +2,7 @@ pub(crate) mod account;
 pub(crate) mod chat;
 mod error;
 pub(crate) mod fandom;
+pub(crate) mod image;
 pub(crate) mod other;
 pub(crate) mod publication;
 pub(crate) mod raw;
@@ -10,6 +11,7 @@ use std::marker::PhantomData;
 use std::result::Result as StdResult;
 
 pub use error::{RootError, UnavailableError};
+pub(crate) use image::Image;
 use serde::{Deserialize, Serialize, Serializer};
 
 use crate::client::Request;

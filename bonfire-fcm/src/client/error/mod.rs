@@ -6,6 +6,7 @@ use std::result::Result as StdResult;
 use std::sync::Arc;
 
 pub use android_registration::AndroidRegistrationError;
+use b_core::jwt::Error as JwtError;
 use http::StatusCode;
 use thiserror::Error;
 
@@ -31,7 +32,7 @@ pub enum Error {
     #[error("JSON error")]
     JsonError(#[from] serde_json::Error),
     #[error("JWT error")]
-    JwtError(#[from] Arc<jwt::Error>),
+    JwtError(#[from] Arc<JwtError>),
     #[error(
         "MCS login error: {}{}",
         .kind.as_ref().unwrap_or(&.code.to_string()),
@@ -86,8 +87,8 @@ impl Error {
     }
 }
 
-impl From<jwt::Error> for Error {
-    fn from(value: jwt::Error) -> Self {
+impl From<JwtError> for Error {
+    fn from(value: JwtError) -> Self {
         Self::JwtError(Arc::new(value))
     }
 }

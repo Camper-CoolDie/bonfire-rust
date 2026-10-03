@@ -19,5 +19,5 @@ pub struct Claims {
     pub subject: Option<String>,
     #[serde(rename = "exp", deserialize_with = "deserialize_timestamp")]
     pub expires_at: DateTime<Utc>,
-    // There are other fields, but we don't need them yet
+    // There are other fields, but they're not needed yet
 }

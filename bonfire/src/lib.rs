@@ -1,13 +1,13 @@
 //! bonfire-rust is a client library for the [Bonfire API](https://github.com/timas130/bonfire). It
-//! exposes asynchronous methods for sending API requests and receiving FCM notifications (with
+//! exposes asynchronous methods for sending API requests and receiving FCM notifications (via the
 //! `fcm` feature). The initial goal was to create a desktop Bonfire client on top of an API
-//! library, but because of a full backend rework coming soon bonfire-rust has shifted its goals
-//! towards bot development.
+//! library, but bonfire-rust has shifted focus toward bot development due to a pending backend
+//! rewrite.
 //!
-//! Other features include `serde`, which implements Serialize and Deserialize on almost every API
-//! object. You will probably want to enable this for caching authentication tokens at least, see
-//! [example](#searching-accounts-by-name). `http1` and `http2` enable corresponding HTTP versions,
-//! at least one must be present (the latter is enabled by default).
+//! Other features include `serde`, which implements (De)Serialize on almost every API object. You
+//! will likely want to enable this for caching authentication tokens, see
+//! [example](#searching-accounts-by-name). `http1` and `http2` enable their corresponding HTTP
+//! versions, at least one must be present (the latter is enabled by default).
 //!
 //! ## Examples
 //!
@@ -40,9 +40,10 @@
 //!
 //! ### Searching accounts by name
 //!
-//! Some methods like `Account::search` return a `Stream`, allowing you to asynchronously iterate
-//! over accounts while the API loads them (the library manages pagination internally). This example
-//! also shows how to properly save and load authentication tokens to reuse the same session:
+//! Some methods like [`Account::search`][models::Account::search] return a
+//! [`Stream`][futures::Stream], allowing you to asynchronously iterate over accounts while the API
+//! loads them (the library manages pagination internally). This example also shows how to properly
+//! save and load authentication tokens to reuse the same session:
 //!
 //! ```no_run
 //! use std::fs;
@@ -98,15 +99,17 @@
 //!
 //! Since Bonfire relies on FCM to deliver notifications, a large portion of the GCM (Google Cloud
 //! Messaging) protocol was implemented specifically for this API based on
-//! [Chromium source code](https://source.chromium.org) and several other sources. To use this
-//! implementation, see
-//! [`notification_listener.rs`](https://github.com/Camper-CoolDie/bonfire-rust/blob/HEAD/bonfire/examples/notification_listener.rs).
+//! [Chromium source code](https://source.chromium.org) and several other sources. For example
+//! usage, see [notification_listener.rs][1].
 //!
 //! ### Debugging
 //!
 //! The library supports [`tracing`](https://crates.io/crates/tracing). One can easily enable
 //! logging by calling `tracing_subscriber::fmt().init()`. Log output includes errors and outgoing
-//! requests by default and even more info if the maximum log level is set to `DEBUG`.
+//! requests by default and even more info if the maximum log level is set to
+//! [`DEBUG`][tracing::Level::DEBUG].
+//!
+//! [1]: https://github.com/Camper-CoolDie/bonfire-rust/blob/HEAD/bonfire/examples/notification_listener.rs
 
 #![warn(missing_docs)]
 
@@ -124,10 +127,10 @@ pub mod prelude;
 mod queries;
 mod requests;
 
+pub use b_core::jwt;
 pub use client::{Builder as ClientBuilder, Client, Error, Result};
 #[cfg(feature = "fcm")]
 pub use fcm;
-pub use jwt;
 pub use queries::{MeliorError, QueryLocation, QueryPath};
 use queries::{MeliorQuery, MeliorResponse};
 pub use requests::{RootError, UnavailableError};

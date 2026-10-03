@@ -23,7 +23,7 @@ use crate::sealed::Sealed;
 use crate::{Client, Result};
 
 /// Represents the specific data for a chat message publication, containing text, and optionally a
-/// media [`Content`][content::Content] or a [`ChatMessageRef`][Reference] to another publication.
+/// media [`Content`] or a [`ChatMessageRef`][Reference] to another publication.
 #[derive(Default, Clone, Debug)]
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct ChatMessage {

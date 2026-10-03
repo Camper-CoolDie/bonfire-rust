@@ -3,6 +3,7 @@ use std::fmt::Debug;
 use std::result::Result as StdResult;
 use std::sync::Arc;
 
+use b_core::jwt::Error as JwtError;
 use http::StatusCode;
 use thiserror::Error;
 
@@ -40,7 +41,7 @@ pub enum Error {
     /// state, all subsequent requests (including logout) will fail with this error until a new
     /// session is established by calling [`Client::login()`][crate::Client::login()].
     #[error("JWT error")]
-    JwtError(#[from] Arc<jwt::Error>),
+    JwtError(#[from] Arc<JwtError>),
     /// An HTTP-related error occurred during request construction
     #[error("HTTP error")]
     HttpError(#[from] http::Error),
@@ -109,8 +110,8 @@ impl Error {
     }
 }
 
-impl From<jwt::Error> for Error {
-    fn from(value: jwt::Error) -> Self {
+impl From<JwtError> for Error {
+    fn from(value: JwtError) -> Self {
         Self::JwtError(Arc::new(value))
     }
 }

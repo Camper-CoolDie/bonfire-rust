@@ -1,10 +1,11 @@
 [package]
-name = "bonfire-jwt"
+name = "bonfire-core"
 version = "0.1.0"
-description = "Utility library for the Bonfire API client for decoding JSON Web Tokens"
+description = "Core components and shared types for the Bonfire API library"
+documentation = "https://docs.rs/bonfire-core"
 readme = "README.md"
-keywords = ["bonfire", "jwt", "web", "token"]
-categories = ["api-bindings"]
+keywords = ["bonfire", "core"]
+categories = ["rust-patterns"]
 
 edition.workspace = true
 rust-version.workspace = true

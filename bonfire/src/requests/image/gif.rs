@@ -2,7 +2,8 @@ use serde::Deserialize;
 
 use crate::Result;
 use crate::models::ImageRef;
-use crate::requests::raw::{Image, RawImageRef};
+use crate::requests::Image;
+use crate::requests::raw::RawImageRef;
 
 pub(crate) struct Gif<'a> {
     first_frame: &'a [u8],

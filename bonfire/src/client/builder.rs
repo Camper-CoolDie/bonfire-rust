@@ -1,6 +1,7 @@
 use std::fmt;
 use std::sync::LazyLock;
 
+use b_core::jwt::{Result as JwtResult, decode_token};
 use governor::Quota;
 use http::Uri;
 use nonzero_ext::nonzero;
@@ -8,12 +9,11 @@ use nonzero_ext::nonzero;
 use crate::Client;
 use crate::models::Auth;
 
-// It's great when we can test our requests against a mock server, hence the ability to specify
-// custom URIs
+// URIs are changed in a test environment
 static ROOT_SERVER_URI: LazyLock<Uri> =
-    LazyLock::new(|| Uri::from_static("https://cf2.bonfire.moe"));
+    LazyLock::new(|| Uri::from_static("https://proxy.bonfire.moe/cf2"));
 static MELIOR_SERVER_URI: LazyLock<Uri> =
-    LazyLock::new(|| Uri::from_static("https://api.bonfire.moe"));
+    LazyLock::new(|| Uri::from_static("https://proxy.bonfire.moe/api"));
 
 // 30 requests per minute with a burst of 15 requests
 const QUOTA: Quota = Quota::per_minute(nonzero!(30u32)).allow_burst(nonzero!(15u32));
@@ -95,7 +95,8 @@ impl Builder {
     ///
     /// # Errors
     ///
-    /// Returns [`jwt::Error`] if an error occurs while parsing the provided credentials.
+    /// Returns [`jwt::Error`][crate::jwt::Error] if an error occurs while parsing the provided
+    /// credentials.
     ///
     /// # Examples
     ///
@@ -117,8 +118,8 @@ impl Builder {
     /// #     }
     /// # }
     /// ```
-    pub fn auth(mut self, auth: Auth) -> jwt::Result<Self> {
-        jwt::decode(&auth.access_token)?;
+    pub fn auth(mut self, auth: Auth) -> JwtResult<Self> {
+        decode_token(&auth.access_token)?;
         self.auth = Some(auth);
         Ok(self)
     }
