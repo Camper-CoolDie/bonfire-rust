@@ -14,8 +14,8 @@ use crate::requests::raw::conversions::timestamp_from_millis;
 use crate::requests::raw::{RawChatMessage, RawPublication};
 use crate::{Error, Result};
 
-pub(crate) trait RawMessageable: Sized {
-    type Target: Messageable;
+pub(crate) trait RawMessageable: Send + Sync + Sized {
+    type Target: Messageable + Send;
 
     fn new(data: Value, tag: RawTag) -> Result<Self>;
 }
@@ -44,7 +44,7 @@ where
 
     fn try_from(value: RawChat<T>) -> Result<Self> {
         Ok(Self {
-            info: T::new(value.extra, value.tag)?.try_into()?,
+            spec: T::new(value.extra, value.tag)?.try_into()?,
             last_message: Option::<Publication<_>>::try_from(value.last_message)?,
             unread_count: value.unread_count,
             read_at: match value.read_at {

@@ -11,9 +11,7 @@ pub use status::Status;
 
 use crate::client::Request as _;
 use crate::models::{Category, ImageRef, Language};
-use crate::requests::fandom::blocklist::{
-    BlockFandomRequest, IsFandomBlockedRequest, UnblockFandomRequest,
-};
+use crate::requests::fandom::blocklist::{BlockRequest, IsFandomBlockedRequest, UnblockRequest};
 use crate::requests::fandom::{GetFandomRequest, ListFandomsRequest};
 use crate::{Client, Result};
 
@@ -141,7 +139,7 @@ impl Fandom {
     ///
     /// Returns [`Error`][crate::Error] if an error occurs while sending the request.
     pub async fn block(&self, client: &Client) -> Result<&Self> {
-        BlockFandomRequest::new(self.id).send(client).await?;
+        BlockRequest::new(self.id).send(client).await?;
         Ok(self)
     }
 
@@ -151,7 +149,7 @@ impl Fandom {
     ///
     /// Returns [`Error`][crate::Error] if an error occurs while sending the request.
     pub async fn unblock(&self, client: &Client) -> Result<&Self> {
-        UnblockFandomRequest::new(self.id).send(client).await?;
+        UnblockRequest::new(self.id).send(client).await?;
         Ok(self)
     }
 

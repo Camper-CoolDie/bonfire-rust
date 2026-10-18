@@ -6,6 +6,7 @@ mod service;
 mod token_provider;
 
 use std::marker::PhantomData;
+use std::num::NonZeroUsize;
 use std::sync::Arc;
 
 use b_core::jwt::Result as JwtResult;
@@ -299,7 +300,13 @@ impl Client {
         Ok(self)
     }
 
-    #[instrument(skip_all, fields(name = request_name))]
+    #[instrument(
+        skip_all,
+        fields(
+            name = request_name,
+            attachments = NonZeroUsize::new(attachments.iter().filter(|slice| !slice.is_empty()).count()),
+        ),
+    )]
     pub(crate) async fn send_request<T, R>(
         &self,
         request_name: &'static str,

@@ -128,9 +128,9 @@ mod queries;
 mod requests;
 
 pub use b_core::jwt;
-pub use client::{Builder as ClientBuilder, Client, Error, Result};
 #[cfg(feature = "fcm")]
-pub use fcm;
+pub use b_fcm as fcm;
+pub use client::{Builder as ClientBuilder, Client, Error, Result};
 pub use queries::{MeliorError, QueryLocation, QueryPath};
 use queries::{MeliorQuery, MeliorResponse};
 pub use requests::{RootError, UnavailableError};

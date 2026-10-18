@@ -4,17 +4,17 @@ use crate::client::{EmptyResponse, InfallibleRequest, Request};
 use crate::{Client, Result, RootError};
 
 #[derive(Serialize)]
-pub(crate) struct UnblockAccountRequest {
+pub(crate) struct UnblockRequest {
     #[serde(rename = "accountId")]
     id: u64,
 }
-impl UnblockAccountRequest {
+impl UnblockRequest {
     pub(crate) fn new(id: u64) -> Self {
         Self { id }
     }
 }
 
-impl Request<()> for UnblockAccountRequest {
+impl Request<()> for UnblockRequest {
     type Response = EmptyResponse;
     type Error = InfallibleRequest<RootError>;
 

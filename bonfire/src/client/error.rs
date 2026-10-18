@@ -30,7 +30,7 @@ pub enum Error {
     ConversionError(String),
     #[cfg(feature = "fcm")]
     #[error("FCM error")]
-    FcmError(#[from] fcm::Error),
+    FcmError(#[from] b_fcm::Error),
     /// An error occurred during JSON serialization or deserialization
     #[error("JSON error")]
     JsonError(#[from] serde_json::Error),

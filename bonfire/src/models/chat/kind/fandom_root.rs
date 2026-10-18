@@ -2,7 +2,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::models::chat::{Messageable, Tag};
-use crate::models::{ImageRef, Language};
+use crate::models::{Chat, ImageRef, Language};
 use crate::sealed::Sealed;
 
 /// Represents a fandom root chat.
@@ -23,10 +23,8 @@ pub struct FandomRoot {
     pub subscribers_count: u64,
 }
 impl FandomRoot {
-    /// Creates a new `FandomRoot` instance with the given `fandom_id` and `language`.
-    #[must_use]
-    pub fn new(fandom_id: u64, language: Language) -> Self {
-        Self {
+    pub(crate) fn new(fandom_id: u64, language: Language) -> Self {
+        FandomRoot {
             fandom_id,
             language,
             ..Default::default()
@@ -45,3 +43,13 @@ impl Messageable for FandomRoot {
 }
 
 impl Sealed for FandomRoot {}
+
+impl Chat<FandomRoot> {
+    #[must_use]
+    pub fn new(fandom_id: u64, language: Language) -> Self {
+        Self {
+            spec: FandomRoot::new(fandom_id, language),
+            ..Default::default()
+        }
+    }
+}

@@ -13,17 +13,22 @@ pub use reference::Reference;
 use serde::{Deserialize, Serialize};
 pub use status::Status;
 
+use crate::client::Request as _;
+use crate::requests::publication::RemovePublicationRequest;
 use crate::sealed::Sealed;
+use crate::{Client, Result};
 
 /// A trait for publication types that extend the core [`Publication`] struct.
 ///
 /// This trait allows for adding type-specific fields beyond the generic [`Publication`] data.
 /// [`AnyPublication`] serves as a catch-all for publications with unspecified specific types.
-pub trait Publishable: Sealed {
+pub trait Publishable: Default + Sealed {
     /// Returns the specific kind of this publication.
     #[must_use]
     fn kind(&self) -> Kind;
 }
+
+pub trait Removable: Publishable + Sealed {}
 
 /// Represents a generic Bonfire publication.
 #[derive(Default, Clone, Debug)]
@@ -40,9 +45,25 @@ pub struct Publication<T: Publishable = AnyPublication> {
     /// A value indicating the "hotness" or popularity of this publication
     pub hotness: f32,
 }
-impl Publication {
+
+impl<T: Publishable> Publication<T> {
+    #[must_use]
+    pub fn new(id: u64) -> Self {
+        Self {
+            id,
+            ..Default::default()
+        }
+    }
+
     #[must_use]
     pub fn kind(&self) -> Kind {
         self.spec.kind()
+    }
+}
+
+impl<T: Removable> Publication<T> {
+    pub async fn remove(&self, client: &Client) -> Result<&Self> {
+        RemovePublicationRequest::new(self.id).send(client).await?;
+        Ok(self)
     }
 }

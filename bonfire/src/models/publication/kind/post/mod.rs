@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 pub use title::Title;
 
 use crate::client::Request as _;
-use crate::models::publication::{Kind, PostTag, Publishable};
+use crate::models::publication::{Kind, PostTag, Publishable, Removable};
 use crate::models::{Account, Category, Comment, Fandom, Publication, RubricRef};
 use crate::requests::publication::post::GetPostRequest;
 use crate::sealed::Sealed;
@@ -53,6 +53,7 @@ impl Publishable for Post {
     }
 }
 
+impl Removable for Post {}
 impl Sealed for Post {}
 
 impl Publication<Post> {

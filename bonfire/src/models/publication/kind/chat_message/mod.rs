@@ -3,8 +3,6 @@ mod error;
 mod ref_content;
 mod reference;
 
-use std::ops::RangeInclusive;
-
 pub use content::Content;
 pub use error::*;
 pub use ref_content::RefContent;
@@ -13,7 +11,7 @@ pub use reference::Reference;
 use serde::{Deserialize, Serialize};
 
 use crate::client::Request as _;
-use crate::models::publication::{Kind, Publishable};
+use crate::models::publication::{Kind, Publishable, Removable};
 use crate::models::{Account, ChatTag, Fandom, Publication};
 use crate::requests::publication::chat_message::SendChatMessageRequest;
 pub use crate::requests::publication::chat_message::{
@@ -50,8 +48,7 @@ pub struct ChatMessage {
     pub has_new_formatting: bool,
 }
 impl ChatMessage {
-    /// The allowed range for a chat message's text length.
-    pub const TEXT_LENGTH_RANGE: RangeInclusive<usize> = 1..=2000;
+    pub const TEXT_MAX_LENGTH: usize = 2000;
 }
 
 impl Publishable for ChatMessage {
@@ -61,6 +58,7 @@ impl Publishable for ChatMessage {
     }
 }
 
+impl Removable for ChatMessage {}
 impl Sealed for ChatMessage {}
 
 impl Publication<ChatMessage> {

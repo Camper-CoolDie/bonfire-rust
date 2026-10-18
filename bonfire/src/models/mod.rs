@@ -33,6 +33,6 @@ pub use other::{Config, InitialData};
 pub use profile::{Gender, Link, Profile};
 pub use publication::{
     AnyPublication, ChatMessage, Comment, Post, PostTag, Publication, Reaction,
-    Reference as PublicationRef,
+    Reference as PublicationRef, Sticker, StickerPack,
 };
 pub use settings::Settings;

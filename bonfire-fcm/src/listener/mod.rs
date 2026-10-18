@@ -84,7 +84,7 @@ impl Listener {
             }
 
             // Pass subscription with modified `persistent_ids` to the parser
-            parser.stop(subscription, error).await;
+            parser.stop(subscription, error);
             break;
         }
     }
@@ -170,7 +170,7 @@ impl Listener {
                     };
 
                     if let Some(message) = option {
-                        match parser.parse(message).await {
+                        match parser.parse(message) {
                             Ok(Some(target)) => {
                                 if sender.send(target).await.is_err() {
                                     tracing::warn!("receiver has been dropped abruptly");
@@ -195,7 +195,7 @@ impl Listener {
         connection.shutdown().await.err().map(Self::map_error)
     }
 
-    fn map_error<E: From<Error> + StdError + Send>(error: Error) -> (E, bool) {
+    fn map_error<E: From<Error> + StdError>(error: Error) -> (E, bool) {
         let should_retry = Self::is_retryable(&error);
         (error.into(), should_retry)
     }

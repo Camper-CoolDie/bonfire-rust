@@ -16,6 +16,6 @@ impl Chat {
     /// The task will also stop automatically when the handler is dropped.
     #[must_use]
     pub fn start_typing(&self, client: &Client) -> Handler {
-        Handler::spawn(client, self.info.tag())
+        Handler::spawn(client, self.spec.tag())
     }
 }

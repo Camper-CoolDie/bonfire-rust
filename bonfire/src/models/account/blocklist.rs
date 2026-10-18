@@ -3,7 +3,7 @@ use futures::Stream;
 use crate::client::Request;
 use crate::models::Account;
 use crate::requests::account::blocklist::{
-    BlockAccountRequest, IsAccountBlockedRequest, ListBlockedAccountsRequest, UnblockAccountRequest,
+    BlockRequest, IsAccountBlockedRequest, ListBlockedAccountsRequest, UnblockRequest,
 };
 use crate::requests::fandom::blocklist::ListBlockedFandomIdsRequest;
 use crate::{Client, Result};
@@ -17,7 +17,7 @@ impl Account {
     /// the authenticated user's own account, or [`Error`][crate::Error] if any other error occurs
     /// during the request.
     pub async fn block(&self, client: &Client) -> Result<&Self> {
-        BlockAccountRequest::new(self.id).send(client).await?;
+        BlockRequest::new(self.id).send(client).await?;
         Ok(self)
     }
 
@@ -28,7 +28,7 @@ impl Account {
     ///
     /// Returns [`Error`][crate::Error] if an error occurs while sending the request.
     pub async fn unblock(&self, client: &Client) -> Result<&Self> {
-        UnblockAccountRequest::new(self.id).send(client).await?;
+        UnblockRequest::new(self.id).send(client).await?;
         Ok(self)
     }
 

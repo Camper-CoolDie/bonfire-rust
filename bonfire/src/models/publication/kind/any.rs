@@ -2,7 +2,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::models::publication::{Kind, Publishable};
-use crate::models::{ChatMessage, Comment, Post, PostTag};
+use crate::models::{ChatMessage, Comment, Post, PostTag, Sticker, StickerPack};
 use crate::sealed::Sealed;
 
 /// Represents a union of all possible additional data types for a publication.
@@ -31,9 +31,9 @@ pub enum AnyPublication {
     /// The publication contains additional user event data
     UserEvent,
     /// The publication contains additional sticker pack data
-    StickerPack,
+    StickerPack(Box<StickerPack>),
     /// The publication contains additional sticker data
-    Sticker,
+    Sticker(Box<Sticker>),
     /// The publication contains additional moderation event data
     ModerationEvent,
     /// The publication contains additional admin event data
@@ -56,8 +56,8 @@ impl Publishable for AnyPublication {
             AnyPublication::ChatMessage(_) => Kind::ChatMessage,
             AnyPublication::Moderation => Kind::Moderation,
             AnyPublication::UserEvent => Kind::UserEvent,
-            AnyPublication::StickerPack => Kind::StickerPack,
-            AnyPublication::Sticker => Kind::Sticker,
+            AnyPublication::StickerPack(_) => Kind::StickerPack,
+            AnyPublication::Sticker(_) => Kind::Sticker,
             AnyPublication::ModerationEvent => Kind::ModerationEvent,
             AnyPublication::AdminEvent => Kind::AdminEvent,
             AnyPublication::FandomEvent => Kind::FandomEvent,

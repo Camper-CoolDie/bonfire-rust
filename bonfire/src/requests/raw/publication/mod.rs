@@ -17,8 +17,8 @@ use crate::models::publication::{Publishable, Status};
 use crate::requests::raw::conversions::timestamp_from_millis;
 use crate::{Error, Result};
 
-pub(crate) trait RawPublishable: Sized {
-    type Target: Publishable;
+pub(crate) trait RawPublishable: Send + Sync + Sized {
+    type Target: Publishable + Send;
 
     fn new(data: Value, kind: RawKind) -> Result<Self>;
 }

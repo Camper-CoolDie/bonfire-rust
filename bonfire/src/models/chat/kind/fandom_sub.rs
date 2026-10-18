@@ -1,8 +1,8 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::models::ImageRef;
 use crate::models::chat::{Messageable, Tag};
+use crate::models::{Chat, ImageRef};
 use crate::sealed::Sealed;
 
 /// Represents a fandom sub-chat.
@@ -21,10 +21,8 @@ pub struct FandomSub {
     pub intro: Option<String>,
 }
 impl FandomSub {
-    /// Creates a new `FandomSub` instance with the given `id`.
-    #[must_use]
-    pub fn new(id: u64) -> Self {
-        Self {
+    pub(crate) fn new(id: u64) -> Self {
+        FandomSub {
             id,
             ..Default::default()
         }
@@ -39,3 +37,13 @@ impl Messageable for FandomSub {
 }
 
 impl Sealed for FandomSub {}
+
+impl Chat<FandomSub> {
+    #[must_use]
+    pub fn new(id: u64) -> Self {
+        Self {
+            spec: FandomSub::new(id),
+            ..Default::default()
+        }
+    }
+}

@@ -25,6 +25,6 @@ pub(crate) use other::RawInitialData;
 pub(crate) use profile::{RawGender, RawLink};
 pub(crate) use publication::{
     AnyRawPublication, RawChatMessage, RawComment, RawPost, RawPostTag, RawPublication,
-    RawReaction, RawReference as RawPublicationRef,
+    RawReaction, RawReference as RawPublicationRef, RawSticker, RawStickerPack,
 };
 pub(crate) use settings::RawSettings;

@@ -2,15 +2,13 @@ mod content;
 mod ref_content;
 mod reference;
 
-use std::ops::RangeInclusive;
-
 pub use content::Content;
 pub use ref_content::RefContent;
 pub use reference::Reference;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::models::publication::{Kind, Publishable};
+use crate::models::publication::{Kind, Publishable, Removable};
 use crate::models::{Account, Fandom};
 use crate::sealed::Sealed;
 
@@ -46,8 +44,7 @@ pub struct Comment {
     pub has_new_formatting: bool,
 }
 impl Comment {
-    /// The allowed range for a comment's text length.
-    pub const TEXT_LENGTH_RANGE: RangeInclusive<usize> = 1..=4000;
+    pub const TEXT_MAX_LENGTH: usize = 4000;
 }
 
 impl Publishable for Comment {
@@ -57,4 +54,5 @@ impl Publishable for Comment {
     }
 }
 
+impl Removable for Comment {}
 impl Sealed for Comment {}

@@ -2,10 +2,10 @@ mod data;
 
 use std::sync::atomic::{AtomicUsize, Ordering};
 
+use b_fcm::Parse;
+use b_fcm::models::{Message, Subscription};
 use chrono::Utc;
 use data::Data;
-use fcm::Parse;
-use fcm::models::{Message, Subscription};
 use tokio::sync::oneshot;
 
 use crate::models::Notification;
@@ -38,7 +38,7 @@ impl Parse for Parser {
     type Target = Notification;
     type Error = Error;
 
-    async fn parse(&self, message: Message) -> Result<Option<Notification>> {
+    fn parse(&self, message: Message) -> Result<Option<Notification>> {
         let data = match message {
             Message::Data(data) => serde_json::from_value::<Data>(data)?,
             Message::MessagesDeleted { count } => {
@@ -66,7 +66,7 @@ impl Parse for Parser {
         Ok(Some(notification.try_into()?))
     }
 
-    async fn stop(self, subscription: Subscription, error: Option<Error>) {
+    fn stop(self, subscription: Subscription, error: Option<Error>) {
         // Allow cases when caller intentionally drops the receiver
         let _ = self.subscription_sender.send((subscription, error));
     }

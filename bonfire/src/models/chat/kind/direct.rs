@@ -2,8 +2,8 @@ use chrono::{DateTime, Utc};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::models::Account;
 use crate::models::chat::{Messageable, Tag};
+use crate::models::{Account, Chat};
 use crate::sealed::Sealed;
 
 /// Represents a direct message chat.
@@ -18,10 +18,8 @@ pub struct Direct {
     pub recipient_read_at: Option<DateTime<Utc>>,
 }
 impl Direct {
-    /// Creates a new `Direct` instance with the authenticated user's ID and the recipient's ID.
-    #[must_use]
-    pub fn new(my_id: u64, recipient_id: u64) -> Self {
-        Self {
+    pub(crate) fn new(my_id: u64, recipient_id: u64) -> Self {
+        Direct {
             my_id,
             recipient: Account::new(recipient_id),
             ..Default::default()
@@ -40,3 +38,13 @@ impl Messageable for Direct {
 }
 
 impl Sealed for Direct {}
+
+impl Chat<Direct> {
+    #[must_use]
+    pub fn new(my_id: u64, recipient_id: u64) -> Self {
+        Self {
+            spec: Direct::new(my_id, recipient_id),
+            ..Default::default()
+        }
+    }
+}

@@ -3,6 +3,7 @@ mod chat_message;
 mod comment;
 mod post;
 mod post_tag;
+mod sticker;
 
 use std::result::Result as StdResult;
 
@@ -17,6 +18,7 @@ pub(crate) use post::{
 };
 pub(crate) use post_tag::RawPostTag;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
+pub(crate) use sticker::{RawPack as RawStickerPack, RawSticker};
 
 use crate::models::publication::Kind;
 

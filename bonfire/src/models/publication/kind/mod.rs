@@ -3,6 +3,7 @@ pub mod chat_message;
 pub mod comment;
 pub mod post;
 pub mod post_tag;
+pub mod sticker;
 
 pub use any::AnyPublication;
 pub use chat_message::{
@@ -16,6 +17,7 @@ pub use post::{ItemKind as PostItemKind, Post, Title as PostTitle};
 pub use post_tag::PostTag;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
+pub use sticker::{Content as StickerContent, Pack as StickerPack, Sticker};
 
 /// Represents the specific type of a publication.
 #[derive(Default, Clone, Copy, Debug, PartialEq, Eq)]

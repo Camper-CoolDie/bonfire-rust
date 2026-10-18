@@ -15,9 +15,10 @@ license.workspace = true
 
 [features]
 default = ["http2"]
+fcm = ["b-fcm"]
 http1 = ["hyper-rustls/http1"]
 http2 = ["hyper-rustls/http2"]
-serde = ["fcm?/serde"]
+serde = ["b-fcm?/serde"]
 
 [dependencies]
 bytes = "1.12"
@@ -26,7 +27,7 @@ futures = "0.3"
 governor = "0.10"
 http = "1.5"
 http-body-util = "0.1"
-hyper = "1.11"
+hyper = "1.12"
 hyper-util = { version = "0.1", features = ["client", "tokio", "tracing"] }
 include_dir = "0.7"
 nonzero_ext = "0.3"
@@ -43,7 +44,7 @@ package = "bonfire-core"
 path = "../bonfire-core"
 version = "0.1.0"
 
-[dependencies.fcm]
+[dependencies.b-fcm]
 package = "bonfire-fcm"
 path = "../bonfire-fcm"
 version = "0.1.0"

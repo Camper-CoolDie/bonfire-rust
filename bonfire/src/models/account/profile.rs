@@ -9,6 +9,8 @@ use crate::requests::account::profile::{
 use crate::{Client, Result};
 
 impl Account {
+    pub const STICKER_PACKS_MAX_COUNT: usize = 50;
+
     /// Follows this account.
     ///
     /// # Errors

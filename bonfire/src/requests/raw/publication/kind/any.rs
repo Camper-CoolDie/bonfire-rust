@@ -1,8 +1,10 @@
 use serde_json::Value;
 
 use crate::models::AnyPublication;
-use crate::requests::raw::publication::{RawChatMessage, RawComment, RawKind, RawPublishable};
-use crate::requests::raw::{RawPost, RawPostTag};
+use crate::requests::raw::publication::{RawKind, RawPublishable};
+use crate::requests::raw::{
+    RawChatMessage, RawComment, RawPost, RawPostTag, RawSticker, RawStickerPack,
+};
 use crate::{Error, Result};
 
 pub(crate) enum AnyRawPublication {
@@ -12,8 +14,8 @@ pub(crate) enum AnyRawPublication {
     ChatMessage(Box<RawChatMessage>),
     Moderation,
     UserEvent,
-    StickerPack,
-    Sticker,
+    StickerPack(Box<RawStickerPack>),
+    Sticker(Box<RawSticker>),
     ModerationEvent,
     AdminEvent,
     FandomEvent,
@@ -34,8 +36,10 @@ impl RawPublishable for AnyRawPublication {
             }
             RawKind::Moderation => AnyRawPublication::Moderation,
             RawKind::UserEvent => AnyRawPublication::UserEvent,
-            RawKind::StickerPack => AnyRawPublication::StickerPack,
-            RawKind::Sticker => AnyRawPublication::Sticker,
+            RawKind::StickerPack => {
+                AnyRawPublication::StickerPack(Box::new(RawStickerPack::new(data, kind)?))
+            }
+            RawKind::Sticker => AnyRawPublication::Sticker(Box::new(RawSticker::new(data, kind)?)),
             RawKind::ModerationEvent => AnyRawPublication::ModerationEvent,
             RawKind::AdminEvent => AnyRawPublication::AdminEvent,
             RawKind::FandomEvent => AnyRawPublication::FandomEvent,
@@ -62,8 +66,12 @@ impl TryFrom<AnyRawPublication> for AnyPublication {
             }
             AnyRawPublication::Moderation => AnyPublication::Moderation,
             AnyRawPublication::UserEvent => AnyPublication::UserEvent,
-            AnyRawPublication::StickerPack => AnyPublication::StickerPack,
-            AnyRawPublication::Sticker => AnyPublication::Sticker,
+            AnyRawPublication::StickerPack(pack) => {
+                AnyPublication::StickerPack(Box::new((*pack).try_into()?))
+            }
+            AnyRawPublication::Sticker(sticker) => {
+                AnyPublication::Sticker(Box::new((*sticker).try_into()?))
+            }
             AnyRawPublication::ModerationEvent => AnyPublication::ModerationEvent,
             AnyRawPublication::AdminEvent => AnyPublication::AdminEvent,
             AnyRawPublication::FandomEvent => AnyPublication::FandomEvent,

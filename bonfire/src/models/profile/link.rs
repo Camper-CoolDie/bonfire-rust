@@ -17,22 +17,24 @@ pub struct Link {
     /// The URI this link points to
     pub uri: String,
 }
+impl Link {
+    /// The maximum allowed length for a link's title.
+    pub const TITLE_MAX_LENGTH: usize = 30;
+    /// The maximum allowed length for a link's URI.
+    pub const URI_MAX_LENGTH: usize = 500;
+}
 
 impl Profile {
     /// The maximum number of links an account's profile can contain.
     pub const LINKS_MAX_COUNT: usize = 7;
-    /// The maximum allowed length for a link's title.
-    pub const LINK_TITLE_MAX_LENGTH: usize = 30;
-    /// The maximum allowed length for a link's URI.
-    pub const LINK_URI_MAX_LENGTH: usize = 500;
 
     /// Sets an external link in the account's profile.
     ///
     /// The link is identified by its `index` (0-based, up to
     /// [`LINKS_MAX_COUNT`][Self::LINKS_MAX_COUNT] - 1). The `title` must not exceed
-    /// [`LINK_TITLE_MAX_LENGTH`][Self::LINK_TITLE_MAX_LENGTH] and the `uri` must not exceed
-    /// [`LINK_URI_MAX_LENGTH`][Self::LINK_URI_MAX_LENGTH]. To delete a link at a specific index,
-    /// both `title` and `uri` must be provided as empty strings.
+    /// [`LINK_TITLE_MAX_LENGTH`][Link::TITLE_MAX_LENGTH] and the `uri` must not exceed
+    /// [`LINK_URI_MAX_LENGTH`][Link::URI_MAX_LENGTH]. To delete a link at a specific index, both
+    /// `title` and `uri` must be provided as empty strings.
     ///
     /// # Errors
     ///

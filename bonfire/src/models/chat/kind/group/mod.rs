@@ -7,8 +7,8 @@ pub use role::MemberRole;
 use serde::{Deserialize, Serialize};
 pub use status::MemberStatus;
 
-use crate::models::ImageRef;
 use crate::models::chat::{Messageable, Tag};
+use crate::models::{Chat, ImageRef};
 use crate::sealed::Sealed;
 
 /// Represents a group chat.
@@ -39,10 +39,8 @@ pub struct Group {
     pub allow_changes: bool,
 }
 impl Group {
-    /// Creates a new `Group` instance with the given `id`.
-    #[must_use]
-    pub fn new(id: u64) -> Self {
-        Self {
+    pub(crate) fn new(id: u64) -> Self {
+        Group {
             id,
             ..Default::default()
         }
@@ -57,3 +55,13 @@ impl Messageable for Group {
 }
 
 impl Sealed for Group {}
+
+impl Chat<Group> {
+    #[must_use]
+    pub fn new(id: u64) -> Self {
+        Self {
+            spec: Group::new(id),
+            ..Default::default()
+        }
+    }
+}
