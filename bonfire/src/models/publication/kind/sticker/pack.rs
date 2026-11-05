@@ -30,6 +30,7 @@ impl Pack {
     pub const NAME_MAX_LENGTH: usize = 100;
     pub const ICON_MAX_SIZE: usize = 32 * 1024;
     pub const ICON_DIMENSION: usize = 384;
+    pub const STICKERS_MAX_COUNT: usize = 100;
 }
 
 impl Publishable for Pack {

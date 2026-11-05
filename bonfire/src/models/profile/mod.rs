@@ -215,8 +215,8 @@ impl Profile {
     /// * Returns [`Error::UnsuccessfulResponse`][crate::Error::UnsuccessfulResponse] with the
     ///   status `500` if the provided background is not a valid image.
     /// * Returns [`Error`][crate::Error] if any other error occurs during the request.
-    pub async fn set_background(client: &Client, background: &[u8]) -> Result<ImageRef> {
-        SetBackgroundRequest::new(background).send(client).await
+    pub async fn set_background(client: &Client, image: &[u8]) -> Result<ImageRef> {
+        SetBackgroundRequest::new(image).send(client).await
     }
 
     /// Sets the account's animated (GIF) profile background, returning a tuple where the first

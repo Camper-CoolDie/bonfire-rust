@@ -17,7 +17,7 @@ pub use post::{ItemKind as PostItemKind, Post, Title as PostTitle};
 pub use post_tag::PostTag;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
-pub use sticker::{Content as StickerContent, Pack as StickerPack, Sticker};
+pub use sticker::{Pack as StickerPack, Sticker};
 
 /// Represents the specific type of a publication.
 #[derive(Default, Clone, Copy, Debug, PartialEq, Eq)]

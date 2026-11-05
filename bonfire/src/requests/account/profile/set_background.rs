@@ -13,16 +13,16 @@ pub(crate) struct SetBackgroundRequest<I: Image> {
 }
 
 impl<'a> SetBackgroundRequest<Normal<'a>> {
-    pub(crate) fn new(background: &'a [u8]) -> Self {
-        SetBackgroundRequest {
-            background: Normal::new(background),
+    pub(crate) fn new(image: &'a [u8]) -> Self {
+        Self {
+            background: Normal::new(image),
         }
     }
 }
 
 impl<'a> SetBackgroundRequest<Gif<'a>> {
     pub(crate) fn new_gif(first_frame: &'a [u8], animated: &'a [u8]) -> Self {
-        SetBackgroundRequest {
+        Self {
             background: Gif::new(first_frame, animated),
         }
     }
