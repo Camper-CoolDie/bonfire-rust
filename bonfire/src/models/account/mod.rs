@@ -9,7 +9,7 @@ mod profile;
 mod reference;
 mod stat;
 
-pub use access_level::AccessLevel;
+pub use access_level::{AccessLevel, Requirement as AccessLevelRequirement};
 pub use badge::Badge;
 pub use ban_entry::BanEntry;
 use chrono::{DateTime, Duration, Utc};

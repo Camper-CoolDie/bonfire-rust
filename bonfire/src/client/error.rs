@@ -28,9 +28,6 @@ pub enum Error {
     /// An error occurred while converting the response's raw data into models or vice-versa
     #[error("{0}")]
     ConversionError(String),
-    #[cfg(feature = "fcm")]
-    #[error("FCM error")]
-    FcmError(#[from] b_fcm::Error),
     /// An error occurred during JSON serialization or deserialization
     #[error("JSON error")]
     JsonError(#[from] serde_json::Error),
@@ -56,7 +53,7 @@ pub enum Error {
     InvalidMeliorResponse,
     /// The Melior server returned an error
     #[error("melior server error")]
-    MeliorError(#[source] MeliorError),
+    MeliorError(#[from] MeliorError),
     /// A request-specific error
     #[error("request-specific error")]
     RequestError(#[source] Box<dyn StdError + Send + Sync + 'static>),
@@ -65,7 +62,7 @@ pub enum Error {
     RequestTooLarge,
     /// The Root server returned an error
     #[error("root server error")]
-    RootError(#[source] RootError),
+    RootError(#[from] RootError),
     /// The client is unauthenticated
     #[error("unauthenticated")]
     Unauthenticated,

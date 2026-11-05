@@ -1,7 +1,5 @@
 mod data;
 
-use std::sync::atomic::{AtomicUsize, Ordering};
-
 use b_fcm::Parse;
 use b_fcm::models::{Message, Subscription};
 use chrono::Utc;
@@ -14,20 +12,23 @@ use crate::{Error, Result};
 
 #[derive(Debug)]
 pub struct Parser {
-    subscription_sender: oneshot::Sender<(Subscription, Option<Error>)>,
+    subscription_sender: oneshot::Sender<(Subscription, Option<b_fcm::Error>)>,
     started_at: i64,
-    dropped_count: AtomicUsize,
+    dropped_count: usize,
 }
 impl Parser {
     #[must_use]
-    pub fn new() -> (Self, oneshot::Receiver<(Subscription, Option<Error>)>) {
+    pub fn new() -> (
+        Self,
+        oneshot::Receiver<(Subscription, Option<b_fcm::Error>)>,
+    ) {
         let (subscription_sender, subscription_receiver) = oneshot::channel();
 
         (
             Self {
                 subscription_sender,
                 started_at: Utc::now().timestamp_millis(),
-                dropped_count: AtomicUsize::new(0),
+                dropped_count: 0,
             },
             subscription_receiver,
         )
@@ -38,11 +39,11 @@ impl Parse for Parser {
     type Target = Notification;
     type Error = Error;
 
-    fn parse(&self, message: Message) -> Result<Option<Notification>> {
+    fn parse(&mut self, message: Message) -> Result<Option<Notification>> {
         let data = match message {
             Message::Data(data) => serde_json::from_value::<Data>(data)?,
             Message::MessagesDeleted { count } => {
-                self.dropped_count.fetch_add(count, Ordering::AcqRel);
+                self.dropped_count += count;
                 return Ok(None);
             }
         };
@@ -50,23 +51,27 @@ impl Parse for Parser {
         let Data::Legacy(payload) = data;
         let notification = serde_json::from_str::<RawNotification>(&payload)?;
 
-        // The server may cache notifications when disconnected and send them after connecting. They
-        // must be dropped
+        // The server may cache notifications when disconnected and send them after connecting.
+        // Those notifications must be dropped
         if notification.sent_at < self.started_at {
-            self.dropped_count.fetch_add(1, Ordering::AcqRel);
+            self.dropped_count += 1;
             return Ok(None);
         }
 
-        let dropped_count = self.dropped_count.swap(0, Ordering::AcqRel);
-        if dropped_count > 0 {
-            tracing::warn!("dropped {dropped_count} notifications");
+        if self.dropped_count > 0 {
+            tracing::warn!("dropped {} notifications", self.dropped_count);
+            self.dropped_count = 0;
         }
 
         tracing::info!(kind = ?notification.kind, "parsed notification");
         Ok(Some(notification.try_into()?))
     }
 
-    fn stop(self, subscription: Subscription, error: Option<Error>) {
+    fn stop(self, subscription: Subscription, error: Option<b_fcm::Error>) {
+        if self.dropped_count > 0 {
+            tracing::warn!("dropped {} notifications", self.dropped_count);
+        }
+
         // Allow cases when caller intentionally drops the receiver
         let _ = self.subscription_sender.send((subscription, error));
     }

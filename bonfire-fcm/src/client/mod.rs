@@ -20,7 +20,7 @@ use tokio_util::sync::CancellationToken;
 
 use crate::models::{Config, Credentials, Subscription};
 use crate::requests::{PushRegistrationRequest, PushUnregistrationRequest};
-use crate::{Listener, Parse};
+use crate::{Listener, Parse, ParseResult};
 
 pub(super) type HyperClient = hyper_util::client::legacy::Client<
     HttpsConnector<HttpConnector>,
@@ -121,7 +121,7 @@ impl Client {
         subscription: Subscription,
         cancellation_token: CancellationToken,
         buffer: usize,
-    ) -> Result<impl Stream<Item = P::Target>> {
+    ) -> Result<impl Stream<Item = ParseResult<P>>> {
         let registration = self
             .inner
             .token_provider

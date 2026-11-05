@@ -85,6 +85,10 @@ impl Error {
             "failed to convert field `{key}` to {target} while parsing {source}: {error}"
         ))
     }
+
+    pub(crate) fn is_retryable(&self) -> bool {
+        matches!(self, Error::IoError(_))
+    }
 }
 
 impl From<JwtError> for Error {

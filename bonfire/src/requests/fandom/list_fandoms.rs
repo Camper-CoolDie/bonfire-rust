@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use crate::client::{InfallibleRequest, Request};
 use crate::models::Fandom;
 use crate::requests::raw::RawFandom;
-use crate::{Client, Error, Result, RootError, UnavailableError};
+use crate::{Client, Result, RootError, UnavailableError};
 
 const REQUEST_NAME: &str = "RFandomsGetAllById";
 
@@ -61,9 +61,7 @@ impl Request<Fandom> for ListFandomsRequest<'_, Fandom> {
             .await?
             .fandoms
             .pop()
-            .ok_or(Error::RootError(RootError::Unavailable(
-                UnavailableError::NotFound,
-            )))?
+            .ok_or(RootError::Unavailable(UnavailableError::NotFound))?
             .try_into()
     }
 }
@@ -86,9 +84,7 @@ impl Request<Vec<Fandom>> for ListFandomsRequest<'_, Vec<Fandom>> {
         for id in self.ids {
             let fandom = order
                 .remove(id)
-                .ok_or(Error::RootError(RootError::Unavailable(
-                    UnavailableError::NotFound,
-                )))?;
+                .ok_or(RootError::Unavailable(UnavailableError::NotFound))?;
             target.push(Fandom::try_from(fandom)?);
         }
 

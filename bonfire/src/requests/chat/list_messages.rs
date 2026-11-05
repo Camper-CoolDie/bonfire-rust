@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use crate::client::{InfallibleRequest, PaginatedRequest, Request};
 use crate::models::{ChatMessage, ChatTag, Publication};
 use crate::requests::raw::{RawChatMessage, RawChatTag, RawPublication};
-use crate::{Client, Error, Result, RootError, UnavailableError};
+use crate::{Client, Result, RootError, UnavailableError};
 
 // 51 if message_id points to a valid message (25 previous, target, 25 next)
 const PAGE_SIZE: NonZeroUsize = nonzero!(50usize);
@@ -91,9 +91,7 @@ impl Request<Vec<Publication<ChatMessage>>> for ListMessagesRequest {
 
         // No message was found
         if self.message_id != 0 && messages.len() <= PAGE_SIZE.get() {
-            return Err(Error::RootError(RootError::Unavailable(
-                UnavailableError::NotFound,
-            )));
+            Err(RootError::Unavailable(UnavailableError::NotFound))?
         }
 
         // Received list is always sorted from oldest to newest

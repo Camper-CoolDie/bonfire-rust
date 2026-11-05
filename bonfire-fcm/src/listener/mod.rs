@@ -2,7 +2,6 @@ mod heartbeat;
 mod parse;
 
 use std::collections::VecDeque;
-use std::error::Error as StdError;
 use std::panic;
 use std::time::{Duration, Instant};
 
@@ -10,7 +9,7 @@ use backon::{BackoffBuilder as _, FibonacciBuilder, Retryable as _};
 use ece::EcKeyComponents;
 use futures::{FutureExt as _, Stream};
 use heartbeat::{Command as HeartbeatCommand, Heartbeat};
-pub use parse::Parse;
+pub use parse::{Parse, Result as ParseResult};
 use serde::Deserialize;
 use tokio::sync::mpsc;
 use tokio::task::JoinSet;
@@ -40,7 +39,7 @@ impl Listener {
         security_token: u64,
         cancellation_token: CancellationToken,
         buffer: usize,
-    ) -> impl Stream<Item = P::Target> {
+    ) -> impl Stream<Item = ParseResult<P>> {
         let (sender, receiver) = mpsc::channel(buffer);
         tokio::spawn(Self::task(
             parser,
@@ -55,64 +54,60 @@ impl Listener {
 
     #[instrument(name = "listener", skip_all, fields(id = subscription.id))]
     async fn task<P: Parse>(
-        parser: P,
+        mut parser: P,
         mut subscription: Subscription,
-        sender: mpsc::Sender<P::Target>,
+        sender: mpsc::Sender<ParseResult<P>>,
         cancellation_token: CancellationToken,
         android_id: u64,
         security_token: u64,
     ) {
         loop {
             let started_at = Instant::now();
-            let (error, should_retry) = Self::task_loop(
-                &parser,
+            let result = Self::task_loop(
+                &mut parser,
                 &mut subscription,
                 &sender,
                 &cancellation_token,
                 android_id,
                 security_token,
             )
-            .await
-            .map_or((None, false), |(error, should_retry)| {
-                (Some(error), should_retry)
-            });
+            .await;
 
             // If `task_loop()` has been running for a long enough time, try reconnecting
-            if should_retry && started_at.elapsed() > MIN_DURATION_FOR_RETRY {
+            if let Err(error) = &result
+                && error.is_retryable()
+                && started_at.elapsed() > MIN_DURATION_FOR_RETRY
+            {
                 tracing::info!(?error, elapsed = ?started_at.elapsed(), "reconnecting");
                 continue;
             }
 
             // Pass subscription with modified `persistent_ids` to the parser
-            parser.stop(subscription, error);
+            parser.stop(subscription, result.err());
             break;
         }
     }
 
     async fn task_loop<P: Parse>(
-        parser: &P,
+        parser: &mut P,
         subscription: &mut Subscription,
-        sender: &mpsc::Sender<P::Target>,
+        sender: &mpsc::Sender<ParseResult<P>>,
         cancellation_token: &CancellationToken,
         android_id: u64,
         security_token: u64,
-    ) -> Option<(P::Error, bool)> {
+    ) -> Result<()> {
         let id = subscription.id;
         let key_components = &subscription.key_components;
         let auth_secret = &subscription.auth_secret;
         let persistent_ids = &mut subscription.persistent_ids;
-        let connection = match Self::connect_and_login(
+        let connection = Self::connect_and_login(
             key_components,
             auth_secret,
             persistent_ids,
             android_id,
             security_token,
         )
-        .await
-        {
-            Ok(connection) => connection,
-            Err(error) => return Some(Self::map_error(error)),
-        };
+        .await?;
 
         // JoinSet aborts the underlying task when dropped
         let mut join_set = JoinSet::new();
@@ -142,46 +137,33 @@ impl Listener {
             tokio::select! {
                 // Heartbeat task must finish first before stopping the listener
                 result = &mut heartbeat_future => {
-                    match result {
-                        Ok(()) => {
-                            tracing::debug!("stopping");
-                            break;
-                        }
-                        Err(error) => return Some(Self::map_error(error)),
-                    }
+                    result?;
+                    tracing::debug!("stopping");
+                    break;
                 }
                 result = connection.read() => {
-                    let (option, should_close) = match result {
-                        Ok(Some(message)) => {
-                            match Self::parse_message(message, persistent_ids, &heartbeat_sender)
-                                .await
-                            {
-                                Ok((option, should_close)) => (option, should_close),
-                                Err(error) => {
-                                    return Some(Self::map_error(error));
-                                }
-                            }
-                        }
+                    let message = match result {
+                        Ok(Some(message)) => message,
                         Ok(None) => continue,
                         Err(error) => {
                             tracing::error!(?error, "failed to read next message");
-                            return Some(Self::map_error(error));
+                            return Err(error);
                         }
                     };
 
-                    if let Some(message) = option {
-                        match parser.parse(message) {
-                            Ok(Some(target)) => {
-                                if sender.send(target).await.is_err() {
-                                    tracing::warn!("receiver has been dropped abruptly");
-                                    break;
-                                }
-                            }
-                            Ok(None) => {}
-                            Err(error) => {
-                                tracing::error!(?error, "failed to parse message");
-                                return Some((error, false));
-                            }
+                    let (option, should_close) =
+                        Self::parse_message(message, persistent_ids, &heartbeat_sender).await?;
+
+                    if let Some(message) = option
+                        && let Some(result) = parser.parse(message).transpose()
+                    {
+                        if let Err(error) = &result {
+                            tracing::error!(?error, "failed to parse message");
+                        }
+
+                        if sender.send(result).await.is_err() {
+                            tracing::warn!("receiver has been dropped abruptly");
+                            break;
                         }
                     }
 
@@ -192,16 +174,8 @@ impl Listener {
             }
         }
 
-        connection.shutdown().await.err().map(Self::map_error)
-    }
-
-    fn map_error<E: From<Error> + StdError>(error: Error) -> (E, bool) {
-        let should_retry = Self::is_retryable(&error);
-        (error.into(), should_retry)
-    }
-
-    fn is_retryable(error: &Error) -> bool {
-        matches!(error, Error::IoError(_))
+        connection.shutdown().await?;
+        Ok(())
     }
 
     async fn connect_and_login(
@@ -234,7 +208,7 @@ impl Listener {
             Ok(connection)
         })
         .retry(backoff)
-        .when(Self::is_retryable)
+        .when(Error::is_retryable)
         .notify(|_, duration| tracing::info!("reconnecting in {duration:?}"))
         .await
     }

@@ -4,24 +4,24 @@ use strum::{EnumIter, IntoEnumIterator};
 
 use crate::models::{Account, Config};
 
-// Requirements for all AccessLevel variants (except User and Protoadmin) in the format
-// (level, karma30). When changing a requirement, also update the associated variant's doc
-const TRUSTED_REQUIREMENT: (f64, f64) = (3.0, 0.0);
-const EXPERIENCED_REQUIREMENT: (f64, f64) = (4.5, 150.0);
-const CURATOR_REQUIREMENT: (f64, f64) = (6.0, 400.0);
-const MODERATOR_REQUIREMENT: (f64, f64) = (7.0, 500.0);
-const ADMIN_REQUIREMENT: (f64, f64) = (8.5, 700.0);
-const SUPERADMIN_REQUIREMENT: (f64, f64) = (10.0, 1000.0);
-const EXPERT_REQUIREMENT: (f64, f64) = (12.0, 1300.0);
+pub enum Requirement {
+    None,
+    Level { level: f64, karma30: Option<f64> },
+    Other,
+}
+impl Requirement {
+    pub const fn new(level: f64, karma30: Option<f64>) -> Self {
+        Self::Level { level, karma30 }
+    }
+}
 
-/// Represents the various access levels an account can hold within the platform.
+/// Represents the various access levels an account can hold.
 ///
 /// These levels are hierarchical, meaning higher levels implicitly include privileges of lower
 /// levels. The `Default` level is [`AccessLevel::User`].
 ///
 /// Each access level (except for [`AccessLevel::User`] and [`AccessLevel::Protoadmin`]) has
-/// specific [`level`][AccessLevel::requirement()] and [`karma30`][AccessLevel::requirement()]
-/// requirements that an account must meet to attain that level.
+/// specific `level` and `karma30` requirements that an account must meet to attain that level.
 #[derive(Default, Clone, Copy, Debug, PartialOrd, Ord, PartialEq, Eq, EnumIter)]
 #[cfg_attr(
     feature = "serde",
@@ -32,57 +32,42 @@ pub enum AccessLevel {
     /// Standard user level, the default for all accounts
     #[default]
     User,
-    /// A trusted user level.
-    ///
-    /// Corresponds to level 3.
+    /// Trusted user level
     Trusted,
-    /// An experienced user level.
-    ///
-    /// Corresponds to level 4.5 and requires 150 karma.
+    /// Experienced user level
     Experienced,
-    /// A curator level.
-    ///
-    /// Corresponds to level 6 and requires 400 karma.
+    /// Curator level
     Curator,
-    /// A moderator level.
-    ///
-    /// Corresponds to level 7 and requires 500 karma.
+    /// Moderator level
     Moderator,
-    /// An administrator level.
-    ///
-    /// Corresponds to level 8.5 and requires 700 karma.
+    /// Administrator level
     Admin,
-    /// A superadministrator level.
-    ///
-    /// Corresponds to level 10 and requires 1000 karma.
+    /// Superadministrator level
     Superadmin,
-    /// An expert user level.
-    ///
-    /// Corresponds to level 12 and requires 1300 karma.
+    /// Expert user level
     Expert,
     /// Protoadministrator level, reserved for accounts explicitly listed in
     /// [`Config::protoadmin_ids`]
     Protoadmin,
 }
 impl AccessLevel {
-    /// Returns the minimum `(level, karma30)` requirements for this access level.
+    /// Returns the minimum requirement for this access level.
     ///
-    /// The first element of the tuple represents the minimum account `level` required, and the
-    /// second element represents the minimum `karma30` (karma earned in the last 30 days) required.
-    ///
-    /// Returns `None` for [`AccessLevel::User`] and [`AccessLevel::Protoadmin`] as they don't have
-    /// specific dynamic requirements.
+    /// Returns [`Requirement::None`] for [`AccessLevel::User`] and [`Requirement::Other`] for
+    /// [`AccessLevel::Protoadmin`] as they don't have specific dynamic requirements.
+    /// [`Requirement::Level`] is returned for other access levels.
     #[must_use]
-    pub const fn requirement(self) -> Option<(f64, f64)> {
+    pub const fn requirement(self) -> Requirement {
         match self {
-            AccessLevel::Trusted => Some(TRUSTED_REQUIREMENT),
-            AccessLevel::Experienced => Some(EXPERIENCED_REQUIREMENT),
-            AccessLevel::Curator => Some(CURATOR_REQUIREMENT),
-            AccessLevel::Moderator => Some(MODERATOR_REQUIREMENT),
-            AccessLevel::Admin => Some(ADMIN_REQUIREMENT),
-            AccessLevel::Superadmin => Some(SUPERADMIN_REQUIREMENT),
-            AccessLevel::Expert => Some(EXPERT_REQUIREMENT),
-            _ => None,
+            AccessLevel::User => Requirement::None,
+            AccessLevel::Trusted => Requirement::new(3.0, None),
+            AccessLevel::Experienced => Requirement::new(4.5, Some(150.0)),
+            AccessLevel::Curator => Requirement::new(6.0, Some(400.0)),
+            AccessLevel::Moderator => Requirement::new(7.0, Some(500.0)),
+            AccessLevel::Admin => Requirement::new(8.5, Some(700.0)),
+            AccessLevel::Superadmin => Requirement::new(10.0, Some(1000.0)),
+            AccessLevel::Expert => Requirement::new(12.0, Some(1300.0)),
+            AccessLevel::Protoadmin => Requirement::Other,
         }
     }
 }
@@ -98,20 +83,20 @@ impl Account {
     /// This method relies on [`Account::id`], [`Account::level`] and [`Account::karma30`] fields
     /// being set.
     #[must_use]
-    pub fn access_level(self, config: &Config) -> AccessLevel {
-        // Linear `.contains()` search is preferred for small vectors, so there's no overhead
-        if config.protoadmin_ids.contains(&self.id) {
-            AccessLevel::Protoadmin
-        } else {
-            AccessLevel::iter()
-                .rev()
-                .find(|access_level| {
-                    let requirement = access_level.requirement();
-                    requirement.is_some_and(|requirement| {
-                        self.level >= requirement.0 && self.karma30 >= requirement.1
-                    })
-                })
-                .unwrap_or(AccessLevel::User)
-        }
+    pub fn access_level(&self, config: &Config) -> AccessLevel {
+        AccessLevel::iter()
+            .rev()
+            .find(|access_level| {
+                match access_level.requirement() {
+                    Requirement::None => true,
+                    Requirement::Level { level, karma30 } => {
+                        self.level >= level && karma30.is_none_or(|karma30| self.karma30 >= karma30)
+                    }
+                    // Linear `.contains()` search is preferred for small vectors, so there's no
+                    // overhead
+                    Requirement::Other => config.protoadmin_ids.contains(&self.id),
+                }
+            })
+            .expect("failed to determine access level")
     }
 }

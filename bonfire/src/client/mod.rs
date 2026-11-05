@@ -416,7 +416,7 @@ impl Client {
             .melior_service
             .send(&self.hyper_client, query, HeaderMap::new())
             .await
-            .inspect_err(|error| tracing::error!(?error, "failed to send an authless query"))
+            .inspect_err(|error| tracing::error!(?error, "failed to send authless query"))
     }
 
     /// Create a new `Builder` with default values.
