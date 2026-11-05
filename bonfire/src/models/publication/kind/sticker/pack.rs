@@ -2,7 +2,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::client::Request as _;
-use crate::models::publication::{Kind, Publishable, Removable};
+use crate::models::publication::{Commentable, Kind, Publishable, Removable};
 use crate::models::{Account, Comment, ImageRef, Publication, Sticker};
 use crate::requests::publication::sticker::pack::{
     CreatePackRequest, GetPackRequest, SetNameRequest,
@@ -40,6 +40,7 @@ impl Publishable for Pack {
     }
 }
 
+impl Commentable for Pack {}
 impl Removable for Pack {}
 impl Sealed for Pack {}
 

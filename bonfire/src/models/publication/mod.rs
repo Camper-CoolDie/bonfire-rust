@@ -6,6 +6,7 @@ mod status;
 
 use chrono::{DateTime, Utc};
 pub use filter::{AccountFilter, FandomFilter};
+use futures::Stream;
 pub use kind::*;
 pub use reaction::Reaction;
 pub use reference::Reference;
@@ -15,6 +16,7 @@ pub use status::Status;
 
 use crate::client::Request as _;
 use crate::requests::publication::RemovePublicationRequest;
+use crate::requests::publication::comment::ListCommentsRequest;
 use crate::sealed::Sealed;
 use crate::{Client, Result};
 
@@ -28,6 +30,7 @@ pub trait Publishable: Default + Sealed {
     fn kind(&self) -> Kind;
 }
 
+pub trait Commentable: Publishable + Sealed {}
 pub trait Removable: Publishable + Sealed {}
 
 /// Represents a generic Bonfire publication.
@@ -58,6 +61,16 @@ impl<T: Publishable> Publication<T> {
     #[must_use]
     pub fn kind(&self) -> Kind {
         self.spec.kind()
+    }
+}
+
+impl<T: Commentable> Publication<T> {
+    pub fn list_comments(
+        &self,
+        client: &Client,
+        offset_date: Option<DateTime<Utc>>,
+    ) -> impl Stream<Item = Result<Publication<Comment>>> {
+        ListCommentsRequest::new(self.id, offset_date).stream(client)
     }
 }
 

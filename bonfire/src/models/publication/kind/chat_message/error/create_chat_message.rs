@@ -4,7 +4,7 @@ use crate::client::RequestError;
 use crate::{Result, RootError};
 
 #[derive(Error, Debug)]
-pub enum SendChatMessageError {
+pub enum CreateChatMessageError {
     #[error("invalid data")]
     InvalidData,
     #[error("text is too long")]
@@ -19,28 +19,28 @@ pub enum SendChatMessageError {
     VoiceBlocked,
 }
 
-impl RequestError for SendChatMessageError {
+impl RequestError for CreateChatMessageError {
     type Source = RootError;
 
     fn try_convert(error: &RootError) -> Result<Option<Self>> {
         Ok(match error {
             RootError::Other { code, .. } if code == "E_BAD_DATA" => {
-                Some(SendChatMessageError::InvalidData)
+                Some(CreateChatMessageError::InvalidData)
             }
             RootError::Other { code, .. } if code == "E_BAD_TEXT" => {
-                Some(SendChatMessageError::TextTooLong)
+                Some(CreateChatMessageError::TextTooLong)
             }
             RootError::Other { code, .. } if code == "E_BAD_IMAGE" => {
-                Some(SendChatMessageError::InvalidImage)
+                Some(CreateChatMessageError::InvalidImage)
             }
             RootError::Other { code, .. } if code == "E_BAD_GIF" => {
-                Some(SendChatMessageError::InvalidGif)
+                Some(CreateChatMessageError::InvalidGif)
             }
             RootError::Other { code, .. } if code == "E_BLACK_LIST" => {
-                Some(SendChatMessageError::Blocked)
+                Some(CreateChatMessageError::Blocked)
             }
             RootError::Other { code, .. } if code == "E_IS_IGNORE_VOICE_MESSAGES" => {
-                Some(SendChatMessageError::VoiceBlocked)
+                Some(CreateChatMessageError::VoiceBlocked)
             }
             _ => None,
         })

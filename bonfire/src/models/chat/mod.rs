@@ -11,8 +11,8 @@ pub use tag::Tag;
 pub use typing::Handler as TypingHandler;
 
 use crate::models::{ChatMessage, Publication};
-pub use crate::requests::chat::ListMessagesAnchor;
-use crate::requests::chat::ListMessagesRequest;
+pub use crate::requests::publication::chat_message::ListChatMessagesAnchor;
+use crate::requests::publication::chat_message::ListChatMessagesRequest;
 use crate::sealed::Sealed;
 use crate::{Client, Result};
 
@@ -49,9 +49,9 @@ impl<T: Messageable> Chat<T> {
         &'a self,
         client: &'a Client,
         newest_first: bool,
-        anchor: &ListMessagesAnchor,
+        anchor: &ListChatMessagesAnchor,
     ) -> impl Stream<Item = Result<Publication<ChatMessage>>> + 'a {
-        ListMessagesRequest::new(self.tag(), newest_first, anchor).stream(client)
+        ListChatMessagesRequest::new(self.tag(), newest_first, anchor).stream(client)
     }
 
     #[must_use]

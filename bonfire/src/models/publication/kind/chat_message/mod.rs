@@ -13,9 +13,9 @@ use serde::{Deserialize, Serialize};
 use crate::client::Request as _;
 use crate::models::publication::{Kind, Publishable, Removable};
 use crate::models::{Account, ChatTag, Fandom, Publication};
-use crate::requests::publication::chat_message::SendChatMessageRequest;
+use crate::requests::publication::chat_message::CreateChatMessageRequest;
 pub use crate::requests::publication::chat_message::{
-    SendChatMessageContent, SendChatMessageOptions,
+    CreateChatMessageContent, CreateChatMessageOptions,
 };
 use crate::sealed::Sealed;
 use crate::{Client, Result};
@@ -62,10 +62,10 @@ impl Removable for ChatMessage {}
 impl Sealed for ChatMessage {}
 
 impl Publication<ChatMessage> {
-    pub async fn send(
+    pub async fn create(
         client: &Client,
-        options: SendChatMessageOptions<'_>,
+        options: CreateChatMessageOptions<'_>,
     ) -> Result<Publication<ChatMessage>> {
-        SendChatMessageRequest::new(options).send(client).await
+        CreateChatMessageRequest::new(options).send(client).await
     }
 }

@@ -27,7 +27,7 @@ pub enum Anchor {
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
-pub(crate) struct ListMessagesRequest {
+pub(crate) struct ListChatMessagesRequest {
     #[serde(rename = "tag")]
     chat_tag: RawChatTag,
     #[serde(rename = "old")]
@@ -35,7 +35,7 @@ pub(crate) struct ListMessagesRequest {
     offset_date: i64,
     message_id: u64,
 }
-impl ListMessagesRequest {
+impl ListChatMessagesRequest {
     pub(crate) fn new(chat_tag: ChatTag, newest_first: bool, anchor: &Anchor) -> Self {
         let message_id = match anchor {
             Anchor::Message { id } => *id,
@@ -79,7 +79,7 @@ pub(crate) struct Response {
     messages: Vec<RawPublication<RawChatMessage>>,
 }
 
-impl Request<Vec<Publication<ChatMessage>>> for ListMessagesRequest {
+impl Request<Vec<Publication<ChatMessage>>> for ListChatMessagesRequest {
     type Response = Response;
     type Error = InfallibleRequest<RootError>;
 

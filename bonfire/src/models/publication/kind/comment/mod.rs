@@ -1,16 +1,22 @@
 mod content;
+mod error;
 mod ref_content;
 mod reference;
 
 pub use content::Content;
+pub use error::*;
 pub use ref_content::RefContent;
 pub use reference::Reference;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
+use crate::client::Request as _;
 use crate::models::publication::{Kind, Publishable, Removable};
-use crate::models::{Account, Fandom};
+use crate::models::{Account, Fandom, Publication};
+use crate::requests::publication::comment::CreateCommentRequest;
+pub use crate::requests::publication::comment::{CreateCommentContent, CreateCommentOptions};
 use crate::sealed::Sealed;
+use crate::{Client, Result};
 
 /// Represents the specific data for a comment publication, containing text, and optionally a media
 /// [`CommentContent`][Content] or a [`CommentRef`][Reference] to another publication.
@@ -56,3 +62,12 @@ impl Publishable for Comment {
 
 impl Removable for Comment {}
 impl Sealed for Comment {}
+
+impl Publication<Comment> {
+    pub async fn create(
+        client: &Client,
+        options: CreateCommentOptions<'_>,
+    ) -> Result<Publication<Comment>> {
+        CreateCommentRequest::new(options).send(client).await
+    }
+}

@@ -1,3 +1,3 @@
-mod send_chat_message;
+mod create_chat_message;
 
-pub use send_chat_message::SendChatMessageError;
+pub use create_chat_message::CreateChatMessageError;

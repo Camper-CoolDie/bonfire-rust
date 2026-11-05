@@ -1,9 +1,9 @@
 use serde::{Deserialize, Serialize};
 
 use crate::client::Request;
-use crate::models::publication::kind::chat_message::SendChatMessageError;
-use crate::models::{ChatMessage, ChatTag, Publication};
-use crate::requests::raw::{RawChatMessage, RawChatTag, RawPublication};
+use crate::models::publication::kind::comment::CreateCommentError;
+use crate::models::{Comment, Publication};
+use crate::requests::raw::{RawComment, RawPublication};
 use crate::{Client, Result};
 
 #[derive(Default, Debug)]
@@ -11,44 +11,48 @@ pub enum Content<'a> {
     #[default]
     Text,
     Images(Vec<&'a [u8]>),
-    Gif(&'a [u8]),
+    Gif {
+        first_frame: &'a [u8],
+        animated: &'a [u8],
+    },
     Sticker {
         id: u64,
     },
-    Voice(&'a [u8]),
 }
 
 #[derive(Default, Debug)]
 pub struct Options<'a> {
     pub content: Content<'a>,
-    pub chat_tag: ChatTag,
+    pub parent_id: u64,
     pub text: Option<&'a str>,
     pub reply_to_id: Option<u64>,
     pub answer_to_id: Option<u64>,
     pub use_new_formatting: bool,
+    pub watch_post: bool,
 }
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
-pub(crate) struct SendChatMessageRequest<'a> {
+pub(crate) struct CreateCommentRequest<'a> {
     #[serde(skip)]
     content: Content<'a>,
-    #[serde(rename = "tag")]
-    chat_tag: RawChatTag,
+    #[serde(rename = "unitId")]
+    parent_id: u64,
     #[serde(skip_serializing_if = "Option::is_none")]
     text: Option<&'a str>,
     sticker_id: u64,
-    #[serde(rename = "parentMessageId")]
+    #[serde(rename = "parentCommentId")]
     reply_to_id: u64,
-    #[serde(rename = "quoteMessageId")]
+    #[serde(rename = "quoteId")]
     answer_to_id: u64,
     #[serde(rename = "newFormatting")]
     use_new_formatting: bool,
+    watch_post: bool,
 }
-impl<'a> SendChatMessageRequest<'a> {
+impl<'a> CreateCommentRequest<'a> {
     pub(crate) fn new(options: Options<'a>) -> Self {
         Self {
-            chat_tag: options.chat_tag.into(),
+            parent_id: options.parent_id,
             text: options.text,
             sticker_id: match options.content {
                 Content::Sticker { id } => id,
@@ -57,6 +61,7 @@ impl<'a> SendChatMessageRequest<'a> {
             reply_to_id: options.reply_to_id.unwrap_or(0),
             answer_to_id: options.answer_to_id.unwrap_or(0),
             use_new_formatting: options.use_new_formatting,
+            watch_post: options.watch_post,
             content: options.content,
         }
     }
@@ -64,31 +69,33 @@ impl<'a> SendChatMessageRequest<'a> {
 
 #[derive(Deserialize)]
 pub(crate) struct Response {
-    message: RawPublication<RawChatMessage>,
+    comment: RawPublication<RawComment>,
 }
 
-impl Request<Publication<ChatMessage>> for SendChatMessageRequest<'_> {
+impl Request<Publication<Comment>> for CreateCommentRequest<'_> {
     type Response = Response;
-    type Error = SendChatMessageError;
+    type Error = CreateCommentError;
 
-    async fn send(&self, client: &Client) -> Result<Publication<ChatMessage>> {
+    async fn send(&self, client: &Client) -> Result<Publication<Comment>> {
         let attachments: Vec<&[u8]> = match self.content {
             Content::Text | Content::Sticker { .. } => {
-                vec![&[], &[]]
+                vec![&[]]
             }
             Content::Images(ref images) => {
-                let mut attachments: Vec<&[u8]> = vec![&[], &[]];
+                let mut attachments: Vec<&[u8]> = vec![&[]];
                 attachments.extend(images.iter());
                 attachments
             }
-            Content::Gif(gif) => vec![gif, &[]],
-            Content::Voice(voice) => vec![&[], voice],
+            Content::Gif {
+                first_frame,
+                animated,
+            } => vec![animated, first_frame],
         };
 
         client
-            .send_request("RChatMessageCreate", self, attachments)
+            .send_request("RCommentsCreate", self, attachments)
             .await?
-            .message
+            .comment
             .try_into()
     }
 }

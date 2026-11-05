@@ -1,4 +1,5 @@
 pub(crate) mod chat_message;
+pub(crate) mod comment;
 pub(crate) mod post;
 mod remove_publication;
 pub(crate) mod sticker;
