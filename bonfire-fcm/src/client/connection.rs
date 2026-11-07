@@ -17,7 +17,7 @@ use tokio::time::timeout;
 use tokio_rustls::TlsConnector;
 use tokio_rustls::client::TlsStream;
 use tokio_rustls::rustls::pki_types::ServerName;
-use tokio_rustls::rustls::{ClientConfig, RootCertStore};
+use tokio_rustls::rustls::{ClientConfig, KeyLogFile, RootCertStore};
 use webpki_roots::TLS_SERVER_ROOTS;
 
 use crate::models::{RawMessage, RawMessageKind};
@@ -60,18 +60,22 @@ impl Connection {
             .with_time(TCP_KEEPALIVE_TIME)
             .with_interval(TCP_KEEPALIVE_INTERVAL)
             .with_retries(TCP_KEEPALIVE_RETRIES);
-        let config = ClientConfig::builder()
+
+        let mut tls_config = ClientConfig::builder()
             .with_root_certificates(RootCertStore {
                 roots: TLS_SERVER_ROOTS.to_vec(),
             })
             .with_no_client_auth();
+        tls_config.key_log = Arc::new(KeyLogFile::new());
 
-        let connector = TlsConnector::from(Arc::new(config));
+        let tls_connector = TlsConnector::from(Arc::new(tls_config));
         let tcp_stream = TcpStream::connect(SERVER_ADDR).await?;
         let socket_ref = SockRef::from(&tcp_stream);
         socket_ref.set_tcp_keepalive(&keepalive)?;
 
-        let stream = connector.connect(SERVER_NAME.clone(), tcp_stream).await?;
+        let stream = tls_connector
+            .connect(SERVER_NAME.clone(), tcp_stream)
+            .await?;
         let (reader, writer) = tokio::io::split(stream);
         Ok(Self {
             reader: Arc::new(Mutex::new(BufReader::new(reader))),

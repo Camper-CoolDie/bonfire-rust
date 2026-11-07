@@ -201,9 +201,11 @@ dependencies = [
  "strum",
  "thiserror",
  "tokio",
+ "tokio-rustls",
  "tokio-util",
  "tracing",
  "walkdir",
+ "webpki-roots",
 ]
 
 [[package]]

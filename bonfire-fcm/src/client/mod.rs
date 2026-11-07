@@ -16,7 +16,9 @@ use hyper_rustls::{HttpsConnector, HttpsConnectorBuilder};
 use hyper_util::client::legacy::connect::HttpConnector;
 use hyper_util::rt::TokioExecutor;
 use token_provider::TokenProvider;
+use tokio_rustls::rustls::{ClientConfig, KeyLogFile, RootCertStore};
 use tokio_util::sync::CancellationToken;
+use webpki_roots::TLS_SERVER_ROOTS;
 
 use crate::models::{Config, Credentials, Subscription};
 use crate::requests::{PushRegistrationRequest, PushUnregistrationRequest};
@@ -40,8 +42,15 @@ pub struct Client {
 }
 impl Client {
     fn new(config: Config, credentials: Option<Credentials>) -> Self {
+        let mut tls_config = ClientConfig::builder()
+            .with_root_certificates(RootCertStore {
+                roots: TLS_SERVER_ROOTS.to_vec(),
+            })
+            .with_no_client_auth();
+        tls_config.key_log = Arc::new(KeyLogFile::new());
+
         let connector = HttpsConnectorBuilder::new()
-            .with_webpki_roots()
+            .with_tls_config(tls_config)
             .https_only()
             .enable_http2()
             .build();

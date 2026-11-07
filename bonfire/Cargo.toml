@@ -37,7 +37,9 @@ serde_json = "1.0"
 strum = { version = "0.28", features = ["derive"] }
 thiserror = "2.0"
 tokio = { version = "1.54", features = ["macros", "sync"] }
+tokio-rustls = "0.26"
 tracing = "0.1"
+webpki-roots = "1.0"
 
 [dependencies.b-core]
 package = "bonfire-core"

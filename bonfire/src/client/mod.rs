@@ -26,7 +26,9 @@ pub(crate) use request::{
 };
 use service::{MeliorService, RootService};
 use token_provider::TokenProvider;
+use tokio_rustls::rustls::{ClientConfig, KeyLogFile, RootCertStore};
 use tracing::instrument;
+use webpki_roots::TLS_SERVER_ROOTS;
 
 use crate::models::{Auth, InitialData};
 use crate::queries::auth::{LoginEmailQuery, LogoutQuery};
@@ -79,8 +81,15 @@ pub struct Client {
 }
 impl Client {
     fn new(root_uri: Uri, melior_uri: Uri, auth: Option<Auth>, quota: Quota) -> Self {
+        let mut tls_config = ClientConfig::builder()
+            .with_root_certificates(RootCertStore {
+                roots: TLS_SERVER_ROOTS.to_vec(),
+            })
+            .with_no_client_auth();
+        tls_config.key_log = Arc::new(KeyLogFile::new());
+
         let builder = HttpsConnectorBuilder::new()
-            .with_webpki_roots()
+            .with_tls_config(tls_config)
             .https_or_http();
 
         // HTTP protocols have to be explicitly enabled
