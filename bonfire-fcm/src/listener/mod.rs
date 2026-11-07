@@ -3,6 +3,7 @@ mod parse;
 
 use std::collections::VecDeque;
 use std::panic;
+use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 use backon::{BackoffBuilder as _, FibonacciBuilder, Retryable as _};
@@ -17,7 +18,7 @@ use tokio_stream::wrappers::ReceiverStream;
 use tokio_util::sync::CancellationToken;
 use tracing::instrument;
 
-use crate::models::{Message, RawMessage, Subscription};
+use crate::models::{AndroidRegistration, Message, RawMessage, Subscription};
 use crate::requests::LoginRequest;
 use crate::{Connection, Error, Result};
 
@@ -35,8 +36,7 @@ impl Listener {
     pub(super) fn spawn<P: Parse>(
         parser: P,
         subscription: Subscription,
-        android_id: u64,
-        security_token: u64,
+        registration: AndroidRegistration,
         cancellation_token: CancellationToken,
         buffer: usize,
     ) -> impl Stream<Item = ParseResult<P>> {
@@ -44,10 +44,9 @@ impl Listener {
         tokio::spawn(Self::task(
             parser,
             subscription,
+            registration,
             sender,
             cancellation_token,
-            android_id,
-            security_token,
         ));
         ReceiverStream::new(receiver)
     }
@@ -56,11 +55,12 @@ impl Listener {
     async fn task<P: Parse>(
         mut parser: P,
         mut subscription: Subscription,
+        registration: AndroidRegistration,
         sender: mpsc::Sender<ParseResult<P>>,
         cancellation_token: CancellationToken,
-        android_id: u64,
-        security_token: u64,
     ) {
+        let key_pair = Arc::new((registration.key_components, registration.auth_secret));
+
         loop {
             let started_at = Instant::now();
             let result = Self::task_loop(
@@ -68,8 +68,9 @@ impl Listener {
                 &mut subscription,
                 &sender,
                 &cancellation_token,
-                android_id,
-                security_token,
+                registration.android_id,
+                registration.security_token,
+                Arc::clone(&key_pair),
             )
             .await;
 
@@ -95,19 +96,12 @@ impl Listener {
         cancellation_token: &CancellationToken,
         android_id: u64,
         security_token: u64,
+        key_pair: Arc<(EcKeyComponents, [u8; 16])>,
     ) -> Result<()> {
         let id = subscription.id;
-        let key_components = &subscription.key_components;
-        let auth_secret = &subscription.auth_secret;
         let persistent_ids = &mut subscription.persistent_ids;
-        let connection = Self::connect_and_login(
-            key_components,
-            auth_secret,
-            persistent_ids,
-            android_id,
-            security_token,
-        )
-        .await?;
+        let connection =
+            Self::connect_and_login(key_pair, persistent_ids, android_id, security_token).await?;
 
         // JoinSet aborts the underlying task when dropped
         let mut join_set = JoinSet::new();
@@ -179,8 +173,7 @@ impl Listener {
     }
 
     async fn connect_and_login(
-        key_components: &EcKeyComponents,
-        auth_secret: &[u8; 16],
+        key_pair: Arc<(EcKeyComponents, [u8; 16])>,
         persistent_ids: &VecDeque<String>,
         android_id: u64,
         security_token: u64,
@@ -193,7 +186,7 @@ impl Listener {
 
         (async || {
             tracing::info!("connecting to MSC");
-            let connection = Connection::connect(key_components.clone(), *auth_secret)
+            let connection = Connection::connect(Arc::clone(&key_pair))
                 .await
                 .inspect_err(|error| tracing::error!(?error, "failed to connect to MSC"))?;
 

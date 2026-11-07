@@ -30,7 +30,7 @@ impl Default for Theme {
 }
 
 #[cfg(feature = "serde")]
-mod inner_serde {
+mod serde_inner {
     use std::result::Result as StdResult;
 
     use serde::{Deserialize, Deserializer, Serialize, Serializer};

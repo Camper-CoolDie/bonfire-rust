@@ -58,6 +58,8 @@ impl TokenProvider {
                 android_id: credentials.android_id,
                 security_token: credentials.security_token,
                 gcm_token: credentials.gcm_token.clone(),
+                key_components: credentials.key_components.clone(),
+                auth_secret: credentials.auth_secret.clone(),
             }),
             InnerState::Unregistered => unreachable!("unregistered credentials state"),
             InnerState::InvalidToken(error) => Err(Arc::clone(error).into()),
@@ -121,6 +123,8 @@ impl TokenProvider {
                 android_id: registration.android_id,
                 security_token: registration.security_token,
                 gcm_token: registration.gcm_token,
+                key_components: registration.key_components,
+                auth_secret: registration.auth_secret,
                 installation_id: installation.id,
                 installation_auth_token: installation.auth_token,
                 installation_refresh_token: installation.refresh_token,
@@ -159,10 +163,13 @@ impl TokenProvider {
             }
         };
 
+        let (key_pair, auth_secret) = ece::generate_keypair_and_auth_secret()?;
         Ok(AndroidRegistration {
             android_id,
             security_token,
             gcm_token,
+            key_components: key_pair.raw_components()?,
+            auth_secret,
         })
     }
 

@@ -66,8 +66,6 @@ impl Client {
     }
 
     pub async fn subscribe(&self, id: u64) -> Result<Subscription> {
-        let (key_pair, auth_secret) = ece::generate_keypair_and_auth_secret()?;
-        let key_components = key_pair.raw_components()?;
         let config = &self.inner.config;
         let credentials = self.credentials().await?;
 
@@ -78,8 +76,8 @@ impl Client {
             &config.vapid_key,
             &credentials.installation_auth_token,
             &credentials.gcm_token,
-            key_components.public_key(),
-            &auth_secret,
+            &credentials.key_components.public_key(),
+            &credentials.auth_secret,
         )
         .send(&self.hyper)
         .await
@@ -90,8 +88,6 @@ impl Client {
         Ok(Subscription {
             id,
             push_token: response.token,
-            key_components,
-            auth_secret,
             persistent_ids: VecDeque::with_capacity(Subscription::PERSISTENT_IDS_MAX_COUNT),
         })
     }
@@ -131,8 +127,7 @@ impl Client {
         Ok(Listener::spawn(
             parser,
             subscription,
-            registration.android_id,
-            registration.security_token,
+            registration,
             cancellation_token,
             buffer,
         ))

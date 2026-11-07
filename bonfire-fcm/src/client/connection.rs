@@ -55,10 +55,7 @@ pub(crate) struct Connection {
     key_pair: Arc<(EcKeyComponents, [u8; 16])>,
 }
 impl Connection {
-    pub(crate) async fn connect(
-        key_components: EcKeyComponents,
-        auth_secret: [u8; 16],
-    ) -> Result<Self> {
+    pub(crate) async fn connect(key_pair: Arc<(EcKeyComponents, [u8; 16])>) -> Result<Self> {
         let keepalive = TcpKeepalive::new()
             .with_time(TCP_KEEPALIVE_TIME)
             .with_interval(TCP_KEEPALIVE_INTERVAL)
@@ -79,7 +76,7 @@ impl Connection {
         Ok(Self {
             reader: Arc::new(Mutex::new(BufReader::new(reader))),
             writer: Arc::new(Mutex::new(BufWriter::new(writer))),
-            key_pair: Arc::new((key_components, auth_secret)),
+            key_pair,
         })
     }
 
