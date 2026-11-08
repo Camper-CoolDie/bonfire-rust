@@ -85,7 +85,7 @@ impl Client {
             &config.vapid_key,
             &credentials.installation_auth_token,
             &credentials.gcm_token,
-            &credentials.key_components.public_key(),
+            credentials.key_components.public_key(),
             &credentials.auth_secret,
         )
         .send(&self.hyper)

@@ -10,6 +10,7 @@ pub enum Requirement {
     Other,
 }
 impl Requirement {
+    #[must_use]
     pub const fn new(level: f64, karma30: Option<f64>) -> Self {
         Self::Level { level, karma30 }
     }

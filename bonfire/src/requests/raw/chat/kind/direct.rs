@@ -10,7 +10,7 @@ use crate::{Error, Result};
 #[derive(Deserialize)]
 pub(crate) struct RawDirect {
     #[serde(skip)]
-    pub my_id: u64,
+    pub ids: (u64, u64),
     #[serde(rename = "anotherAccount")]
     pub recipient: RawAccount,
     #[serde(rename = "anotherAccountReadDate")]
@@ -21,9 +21,9 @@ impl RawMessageable for RawDirect {
     type Target = Direct;
 
     fn new(data: Value, tag: RawChatTag) -> Result<Self> {
-        if let RawChatTag::Direct { my_id, .. } = tag {
+        if let RawChatTag::Direct { ids } = tag {
             let mut direct = serde_json::from_value::<RawDirect>(data)?;
-            direct.my_id = my_id;
+            direct.ids = ids;
             Ok(direct)
         } else {
             let kind = RawKind::from(tag);
@@ -37,7 +37,7 @@ impl TryFrom<RawDirect> for Direct {
 
     fn try_from(value: RawDirect) -> Result<Self> {
         Ok(Self {
-            my_id: value.my_id,
+            ids: value.ids,
             recipient: value.recipient.try_into()?,
             recipient_read_at: match value.recipient_read_at {
                 0 => None,

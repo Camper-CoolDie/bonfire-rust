@@ -91,7 +91,7 @@ impl Request<Vec<Publication<ChatMessage>>> for ListChatMessagesRequest {
 
         // No message was found
         if self.message_id != 0 && messages.len() <= PAGE_SIZE.get() {
-            Err(RootError::Unavailable(UnavailableError::NotFound))?
+            return Err(RootError::Unavailable(UnavailableError::NotFound).into());
         }
 
         // Received list is always sorted from oldest to newest

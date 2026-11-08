@@ -15,7 +15,7 @@ use crate::{Error, HyperClient, Result};
 #[derive(Debug)]
 enum InnerState {
     // Claims are decoded from an installation token
-    Registered(Credentials, Claims),
+    Registered(Box<Credentials>, Claims),
     Unregistered,
     // A "poisoned" state, for cases when the server sends an invalid installation token
     InvalidToken(Arc<JwtError>),
@@ -31,7 +31,7 @@ impl TokenProvider {
             inner: Mutex::new(match credentials {
                 Some(credentials) => {
                     let claims = decode_token(&credentials.installation_auth_token)?;
-                    InnerState::Registered(credentials, claims)
+                    InnerState::Registered(Box::new(credentials), claims)
                 }
                 None => InnerState::Unregistered,
             }),
@@ -47,7 +47,7 @@ impl TokenProvider {
 
         if matches!(&*guard, InnerState::Unregistered) {
             *guard = match self.register(client, config).await {
-                Ok((credentials, claims)) => InnerState::Registered(credentials, claims),
+                Ok((credentials, claims)) => InnerState::Registered(Box::new(credentials), claims),
                 Err(Error::JwtError(error)) => InnerState::InvalidToken(error),
                 Err(error) => return Err(error),
             };
@@ -59,7 +59,7 @@ impl TokenProvider {
                 security_token: credentials.security_token,
                 gcm_token: credentials.gcm_token.clone(),
                 key_components: credentials.key_components.clone(),
-                auth_secret: credentials.auth_secret.clone(),
+                auth_secret: credentials.auth_secret,
             }),
             InnerState::Unregistered => unreachable!("unregistered credentials state"),
             InnerState::InvalidToken(error) => Err(Arc::clone(error).into()),
@@ -77,7 +77,7 @@ impl TokenProvider {
         // poisoning, so the same request can be sent again later
         if matches!(&*guard, InnerState::Unregistered) {
             *guard = match self.register(client, config).await {
-                Ok((credentials, claims)) => InnerState::Registered(credentials, claims),
+                Ok((credentials, claims)) => InnerState::Registered(Box::new(credentials), claims),
                 Err(Error::JwtError(error)) => InnerState::InvalidToken(error),
                 Err(error) => return Err(error),
             };
@@ -92,7 +92,7 @@ impl TokenProvider {
         }
 
         match &*guard {
-            InnerState::Registered(credentials, _) => Ok(credentials.clone()),
+            InnerState::Registered(credentials, _) => Ok(*credentials.clone()),
             InnerState::Unregistered => unreachable!("unregistered credentials state"),
             InnerState::InvalidToken(error) => Err(Arc::clone(error).into()),
         }

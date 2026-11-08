@@ -60,10 +60,7 @@ impl Chat<AnyChat> {
                 } => AnyChat::FandomRoot(FandomRoot::new(fandom_id, language)),
                 Tag::FandomSub { id } => AnyChat::FandomSub(FandomSub::new(id)),
                 Tag::Group { id } => AnyChat::Group(Group::new(id)),
-                Tag::Direct {
-                    my_id,
-                    recipient_id,
-                } => AnyChat::Direct(Direct::new(my_id, recipient_id)),
+                Tag::Direct { ids } => AnyChat::Direct(Direct::new(ids)),
             },
             ..Default::default()
         }

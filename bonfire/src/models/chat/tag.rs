@@ -31,12 +31,7 @@ pub enum Tag {
         id: u64,
     },
     /// Identifies a direct message conversation between two users
-    Direct {
-        /// The unique identifier of the authenticated user
-        my_id: u64,
-        /// The unique identifier of the other user in the conversation
-        recipient_id: u64,
-    },
+    Direct { ids: (u64, u64) },
 }
 
 impl Default for Tag {

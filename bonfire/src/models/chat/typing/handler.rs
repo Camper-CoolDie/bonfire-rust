@@ -54,6 +54,10 @@ impl Handler {
                             tracing::debug!("resuming");
                             is_paused = false;
                         }
+                        Some(Command::Reset) => {
+                            tracing::debug!("resetting");
+                            interval.reset_at(Instant::now());
+                        }
                         Some(Command::Cancel) | None => {
                             tracing::debug!("stopping");
                             break;
@@ -75,6 +79,10 @@ impl Handler {
     /// Sends a command to the background task to resume sending typing notifications.
     pub async fn resume(&self) {
         let _ = self.command_sender.send(Command::Resume).await;
+    }
+
+    pub async fn reset(&self) {
+        let _ = self.command_sender.send(Command::Reset).await;
     }
 
     /// Sends a command to the background task to stop sending typing notifications, consuming this

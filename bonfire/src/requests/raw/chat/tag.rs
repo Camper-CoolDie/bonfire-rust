@@ -20,8 +20,7 @@ pub(crate) enum RawTag {
         id: u64,
     },
     Direct {
-        my_id: u64,
-        recipient_id: u64,
+        ids: (u64, u64),
     },
     Unknown {
         kind: i64,
@@ -111,10 +110,7 @@ impl TryFrom<&RawTag> for (RawKind, u64, u64) {
             } => (RawKind::FandomRoot, *fandom_id, u64::try_from(language)?),
             RawTag::FandomSub { id } => (RawKind::FandomSub, *id, 0),
             RawTag::Group { id } => (RawKind::Group, *id, 0),
-            RawTag::Direct {
-                my_id,
-                recipient_id,
-            } => (RawKind::Direct, *my_id, *recipient_id),
+            RawTag::Direct { ids } => (RawKind::Direct, ids.0, ids.1),
             RawTag::Unknown {
                 kind,
                 first_id,
@@ -138,13 +134,7 @@ impl TryFrom<RawTag> for ChatTag {
             },
             RawTag::FandomSub { id } => ChatTag::FandomSub { id },
             RawTag::Group { id } => ChatTag::Group { id },
-            RawTag::Direct {
-                my_id,
-                recipient_id,
-            } => ChatTag::Direct {
-                my_id,
-                recipient_id,
-            },
+            RawTag::Direct { ids } => ChatTag::Direct { ids },
             RawTag::Unknown { kind: unknown, .. } => {
                 return Err(Error::UnknownVariant(Box::new(unknown)));
             }
@@ -174,8 +164,7 @@ impl From<(RawKind, u64, u64)> for RawTag {
             RawKind::FandomSub => RawTag::FandomSub { id: value.1 },
             RawKind::Group => RawTag::Group { id: value.1 },
             RawKind::Direct => RawTag::Direct {
-                my_id: value.1,
-                recipient_id: value.2,
+                ids: (value.1, value.2),
             },
             RawKind::Unknown(unknown) => RawTag::Unknown {
                 kind: unknown,
@@ -198,13 +187,7 @@ impl From<ChatTag> for RawTag {
             },
             ChatTag::FandomSub { id } => RawTag::FandomSub { id },
             ChatTag::Group { id } => RawTag::Group { id },
-            ChatTag::Direct {
-                my_id,
-                recipient_id,
-            } => RawTag::Direct {
-                my_id,
-                recipient_id,
-            },
+            ChatTag::Direct { ids } => RawTag::Direct { ids },
         }
     }
 }

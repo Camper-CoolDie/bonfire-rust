@@ -257,7 +257,7 @@ impl Listener {
     }
 
     fn push_persistent_id(ids: &mut VecDeque<String>, id: String) {
-        if ids.len() == Subscription::PERSISTENT_IDS_MAX_COUNT {
+        if ids.len() >= Subscription::PERSISTENT_IDS_MAX_COUNT {
             ids.pop_front();
         }
         ids.push_back(id);
